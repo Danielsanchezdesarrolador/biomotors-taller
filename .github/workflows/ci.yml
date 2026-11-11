@@ -36,6 +36,12 @@ jobs:
       - name: Verificar TypeScript Android
         run: npm run typecheck
         working-directory: apps/android
+      - name: Verificar compatibilidad de paquetes Expo
+        run: npx expo install --check
+        working-directory: apps/android
+      - name: Generar bundle Android para validación (no APK)
+        run: npx expo export --platform android --output-dir dist-android
+        working-directory: apps/android
       - name: Verificar configuración nativa y perfil APK
         run: npm run verify-config
         working-directory: apps/android
