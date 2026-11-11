@@ -1,0 +1,23 @@
+name: Verificación BIOMOTORS TALLER
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+      - name: Comprobar TypeScript
+        run: npm run typecheck
+      - name: Ejecutar pruebas
+        run: npm test
+      - name: Construir aplicación
+        run: npm run build
