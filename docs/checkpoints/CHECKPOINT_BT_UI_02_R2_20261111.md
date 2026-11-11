@@ -26,3 +26,7 @@ Cambios preparados para main y despliegue automático del servicio Render existe
 ## Pendientes
 
 Aprobación visual del Director; Safari físico/iPhone; confirmar LIVE del commit R2 si la cuenta Render no ofrece acceso al estado del despliegue. El resto de módulos y Android se mantienen para etapas posteriores.
+
+## Evidencia posterior al push
+
+Commit de implementación `c139ec6` enviado a `origin/main`. El sitio Render existente sirve HTML que referencia exactamente `/assets/index-CKCGObAF.js` y `/assets/index-BNlXlPfg.css` del build local validado. La imagen pública `/hero-workshop.webp` coincide por SHA-256 con el archivo versionado. Esto confirma R2 accesible en la URL de revisión, sin crear otro servicio. El estado administrativo literal LIVE y CI remoto no se consultaron: API GitHub denegada por la política de red y sin conector Render disponible. La captura remota directa conserva la limitación de confianza CA descrita arriba; las capturas visuales son de la implementación local validada.

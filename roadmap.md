@@ -238,6 +238,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Integrar imagen automotriz original realista en WebP, con degradados y fecha dinámica de Chile.
 - [x] Validar TypeScript, 11 tests, build PWA y navegador a 1650/1440/375/390/430 px; capturas antes/después.
 - [x] Conservar Android nativo, CSS anterior y datos DEMO sin backend.
-- [ ] Confirmar LIVE de R2 en el Render existente y aprobación visual del Director; prueba Safari en iPhone físico pendiente.
+- [x] Confirmar R2 servido en el Render existente: hashes JS/CSS del build y SHA-256 de imagen coincidentes con commit `c139ec6`.
+- [ ] Aprobación visual del Director y Safari en iPhone físico; estado administrativo LIVE y CI remoto sin acceso desde este entorno.
 
 Evidencia y limitaciones: [checkpoint BT-UI-02-R2](docs/checkpoints/CHECKPOINT_BT_UI_02_R2_20261111.md).
