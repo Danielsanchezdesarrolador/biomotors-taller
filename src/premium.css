@@ -269,3 +269,117 @@ body { background: #f0f6ff; }
 @media (prefers-reduced-motion: no-preference) {
   .metric-card, .shortcut { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 }
+
+/* BT-UI-02-R2 — proportions calibrated against the Director's 1672 × 941 reference.
+   This layer and the photographic asset can be reverted without touching styles.css. */
+:root { --bt-shadow: 0 9px 24px rgba(22,69,137,.10), 0 2px 4px rgba(22,69,137,.025); }
+.sidebar { background: linear-gradient(155deg,#031a33,#062446 62%,#02152c); }
+.brand-name > small { text-transform: none; font-size: 14px; }
+.sidebar::before { bottom: 230px; height: 185px; left: -25%; transform: rotate(-20deg); }
+.sidebar::after { bottom: 35px; height: 190px; left: -30%; transform: rotate(-19deg); }
+.workshop-info strong { font-size: 14px; }
+.workshop-info small, .workshop-info div > span { font-size: 13px; }
+.workshop-info { min-height: 92px; gap: 12px; }
+.sidebar-version { font-size: 12px; }
+.welcome-area::before {
+  height: 150px;
+  background-image: linear-gradient(90deg,#f1f7ff 0%,rgba(237,246,255,.98) 27%,rgba(213,233,254,.50) 62%,rgba(222,239,255,.65) 100%),url('/hero-workshop.webp');
+  background-size: 100% 100%, 780px auto;
+  background-position: center, right 90px center;
+  mask-image: linear-gradient(#000 70%,transparent);
+}
+.welcome-head > div:first-child { border: 0; position: relative; padding-left: 19px; }
+.welcome-head > div:first-child::before { content:''; position:absolute; left:0; top:5px; width:5px; height:32px; border-radius:5px; background:linear-gradient(#11c8ff,#006bff); }
+.metric-card::after { content:''; position:absolute; right:-24px; bottom:-63px; width:115px; height:100px; border-radius:50%; transform:rotate(-30deg); border:16px solid rgba(126,184,255,.09); pointer-events:none; }
+.metric-icon svg { width:34px; height:34px; }
+.order-car svg { width:30px; height:30px; }
+.activity-row time { display:block; }
+@media (min-width: 1151px) {
+  .sidebar { width:272px; }
+  .app-main { margin-left:272px; }
+  .topbar { height:78px; min-height:78px; padding-left:41px; }
+  .topbar-search { width:min(647px,57%); min-height:46px; }
+  .topbar-search input { font-size:14px; }
+  .icon-button svg { width:27px; height:27px; }
+  .avatar { width:44px; height:44px; font-size:16px; }
+  .account-copy strong { font-size:14px; }
+  .account-copy small { font-size:13px; }
+  .side-link { font-size:15px; gap:20px; }
+  .side-link svg { width:24px; height:24px; }
+  .sidebar-top { padding-bottom:38px; }
+  .welcome-head { margin-bottom:26px; }
+  .welcome-head h1 { font-size:40px; letter-spacing:-1.5px; }
+  .welcome-head p:not(.section-eyebrow) { font-size:17px; }
+  .date-pill { font-size:15px; }
+  .metric-card { min-height:102px; gap:20px; padding:16px 20px; }
+  .metric-title { font-size:15px; }
+  .metric-content strong { font-size:38px; }
+  .metric-grid { margin-bottom:20px; }
+  .dashboard-card { padding:16px 24px; }
+  .card-head { margin-bottom:6px; }
+  .card-head h2 { font-size:21px; }
+  .card-head h2 svg { width:26px; height:26px; }
+  .text-action { font-size:14px; }
+  .tag-demo { font-size:12px; }
+  .overview-grid { align-items:stretch; }
+  .statuses-panel,.orders-panel { min-height:306px; }
+  .statuses-layout { min-height:244px; gap:30px; }
+  .donut { width:210px; height:210px; }
+  .donut > span { width:138px; height:138px; }
+  .donut strong { font-size:48px; }
+  .donut small { font-size:17px; }
+  .legend-line { font-size:15px; padding:12px 0; }
+  .legend-line strong { font-size:18px; }
+  .order-row { min-height:60px; padding:5px 0; gap:16px; }
+  .order-detail { gap:1px; }
+  .order-detail strong,.order-detail span { font-size:14px; }
+  .order-detail small { font-size:13px; }
+  .order-status { font-size:12px; padding:7px 18px; }
+  .lower-grid { margin-top:20px; }
+  .activity-panel,.shortcuts-panel { min-height:250px; }
+  .activity-row { min-height:63px; gap:22px; padding:8px 0; }
+  .activity-row strong { font-size:15px; }
+  .activity-row small,.activity-row time { font-size:14px; }
+  .activity-icon { width:50px; height:50px; }
+  .shortcuts-grid { margin-top:20px; }
+  .shortcut { min-height:151px; }
+  .shortcut svg { width:36px; height:36px; }
+  .shortcut strong { font-size:18px; }
+  .shortcut small { font-size:15px; }
+}
+@media (min-width:1151px) and (max-width:1450px) {
+  .dashboard-card { padding-inline:18px; }
+  .statuses-layout { gap:18px; }
+  .donut { width:180px; height:180px; }
+  .donut > span { width:118px; height:118px; }
+  .legend-line { font-size:13px; }
+  .metric-card { padding:14px; gap:12px; }
+  .metric-title { font-size:13px; }
+  .order-status { padding-inline:10px; }
+  .order-row { gap:9px; }
+}
+@media (max-width:760px) {
+  .topbar { background:#f7faff; }
+  .mobile-hamburger,.icon-button { color:#173e68; }
+  .topbar-search { display:flex; flex:1; width:auto; min-width:0; min-height:38px; padding:0 8px; gap:6px; }
+  .topbar-search input { font-size:12px; }
+  .shortcut-hint,.topbar .account-trigger { display:none; }
+  .topbar-controls { margin-left:0; }
+  .welcome-area::before { background-position:center,right -170px top; background-size:100% 100%,570px auto; height:210px; }
+  .workshop-info strong { font-size:13px; }
+  .legend-line { font-size:11px; }
+  .activity-row strong { font-size:12px; }
+  .activity-row time { font-size:11px; }
+  .activity-row { gap:10px; }
+  .shortcut { padding:8px 3px; }
+}
+@media (min-width:1151px) {
+  .side-link { font-size:14px; gap:18px; white-space:nowrap; }
+  .activity-row { min-height:60px; padding:6px 0; }
+  .lower-grid .dashboard-card { padding-bottom:14px; }
+  .welcome-area::before { background-size:100% 100%,650px auto; background-position:center,right 150px center; }
+}
+@media (max-width:760px) {
+  .metric-icon svg { width:27px; height:27px; }
+  .welcome-area::before { background-image:linear-gradient(90deg,#f1f7ff 0%,rgba(237,246,255,.95) 40%,rgba(222,239,255,.72) 100%),url('/hero-workshop.webp'); }
+}

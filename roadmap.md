@@ -232,3 +232,12 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - No declarar tareas completadas por estar descritas en un plan.
 - Mantener decisiones originales de Ignacio y cambios aprobados por el usuario.
 - Registrar cambios relevantes en un nuevo checkpoint y conservar la historia.
+### BT-UI-02-R2 — Fidelidad premium del Inicio
+
+- [x] Calibrar proporciones, tipografía, sidebar, tarjetas, dona, listas y accesos contra el mockup del Director.
+- [x] Integrar imagen automotriz original realista en WebP, con degradados y fecha dinámica de Chile.
+- [x] Validar TypeScript, 11 tests, build PWA y navegador a 1650/1440/375/390/430 px; capturas antes/después.
+- [x] Conservar Android nativo, CSS anterior y datos DEMO sin backend.
+- [ ] Confirmar LIVE de R2 en el Render existente y aprobación visual del Director; prueba Safari en iPhone físico pendiente.
+
+Evidencia y limitaciones: [checkpoint BT-UI-02-R2](docs/checkpoints/CHECKPOINT_BT_UI_02_R2_20261111.md).

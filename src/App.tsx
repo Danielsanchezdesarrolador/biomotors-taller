@@ -12,7 +12,7 @@ type NavItem = { id: Screen; label: string; compact: string; icon: LucideIcon }
 const navItems: NavItem[] = [
   { id: 'inicio', label: 'Inicio', compact: 'Inicio', icon: House },
   { id: 'ordenes', label: 'Órdenes de trabajo', compact: 'Órdenes', icon: Wrench },
-  { id: 'clientes', label: 'Clientes y vehículos', compact: 'Clientes', icon: UsersRound },
+  { id: 'clientes', label: 'Clientes y vehículos', compact: 'Clientes', icon: CarFront },
   { id: 'informes', label: 'Informes y cotizaciones', compact: 'Informes', icon: FileText },
   { id: 'configuracion', label: 'Configuración', compact: 'Más', icon: Settings2 },
 ]
@@ -81,7 +81,7 @@ function App() {
         <div className="sidebar-top">
           <button className="brand" type="button" onClick={() => navigate('inicio')} aria-label="ByteTorque, ir al inicio">
             <span className="brand-mark"><Wrench size={23} strokeWidth={2.8} /></span>
-            <span className="brand-name">Byte<span>Torque</span><small>GESTIÓN DE TALLERES</small></span>
+            <span className="brand-name">Byte<span>Torque</span><small>Gestión de Talleres</small></span>
           </button>
           <button type="button" className="menu-close" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)}><X size={22} /></button>
         </div>
@@ -99,7 +99,7 @@ function App() {
             <span className="workshop-badge"><Wrench size={23} /></span>
             <div><strong>Taller de demostración</strong><small>Entorno de muestra</small><span><i /> Sin datos reales</span></div>
           </div>
-          <p className="sidebar-version">ByteTorque · BT-UI-02 · Diseño en prueba</p>
+          <p className="sidebar-version">ByteTorque · BT-UI-02-R2 · DEMO</p>
         </div>
       </aside>
 
