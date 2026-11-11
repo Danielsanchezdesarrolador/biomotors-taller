@@ -55,3 +55,10 @@ El manifiesto, iconos PNG generados durante el build y service worker básico es
 ## Metodología de ejecución
 
 ChatGPT realiza directamente lo que esté al alcance de sus herramientas; modo Alto para razonamiento profundo; Codex solamente para tareas que lo necesiten; el responsable técnico revisa y autoriza, Ignacio lidera contacto y ventas. Detalles en `AGENTS.md`.
+
+## Demo publicada
+
+- URL: https://biomotors-taller-demo.onrender.com
+- CI GitHub Actions: `43106669748` PASS, con generación y validación de iconos PWA.
+- Render: primer deploy `dep-dbqe4r6c6qcc73f2768g` LIVE; actualización con iconos `dep-dbqe6ihsrm7s738dnptg` LIVE.
+- **Limitación:** la instalación real en iPhone/Android sigue pendiente de la comprobación manual del usuario e Ignacio.

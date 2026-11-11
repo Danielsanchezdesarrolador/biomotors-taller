@@ -34,3 +34,12 @@
 - **Fuente:** GitHub repo privado propio, rama `main`; autodespliegue activado.
 - **Sin claves ni backend:** el sitio es visual; nunca usar datos personales reales.
 - **Siguientes ajustes:** generar iconos PNG Apple/Android antes del siguiente despliegue; comprobar resultado y dispositivos reales.
+
+## Actualización verificada — iconos y compilación PWA
+
+- Implementados iconos PNG de 180 px (iOS), 192 px y 512 px (Android), generados durante build con script sin dependencias adicionales.
+- Manifest actualizado, opción standalone y `apple-touch-icon` vinculada.
+- Verificación postbuild de artefactos reales añadida.
+- GitHub Actions run `43106669748`: **success**.
+- Render deploy actualizado `dep-dbqe6ihsrm7s738dnptg`: **live**.
+- **Pruebas físicas iOS/Android:** pendientes; no afirmar instalación real sin evidencia.

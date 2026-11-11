@@ -64,7 +64,8 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [ ] Instalar y probar la PWA en Safari de un iPhone real y Chrome de Android; revisar iconos, navegación, tamaños y comportamiento de actualización.
 - [ ] Verificar acceso web por URL en escritorio y compatibilidad mínima de navegadores.
 - [x] Publicar la demo inicial por Render Static Site, independiente, HTTPS, sin datos reales: https://biomotors-taller-demo.onrender.com — primer deploy `live` confirmado 11/11/2026.
-- [ ] Validar que el último commit de iconos/manifest se despliegue y que Chrome Android y Safari iOS permitan agregar la PWA a pantalla de inicio.
+- [x] Generar iconos PNG iOS/Android, ajustar manifiesto y verificar build + Render `live` (deploy `dep-dbqe6ihsrm7s738dnptg`, CI `43106669748` PASS, 11/11/2026).
+- [ ] Probar con Ignacio en Safari iOS y Chrome Android la opción de agregar a pantalla de inicio (no se considera verificado todavía).
 - [ ] Configurar variables de entorno con secretos exclusivamente fuera de Git.
 - [ ] Conectar el proyecto Supabase independiente con la menor cantidad de permisos necesaria.
 - [x] Incorporar estructura de pruebas y CI GitHub Actions; ejecuciones verificadas en GitHub el 11/11/2026.
