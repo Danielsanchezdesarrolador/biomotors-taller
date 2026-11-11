@@ -6,6 +6,7 @@ import {
   UsersRound, Wrench, X, type LucideIcon,
 } from 'lucide-react'
 import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
+import { OrdenesPanel } from './ordenes/OrdenesPanel'
 
 type Screen = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
 type NavItem = { id: Screen; label: string; compact: string; icon: LucideIcon }
@@ -109,7 +110,7 @@ function App() {
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
             <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
-              onFocus={() => { if (screen !== 'inicio') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
+              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
             {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}
           </div>
           <div className="topbar-controls">
@@ -205,6 +206,8 @@ function App() {
                 </section>
               </div>
             </>
+          ) : screen === 'ordenes' ? (
+            <OrdenesPanel globalSearch={searchText} onNotify={setNotice} />
           ) : (
             <section className="module-placeholder">
               <div className="module-title-row">
