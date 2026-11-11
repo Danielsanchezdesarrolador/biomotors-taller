@@ -30,3 +30,14 @@ Aprobación visual del Director; Safari físico/iPhone; confirmar LIVE del commi
 ## Evidencia posterior al push
 
 Commit de implementación `c139ec6` enviado a `origin/main`. El sitio Render existente sirve HTML que referencia exactamente `/assets/index-CKCGObAF.js` y `/assets/index-BNlXlPfg.css` del build local validado. La imagen pública `/hero-workshop.webp` coincide por SHA-256 con el archivo versionado. Esto confirma R2 accesible en la URL de revisión, sin crear otro servicio. El estado administrativo literal LIVE y CI remoto no se consultaron: API GitHub denegada por la política de red y sin conector Render disponible. La captura remota directa conserva la limitación de confianza CA descrita arriba; las capturas visuales son de la implementación local validada.
+
+## Auditoría independiente posterior — ChatGPT (11/11/2026)
+
+Esta sección complementa la limitación de acceso que tuvo Codex durante la ejecución; no modifica sus evidencias históricas.
+
+- GitHub remoto `main` verificado: `eb82d27a0e5b79e62f9c25a217ab8aef528df4af`, padre de documentación del commit R2 `c139ec6d35d6875599a64461b85a9c5cd24e43aa`.
+- GitHub Actions implementación: `43119179234` **SUCCESS**.
+- GitHub Actions documentación: `43119309468` **SUCCESS**. En el log web constan **11 pruebas PASS (3 archivos)**, build Vite y `PWA assets: PASS`. El job Android Expo también fue **SUCCESS**, sin generar APK.
+- Render: último despliegue `dep-dbqfhbl9el5s73er8ucg`, correspondiente al SHA `eb82d27a0e5b79e62f9c25a217ab8aef528df4af`: **LIVE**. El despliegue de implementación R2 anterior `dep-dbqfgsm7bikc739htq90` está `deactivated` porque fue sustituido por el de documentación.
+- Las capturas `/workspace/visual-r2/before.png`, `after-1650.png` y `after-390.png` constan en el informe, pero **no están disponibles como archivos adjuntos en este chat** para una comparación independiente. La auditoría NO constituye aceptación visual final.
+- Pendientes: revisión de fidelidad con capturas visibles por el usuario, aprobación del Director y prueba física Safari iPhone.

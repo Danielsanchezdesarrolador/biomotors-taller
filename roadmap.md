@@ -239,6 +239,8 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Validar TypeScript, 11 tests, build PWA y navegador a 1650/1440/375/390/430 px; capturas antes/después.
 - [x] Conservar Android nativo, CSS anterior y datos DEMO sin backend.
 - [x] Confirmar R2 servido en el Render existente: hashes JS/CSS del build y SHA-256 de imagen coincidentes con commit `c139ec6`.
-- [ ] Aprobación visual del Director y Safari en iPhone físico; estado administrativo LIVE y CI remoto sin acceso desde este entorno.
+- [x] **Verificación externa posterior** con conectores GitHub y Render: CI de implementación `#43119179234` SUCCESS y documentación `#43119309468` SUCCESS; Render `dep-dbqfhbl9el5s73er8ucg` LIVE, commit `eb82d27`.
+- [ ] **Aprobación visual del Director** mediante capturas comparativas R2 vs. mockup de referencia (las capturas locales de Codex no se adjuntaron a este chat).
+- [ ] **Prueba física iPhone Safari/PWA**, y Android nativo/APK en la fase final.
 
 Evidencia y limitaciones: [checkpoint BT-UI-02-R2](docs/checkpoints/CHECKPOINT_BT_UI_02_R2_20261111.md).
