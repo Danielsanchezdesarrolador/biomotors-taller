@@ -1,8 +1,8 @@
 # BIOMOTORS TALLER — ROADMAP OFICIAL
 
-**Edición:** v1.2 — distribución web/PWA multiplataforma y despliegue autorizado  
+**Edición:** v1.3 — Android APK nativa + iOS PWA Safari + web  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-CP01-PWA-RENDER-20261111  
+**Checkpoint de continuidad:** BT-CP01-PLATAFORMAS-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Visión
@@ -15,18 +15,37 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - **Ignacio:** líder comercial y primer usuario piloto.
 - Precio objetivo por validar: **US$5 por taller/mes**. No equivale aún a tarifa aprobada para cobro real ni define porcentajes de utilidad.
 
-## Canales de distribución oficiales — decisión del 11/11/2026
+## Distribución OFICIAL — corregida el 11/11/2026
 
-**Modalidad aprobada:** una única aplicación web progresiva (PWA), accesible por URL HTTPS y con instalación opcional en pantalla de inicio. La estrategia cubre tres experiencias a partir de la misma base React/TypeScript:
+**Android será una aplicación nativa React Native + Expo + TypeScript, distribuida inicialmente mediante APK firmada e instalable directamente, como PUNTO FÉNIX. NO será PWA ni un sitio web en WebView.**
 
-1. **iOS / iPhone (Safari):** abrir la URL desde Safari; usar «Compartir» → «Agregar a pantalla de inicio» (el texto del menú puede variar según iOS). Validar apertura autónoma, iconos, estados de actualización, formularios y uso con el equipo de Ignacio.
-2. **Android (Chrome o navegador compatible):** abrir la URL; instalar la aplicación o usar «Agregar a pantalla principal» cuando esté disponible. Validar instalación, iconos, botones táctiles y navegación.
-3. **Web de escritorio:** usar la URL sin instalación desde Chrome, Edge, Firefox y Safari compatibles; validar la adaptación responsive.
+**Únicamente iPhone/iOS utilizará PWA**, accesible desde Safari y agregable a pantalla de inicio. Sin aplicación iOS nativa, Apple Developer, TestFlight ni App Store en esta etapa.
 
-**Alcance:** esto **no implica** una publicación nativa en Apple App Store ni Google Play Store. Esas vías requerirían un proyecto de distribución separado y aprobación futura. Las capacidades offline, notificaciones, cámara y otras APIs deberán evaluarse por navegador antes de prometerse.
+**La versión web de escritorio seguirá disponible por navegador** y utilizará el mismo frontend React + Vite que la PWA de iOS.
 
-**Autorización de publicación:** el usuario autoriza el despliegue de una **demo pública sin datos reales** a través de Render Static Site (servicio separado de BIOMOTORS Academia). No habilitar aún registro real, base de datos, correos ni pagos. Probar personalmente el acceso por URL y la instalación en dispositivos antes de declararlo verificado.
+| Plataforma | Producto | Tecnología y entrega |
+| --- | --- | --- |
+| Android | APK nativa | React Native + Expo, archivo APK para instalación directa |
+| iPhone/iOS | PWA Safari | React + TypeScript + Vite; Safari → Agregar a pantalla de inicio |
+| Computador | Web | Mismo frontend web que la PWA iOS, mediante HTTPS |
 
+### Arquitectura conjunta
+
+- Conservar frontend web/iOS PWA existente en la raíz del repositorio y su demo en Render.
+- Crear aplicación Android nativa independiente en `apps/android/` DENTRO del mismo repositorio privado, trabajando solo sobre `main`.
+- Utilizar un ÚNICO backend Supabase `biomotors-taller`, con Auth, tablas, Storage y RLS por `workshop_id`; misma información autorizada en ambos clientes.
+- Los componentes React DOM NO se compartirán directamente con React Native; compartir tipos, validaciones y acceso a API cuando sea viable.
+- Generar una APK real de prueba usando firma y perfil EAS `android.buildType: "apk"` o un método nativo equivalente; verificar en teléfono Android real.
+- La PWA iOS debe probarse desde Safari en iPhone real; no dar por verificada la instalación solo por un manifiesto web.
+- Google Play Store y desarrollo iOS nativo quedan para decisiones futuras, sin gastos ni publicaciones autorizados por ahora.
+- Mantener sin activar clientes reales, pagos, correos externos o migraciones irreversibles hasta asegurar permisos y recibir autorización.
+
+### Secuencia inmediata
+
+1. Preservar la demo web/iOS publicada en Render.
+2. Crear base Android nativa React Native + Expo dentro de `apps/android/`, con navegación de Inicio, Clientes, Vehículos, Revisiones y Presupuestos.
+3. Definir build de APK y probarla en Android; probar PWA por separado en Safari iPhone.
+4. Conectar ambos clientes a Supabase independiente, con aislamiento por taller y pruebas RLS.
 ## Requerimientos de Ignacio — conservados
 
 | Código | Capacidad | Prioridad |
@@ -50,7 +69,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 - [x] Registrar la necesidad principal a partir del audio de Ignacio.
 - [x] Definir aplicación independiente de BIOMOTORS Academia.
-- [x] Seleccionar enfoque PWA adaptable para iPhone y Android; React + TypeScript como base propuesta.
+- [x] Confirmar Android APK nativa + iOS PWA Safari + web; la decisión anterior PWA para Android queda revocada (11/11/2026).
 - [x] Registrar que existe un proyecto Supabase independiente denominado `biomotors-taller` según información del usuario (sin afirmar conexión funcional).
 - [x] Incorporar meta SaaS multiempresa y roles comercial/técnico.
 - [x] Fijar US$5/taller/mes como **precio de referencia, aún no validado**.
@@ -61,11 +80,13 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Crear y verificar el repositorio privado `Danielsanchezdesarrolador/biomotors-taller` (11/11/2026).
 - [x] Instalar este kit documental, con checkpoint BT-CP01 (11/11/2026).
 - [x] Incorporar React + TypeScript + Vite, pantalla principal adaptable, navegación y manifiesto web (interfaz demostrativa en `main`, 11/11/2026).
-- [ ] Instalar y probar la PWA en Safari de un iPhone real y Chrome de Android; revisar iconos, navegación, tamaños y comportamiento de actualización.
+- [ ] Instalar y probar la PWA SOLO en Safari de iPhone; revisar iconos, navegación, tamaños y actualización.
+- [ ] Crear proyecto React Native + Expo Android nativo en `apps/android/`, sin sustituir la web.
+- [ ] Generar primera APK firmada de prueba y verificarla en Android real.
 - [ ] Verificar acceso web por URL en escritorio y compatibilidad mínima de navegadores.
 - [x] Publicar la demo inicial por Render Static Site, independiente, HTTPS, sin datos reales: https://biomotors-taller-demo.onrender.com — primer deploy `live` confirmado 11/11/2026.
-- [x] Generar iconos PNG iOS/Android, ajustar manifiesto y verificar build + Render `live` (deploy `dep-dbqe6ihsrm7s738dnptg`, CI `43106669748` PASS, 11/11/2026).
-- [ ] Probar con Ignacio en Safari iOS y Chrome Android la opción de agregar a pantalla de inicio (no se considera verificado todavía).
+- [x] Generar iconos PNG y manifiesto WEB/iOS PWA, verificar build + Render `live` (deploy `dep-dbqe6ihsrm7s738dnptg`, CI `43106669748` PASS); esto NO constituye una APK Android.
+- [ ] Probar PWA Safari con Ignacio en iPhone y APK nativa con un usuario Android; ambas pruebas físicas pendientes.
 - [ ] Configurar variables de entorno con secretos exclusivamente fuera de Git.
 - [ ] Conectar el proyecto Supabase independiente con la menor cantidad de permisos necesaria.
 - [x] Incorporar estructura de pruebas y CI GitHub Actions; ejecuciones verificadas en GitHub el 11/11/2026.
@@ -115,7 +136,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 - [ ] Historial cronológico unificado por vehículo.
 - [ ] Exportación, restauración probada, permisos y políticas de conservación.
-- [ ] Pruebas de usabilidad y estabilidad en iPhone/Android/escritorio.
+- [ ] Pruebas de estabilidad en iPhone PWA Safari, APK Android nativa y web escritorio.
 - [ ] Uso real controlado en el taller de Ignacio, con autorización y garantías de datos.
 - [ ] Corregir hallazgos del taller piloto antes de vender.
 

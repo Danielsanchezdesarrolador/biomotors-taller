@@ -12,11 +12,12 @@ Aplicación independiente para gestionar talleres mecánicos, iniciando con el t
 
 ## Producto
 
-Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos de clientes y vehículos, reparaciones y diagnósticos, observaciones de fallas no reparadas, historial recuperable y respaldos. **Distribución oficial:** una sola PWA accesible mediante HTTPS desde Safari en iPhone, Chrome en Android y navegadores de escritorio. La persona podrá agregarla a su pantalla de inicio. No se ha aprobado publicar apps nativas en App Store o Play Store.
+Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos de clientes y vehículos, reparaciones y diagnósticos, observaciones de fallas no reparadas, historial recuperable y respaldos. **Distribución oficial (corregida 11/11/2026): Android tendrá APK NATIVA React Native + Expo (como Punto Fénix); iOS/iPhone tendrá PWA instalada desde Safari; computadores usarán la web.** Android NO será PWA. Sin tiendas de apps por ahora.
 
 ## Arquitectura prevista
 
-- Frontend: React + TypeScript + Vite, con PWA móvil.
+- Cliente web + iOS PWA: React + TypeScript + Vite, existente en la raíz y publicado en Render.
+- Cliente Android nativo: React Native + Expo + TypeScript, pendiente de crear dentro de `apps/android/`, distribuir como APK instalable.
 - Backend/datos: proyecto Supabase separado `biomotors-taller`, con Auth, Postgres y RLS multiempresa.
 - Despliegue web: [demo pública Render](https://biomotors-taller-demo.onrender.com) verificada como `live` el 11/11/2026. Servicio independiente de BIOMOTORS Academia, con despliegue automático desde `main`.
 - Emails y suscripciones: proveedor a seleccionar tras pruebas, validación de costos y permisos.
@@ -50,7 +51,7 @@ npm run build
 
 **Aviso:** las pantallas son una maqueta interactiva. Los contadores muestran cero intencionalmente y ninguna función permite almacenar datos personales. No ingreses datos reales durante esta etapa.
 
-El manifiesto, iconos PNG generados durante el build y service worker básico están preparados sin caching de datos privados. La instalación real en iPhone/Android, capacidades offline y actualizaciones requieren pruebas físicas. Los iconos no implican una app nativa.
+El manifiesto, iconos PNG generados durante el build y service worker básico están preparados sin caching de datos privados. La instalación real de la PWA en iPhone requiere pruebas físicas. Los iconos web no son una APK Android; aún debemos construirla, firmarla y probarla.
 
 ## Metodología de ejecución
 
@@ -61,4 +62,8 @@ ChatGPT realiza directamente lo que esté al alcance de sus herramientas; modo A
 - URL: https://biomotors-taller-demo.onrender.com
 - CI GitHub Actions: `43106669748` PASS, con generación y validación de iconos PWA.
 - Render: primer deploy `dep-dbqe4r6c6qcc73f2768g` LIVE; actualización con iconos `dep-dbqe6ihsrm7s738dnptg` LIVE.
-- **Limitación:** la instalación real en iPhone/Android sigue pendiente de la comprobación manual del usuario e Ignacio.
+- **Limitación:** PWA iOS no verificada aún en iPhone; APK Android nativa todavía no construida. La demo Render corresponde al frontend web/iOS.
+
+## Arquitectura oficial de plataformas
+
+[Android APK nativa + iOS PWA + web — decisión corregida](docs/ARQUITECTURA_PLATAFORMAS.md). Ambos clientes usarán el backend Supabase multiempresa independiente, sin duplicar datos. [Checkpoint BT-CP01-PLATAFORMAS](docs/checkpoints/CHECKPOINT_BT_CP01_PLATAFORMAS_20261111.md).

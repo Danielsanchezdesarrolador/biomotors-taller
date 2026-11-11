@@ -1,6 +1,6 @@
 # BIOMOTORS TALLER — AGENTS.md
 
-**Versión documental:** BT-CP01-PWA-RENDER / 2026-11-11  
+**Versión documental:** BT-CP01-PLATAFORMAS / 2026-11-11  
 **Producto:** BIOMOTORS TALLER (independiente de BIOMOTORS Academia)  
 **Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; demo pública Render con primer despliegue `live`, pruebas de dispositivo pendientes, sin backend.
 
@@ -37,10 +37,12 @@ Crear una aplicación de gestión para talleres mecánicos con enfoque **SaaS mu
 5. Preferir incrementos pequeños, verificables, reversibles, con commits identificables, pruebas y reporte de cambios.
 6. No activar cobros reales, envíos masivos de correo, migraciones destructivas ni datos de clientes reales sin autorización explícita y controles probados.
 7. Toda tabla con datos de taller debe tener `workshop_id`/`tenant_id`, claves foráneas coherentes y **RLS comprobado con pruebas de acceso cruzado**. No depender de ocultar registros en frontend.
-8. Claves administrativas o de servicio exclusivamente en backend seguro; jamás en la PWA ni en archivos públicos.
+8. Claves administrativas o de servicio exclusivamente en backend seguro; jamás en la PWA, APK Android ni archivos públicos.
 9. Preservar trazabilidad: qué pidió Ignacio, qué fue decidido, qué es hipótesis, qué está implementado y qué continúa pendiente.
-10. La distribución oficialmente aprobada será **Web + PWA instalada en pantalla principal de iPhone/iOS (desde Safari) + Android (desde Chrome o navegador compatible)**. Es una aplicación web compartida, no apps nativas de App Store/Google Play; ello requeriría aprobación separada.
-11. **Autorizada** la publicación de una demo exclusivamente visual y sin datos reales mediante un sitio estático Render exclusivo de BIOMOTORS TALLER. No mezclar con BIOMOTORS Academia ni con servicios existentes.
+10. **CORRECCIÓN DEFINITIVA 11/11/2026:** Android = APK NATIVA React Native + Expo + TypeScript, como Punto Fénix; NO PWA ni WebView. iPhone/iOS = SOLO PWA desde Safari agregada a pantalla de inicio; NO app nativa iOS, Apple Developer ni App Store. Web PC = acceso vía navegador al mismo frontend de iOS PWA.
+11. **Autorizada** la demo web en Render solo para navegador/iOS PWA; Android se implementará como cliente NATIVO en `apps/android/` en este repo.
+12. Backend único Supabase `biomotors-taller` compartido por PWA iOS/web y APK Android, aislado por taller (RLS). Nunca incluir `service_role` en clientes.
+13. No decir APK lista hasta generar, firmar e instalar un APK auténtico en un dispositivo Android; iconos y manifiesto PWA no sirven como prueba de APK.
 
 ## 4. Alcance funcional mínimo del piloto
 
@@ -86,3 +88,6 @@ Entidades sugeridas: `workshops`, `profiles`, `workshop_memberships`, `customers
 Cada entrega debe incluir: requerimiento, diseño de permisos, migración reversible si aplica, prueba unitaria/integración, prueba de RLS multitenant, prueba móvil Safari cuando corresponda, evidencia de ejecución, actualización de roadmap y checkpoint con riesgos/pedientes.
 
 **Próxima etapa:** completar BT-CP01 verificando CI/build, publicación demo y conexión segura del proyecto Supabase independiente. La interfaz actual es demostrativa; no guarda información.
+## Corrección de arquitectura oficial
+
+La descripción anterior «PWA para Android e iOS» fue revocada por el usuario. Fuente vigente: `docs/ARQUITECTURA_PLATAFORMAS.md` y checkpoint BT-CP01-PLATAFORMAS. Conservar historia anterior, una rama `main` y el repositorio independiente de BIOMOTORS Academia.
