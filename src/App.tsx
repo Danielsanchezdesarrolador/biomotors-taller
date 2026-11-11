@@ -60,7 +60,6 @@ function App() {
   function planned(action: string) {
     setNotice(action + ' estará disponible después de conectar la cuenta segura del taller.')
   }
-  const title = navItems.find(item => item.id === screen)?.label ?? 'Inicio'
   const formattedDate = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date())
 
   return (
