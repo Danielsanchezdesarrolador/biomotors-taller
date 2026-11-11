@@ -25,4 +25,12 @@
 3. Verificar instalación PWA, iconos, actualización, apertura y accesibilidad.
 4. Revisar experiencia con Ignacio antes de usar datos verdaderos.
 
-**Estado de publicación en este checkpoint:** autorizado, pero la creación y verificación del servicio se documentan por separado cuando exista evidencia.
+## Publicación verificada
+
+- **Servicio Render:** `biomotors-taller-demo` (`srv-dbqe4quc6qcc73f275jg`).
+- **URL:** https://biomotors-taller-demo.onrender.com
+- **Despliegue inicial:** `dep-dbqe4r6c6qcc73f2768g`.
+- **Estado confirmado:** `live` (11/11/2026).
+- **Fuente:** GitHub repo privado propio, rama `main`; autodespliegue activado.
+- **Sin claves ni backend:** el sitio es visual; nunca usar datos personales reales.
+- **Siguientes ajustes:** generar iconos PNG Apple/Android antes del siguiente despliegue; comprobar resultado y dispositivos reales.

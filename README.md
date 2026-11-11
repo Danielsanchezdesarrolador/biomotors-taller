@@ -2,7 +2,7 @@
 
 Aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
-**Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento, autenticación ni despliegue público**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
+**Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento ni autenticación**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
 
 ## Responsabilidades
 
@@ -18,7 +18,7 @@ Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos d
 
 - Frontend: React + TypeScript + Vite, con PWA móvil.
 - Backend/datos: proyecto Supabase separado `biomotors-taller`, con Auth, Postgres y RLS multiempresa.
-- Despliegue web: demo pública en Render Static Site autorizada el 11/11/2026; servicio independiente de la academia, pendiente de verificar URL activa.
+- Despliegue web: [demo pública Render](https://biomotors-taller-demo.onrender.com) verificada como `live` el 11/11/2026. Servicio independiente de BIOMOTORS Academia, con despliegue automático desde `main`.
 - Emails y suscripciones: proveedor a seleccionar tras pruebas, validación de costos y permisos.
 
 ## Documentos
@@ -50,7 +50,7 @@ npm run build
 
 **Aviso:** las pantallas son una maqueta interactiva. Los contadores muestran cero intencionalmente y ninguna función permite almacenar datos personales. No ingreses datos reales durante esta etapa.
 
-El manifiesto web y el service worker básico están preparados sin caching de información de clientes. La instalación en iPhone, iconos PNG, comportamientos offline y actualizaciones requieren pruebas adicionales.
+El manifiesto, iconos PNG generados durante el build y service worker básico están preparados sin caching de datos privados. La instalación real en iPhone/Android, capacidades offline y actualizaciones requieren pruebas físicas. Los iconos no implican una app nativa.
 
 ## Metodología de ejecución
 

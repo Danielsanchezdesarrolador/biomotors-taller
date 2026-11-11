@@ -2,7 +2,7 @@
 
 **Versión documental:** BT-CP01-PWA-RENDER / 2026-11-11  
 **Producto:** BIOMOTORS TALLER (independiente de BIOMOTORS Academia)  
-**Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; pruebas de dispositivo pendientes, sin backend ni despliegue.
+**Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; demo pública Render con primer despliegue `live`, pruebas de dispositivo pendientes, sin backend.
 
 ## 1. Misión y fuentes de verdad
 
