@@ -1,8 +1,8 @@
 # ByteTorque — ROADMAP OFICIAL
 
-**Edición:** v1.7 — BT-UI-02 premium web-first + Android nativa al final  
+**Edición:** v1.8 — Identidad premium R2 OFICIAL + BT-UI-03 Órdenes  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-UI-02-PREMIUM-WEB-FIRST-20261111  
+**Checkpoint de continuidad:** BT-UI-02-R2-APROBACION-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Marca comercial y denominaciones — decisión 11/11/2026
@@ -126,7 +126,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 **Frontera:** Inicio implementado visualmente, no operación de taller habilitada; sin backend ni APK real en esta fase.
 
-### BT-UI-02 — Inicio PREMIUM en Render, propuesta de identidad visual — EN REVISIÓN
+### BT-UI-02 — Inicio PREMIUM en Render, identidad visual OFICIAL — APROBADO
 
 **Referencia:** nuevo mockup premium de ByteTorque compartido por el usuario el 11/11/2026. Esta etapa no convierte automáticamente el sitio en una app nativa.
 
@@ -136,7 +136,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Conservar cliente Android React Native + Expo BT-UI-01 sin reconstrucciones ni publicar APK en esta etapa.
 - [x] Establecer flujo **WEB primero**: revisión en el mismo Render, luego ampliar los paneles web y al final portar la experiencia aprobada a React Native/Expo y compilar APK.
 - [x] Confirmar CI del rediseño premium: GitHub Actions **#43115723650 SUCCESS** (web/iOS y Android code); Render deploy **`dep-dbqf4l2jnfac73bf3sb0` LIVE** sobre commit `39b00cfa`.
-- [ ] **Aprobación visual del usuario** en computador y PWA Safari; si queda bien, declararlo base estética del resto de ByteTorque.
+- [x] **Aprobación visual expresa del Director el 11/11/2026**: R2 queda como identidad premium oficial para los cinco paneles. La prueba física Safari iPhone continúa pendiente.
 - [ ] Completar las otras cuatro pantallas con el estilo premium aprobado, considerando acceso público de registro de clientes, seguridad, accesibilidad y responsive.
 - [ ] Adaptar las pantallas premium a Android **nativo**, generar APK firmado y realizar QA real (etapa final, aún no realizada).
 
@@ -240,7 +240,19 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Conservar Android nativo, CSS anterior y datos DEMO sin backend.
 - [x] Confirmar R2 servido en el Render existente: hashes JS/CSS del build y SHA-256 de imagen coincidentes con commit `c139ec6`.
 - [x] **Verificación externa posterior** con conectores GitHub y Render: CI de implementación `#43119179234` SUCCESS y documentación `#43119309468` SUCCESS; Render `dep-dbqfhbl9el5s73er8ucg` LIVE, commit `eb82d27`.
-- [ ] **Aprobación visual del Director** mediante capturas comparativas R2 vs. mockup de referencia (las capturas locales de Codex no se adjuntaron a este chat).
+- [x] **Aprobación visual expresa del Director** el 11/11/2026: identidad R2 oficial. Las capturas locales de Codex continúan documentadas como evidencia técnica, no como prueba física iPhone.
 - [ ] **Prueba física iPhone Safari/PWA**, y Android nativo/APK en la fase final.
 
 Evidencia y limitaciones: [checkpoint BT-UI-02-R2](docs/checkpoints/CHECKPOINT_BT_UI_02_R2_20261111.md).
+
+### BT-UI-02-R2-APROBACIÓN — Sistema visual oficial y homogeneidad de los cinco paneles
+
+- [x] Director confirma **R2 como referencia premium definitiva** del Inicio (11/11/2026).
+- [x] Registrar un estándar único en `docs/SISTEMA_VISUAL_OFICIAL_R2.md` con colores, componentes, comportamiento responsive y regla de no modificar Inicio aprobado.
+- [x] Mantener las cinco secciones y metodología web Render primero, iPhone PWA, Android APK nativa al final.
+- [x] Preparar brief maestro BT-UI-03 para **Órdenes de trabajo** en `docs/briefs/BT_UI_03_ORDENES_TRABAJO_DIRECCION_ARTE.md`.
+- [ ] Diseñar e implementar lista, detalle y creación DEMO de Órdenes de trabajo con visual R2 homogéneo; requerirá aprobación específica antes de siguiente panel.
+- [ ] Repetir esta homogeneización en Clientes y vehículos, Informes y cotizaciones y Configuración, sin alterar Inicio R2.
+- [ ] Verificación física iPhone Safari/iOS PWA; APK Android nativa y prueba en dispositivo en fase final.
+
+**Fuente de continuidad:** [checkpoint BT-UI-02-R2-APROBACIÓN](docs/checkpoints/CHECKPOINT_BT_UI_02_R2_APROBACION_20261111.md).

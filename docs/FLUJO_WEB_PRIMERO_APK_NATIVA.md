@@ -8,7 +8,7 @@ Usar **https://biomotors-taller-demo.onrender.com** como entorno único de revis
 
 ## Cómo se trabajará
 
-1. **Web y PWA iOS — prioridad inmediata.** React/Vite en la raíz del repositorio, despliegue automático sobre el mismo Render. Cada cambio se verifica mediante CI y el usuario lo revisa en web; el estilo premium BT-UI-02 se considera candidato, no definitivo hasta su aprobación visual.
+1. **Web y PWA iOS — prioridad inmediata.** React/Vite en la raíz del repositorio, despliegue automático sobre el mismo Render. Cada cambio se verifica mediante CI y el usuario lo revisa en web; el estilo premium BT-UI-02-R2 fue **aprobado como identidad visual oficial** por el Director el 11/11/2026.
 2. **Módulos completos.** Avanzar por las cinco pantallas acordadas: Inicio, Órdenes de trabajo, Clientes y vehículos, Informes y cotizaciones, Configuración. No activar operaciones reales con datos personales mientras falten Auth, RLS, validaciones y seguridad.
 3. **Una sola base de datos.** Supabase `biomotors-taller`, Auth + RLS por `workshop_id` y controles de permisos testeados. Definir APIs, tipos y validaciones reutilizables por web y móvil.
 4. **Android nativo — fase posterior.** Proyecto React Native + Expo **ya creado** en `apps/android/` y respaldado. No tocarlo por cada ajuste cosmético de web; después de consolidar diseño y flujos, adaptar su UI con componentes nativos (no React DOM, ni PWA, ni WebView). Validar feature parity y regresiones.
@@ -17,7 +17,7 @@ Usar **https://biomotors-taller-demo.onrender.com** como entorno único de revis
 
 ## Decisión del Director sobre el diseño
 
-El mockup premium recibido el 11/11/2026 establece una **referencia candidata**: sidebar navy con ondas y selección azul, topbar claro y buscador, hero automotriz suave, cuatro métricas, donut de estados, órdenes recientes, actividad y CTA de accesos rápidos. El CSS candidato se aloja en `src/premium.css` sin eliminar `src/styles.css`. **No replicarlo en el resto de paneles hasta aprobación visual**.
+El mockup premium recibido el 11/11/2026 y la implementación R2 **aprobada** establecen el **patrón oficial obligatorio**: sidebar navy con ondas y selección azul, topbar claro y buscador, hero automotriz suave, cuatro métricas, donut de estados, órdenes recientes, actividad y CTA de accesos rápidos. El CSS candidato se aloja en `src/premium.css` sin eliminar `src/styles.css`. **Aplicarlo de manera homogénea a los otros cuatro paneles sin modificar Inicio R2**, según `docs/SISTEMA_VISUAL_OFICIAL_R2.md`.
 
 ## Restricciones
 

@@ -2,7 +2,7 @@
 
 **ByteTorque** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
-**Estado (11-11-2026):** Inicio en web/iOS PWA con **rediseño premium BT-UI-02 candidato a aprobación**, y cliente Android nativo inicial **BT-UI-01** en `apps/android/`, sin almacenamiento ni autenticación. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
+**Estado (11-11-2026):** Inicio web/iOS PWA **BT-UI-02-R2 visualmente APROBADO como identidad oficial premium** para todo ByteTorque. Proyecto Android nativo BT-UI-01 en `apps/android/`, sin backend ni APK real. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
 
 ## Nombre e identidad comercial
 
@@ -95,8 +95,12 @@ La **web publicada en Render** es el espacio principal de revisión de diseños 
 - **Al final:** generar un APK firmado, instalarlo en Android físico y probar flujos, navegación, permisos y seguridad; no bastará con compilar un sitio web a APK.
 - **iPhone:** seguirá funcionando como PWA Safari instalable desde la pantalla de inicio. El backend Supabase será único y con aislamiento de datos por taller.
 
-**Diseño BT-UI-02:** el mockup premium compartido el 11/11/2026 es referencia de implementación de Inicio; **no se declara sistema de diseño oficial para todos los paneles hasta recibir aprobación visual del usuario**. La implementación candidata está aislada en `src/premium.css`, con `src/styles.css` previo conservado.
+**Diseño BT-UI-02-R2 APROBADO:** el 11/11/2026 el Director aprobó el acabado premium como sistema visual oficial para todos los paneles de ByteTorque. Implementación en `src/premium.css` y CSS original preservado; **no modificar Inicio R2** al diseñar otras pantallas. Ver `docs/SISTEMA_VISUAL_OFICIAL_R2.md`.
 
 [Documento de metodología y arquitectura](docs/FLUJO_WEB_PRIMERO_APK_NATIVA.md) · [Checkpoint BT-UI-02](docs/checkpoints/CHECKPOINT_BT_UI_02_PREMIUM_WEB_FIRST_20261111.md)
 
 **Validación BT-UI-02 (previa a aprobación visual):** GitHub Actions `43115723650` SUCCESS; Render deploy `dep-dbqf4l2jnfac73bf3sb0` LIVE. Android conserva BT-UI-01; no se ha generado APK.
+
+## Estándar oficial de diseño (11/11/2026)
+
+El Director aprobó **BT-UI-02-R2**, por lo que ya no es una propuesta pendiente: su diseño es obligatorio para **Inicio, Órdenes de trabajo, Clientes y vehículos, Informes y cotizaciones, Configuración**. [Sistema visual oficial R2](docs/SISTEMA_VISUAL_OFICIAL_R2.md) · [Brief próximo panel, Órdenes](docs/briefs/BT_UI_03_ORDENES_TRABAJO_DIRECCION_ARTE.md).

@@ -1,8 +1,8 @@
 # ByteTorque — AGENTS.md
 
-**Versión documental:** BT-UI-02-PREMIUM-WEB-FIRST / 2026-11-11  
+**Versión documental:** BT-UI-02-R2-OFICIAL / 2026-11-11  
 **Producto y marca comercial oficial:** **ByteTorque** (proyecto técnico `biomotors-taller`, independiente de BIOMOTORS Academia). BIOMOTORS es el taller piloto, no la marca visible del SaaS.  
-**Estado:** Inicio web/PWA con propuesta visual premium BT-UI-02 en `main`; Android Expo BT-UI-01 preservado; sin backend ni APK real; verificar CI/deploy por commit antes de declarar un cambio LIVE.
+**Estado:** Inicio **BT-UI-02-R2 aprobado visualmente como sistema premium OFICIAL** por el Director el 11/11/2026; Android Expo BT-UI-01 preservado; sin backend ni APK real. Próximo panel: Órdenes de trabajo BT-UI-03.
 
 ## 1. Misión y fuentes de verdad
 
@@ -113,8 +113,12 @@ La descripción anterior «PWA para Android e iOS» fue revocada por el usuario.
 ## Decisión BT-UI-02 — desarrollar y aprobar desde Render antes de APK Android
 
 1. **Render web = plataforma principal de desarrollo y revisión**, trabajando solo en `main`, con despliegue automático de cambios aprobados a la demo de ByteTorque. Mantener **un solo sitio** y los mismos identificadores de infraestructura.
-2. El diseño **premium del Inicio compartido por el usuario el 11/11/2026** es referencia candidata; se aplica primero a la web/PWA iOS, manteniendo una hoja de estilos separada `src/premium.css` y el CSS anterior, para facilitar reversión. Solo si se aprueba visualmente será base de los otros cuatro paneles.
+2. **APROBADO** el 11/11/2026: el Inicio **BT-UI-02-R2** define la identidad visual **OFICIAL** para los cinco paneles. Mantener `src/premium.css` y `src/styles.css` y reproducir idéntica calidad en las demás pantallas, sin modificar el Inicio aprobado. Contrato oficial en `docs/SISTEMA_VISUAL_OFICIAL_R2.md`.
 3. **Android debe seguir siendo nativo** React Native + Expo. El cliente de `apps/android/` queda preservado temporalmente en BT-UI-01; su estética se actualizará **después** de consolidar flujos web y antes de crear APK. No usar WebView/PWA como atajo ni afirmar que compartir React DOM equivale a compartir interfaces nativas.
 4. Diseñar contratos de datos, validaciones y lógica reutilizables en la medida de lo posible para evitar duplicar errores; para ambos clientes, un único Supabase con Auth y RLS multitenant. No habilitar datos personales, correos, pagos ni cuenta real sin seguridad y aprobación.
 5. **No construir ni firmar APK ahora.** Al cierre del trabajo web, portar las pantallas aprobadas, verificar compilación nativa, generar APK firmado, probar en Android real y documentar resultados.
 6. No confundir **código creado**, **GitHub CI PASS**, **Render LIVE**, **aprobación visual** ni **APK física probada**. Registrar evidencia individual para cada estado.
+
+## Orden vinculante — Sistema visual OFICIAL R2
+
+El Director aprobó expresamente BT-UI-02-R2. Todo diseño nuevo (incluido BT-UI-03 Órdenes de trabajo) debe basarse en `docs/SISTEMA_VISUAL_OFICIAL_R2.md` y no alterar ni sustituir la identidad ni el Inicio existente. No se permite introducir paletas, menús, topbars, estilos de tarjeta, tipografías o iconos discordantes. La identidad premium debe mantenerse en escritorio, Safari/iPhone PWA y finalmente Android nativo. La fidelidad visual debe comprobarse con capturas lado a lado. No confundir la aprobación visual del Inicio con autorización de backend real o APK.
