@@ -5,6 +5,8 @@ const manifest=JSON.parse(readFileSync(root+'manifest.webmanifest','utf8'))
 const html=readFileSync(root+'index.html','utf8')
 if(!html.includes('apple-touch-icon.png')) throw Error('Falta enlace de icono Apple')
 if(manifest.display!=='standalone') throw Error('Modo instalable no configurado')
+if(manifest.short_name!=='ByteTorque' || !manifest.name.startsWith('ByteTorque')) throw Error('Nombre de marca PWA incorrecto')
+if(!html.includes('<title>ByteTorque')) throw Error('Título de marca HTML incorrecto')
 for(const [size,path] of [['192x192','icon-192.png'],['512x512','icon-512.png']]){
   if(!manifest.icons.some(icon=>icon.sizes===size && icon.src==='/' + path)) throw Error('Manifest sin '+path)
   if(!existsSync(root+path)) throw Error('Falta '+path+' en la salida de build')
