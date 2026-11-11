@@ -34,3 +34,7 @@ npx eas-cli build --platform android --profile preview
 Este comando **requiere** conexión a Expo, permisos, registro de credenciales de firma y aprobación humana cuando sea el momento. Todavía **no se ha ejecutado** ni existe un APK descargable. No publicar OTA, AAB ni Google Play sin autorización.
 
 **Paquete temporal de demostración:** `cl.bytetorque.demo`; revisar identificador e icono antes de distribución comercial.
+
+## Metodología BT-UI-02 (web primero)
+
+La nueva propuesta premium del Inicio se desarrolla primero en la web Render y PWA iOS. Este cliente Android nativo **sigue momentáneamente con el diseño BT-UI-01** hasta que el usuario apruebe la versión web. Después se portarán pantallas y estilos a componentes React Native auténticos y recién al cierre se generará una APK firmada para pruebas físicas. Mantener `apps/android/` y no reemplazar por WebView o PWA.

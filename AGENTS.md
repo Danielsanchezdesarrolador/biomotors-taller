@@ -1,12 +1,12 @@
-# TallerFlow — AGENTS.md
+# ByteTorque — AGENTS.md
 
-**Versión documental:** BT-CP01-PLATAFORMAS / 2026-11-11  
-**Producto y marca comercial oficial:** **TallerFlow** (proyecto técnico `biomotors-taller`, independiente de BIOMOTORS Academia). BIOMOTORS es el taller piloto, no la marca visible del SaaS.  
-**Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; demo pública Render con primer despliegue `live`, pruebas de dispositivo pendientes, sin backend.
+**Versión documental:** BT-UI-02-PREMIUM-WEB-FIRST / 2026-11-11  
+**Producto y marca comercial oficial:** **ByteTorque** (proyecto técnico `biomotors-taller`, independiente de BIOMOTORS Academia). BIOMOTORS es el taller piloto, no la marca visible del SaaS.  
+**Estado:** Inicio web/PWA con propuesta visual premium BT-UI-02 en `main`; Android Expo BT-UI-01 preservado; sin backend ni APK real; verificar CI/deploy por commit antes de declarar un cambio LIVE.
 
 ## 1. Misión y fuentes de verdad
 
-Crear TallerFlow, una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
+Crear ByteTorque, una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
 
 **Prioridades inamovibles:** continuidad sin reconstrucciones innecesarias; seguridad y privacidad; facilidad de uso en iPhone y Android; costos iniciales contenidos; claridad para usuarios no técnicos.
 
@@ -69,7 +69,7 @@ Entidades sugeridas: `workshops`, `profiles`, `workshop_memberships`, `customers
 
 ## 6. Modelo de negocio — decisión estratégica
 
-- **Meta:** comercializar TallerFlow a otros talleres mediante pago recurrente.
+- **Meta:** comercializar ByteTorque a otros talleres mediante pago recurrente.
 - **Precio objetivo inicial:** **US$5 mensuales por taller**; hipótesis comercial sujeta a costos, impuestos, comisiones y pruebas de mercado. No implementar como tarifa productiva ni prometer funciones ilimitadas todavía.
 - **Adquisición:** Ignacio lidera contacto, demostraciones y venta; el usuario lidera evolución del producto.
 - **Etapas:** taller piloto -> otros talleres piloto -> validar cobro y soporte -> lanzar suscripción -> ampliar cartera.
@@ -94,11 +94,11 @@ La descripción anterior «PWA para Android e iOS» fue revocada por el usuario.
 
 ## Identidad visual y nomenclatura — decisión 11/11/2026
 
-- **Nombre visible de la aplicación:** `TallerFlow`, escrito exactamente así, sin espacio.
-- **Marca de presentación:** TallerFlow. No usar «BIOMOTORS TALLER» en títulos, menús, onboarding, emails de la aplicación, iconos nombrados ni entregables nuevos.
+- **Nombre visible de la aplicación:** `ByteTorque`, escrito exactamente así, sin espacio.
+- **Marca de presentación:** ByteTorque. No usar «BIOMOTORS TALLER» en títulos, menús, onboarding, emails de la aplicación, iconos nombrados ni entregables nuevos.
 - **Taller piloto:** BIOMOTORS, propiedad de Ignacio; mostrar BIOMOTORS solo como nombre del taller activo cuando corresponda, y no simular propietarios ni clientes reales.
 - **Identificadores técnicos heredados:** conservar `biomotors-taller` en GitHub, Supabase y URL de Render, salvo autorización separada de migración, para evitar romper las integraciones.
-- **Director de Arte:** adaptar los cinco paneles y el flujo de registro de clientes a TallerFlow; los mockups antiguos de BIOMOTORS TALLER son referentes de diseño, no marca final. Logo e iconos de marca quedan pendientes de aprobación.
+- **Director de Arte:** adaptar los cinco paneles y el flujo de registro de clientes a ByteTorque; los mockups antiguos de BIOMOTORS TALLER son referentes de diseño, no marca final. Logo e iconos de marca quedan pendientes de aprobación.
 - **Control comercial:** disponibilidad registral, dominios y posible marca registrada todavía no verificados; no afirmar exclusividad.
 
 ## BT-UI-01 — Inicio visual dual (aprobación 11/11/2026)
@@ -109,3 +109,12 @@ La descripción anterior «PWA para Android e iOS» fue revocada por el usuario.
 - Mostrar claramente modo DEMO cuando se utilicen datos inventados (cifras, vehículos, órdenes). Ningún botón de crear debe fingir persistencia, emisión o envío; navegar a módulo o advertir que está pendiente.
 - Cada entrega de UI debe comprobar TypeScript y pruebas en CI, y verificar estado de Render; APK real solo cuando se haya generado/firmado y probado en dispositivo.
 - Icono y logotipo definitivos aún pendientes del Director de Arte, no introducir símbolos o activos comerciales ajenos como logo final.
+
+## Decisión BT-UI-02 — desarrollar y aprobar desde Render antes de APK Android
+
+1. **Render web = plataforma principal de desarrollo y revisión**, trabajando solo en `main`, con despliegue automático de cambios aprobados a la demo de ByteTorque. Mantener **un solo sitio** y los mismos identificadores de infraestructura.
+2. El diseño **premium del Inicio compartido por el usuario el 11/11/2026** es referencia candidata; se aplica primero a la web/PWA iOS, manteniendo una hoja de estilos separada `src/premium.css` y el CSS anterior, para facilitar reversión. Solo si se aprueba visualmente será base de los otros cuatro paneles.
+3. **Android debe seguir siendo nativo** React Native + Expo. El cliente de `apps/android/` queda preservado temporalmente en BT-UI-01; su estética se actualizará **después** de consolidar flujos web y antes de crear APK. No usar WebView/PWA como atajo ni afirmar que compartir React DOM equivale a compartir interfaces nativas.
+4. Diseñar contratos de datos, validaciones y lógica reutilizables en la medida de lo posible para evitar duplicar errores; para ambos clientes, un único Supabase con Auth y RLS multitenant. No habilitar datos personales, correos, pagos ni cuenta real sin seguridad y aprobación.
+5. **No construir ni firmar APK ahora.** Al cierre del trabajo web, portar las pantallas aprobadas, verificar compilación nativa, generar APK firmado, probar en Android real y documentar resultados.
+6. No confundir **código creado**, **GitHub CI PASS**, **Render LIVE**, **aprobación visual** ni **APK física probada**. Registrar evidencia individual para cada estado.

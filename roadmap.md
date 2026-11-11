@@ -1,22 +1,23 @@
-# TallerFlow — ROADMAP OFICIAL
+# ByteTorque — ROADMAP OFICIAL
 
-**Edición:** v1.4 — marca comercial TallerFlow + Android APK nativa + iOS PWA Safari + web  
+**Edición:** v1.7 — BT-UI-02 premium web-first + Android nativa al final  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-CP01-NOMBRE-TALLERFLOW-20261111  
+**Checkpoint de continuidad:** BT-UI-02-PREMIUM-WEB-FIRST-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Marca comercial y denominaciones — decisión 11/11/2026
 
-- [x] **Marca oficial del producto SaaS:** **TallerFlow**.
-- [x] Distinguir la marca **TallerFlow** de **BIOMOTORS**, primer taller piloto de Ignacio.
+- [x] **Marca oficial del producto SaaS:** **ByteTorque**.
+- [x] Distinguir la marca **ByteTorque** de **BIOMOTORS**, primer taller piloto de Ignacio.
 - [x] Mantener identificadores técnicos existentes `biomotors-taller` (repositorio, proyecto Supabase y Render), sin renombrar servicios hasta planificar migración.
 - [x] Actualizar nombre visible en web/PWA (título, encabezados, manifest).
-- [ ] Desarrollar identidad visual/logotipo definitivo **TallerFlow**, basada en los cinco mockups aprobados (sidebar azul marino, blanco, acento azul).
-- [ ] Diseñar marca y pantalla de inicio para **APK Android nativa**, todavía no construida.
+- [ ] Desarrollar identidad visual/logotipo definitivo **ByteTorque**, basada en los cinco mockups aprobados (sidebar azul marino, blanco, acento azul).
+- [x] Crear estructura Android nativa React Native/Expo e Inicio BT-UI-01 (sin APK firmada).
+- [ ] Adaptar el sistema visual premium definitivo al Android nativo tras aprobar la experiencia web.
 - [ ] Verificar disponibilidad de dominio y eventuales derechos de marca antes del lanzamiento comercial.
 - [ ] Revisar y aprobar nomenclatura de PDFs, plantillas, correos y formularios de registro público cuando se implementen.
 
-**Las referencias históricas a «BIOMOTORS TALLER» en checkpoints anteriores se conservan para trazabilidad, pero NO son el nombre comercial actual.**
+**Las referencias históricas a los nombres anteriores en checkpoints se conservan para trazabilidad. La marca vigente es exclusivamente ByteTorque.**
 
 ## Visión
 
@@ -45,7 +46,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 ### Arquitectura conjunta
 
 - Conservar frontend web/iOS PWA existente en la raíz del repositorio y su demo en Render.
-- Crear aplicación Android nativa independiente en `apps/android/` DENTRO del mismo repositorio privado, trabajando solo sobre `main`.
+- Conservar la aplicación Android nativa ya creada en `apps/android/` dentro del mismo repositorio privado, trabajando solo sobre `main`.
 - Utilizar un ÚNICO backend Supabase `biomotors-taller`, con Auth, tablas, Storage y RLS por `workshop_id`; misma información autorizada en ambos clientes.
 - Los componentes React DOM NO se compartirán directamente con React Native; compartir tipos, validaciones y acceso a API cuando sea viable.
 - Generar una APK real de prueba usando firma y perfil EAS `android.buildType: "apk"` o un método nativo equivalente; verificar en teléfono Android real.
@@ -56,9 +57,10 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 ### Secuencia inmediata
 
 1. Preservar la demo web/iOS publicada en Render.
-2. Crear base Android nativa React Native + Expo dentro de `apps/android/`, con navegación de Inicio, Clientes, Vehículos, Revisiones y Presupuestos.
-3. Definir build de APK y probarla en Android; probar PWA por separado en Safari iPhone.
-4. Conectar ambos clientes a Supabase independiente, con aislamiento por taller y pruebas RLS.
+2. Completar y aprobar cada pantalla primero en la web publicada en Render, compartida con Safari iPhone PWA.
+3. Preparar un backend común Supabase seguro por taller, validando la experiencia web y los contratos de API.
+4. Una vez aprobadas las funciones y el diseño web, adaptar y verificar el cliente Android nativo React Native/Expo existente.
+5. Como última etapa antes del piloto Android, generar una APK firmada, instalarla y probarla en teléfono Android real.
 ## Requerimientos de Ignacio — conservados
 
 | Código | Capacidad | Prioridad |
@@ -123,6 +125,22 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [ ] Sustituir datos de muestra por agregados de Supabase cuando existan autenticación segura, tenant y RLS.
 
 **Frontera:** Inicio implementado visualmente, no operación de taller habilitada; sin backend ni APK real en esta fase.
+
+### BT-UI-02 — Inicio PREMIUM en Render, propuesta de identidad visual — EN REVISIÓN
+
+**Referencia:** nuevo mockup premium de ByteTorque compartido por el usuario el 11/11/2026. Esta etapa no convierte automáticamente el sitio en una app nativa.
+
+- [x] Implementar en la web un rediseño del **Inicio** con sidebar azul marino por capas, búsqueda con atajo real Ctrl/Cmd+K, cabecera automotriz vectorial tenue, tarjetas KPI horizontales con detalles, gráfico de dona, listas, etiquetas de estados, actividad y accesos rápidos.
+- [x] Mantener **datos ficticios DEMO**, cinco destinos y sin falsas confirmaciones de guardado, emails o cobros.
+- [x] Implementar diseño candidato **reversible** en `src/premium.css`, importado después del CSS BT-UI-01 original.
+- [x] Conservar cliente Android React Native + Expo BT-UI-01 sin reconstrucciones ni publicar APK en esta etapa.
+- [x] Establecer flujo **WEB primero**: revisión en el mismo Render, luego ampliar los paneles web y al final portar la experiencia aprobada a React Native/Expo y compilar APK.
+- [x] Confirmar CI del rediseño premium: GitHub Actions **#43115723650 SUCCESS** (web/iOS y Android code); Render deploy **`dep-dbqf4l2jnfac73bf3sb0` LIVE** sobre commit `39b00cfa`.
+- [ ] **Aprobación visual del usuario** en computador y PWA Safari; si queda bien, declararlo base estética del resto de ByteTorque.
+- [ ] Completar las otras cuatro pantallas con el estilo premium aprobado, considerando acceso público de registro de clientes, seguridad, accesibilidad y responsive.
+- [ ] Adaptar las pantallas premium a Android **nativo**, generar APK firmado y realizar QA real (etapa final, aún no realizada).
+
+**Regla:** ningún trabajo web implica que Android esté finalizado; usar `apps/android/` como proyecto nativo existente, con backend único Supabase y sin WebView.
 
 ### BT-CP02 — Identidad, talleres y aislamiento — PENDIENTE
 

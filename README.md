@@ -1,12 +1,12 @@
-# TallerFlow
+# ByteTorque
 
-**TallerFlow** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
+**ByteTorque** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
-**Estado (11-11-2026):** Inicio UI implementado en web/iOS PWA y Android nativo, sin almacenamiento ni autenticación. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
+**Estado (11-11-2026):** Inicio en web/iOS PWA con **rediseño premium BT-UI-02 candidato a aprobación**, y cliente Android nativo inicial **BT-UI-01** en `apps/android/`, sin almacenamiento ni autenticación. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
 
 ## Nombre e identidad comercial
 
-**TallerFlow** es el nombre comercial aprobado el 11/11/2026 para la aplicación SaaS. El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo definitivo y revisión de disponibilidad de marca/dominio pendientes.
+**ByteTorque** es la marca comercial vigente para la aplicación SaaS (reemplaza al nombre anterior, según decisión del usuario del 11/11/2026). El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo definitivo y revisión de disponibilidad de marca/dominio pendientes.
 
 ## Responsabilidades
 
@@ -84,3 +84,19 @@ El Inicio se rediseñó en ambas plataformas con paleta azul marino/blanco/azul,
 
 - GitHub Actions: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43113368311 — SUCCESS.
 - Android generó un bundle Metro verificado, pero **no un APK instalable**: están pendientes la firma, la compilación nativa y las pruebas físicas.
+
+## Flujo aprobado de desarrollo: WEB PRIMERO, APK ANDROID AL FINAL
+
+La **web publicada en Render** es el espacio principal de revisión de diseños y flujos. Cada cambio aprobado se integra en `main` y se despliega automáticamente al mismo sitio de demostración; no crear un nuevo studio ni otra rama para esto.
+
+- **Durante la construcción:** diseñar y validar los cinco paneles en web (React/Vite) y la PWA Safari iOS, con datos DEMO hasta aprobar el backend seguro.
+- **Android:** conservar el proyecto existente React Native + Expo de `apps/android/`; no lo reemplazaremos por WebView ni lo empaquetaremos como PWA.
+- **Después de validar las funcionalidades web:** trasladar el sistema de diseño y las pantallas aprobadas al cliente nativo Android, reutilizando tipos, lógica de negocio y APIs cuando sea posible, hasta tener paridad funcional.
+- **Al final:** generar un APK firmado, instalarlo en Android físico y probar flujos, navegación, permisos y seguridad; no bastará con compilar un sitio web a APK.
+- **iPhone:** seguirá funcionando como PWA Safari instalable desde la pantalla de inicio. El backend Supabase será único y con aislamiento de datos por taller.
+
+**Diseño BT-UI-02:** el mockup premium compartido el 11/11/2026 es referencia de implementación de Inicio; **no se declara sistema de diseño oficial para todos los paneles hasta recibir aprobación visual del usuario**. La implementación candidata está aislada en `src/premium.css`, con `src/styles.css` previo conservado.
+
+[Documento de metodología y arquitectura](docs/FLUJO_WEB_PRIMERO_APK_NATIVA.md) · [Checkpoint BT-UI-02](docs/checkpoints/CHECKPOINT_BT_UI_02_PREMIUM_WEB_FIRST_20261111.md)
+
+**Validación BT-UI-02 (previa a aprobación visual):** GitHub Actions `43115723650` SUCCESS; Render deploy `dep-dbqf4l2jnfac73bf3sb0` LIVE. Android conserva BT-UI-01; no se ha generado APK.
