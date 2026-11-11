@@ -2,7 +2,7 @@
 
 **TallerFlow** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
-**Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento ni autenticación**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
+**Estado (11-11-2026):** Inicio UI implementado en web/iOS PWA y Android nativo, sin almacenamiento ni autenticación. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
 
 ## Nombre e identidad comercial
 
@@ -79,3 +79,8 @@ El Inicio se rediseñó en ambas plataformas con paleta azul marino/blanco/azul,
 - **Web/iOS PWA:** ver [demo Render](https://biomotors-taller-demo.onrender.com), publicada desde la raíz de `main`.
 - **Android nativa:** código fuente en [apps/android](apps/android/README.md), verificable con `cd apps/android && npm install && npm run typecheck`. No se ha emitido un APK instalable.
 - **Continuidad:** [BT-UI-01](docs/checkpoints/CHECKPOINT_BT_UI_01_INICIO_DUAL_20261111.md).
+
+## Validación BT-UI-01
+
+- GitHub Actions: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43113368311 — SUCCESS.
+- Android generó un bundle Metro verificado, pero **no un APK instalable**: están pendientes la firma, la compilación nativa y las pruebas físicas.

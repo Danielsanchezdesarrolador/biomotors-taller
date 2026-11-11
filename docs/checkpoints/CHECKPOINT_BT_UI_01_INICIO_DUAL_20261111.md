@@ -3,7 +3,7 @@
 **Fecha:** 11/11/2026  
 **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · `main`  
 **Referencias:** mockup escritorio y mockup teléfonos aportados por el usuario el 11/11/2026.  
-**Estado:** código de ambas interfaces creado; resultados CI Android y APK aún pendientes al emitir este checkpoint.
+**Estado actualizado:** código de ambas interfaces en main, ambas verificaciones CI PASS y Render LIVE; APK real aún pendiente.
 
 ## Objetivo y decisiones
 
@@ -40,3 +40,12 @@ Implementar el **Panel Inicio** en la web compatible con PWA Safari de iPhone y 
 - Comprobar nuevo despliegue `live` en Render.
 - Revisar UI, corregir hallazgos y preparar entrega APK cuando se autorice conexión EAS.
 - Obtener aprobación de Inicio antes de avanzar en paneles operativos y datos.
+
+## Evidencia técnica de cierre BT-UI-01
+
+- GitHub Actions run **#43113368311 SUCCESS**: jobs Web / iOS PWA y Android React Native / Expo.
+- **Web/iOS PWA:** TypeScript PASS, 2 archivos de test PASS, **7 pruebas PASS**, build Vite PASS y verificación de PWA PASS.
+- **Android nativa:** npm install PASS, TypeScript PASS, Expo install --check PASS, export bundle Android PASS (**601 módulos**), verificación de perfil APK PASS.
+- **Render:** https://biomotors-taller-demo.onrender.com confirmó estado **live** sobre el commit 4a106710.
+- **APK no generada:** bundle Expo y configuración EAS no equivalen a APK firmado ni prueba en dispositivo físico.
+- **Revisión visual y prueba física:** pendientes de aprobación del usuario.

@@ -117,7 +117,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] **Android:** menú y navegación inferior hacia las cinco secciones: Inicio, Órdenes de trabajo, Clientes y vehículos, Informes y cotizaciones, Configuración. Las otras cuatro mantienen pantallas informativas preparatorias.
 - [x] Mantener el producto denominado **ByteTorque**, mostrando BIOMOTORS solo como eventual taller piloto, nunca como marca de SaaS.
 - [x] Usar únicamente **datos ficticios DEMO** y funciones sin persistencia ni envío de correos.
-- [ ] Confirmar **CI web** y **CI TypeScript Android** para el commit definitivo; registrar evidencias antes de declarar verificado.
+- [x] Confirmar CI web (7 tests PASS, TypeScript y build PWA), Expo Android (TypeScript, compatibilidad de versiones, bundle Metro y configuración): GitHub Actions #43113368311 PASS (11/11/2026).
 - [ ] Verificar visualmente web de escritorio, Safari iPhone y Android real.
 - [ ] Generar **APK firmada instalable**, validar permisos/identificador y prueba real en dispositivo.
 - [ ] Sustituir datos de muestra por agregados de Supabase cuando existan autenticación segura, tenant y RLS.
