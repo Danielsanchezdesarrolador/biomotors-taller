@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowRight, Bell, CalendarDays, CarFront, Check, ChevronDown,
+  ArrowRight, BarChart3, Bell, CalendarDays, CarFront, Check, ChevronDown, Clock3, Zap,
   ChevronRight, CircleAlert, ClipboardCheck, FilePlus2,
   FileText, House, Info, Menu, Search, Settings2,
   UsersRound, Wrench, X, type LucideIcon,
@@ -42,12 +42,24 @@ function App() {
   const [screen, setScreen] = useState<Screen>('inicio')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
   const [notice, setNotice] = useState('')
   const [showAccount, setShowAccount] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [filter, setFilter] = useState('todas')
   const metrics = useMemo(getDashboardMetrics, [])
   const visibleOrders = useMemo(() => filterDemoOrders(searchText, filter), [searchText, filter])
+
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', focusSearch)
+    return () => window.removeEventListener('keydown', focusSearch)
+  }, [])
 
   function navigate(next: Screen) {
     setScreen(next)
@@ -87,7 +99,7 @@ function App() {
             <span className="workshop-badge"><Wrench size={23} /></span>
             <div><strong>Taller de demostración</strong><small>Entorno de muestra</small><span><i /> Sin datos reales</span></div>
           </div>
-          <p className="sidebar-version">ByteTorque · BT-UI-01</p>
+          <p className="sidebar-version">ByteTorque · BT-UI-02 · Diseño en prueba</p>
         </div>
       </aside>
 
@@ -96,9 +108,9 @@ function App() {
           <button type="button" className="mobile-hamburger" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}><Menu size={23} /></button>
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
-            <input aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo, patente u OT..." value={searchText}
+            <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
               onFocus={() => { if (screen !== 'inicio') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
-            {searchText && <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button>}
+            {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}}
           </div>
           <div className="topbar-controls">
             <div className="popover-anchor">
@@ -117,22 +129,21 @@ function App() {
         </header>
 
         <main className="dashboard-main" id="main-content">
-          <div className="demo-strip" role="note"><Info size={15} /><span><strong>DEMO VISUAL</strong> · Los valores y vehículos de esta vista son ficticios. No se registran clientes ni se envían correos.</span></div>
           {notice && <div className="action-alert" role="status"><CircleAlert size={17}/><span>{notice}</span><button type="button" aria-label="Cerrar aviso" onClick={() => setNotice('')}><X size={17}/></button></div>}
           {screen === 'inicio' ? (
             <>
               <section className="welcome-area">
-                <div className="welcome-art" aria-hidden="true"><CarFront size={126} strokeWidth={0.7} /></div>
+                <div className="welcome-art" aria-hidden="true" />
                 <div className="welcome-head">
-                  <div><p className="section-eyebrow">PANEL PRINCIPAL · VISTA DE EJEMPLO</p><h1>¡Hola, equipo! <span aria-hidden="true">👋</span></h1><p>Aquí tienes el resumen de tu taller hoy.</p></div>
+                  <div><h1>¡Hola, equipo! <span aria-hidden="true">👋</span></h1><p>Aquí tienes el resumen de tu taller hoy.</p></div>
                   <span className="date-pill"><CalendarDays size={18}/> {formattedDate}</span>
                 </div>
                 <div className="metric-grid">
                   {metricItems.map(({ label, value, icon: Icon, className, destination }) => (
                     <button type="button" key={label} className="metric-card" onClick={() => navigate(destination)}>
-                      <span className={'metric-icon ' + className}><Icon size={24} strokeWidth={2}/></span>
-                      <span className="metric-title">{label}</span><strong>{value}</strong>
-                      <span className="metric-footnote">Valor de demostración</span>
+                      <span className={'metric-icon ' + className}><Icon size={27} strokeWidth={2.2}/></span>
+                      <span className="metric-content"><span className="metric-title">{label}</span><strong>{value}</strong></span>
+                      <span className="metric-footnote sr-only">Valor de demostración</span>
                     </button>
                   ))}
                 </div>
@@ -140,7 +151,7 @@ function App() {
 
               <div className="overview-grid">
                 <section className="dashboard-card statuses-panel" aria-labelledby="statuses-title">
-                  <div className="card-head"><h2 id="statuses-title">Estado de órdenes</h2><span className="tag-demo">Ejemplo</span></div>
+                  <div className="card-head"><h2 id="statuses-title"><BarChart3 size={21} aria-hidden="true"/> Estado de órdenes</h2><span className="tag-demo">Ejemplo</span></div>
                   <div className="statuses-layout">
                     <div className="donut"><span><strong>{metrics.active}</strong><small>órdenes</small></span></div>
                     <div className="status-legend">
@@ -154,7 +165,7 @@ function App() {
                   <p className="card-help">Selecciona un estado para filtrar las órdenes de ejemplo.</p>
                 </section>
                 <section className="dashboard-card orders-panel" aria-labelledby="orders-title">
-                  <div className="card-head"><h2 id="orders-title">Órdenes recientes</h2><button type="button" className="text-action" onClick={() => navigate('ordenes')}>Ver todas <ArrowRight size={16}/></button></div>
+                  <div className="card-head"><h2 id="orders-title"><CarFront size={21} aria-hidden="true"/> Órdenes recientes</h2><button type="button" className="text-action" onClick={() => navigate('ordenes')}>Ver todas <ArrowRight size={16}/></button></div>
                   {filter !== 'todas' && <button type="button" className="active-filter" onClick={() => setFilter('todas')}>Filtro activo · Limpiar <X size={13}/></button>}
                   <div className="orders-list">
                     {visibleOrders.length === 0 ? <div className="empty-results"><Search size={24}/><p>Sin coincidencias en los ejemplos.</p><button onClick={() => {setFilter('todas');setSearchText('')}} type="button">Restablecer búsqueda</button></div> : visibleOrders.map(order => (
@@ -170,7 +181,7 @@ function App() {
               </div>
               <div className="lower-grid">
                 <section className="dashboard-card activity-panel" aria-labelledby="activity-title">
-                  <div className="card-head"><h2 id="activity-title">Actividad reciente</h2><span className="tag-demo">Simulada</span></div>
+                  <div className="card-head"><h2 id="activity-title"><Clock3 size={21} aria-hidden="true"/> Actividad reciente</h2><span className="tag-demo">Simulada</span></div>
                   <div className="activity-list">
                     {demoActivities.map(activity => (
                       <div className="activity-row" key={activity.id}>
@@ -182,7 +193,7 @@ function App() {
                   </div>
                 </section>
                 <section className="dashboard-card shortcuts-panel" aria-labelledby="shortcuts-title">
-                  <div className="card-head"><h2 id="shortcuts-title">Accesos rápidos</h2></div>
+                  <div className="card-head"><h2 id="shortcuts-title"><Zap size={21} aria-hidden="true"/> Accesos rápidos</h2></div>
                   <div className="shortcuts-grid">
                     {quickActions.map(({ label, sub, icon: Icon, to }, index) => (
                       <button type="button" key={label} className={'shortcut ' + (index === 0 ? 'primary' : '')} onClick={() => navigate(to)}>
@@ -190,7 +201,7 @@ function App() {
                       </button>
                     ))}
                   </div>
-                  <p className="card-help">Los módulos se habilitarán al conectar la base de datos.</p>
+                  <p className="card-help sr-only">Los módulos se habilitarán al conectar la base de datos.</p>
                 </section>
               </div>
             </>
@@ -208,6 +219,7 @@ function App() {
               <button className="return-home" type="button" onClick={() => navigate('inicio')}><House size={16}/> Volver al Inicio</button>
             </section>
           )}
+          <div className="demo-strip" role="note"><Info size={15} /><span><strong>Entorno de demostración:</strong> todas las cifras y órdenes son ficticias. No se registran clientes ni se envían correos.</span></div>
         </main>
       </div>
       <nav className="bottom-nav" aria-label="Navegación móvil">
