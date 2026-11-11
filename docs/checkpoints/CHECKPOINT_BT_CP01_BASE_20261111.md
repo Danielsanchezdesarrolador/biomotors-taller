@@ -2,7 +2,7 @@
 
 **Fecha:** 11 de noviembre de 2026
 **Rama:** `main`
-**Estado:** primer código frontend subido, sin despliegue ni datos reales.
+**Estado:** primer frontend subido y CI verificado; sin despliegue ni datos reales.
 
 ## Implementado en el repositorio
 
@@ -16,7 +16,7 @@
 
 ## Pendiente (no atribuir completitud)
 
-- Verificar CI y build remoto con dependencias instaladas.
+- CI y build remoto: **verificados PASS**. GitHub Actions #43105084982 y #43105329020; TypeScript, 3 tests y build completados correctamente.
 - Probar instalación/visualización en iPhone real y Android.
 - Conectar Supabase `biomotors-taller` y diseñar esquema seguro con RLS multiempresa.
 - Implementar autenticación, persistencia, documentos PDF y correos.

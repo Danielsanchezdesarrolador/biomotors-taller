@@ -52,7 +52,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [ ] Instalar y probar la PWA en Safari de un iPhone real; revisar iconos, navegación, tamaños y comportamiento de actualización.
 - [ ] Configurar variables de entorno con secretos exclusivamente fuera de Git.
 - [ ] Conectar el proyecto Supabase independiente con la menor cantidad de permisos necesaria.
-- [x] Incorporar estructura de pruebas y CI GitHub Actions (verificación de ejecución pendiente).\n- [ ] Confirmar que TypeScript, tests y build aprueben en CI, corregir hallazgos y documentar evidencia.
+- [x] Incorporar estructura de pruebas y CI GitHub Actions; ejecuciones verificadas en GitHub el 11/11/2026.\n- [x] Confirmar que TypeScript, 3 tests y build aprueban en GitHub Actions: run #43105084982 y run #43105329020, ambas PASS (11/11/2026).
 
 **Salida:** repositorio accesible, aplicación base demostrable, variables seguras y build/test pasando.
 

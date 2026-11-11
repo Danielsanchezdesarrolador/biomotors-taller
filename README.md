@@ -2,7 +2,7 @@
 
 Aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
-**Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento, autenticación ni despliegue público**; CI incorporado, verificación pendiente.
+**Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento, autenticación ni despliegue público**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
 
 ## Responsabilidades
 
