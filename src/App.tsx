@@ -74,7 +74,7 @@ function App() {
         <div className="sidebar-top">
           <div className="brand">
             <div className="brand-mark" aria-hidden="true"><Wrench size={22} strokeWidth={2.6} /></div>
-            <div className="brand-name">BIOMOTORS <span>TALLER</span></div>
+            <div className="brand-name">TallerFlow <span>GESTIÓN AUTOMOTRIZ</span></div>
           </div>
           <button className="menu-close" type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Cerrar menú">
             <X size={21} />
@@ -109,7 +109,7 @@ function App() {
             <button className="menu-toggle" type="button" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
-            <span className="breadcrumb">BIOMOTORS TALLER <ChevronRight size={15} /> <strong>{active.label}</strong></span>
+            <span className="breadcrumb">TallerFlow <ChevronRight size={15} /> <strong>{active.label}</strong></span>
           </div>
           <span className="demo-indicator"><span className="indicator-dot" /> Entorno de demostración</span>
         </header>
@@ -137,7 +137,7 @@ function App() {
                 <div className="hero-glow hero-glow-one" />
                 <div className="hero-glow hero-glow-two" />
                 <div className="hero-content">
-                  <div className="hero-badge"><Wrench size={15} /> BIOMOTORS TALLER</div>
+                  <div className="hero-badge"><Wrench size={15} /> TallerFlow</div>
                   <h2 id="hero-title">Menos papeles.<br /><span>Más control.</span></h2>
                   <p>Clientes, vehículos, inspecciones y presupuestos. Estamos construyendo la herramienta que necesita tu taller.</p>
                   <button className="hero-button" type="button" onClick={() => navigate('clientes')}>

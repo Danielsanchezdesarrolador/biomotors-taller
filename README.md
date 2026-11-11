@@ -1,8 +1,12 @@
-# BIOMOTORS TALLER
+# TallerFlow
 
-Aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
+**TallerFlow** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
 **Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento ni autenticación**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
+
+## Nombre e identidad comercial
+
+**TallerFlow** es el nombre comercial aprobado el 11/11/2026 para la aplicación SaaS. El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo definitivo y revisión de disponibilidad de marca/dominio pendientes.
 
 ## Responsabilidades
 

@@ -1,6 +1,6 @@
-# BIOMOTORS TALLER — Arquitectura de plataformas
+# TallerFlow — Arquitectura de plataformas
 
-**Decisión aprobada el 11/11/2026.** Reemplaza la estrategia previa de una PWA para Android e iOS.
+**Producto comercial: TallerFlow.** Proyecto técnico `biomotors-taller`. **Decisión aprobada el 11/11/2026.** Reemplaza la estrategia previa de una PWA para Android e iOS.
 
 ## Android — APK NATIVA
 React Native + Expo + TypeScript. Código Android en `apps/android/` del mismo repositorio (aún no creado). Distribución inicial mediante APK real firmado; no WebView ni PWA empaquetada, no Play Store por ahora. Configurar perfil EAS con `android.buildType: "apk"` y validar en Android físico. **No se ha generado una APK todavía**.

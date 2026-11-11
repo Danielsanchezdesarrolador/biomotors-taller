@@ -1,12 +1,12 @@
-# BIOMOTORS TALLER — AGENTS.md
+# TallerFlow — AGENTS.md
 
 **Versión documental:** BT-CP01-PLATAFORMAS / 2026-11-11  
-**Producto:** BIOMOTORS TALLER (independiente de BIOMOTORS Academia)  
+**Producto y marca comercial oficial:** **TallerFlow** (proyecto técnico `biomotors-taller`, independiente de BIOMOTORS Academia). BIOMOTORS es el taller piloto, no la marca visible del SaaS.  
 **Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; demo pública Render con primer despliegue `live`, pruebas de dispositivo pendientes, sin backend.
 
 ## 1. Misión y fuentes de verdad
 
-Crear una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
+Crear TallerFlow, una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
 
 **Prioridades inamovibles:** continuidad sin reconstrucciones innecesarias; seguridad y privacidad; facilidad de uso en iPhone y Android; costos iniciales contenidos; claridad para usuarios no técnicos.
 
@@ -69,7 +69,7 @@ Entidades sugeridas: `workshops`, `profiles`, `workshop_memberships`, `customers
 
 ## 6. Modelo de negocio — decisión estratégica
 
-- **Meta:** comercializar BIOMOTORS TALLER a otros talleres mediante pago recurrente.
+- **Meta:** comercializar TallerFlow a otros talleres mediante pago recurrente.
 - **Precio objetivo inicial:** **US$5 mensuales por taller**; hipótesis comercial sujeta a costos, impuestos, comisiones y pruebas de mercado. No implementar como tarifa productiva ni prometer funciones ilimitadas todavía.
 - **Adquisición:** Ignacio lidera contacto, demostraciones y venta; el usuario lidera evolución del producto.
 - **Etapas:** taller piloto -> otros talleres piloto -> validar cobro y soporte -> lanzar suscripción -> ampliar cartera.
@@ -91,3 +91,12 @@ Cada entrega debe incluir: requerimiento, diseño de permisos, migración revers
 ## Corrección de arquitectura oficial
 
 La descripción anterior «PWA para Android e iOS» fue revocada por el usuario. Fuente vigente: `docs/ARQUITECTURA_PLATAFORMAS.md` y checkpoint BT-CP01-PLATAFORMAS. Conservar historia anterior, una rama `main` y el repositorio independiente de BIOMOTORS Academia.
+
+## Identidad visual y nomenclatura — decisión 11/11/2026
+
+- **Nombre visible de la aplicación:** `TallerFlow`, escrito exactamente así, sin espacio.
+- **Marca de presentación:** TallerFlow. No usar «BIOMOTORS TALLER» en títulos, menús, onboarding, emails de la aplicación, iconos nombrados ni entregables nuevos.
+- **Taller piloto:** BIOMOTORS, propiedad de Ignacio; mostrar BIOMOTORS solo como nombre del taller activo cuando corresponda, y no simular propietarios ni clientes reales.
+- **Identificadores técnicos heredados:** conservar `biomotors-taller` en GitHub, Supabase y URL de Render, salvo autorización separada de migración, para evitar romper las integraciones.
+- **Director de Arte:** adaptar los cinco paneles y el flujo de registro de clientes a TallerFlow; los mockups antiguos de BIOMOTORS TALLER son referentes de diseño, no marca final. Logo e iconos de marca quedan pendientes de aprobación.
+- **Control comercial:** disponibilidad registral, dominios y posible marca registrada todavía no verificados; no afirmar exclusividad.
