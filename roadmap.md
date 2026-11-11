@@ -1,8 +1,8 @@
 # BIOMOTORS TALLER — ROADMAP OFICIAL
 
-**Edición:** v1.1 — incorporación de estrategia SaaS comercial  
+**Edición:** v1.2 — distribución web/PWA multiplataforma y despliegue autorizado  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-CP01-BASE-20261111  
+**Checkpoint de continuidad:** BT-CP01-PWA-RENDER-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Visión
@@ -14,6 +14,18 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - **Usuario:** líder de desarrollo y operación técnica.
 - **Ignacio:** líder comercial y primer usuario piloto.
 - Precio objetivo por validar: **US$5 por taller/mes**. No equivale aún a tarifa aprobada para cobro real ni define porcentajes de utilidad.
+
+## Canales de distribución oficiales — decisión del 11/11/2026
+
+**Modalidad aprobada:** una única aplicación web progresiva (PWA), accesible por URL HTTPS y con instalación opcional en pantalla de inicio. La estrategia cubre tres experiencias a partir de la misma base React/TypeScript:
+
+1. **iOS / iPhone (Safari):** abrir la URL desde Safari; usar «Compartir» → «Agregar a pantalla de inicio» (el texto del menú puede variar según iOS). Validar apertura autónoma, iconos, estados de actualización, formularios y uso con el equipo de Ignacio.
+2. **Android (Chrome o navegador compatible):** abrir la URL; instalar la aplicación o usar «Agregar a pantalla principal» cuando esté disponible. Validar instalación, iconos, botones táctiles y navegación.
+3. **Web de escritorio:** usar la URL sin instalación desde Chrome, Edge, Firefox y Safari compatibles; validar la adaptación responsive.
+
+**Alcance:** esto **no implica** una publicación nativa en Apple App Store ni Google Play Store. Esas vías requerirían un proyecto de distribución separado y aprobación futura. Las capacidades offline, notificaciones, cámara y otras APIs deberán evaluarse por navegador antes de prometerse.
+
+**Autorización de publicación:** el usuario autoriza el despliegue de una **demo pública sin datos reales** a través de Render Static Site (servicio separado de BIOMOTORS Academia). No habilitar aún registro real, base de datos, correos ni pagos. Probar personalmente el acceso por URL y la instalación en dispositivos antes de declararlo verificado.
 
 ## Requerimientos de Ignacio — conservados
 
@@ -49,10 +61,13 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Crear y verificar el repositorio privado `Danielsanchezdesarrolador/biomotors-taller` (11/11/2026).
 - [x] Instalar este kit documental, con checkpoint BT-CP01 (11/11/2026).
 - [x] Incorporar React + TypeScript + Vite, pantalla principal adaptable, navegación y manifiesto web (interfaz demostrativa en `main`, 11/11/2026).
-- [ ] Instalar y probar la PWA en Safari de un iPhone real; revisar iconos, navegación, tamaños y comportamiento de actualización.
+- [ ] Instalar y probar la PWA en Safari de un iPhone real y Chrome de Android; revisar iconos, navegación, tamaños y comportamiento de actualización.
+- [ ] Verificar acceso web por URL en escritorio y compatibilidad mínima de navegadores.
+- [ ] Publicar la demo inicial por Render Static Site en un servicio independiente, con HTTPS y sin datos reales (autorizado por el usuario).
 - [ ] Configurar variables de entorno con secretos exclusivamente fuera de Git.
 - [ ] Conectar el proyecto Supabase independiente con la menor cantidad de permisos necesaria.
-- [x] Incorporar estructura de pruebas y CI GitHub Actions; ejecuciones verificadas en GitHub el 11/11/2026.\n- [x] Confirmar que TypeScript, 3 tests y build aprueban en GitHub Actions: run #43105084982 y run #43105329020, ambas PASS (11/11/2026).
+- [x] Incorporar estructura de pruebas y CI GitHub Actions; ejecuciones verificadas en GitHub el 11/11/2026.
+- [x] Confirmar que TypeScript, 3 tests y build aprueban en GitHub Actions: run #43105084982 y run #43105329020, ambas PASS (11/11/2026).
 
 **Salida:** repositorio accesible, aplicación base demostrable, variables seguras y build/test pasando.
 

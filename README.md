@@ -12,13 +12,13 @@ Aplicación independiente para gestionar talleres mecánicos, iniciando con el t
 
 ## Producto
 
-Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos de clientes y vehículos, reparaciones y diagnósticos, observaciones de fallas no reparadas, historial recuperable y respaldos. Debe funcionar bien en iPhone, Android y computador.
+Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos de clientes y vehículos, reparaciones y diagnósticos, observaciones de fallas no reparadas, historial recuperable y respaldos. **Distribución oficial:** una sola PWA accesible mediante HTTPS desde Safari en iPhone, Chrome en Android y navegadores de escritorio. La persona podrá agregarla a su pantalla de inicio. No se ha aprobado publicar apps nativas en App Store o Play Store.
 
 ## Arquitectura prevista
 
 - Frontend: React + TypeScript + Vite, con PWA móvil.
 - Backend/datos: proyecto Supabase separado `biomotors-taller`, con Auth, Postgres y RLS multiempresa.
-- Despliegue web: preferencia inicial por Render, pendiente de configuración técnica.
+- Despliegue web: demo pública en Render Static Site autorizada el 11/11/2026; servicio independiente de la academia, pendiente de verificar URL activa.
 - Emails y suscripciones: proveedor a seleccionar tras pruebas, validación de costos y permisos.
 
 ## Documentos

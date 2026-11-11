@@ -1,6 +1,6 @@
 # BIOMOTORS TALLER — AGENTS.md
 
-**Versión documental:** BT-CP00-SaaS / 2026-11-11  
+**Versión documental:** BT-CP01-PWA-RENDER / 2026-11-11  
 **Producto:** BIOMOTORS TALLER (independiente de BIOMOTORS Academia)  
 **Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI (TypeScript + 3 pruebas + build) verificado; pruebas de dispositivo pendientes, sin backend ni despliegue.
 
@@ -39,7 +39,8 @@ Crear una aplicación de gestión para talleres mecánicos con enfoque **SaaS mu
 7. Toda tabla con datos de taller debe tener `workshop_id`/`tenant_id`, claves foráneas coherentes y **RLS comprobado con pruebas de acceso cruzado**. No depender de ocultar registros en frontend.
 8. Claves administrativas o de servicio exclusivamente en backend seguro; jamás en la PWA ni en archivos públicos.
 9. Preservar trazabilidad: qué pidió Ignacio, qué fue decidido, qué es hipótesis, qué está implementado y qué continúa pendiente.
-10. La aplicación inicial será **PWA web adaptable**, instalable desde Safari en iPhone; una app nativa requeriría decisión futura separada.
+10. La distribución oficialmente aprobada será **Web + PWA instalada en pantalla principal de iPhone/iOS (desde Safari) + Android (desde Chrome o navegador compatible)**. Es una aplicación web compartida, no apps nativas de App Store/Google Play; ello requeriría aprobación separada.
+11. **Autorizada** la publicación de una demo exclusivamente visual y sin datos reales mediante un sitio estático Render exclusivo de BIOMOTORS TALLER. No mezclar con BIOMOTORS Academia ni con servicios existentes.
 
 ## 4. Alcance funcional mínimo del piloto
 
