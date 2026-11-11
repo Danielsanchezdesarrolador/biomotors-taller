@@ -1,23 +1,41 @@
-name: Verificación BIOMOTORS TALLER
+name: Verificación ByteTorque
 on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: read
 jobs:
-  verify:
+  web-ios-pwa:
+    name: Web / iOS PWA
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Instalar dependencias
+      - name: Instalar dependencias web
         run: npm install --no-audit --no-fund
-      - name: Comprobar TypeScript
+      - name: Verificar TypeScript web
         run: npm run typecheck
-      - name: Ejecutar pruebas
+      - name: Pruebas web
         run: npm test
-      - name: Construir aplicación
+      - name: Build PWA
         run: npm run build
+  android-native:
+    name: Android React Native / Expo (sin generar APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+      - name: Instalar dependencias Android
+        run: npm install --no-audit --no-fund
+        working-directory: apps/android
+      - name: Verificar TypeScript Android
+        run: npm run typecheck
+        working-directory: apps/android
+      - name: Verificar configuración nativa y perfil APK
+        run: npm run verify-config
+        working-directory: apps/android

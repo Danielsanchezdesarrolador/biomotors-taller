@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+const json = path => JSON.parse(readFileSync(path,'utf8'))
+const app = json('app.json').expo
+const eas = json('eas.json')
+const pkg = json('package.json')
+assert.equal(app.name,'ByteTorque')
+assert.deepEqual(app.platforms,['android'])
+assert.match(app.android.package,/^cl\.bytetorque\./)
+assert.equal(eas.build.preview.android.buildType,'apk')
+assert.equal(eas.build.preview.distribution,'internal')
+assert.ok(pkg.dependencies.expo.startsWith('~57.'))
+assert.ok(pkg.dependencies['react-native'].startsWith('0.86.'))
+const code = readFileSync('App.tsx','utf8')
+assert.ok(code.includes('ScrollView'))
+assert.ok(code.includes('ByteTorque'))
+assert.ok(code.includes('DEMO VISUAL'))
+assert.ok(!/WebView\b/.test(code), 'Android no debe ser una WebView')
+assert.ok(code.includes('OT-1001'))
+console.log('ByteTorque Android: configuración nativa y perfil APK PASS (APK no generada)')

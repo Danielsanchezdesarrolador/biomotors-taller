@@ -21,7 +21,7 @@ Ficha de inspección multipunto, presupuesto formal, PDF/correo, base de datos d
 ## Arquitectura prevista
 
 - Cliente web + iOS PWA: React + TypeScript + Vite, existente en la raíz y publicado en Render.
-- Cliente Android nativo: React Native + Expo + TypeScript, pendiente de crear dentro de `apps/android/`, distribuir como APK instalable.
+- Cliente Android nativo: **React Native + Expo SDK 57 + TypeScript**, Inicio y navegación implementados en `apps/android/`, con perfil APK de prueba documentado; APK real todavía pendiente de generación y firma.
 - Backend/datos: proyecto Supabase separado `biomotors-taller`, con Auth, Postgres y RLS multiempresa.
 - Despliegue web: [demo pública Render](https://biomotors-taller-demo.onrender.com) verificada como `live` el 11/11/2026. Servicio independiente de BIOMOTORS Academia, con despliegue automático desde `main`.
 - Emails y suscripciones: proveedor a seleccionar tras pruebas, validación de costos y permisos.
@@ -66,8 +66,16 @@ ChatGPT realiza directamente lo que esté al alcance de sus herramientas; modo A
 - URL: https://biomotors-taller-demo.onrender.com
 - CI GitHub Actions: `43106669748` PASS, con generación y validación de iconos PWA.
 - Render: primer deploy `dep-dbqe4r6c6qcc73f2768g` LIVE; actualización con iconos `dep-dbqe6ihsrm7s738dnptg` LIVE.
-- **Limitación:** PWA iOS no verificada aún en iPhone; APK Android nativa todavía no construida. La demo Render corresponde al frontend web/iOS.
+- **Limitación:** PWA iOS no verificada aún en iPhone; código Android nativo incorporado; compilación APK, firma y pruebas físicas pendientes. La demo Render corresponde al frontend web/iOS.
 
 ## Arquitectura oficial de plataformas
 
 [Android APK nativa + iOS PWA + web — decisión corregida](docs/ARQUITECTURA_PLATAFORMAS.md). Ambos clientes usarán el backend Supabase multiempresa independiente, sin duplicar datos. [Checkpoint BT-CP01-PLATAFORMAS](docs/checkpoints/CHECKPOINT_BT_CP01_PLATAFORMAS_20261111.md).
+
+## BT-UI-01 — Inicio visual aprobado
+
+El Inicio se rediseñó en ambas plataformas con paleta azul marino/blanco/azul, cuatro métricas, estado de órdenes, órdenes recientes, actividad, accesos rápidos y navegación a cinco paneles. **Los indicadores, vehículos y órdenes mostrados son ficticios de demostración** y NO proceden de Supabase ni de clientes de Ignacio.
+
+- **Web/iOS PWA:** ver [demo Render](https://biomotors-taller-demo.onrender.com), publicada desde la raíz de `main`.
+- **Android nativa:** código fuente en [apps/android](apps/android/README.md), verificable con `cd apps/android && npm install && npm run typecheck`. No se ha emitido un APK instalable.
+- **Continuidad:** [BT-UI-01](docs/checkpoints/CHECKPOINT_BT_UI_01_INICIO_DUAL_20261111.md).

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "ByteTorque",
+    "slug": "bytetorque-android",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F5F8FD",
+    "platforms": [
+      "android"
+    ],
+    "android": {
+      "package": "cl.bytetorque.demo",
+      "versionCode": 1
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "environment": "demo"
+    }
+  }
+}

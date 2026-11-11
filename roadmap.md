@@ -94,7 +94,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Instalar este kit documental, con checkpoint BT-CP01 (11/11/2026).
 - [x] Incorporar React + TypeScript + Vite, pantalla principal adaptable, navegación y manifiesto web (interfaz demostrativa en `main`, 11/11/2026).
 - [ ] Instalar y probar la PWA SOLO en Safari de iPhone; revisar iconos, navegación, tamaños y actualización.
-- [ ] Crear proyecto React Native + Expo Android nativo en `apps/android/`, sin sustituir la web.
+- [x] Crear estructura Android React Native + Expo SDK 57 en `apps/android/`, con Inicio nativo y perfil APK EAS `preview` (11/11/2026). **Firma y APK real pendientes**.
 - [ ] Generar primera APK firmada de prueba y verificarla en Android real.
 - [ ] Verificar acceso web por URL en escritorio y compatibilidad mínima de navegadores.
 - [x] Publicar la demo inicial por Render Static Site, independiente, HTTPS, sin datos reales: https://biomotors-taller-demo.onrender.com — primer deploy `live` confirmado 11/11/2026.
@@ -106,6 +106,23 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Confirmar que TypeScript, 3 tests y build aprueban en GitHub Actions: run #43105084982 y run #43105329020, ambas PASS (11/11/2026).
 
 **Salida:** repositorio accesible, aplicación base demostrable, variables seguras y build/test pasando.
+
+### BT-UI-01 — Panel Inicio en web/iOS PWA y Android APK nativa — IMPLEMENTACIÓN DE INTERFAZ
+
+**Referencia visual aprobada:** capturas de diseño escritorio + móviles entregadas por el usuario el 11/11/2026.
+
+- [x] **Web / iOS PWA:** implementar Inicio en React + TypeScript con barra lateral azul marino, cabecera, saludo, 4 métricas, gráfico circular de estado, órdenes recientes, actividad y accesos rápidos.
+- [x] **Web / móvil:** tarjetas 2×2, navegación inferior de 5 secciones, búsqueda de órdenes ficticias, filtrado por estados y avisos claros de modo demostración.
+- [x] **Android Nativo:** crear UI React Native + Expo desde cero dentro de `apps/android/`, sin WebView; encabezado oscuro, 4 métricas, estados de órdenes, búsqueda, actividad, órdenes y accesos rápidos.
+- [x] **Android:** menú y navegación inferior hacia las cinco secciones: Inicio, Órdenes de trabajo, Clientes y vehículos, Informes y cotizaciones, Configuración. Las otras cuatro mantienen pantallas informativas preparatorias.
+- [x] Mantener el producto denominado **ByteTorque**, mostrando BIOMOTORS solo como eventual taller piloto, nunca como marca de SaaS.
+- [x] Usar únicamente **datos ficticios DEMO** y funciones sin persistencia ni envío de correos.
+- [ ] Confirmar **CI web** y **CI TypeScript Android** para el commit definitivo; registrar evidencias antes de declarar verificado.
+- [ ] Verificar visualmente web de escritorio, Safari iPhone y Android real.
+- [ ] Generar **APK firmada instalable**, validar permisos/identificador y prueba real en dispositivo.
+- [ ] Sustituir datos de muestra por agregados de Supabase cuando existan autenticación segura, tenant y RLS.
+
+**Frontera:** Inicio implementado visualmente, no operación de taller habilitada; sin backend ni APK real en esta fase.
 
 ### BT-CP02 — Identidad, talleres y aislamiento — PENDIENTE
 
