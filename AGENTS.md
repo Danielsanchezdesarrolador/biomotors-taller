@@ -2,7 +2,7 @@
 
 **Versión documental:** BT-CP00-SaaS / 2026-11-11  
 **Producto:** BIOMOTORS TALLER (independiente de BIOMOTORS Academia)  
-**Estado:** repositorio privado verificado y documentación BT-CP01; no afirmar que la aplicación o los despliegues estén creados sin evidencia.
+**Estado:** repositorio privado con primera interfaz React/Vite publicada en `main`; CI y pruebas de dispositivo pendientes de verificación, sin backend ni despliegue.
 
 ## 1. Misión y fuentes de verdad
 
@@ -16,7 +16,19 @@ Crear una aplicación de gestión para talleres mecánicos con enfoque **SaaS mu
 - **Responsable comercial (Ignacio):** usar el piloto como taller de referencia, contactar talleres, presentar el producto, captar clientes, recoger retroalimentación comercial y coordinar oportunidades de venta.
 - **Decisiones conjuntas pendientes:** titularidad jurídica de software/marca, reparto de ingresos o utilidades, facturación, soporte al cliente, presupuesto de operación, política comercial y eventual estructura societaria. **No presumir porcentajes, cesiones ni asociaciones legales automáticas.**
 
-## 3. Reglas operativas del agente / Codex
+## 3. Metodología de trabajo — usar la herramienta adecuada y ahorrar cuota
+
+**Decisión confirmada por el responsable técnico el 11/11/2026.** Aplicable a todas las etapas:
+
+1. **ChatGPT de este proyecto:** analizar, proponer, programar, actualizar archivos, verificar y documentar directamente siempre que tenga herramientas y permisos. Priorizar la ejecución real y evitar delegación innecesaria.
+2. **ChatGPT en modo Alto:** usarlo cuando el trabajo exija razonamiento adicional o revisión profunda y el usuario así lo elija.
+3. **Codex:** reservarlo para tareas grandes, refactorizaciones extensas, exploración de muchas rutas o problemas que no puedan resolverse fiablemente de forma directa; cada encargo debe estar acotado, con criterios de aceptación y referencia a checkpoint.
+4. **Usuario:** intervenir exclusivamente en decisiones, revisión visual, permisos, configuraciones que requieran acceso personal y pruebas físicas (por ejemplo, iPhone de Ignacio).
+5. **Cero trabajo repetido:** no rehacer lo que ya esté en main; leer el estado antes de cada cambio. No crear ramas paralelas, studios adicionales, ni gastos de cuota sin beneficio claro.
+6. **Evidencias primero:** diferenciar archivos creados, build verificado, CI aprobado, web publicada y aplicación probada en dispositivo real; no confundir estas fases.
+7. **Aprobar primero actividades sensibles:** sin cobros reales, correos externos, cambios irreversibles, secretos ni incorporación de datos personales hasta que el usuario lo autorice.
+
+## 4. Reglas operativas del agente / Codex
 
 1. Antes de modificar, leer `README.md`, `AGENTS.md`, `roadmap.md` y el último checkpoint.
 2. No mezclar ni reutilizar tablas, proyectos, secretos o despliegues de **BIOMOTORS Academia**.
@@ -72,4 +84,4 @@ Entidades sugeridas: `workshops`, `profiles`, `workshop_memberships`, `customers
 
 Cada entrega debe incluir: requerimiento, diseño de permisos, migración reversible si aplica, prueba unitaria/integración, prueba de RLS multitenant, prueba móvil Safari cuando corresponda, evidencia de ejecución, actualización de roadmap y checkpoint con riesgos/pedientes.
 
-**Próxima etapa:** BT-CP01 — iniciar React/Vite y conectar entorno de desarrollo de forma segura; no presumir su ejecución.
+**Próxima etapa:** completar BT-CP01 verificando CI/build, publicación demo y conexión segura del proyecto Supabase independiente. La interfaz actual es demostrativa; no guarda información.

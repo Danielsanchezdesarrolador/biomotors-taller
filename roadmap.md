@@ -2,7 +2,7 @@
 
 **Edición:** v1.1 — incorporación de estrategia SaaS comercial  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-CP00-SaaS  
+**Checkpoint de continuidad:** BT-CP01-BASE-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Visión
@@ -44,14 +44,15 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] Fijar US$5/taller/mes como **precio de referencia, aún no validado**.
 - [ ] Recibir o verificar las hojas originales de inspección multipunto y presupuesto para modelarlas exactamente.
 
-### BT-CP01 — Repositorio, fundamentos y entorno — PENDIENTE
+### BT-CP01 — Repositorio, fundamentos y entorno — EN DESARROLLO
 
 - [x] Crear y verificar el repositorio privado `Danielsanchezdesarrolador/biomotors-taller` (11/11/2026).
 - [x] Instalar este kit documental, con checkpoint BT-CP01 (11/11/2026).
-- [ ] Iniciar React + TypeScript + Vite como PWA adaptable y probar Safari en iPhone.
+- [x] Incorporar React + TypeScript + Vite, pantalla principal adaptable, navegación y manifiesto web (interfaz demostrativa en `main`, 11/11/2026).
+- [ ] Instalar y probar la PWA en Safari de un iPhone real; revisar iconos, navegación, tamaños y comportamiento de actualización.
 - [ ] Configurar variables de entorno con secretos exclusivamente fuera de Git.
 - [ ] Conectar el proyecto Supabase independiente con la menor cantidad de permisos necesaria.
-- [ ] Establecer pruebas, CI, convenciones de commits y checkpoint.
+- [x] Incorporar estructura de pruebas y CI GitHub Actions (verificación de ejecución pendiente).\n- [ ] Confirmar que TypeScript, tests y build aprueben en CI, corregir hallazgos y documentar evidencia.
 
 **Salida:** repositorio accesible, aplicación base demostrable, variables seguras y build/test pasando.
 
