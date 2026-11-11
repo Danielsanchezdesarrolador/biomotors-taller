@@ -110,7 +110,7 @@ function App() {
             <Search size={18} aria-hidden="true" />
             <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
               onFocus={() => { if (screen !== 'inicio') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
-            {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}}
+            {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}
           </div>
           <div className="topbar-controls">
             <div className="popover-anchor">
