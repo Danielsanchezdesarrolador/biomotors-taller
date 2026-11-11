@@ -1,12 +1,12 @@
-# ByteTorque
+# TallerFlow
 
-**ByteTorque** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
+**TallerFlow** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
 **Estado (11-11-2026):** primera interfaz React + TypeScript + Vite incorporada en `main`, con navegación y módulos demostrativos. **No existe almacenamiento ni autenticación**; CI incorporado y verificado en GitHub Actions (3 pruebas PASS, TypeScript PASS, build PASS).
 
 ## Nombre e identidad comercial
 
-**ByteTorque** es el nombre comercial vigente aprobado el 11/11/2026 para la aplicación SaaS, reemplazando al anterior nombre TallerFlow a petición del usuario. El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo definitivo y revisión de disponibilidad de marca/dominio pendientes.
+**TallerFlow** es el nombre comercial aprobado el 11/11/2026 para la aplicación SaaS. El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo definitivo y revisión de disponibilidad de marca/dominio pendientes.
 
 ## Responsabilidades
 
@@ -71,5 +71,3 @@ ChatGPT realiza directamente lo que esté al alcance de sus herramientas; modo A
 ## Arquitectura oficial de plataformas
 
 [Android APK nativa + iOS PWA + web — decisión corregida](docs/ARQUITECTURA_PLATAFORMAS.md). Ambos clientes usarán el backend Supabase multiempresa independiente, sin duplicar datos. [Checkpoint BT-CP01-PLATAFORMAS](docs/checkpoints/CHECKPOINT_BT_CP01_PLATAFORMAS_20261111.md).
-
-**Checkpoint de la última decisión de marca:** [BT-CP01-RENOMBRE-BYTETORQUE](docs/checkpoints/CHECKPOINT_BT_CP01_RENOMBRE_BYTETORQUE_20261111.md). No se renombra infraestructura técnica; solo el nombre visible del producto.

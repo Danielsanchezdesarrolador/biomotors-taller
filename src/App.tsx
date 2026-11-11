@@ -1,200 +1,221 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  ArrowRight, Building2, CarFront, CheckCircle2, ChevronRight,
-  ClipboardCheck, Cloud, FileText, House, Info, LockKeyhole,
-  Menu, ShieldCheck, Smartphone, UsersRound, Wrench, X,
-  type LucideIcon,
+  ArrowRight, Bell, CalendarDays, CarFront, Check, ChevronDown,
+  ChevronRight, CircleAlert, ClipboardCheck, FilePlus2,
+  FileText, House, Info, Menu, Search, Settings2,
+  UsersRound, Wrench, X, type LucideIcon,
 } from 'lucide-react'
+import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
 
-type Screen = 'inicio' | 'clientes' | 'vehiculos' | 'revisiones' | 'presupuestos'
-
-type Section = {
-  id: Screen
-  label: string
-  description: string
-  icon: LucideIcon
+type Screen = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
+type NavItem = { id: Screen; label: string; compact: string; icon: LucideIcon }
+const navItems: NavItem[] = [
+  { id: 'inicio', label: 'Inicio', compact: 'Inicio', icon: House },
+  { id: 'ordenes', label: 'Órdenes de trabajo', compact: 'Órdenes', icon: Wrench },
+  { id: 'clientes', label: 'Clientes y vehículos', compact: 'Clientes', icon: UsersRound },
+  { id: 'informes', label: 'Informes y cotizaciones', compact: 'Informes', icon: FileText },
+  { id: 'configuracion', label: 'Configuración', compact: 'Más', icon: Settings2 },
+]
+const moduleDetails: Record<Exclude<Screen, 'inicio'>, { title: string; description: string; items: string[]; icon: LucideIcon }> = {
+  ordenes: { title: 'Órdenes de trabajo', description: 'Gestiona diagnósticos, servicios y observaciones de los vehículos.', icon: Wrench, items: ['Crear una orden de trabajo', 'Inspección multipunto', 'Seguimiento del estado de la reparación'] },
+  clientes: { title: 'Clientes y vehículos', description: 'Mantén las fichas y el historial técnico asociados a tu taller.', icon: UsersRound, items: ['Registro de clientes mediante enlace', 'Fichas de vehículos y patentes', 'Historial y observaciones pendientes'] },
+  informes: { title: 'Informes y cotizaciones', description: 'Prepara los documentos y envíalos por correo cuando esté habilitado.', icon: ClipboardCheck, items: ['Informes de revisión multipunto', 'Presupuestos en PDF', 'Envío verificado al correo del cliente'] },
+  configuracion: { title: 'Configuración', description: 'Gestiona el perfil del taller y las preferencias del equipo.', icon: Settings2, items: ['Datos e identidad del taller', 'Usuarios y permisos', 'Plantillas, correos y enlaces'] },
 }
-
-const sections: Section[] = [
-  { id: 'inicio', label: 'Inicio', description: 'Resumen general', icon: House },
-  { id: 'clientes', label: 'Clientes', description: 'Fichas de clientes', icon: UsersRound },
-  { id: 'vehiculos', label: 'Vehículos', description: 'Autos e historiales', icon: CarFront },
-  { id: 'revisiones', label: 'Revisiones', description: 'Inspección multipunto', icon: ClipboardCheck },
-  { id: 'presupuestos', label: 'Presupuestos', description: 'Cotizaciones formales', icon: FileText },
+const quickActions: { label: string; sub: string; icon: LucideIcon; to: Screen }[] = [
+  { label: 'Nueva orden', sub: 'Crear OT', icon: FilePlus2, to: 'ordenes' },
+  { label: 'Nuevo cliente', sub: 'Registrar cliente', icon: UsersRound, to: 'clientes' },
+  { label: 'Nuevo informe', sub: 'Preparar revisión', icon: FileText, to: 'informes' },
+]
+const metricItems: { label: string; value: number; icon: LucideIcon; className: string; destination: Screen }[] = [
+  { label: 'Órdenes activas', value: 18, icon: Wrench, className: 'blue', destination: 'ordenes' },
+  { label: 'Vehículos en taller', value: 14, icon: CarFront, className: 'violet', destination: 'clientes' },
+  { label: 'Informes pendientes', value: 6, icon: ClipboardCheck, className: 'sky', destination: 'informes' },
+  { label: 'Cotizaciones pendientes', value: 5, icon: FileText, className: 'purple', destination: 'informes' },
 ]
 
-const metricCards = [
-  { label: 'Clientes', amount: '0', description: 'Sin clientes registrados', icon: UsersRound, screen: 'clientes' },
-  { label: 'Vehículos', amount: '0', description: 'Sin vehículos registrados', icon: CarFront, screen: 'vehiculos' },
-  { label: 'Revisiones', amount: '0', description: 'Sin inspecciones realizadas', icon: ClipboardCheck, screen: 'revisiones' },
-  { label: 'Presupuestos', amount: '0', description: 'Sin presupuestos creados', icon: FileText, screen: 'presupuestos' },
-] as const
-
-const sectionDetails: Record<Exclude<Screen, 'inicio'>, { lead: string; steps: string[]; icon: LucideIcon }> = {
-  clientes: {
-    lead: 'Aquí podrás registrar los datos y el contacto de cada cliente, para no depender de conversaciones antiguas.',
-    steps: ['Crear fichas de clientes', 'Buscar por nombre y contacto', 'Relacionar clientes con sus vehículos'],
-    icon: UsersRound,
-  },
-  vehiculos: {
-    lead: 'Recupera rápidamente el historial de cada automóvil cuando vuelva al taller, incluso después de varios años.',
-    steps: ['Registrar vehículos y patente', 'Consultar historial cronológico', 'Ver observaciones que quedaron pendientes'],
-    icon: CarFront,
-  },
-  revisiones: {
-    lead: 'Digitalizaremos la hoja de inspección multipunto real que utiliza Ignacio, respetando su forma de trabajo.',
-    steps: ['Completar revisión desde el teléfono', 'Agregar hallazgos y recomendaciones', 'Conservar revisiones anteriores'],
-    icon: ClipboardCheck,
-  },
-  presupuestos: {
-    lead: 'Prepara cotizaciones formales asociadas a un vehículo y, más adelante, envíalas por correo al cliente.',
-    steps: ['Ingresar repuestos y mano de obra', 'Generar un documento PDF', 'Enviar por correo con registro de entrega'],
-    icon: FileText,
-  },
+function StateBadge({ status }: { status: OrderStatus }) {
+  return <span className={'order-status status-' + status.key}>{status.label}</span>
 }
 
 function App() {
   const [screen, setScreen] = useState<Screen>('inicio')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const active = sections.find((item) => item.id === screen) ?? sections[0]
+  const [searchText, setSearchText] = useState('')
+  const [notice, setNotice] = useState('')
+  const [showAccount, setShowAccount] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [filter, setFilter] = useState('todas')
+  const metrics = useMemo(getDashboardMetrics, [])
+  const visibleOrders = useMemo(() => filterDemoOrders(searchText, filter), [searchText, filter])
 
-  function navigate(destination: Screen) {
-    setScreen(destination)
+  function navigate(next: Screen) {
+    setScreen(next)
     setMobileMenuOpen(false)
+    setShowAccount(false)
+    setShowNotifications(false)
+    setNotice('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  function planned(action: string) {
+    setNotice(action + ' estará disponible después de conectar la cuenta segura del taller.')
+  }
+  const title = navItems.find(item => item.id === screen)?.label ?? 'Inicio'
+  const formattedDate = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date())
 
   return (
     <div className="app-shell">
-      {mobileMenuOpen && (
-        <button className="mobile-overlay" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)} />
-      )}
-
-      <aside className={`sidebar ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
+      {mobileMenuOpen && <button className="mobile-overlay" type="button" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)} />}
+      <aside className={'sidebar' + (mobileMenuOpen ? ' sidebar-open' : '')} aria-label="Menú principal">
         <div className="sidebar-top">
-          <div className="brand">
-            <div className="brand-mark" aria-hidden="true"><Wrench size={22} strokeWidth={2.6} /></div>
-            <div className="brand-name">ByteTorque <span>GESTIÓN AUTOMOTRIZ</span></div>
-          </div>
-          <button className="menu-close" type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Cerrar menú">
-            <X size={21} />
+          <button className="brand" type="button" onClick={() => navigate('inicio')} aria-label="ByteTorque, ir al inicio">
+            <span className="brand-mark"><Wrench size={23} strokeWidth={2.8} /></span>
+            <span className="brand-name">Byte<span>Torque</span><small>GESTIÓN DE TALLERES</small></span>
           </button>
+          <button type="button" className="menu-close" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)}><X size={22} /></button>
         </div>
-        <div className="workspace-pill">
-          <div className="workspace-icon"><Building2 size={18} /></div>
-          <div><strong>Espacio inicial</strong><span>Configuración pendiente</span></div>
-        </div>
-        <p className="sidebar-label">GESTIÓN DEL TALLER</p>
-        <nav className="sidebar-nav" aria-label="Navegación principal">
-          {sections.map(({ id, label, icon: Icon }) => (
-            <button key={id} type="button" aria-current={screen === id ? 'page' : undefined}
-              className={`nav-item ${screen === id ? 'is-active' : ''}`} onClick={() => navigate(id)}>
+        <p className="sidebar-caption">MENÚ PRINCIPAL</p>
+        <nav className="side-nav">
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button type="button" key={id} className={'side-link' + (id === screen ? ' active' : '')}
+              aria-current={screen === id ? 'page' : undefined} onClick={() => navigate(id)}>
               <Icon size={20} strokeWidth={1.9} /><span>{label}</span>
-              {screen === id && <ChevronRight className="nav-chevron" size={16} />}
             </button>
           ))}
         </nav>
-        <div className="sidebar-bottom">
-          <div className="side-help">
-            <ShieldCheck size={22} />
-            <div><strong>Diseñado para crecer</strong><span>Cada taller tendrá su propio espacio privado.</span></div>
+        <div className="sidebar-end">
+          <div className="workshop-info">
+            <span className="workshop-badge"><Wrench size={23} /></span>
+            <div><strong>Taller de demostración</strong><small>Entorno de muestra</small><span><i /> Sin datos reales</span></div>
           </div>
-          <span className="version">Versión inicial · BT-CP01</span>
+          <p className="sidebar-version">ByteTorque · BT-UI-01</p>
         </div>
       </aside>
 
-      <div className="main-column">
+      <div className="app-main">
         <header className="topbar">
-          <div className="topbar-left">
-            <button className="menu-toggle" type="button" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}>
-              <Menu size={24} />
-            </button>
-            <span className="breadcrumb">ByteTorque <ChevronRight size={15} /> <strong>{active.label}</strong></span>
+          <button type="button" className="mobile-hamburger" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}><Menu size={23} /></button>
+          <div className="topbar-search">
+            <Search size={18} aria-hidden="true" />
+            <input aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo, patente u OT..." value={searchText}
+              onFocus={() => { if (screen !== 'inicio') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
+            {searchText && <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button>}
           </div>
-          <span className="demo-indicator"><span className="indicator-dot" /> Entorno de demostración</span>
+          <div className="topbar-controls">
+            <div className="popover-anchor">
+              <button type="button" className="icon-button" aria-label="Notificaciones" aria-expanded={showNotifications}
+                onClick={() => { setShowNotifications(!showNotifications); setShowAccount(false) }}><Bell size={21} /><i className="bell-dot" /></button>
+              {showNotifications && <div className="top-popover" role="status"><strong>Notificaciones</strong><p>Sin notificaciones reales. Estamos en modo demostración.</p></div>}
+            </div>
+            <span className="top-divider" />
+            <div className="popover-anchor">
+              <button className="account-trigger" type="button" aria-expanded={showAccount} onClick={() => { setShowAccount(!showAccount); setShowNotifications(false) }}>
+                <span className="avatar">BT</span><span className="account-copy"><strong>Cuenta de prueba</strong><small>Taller de demostración</small></span><ChevronDown size={16} />
+              </button>
+              {showAccount && <div className="top-popover account-popover"><strong>ByteTorque</strong><p>La autenticación y gestión de talleres se habilitarán en una etapa posterior.</p><button type="button" onClick={() => navigate('configuracion')}>Ver configuración <ArrowRight size={15} /></button></div>}
+            </div>
+          </div>
         </header>
 
-        <main className="content" id="main-content">
-          <div className="page-head">
-            <div>
-              <p className="eyebrow">PLATAFORMA DE GESTIÓN AUTOMOTRIZ</p>
-              <h1>{screen === 'inicio' ? 'Tu taller, organizado.' : active.label}</h1>
-              <p className="page-description">
-                {screen === 'inicio' ? 'Toda la información que necesitas, en un solo lugar.' : active.description}
-              </p>
-            </div>
-            <span className="phase-chip"><CheckCircle2 size={16} /> Base inicial</span>
-          </div>
-
-          <div className="notice" role="status">
-            <Info size={20} />
-            <p><strong>Vista preliminar.</strong> Esta pantalla no almacena información real. No ingreses datos de clientes hasta que estén listos el acceso seguro y la base de datos.</p>
-          </div>
-
+        <main className="dashboard-main" id="main-content">
+          <div className="demo-strip" role="note"><Info size={15} /><span><strong>DEMO VISUAL</strong> · Los valores y vehículos de esta vista son ficticios. No se registran clientes ni se envían correos.</span></div>
+          {notice && <div className="action-alert" role="status"><CircleAlert size={17}/><span>{notice}</span><button type="button" aria-label="Cerrar aviso" onClick={() => setNotice('')}><X size={17}/></button></div>}
           {screen === 'inicio' ? (
             <>
-              <section className="hero" aria-labelledby="hero-title">
-                <div className="hero-glow hero-glow-one" />
-                <div className="hero-glow hero-glow-two" />
-                <div className="hero-content">
-                  <div className="hero-badge"><Wrench size={15} /> ByteTorque</div>
-                  <h2 id="hero-title">Menos papeles.<br /><span>Más control.</span></h2>
-                  <p>Clientes, vehículos, inspecciones y presupuestos. Estamos construyendo la herramienta que necesita tu taller.</p>
-                  <button className="hero-button" type="button" onClick={() => navigate('clientes')}>
-                    Explorar los módulos <ArrowRight size={19} />
-                  </button>
+              <section className="welcome-area">
+                <div className="welcome-art" aria-hidden="true"><CarFront size={126} strokeWidth={0.7} /></div>
+                <div className="welcome-head">
+                  <div><p className="section-eyebrow">PANEL PRINCIPAL · VISTA DE EJEMPLO</p><h1>¡Hola, equipo! <span aria-hidden="true">👋</span></h1><p>Aquí tienes el resumen de tu taller hoy.</p></div>
+                  <span className="date-pill"><CalendarDays size={18}/> {formattedDate}</span>
                 </div>
-                <div className="hero-graphic" aria-hidden="true">
-                  <div className="graphic-orbit orbit-outer"><CarFront size={49} strokeWidth={1.3} /></div>
-                  <div className="graphic-orbit orbit-inner"><Wrench size={42} strokeWidth={1.4} /></div>
-                </div>
-              </section>
-
-              <section aria-labelledby="summary-title" className="summary-section">
-                <div className="section-title"><div><h2 id="summary-title">Resumen del taller</h2><p>Los módulos partirán sin datos hasta configurar la base segura.</p></div></div>
                 <div className="metric-grid">
-                  {metricCards.map(({ label, amount, description, icon: Icon, screen: destination }) => (
-                    <button className="metric-card" type="button" key={label} onClick={() => navigate(destination)}>
-                      <div className="metric-top"><span className="metric-icon"><Icon size={22} /></span><ChevronRight size={18} className="muted-icon" /></div>
-                      <strong className="metric-number">{amount}</strong>
-                      <span className="metric-label">{label}</span>
-                      <span className="metric-description">{description}</span>
+                  {metricItems.map(({ label, value, icon: Icon, className, destination }) => (
+                    <button type="button" key={label} className="metric-card" onClick={() => navigate(destination)}>
+                      <span className={'metric-icon ' + className}><Icon size={24} strokeWidth={2}/></span>
+                      <span className="metric-title">{label}</span><strong>{value}</strong>
+                      <span className="metric-footnote">Valor de demostración</span>
                     </button>
                   ))}
                 </div>
               </section>
 
-              <section className="next-section" aria-labelledby="next-title">
-                <div className="section-title"><div><h2 id="next-title">Lo que construiremos</h2><p>Funciones definidas a partir de las necesidades de Ignacio.</p></div></div>
-                <div className="feature-grid">
-                  <article className="feature-card"><span className="feature-icon"><ClipboardCheck size={23} /></span><h3>Revisión multipunto</h3><p>Completa inspecciones y conserva hallazgos técnicos para futuras visitas.</p></article>
-                  <article className="feature-card"><span className="feature-icon"><FileText size={23} /></span><h3>Presupuestos formales</h3><p>Crea cotizaciones en PDF y envíalas al correo de cada cliente.</p></article>
-                  <article className="feature-card"><span className="feature-icon"><Cloud size={23} /></span><h3>Historial centralizado</h3><p>Recupera datos de vehículos y reparaciones sin depender de WhatsApp.</p></article>
-                </div>
-              </section>
-              <div className="trust-strip"><Smartphone size={18} /> Diseñado para iPhone, Android y computador <span className="trust-separator">·</span><LockKeyhole size={18} /> Separación de datos por taller: próxima etapa</div>
+              <div className="overview-grid">
+                <section className="dashboard-card statuses-panel" aria-labelledby="statuses-title">
+                  <div className="card-head"><h2 id="statuses-title">Estado de órdenes</h2><span className="tag-demo">Ejemplo</span></div>
+                  <div className="statuses-layout">
+                    <div className="donut"><span><strong>{metrics.active}</strong><small>órdenes</small></span></div>
+                    <div className="status-legend">
+                      {orderStatuses.map(status => (
+                        <button type="button" key={status.key} className="legend-line" onClick={() => setFilter(filter === status.key ? 'todas' : status.key)}>
+                          <i style={{ background: status.color }} /> <span>{status.label}</span><strong>{status.count}</strong>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="card-help">Selecciona un estado para filtrar las órdenes de ejemplo.</p>
+                </section>
+                <section className="dashboard-card orders-panel" aria-labelledby="orders-title">
+                  <div className="card-head"><h2 id="orders-title">Órdenes recientes</h2><button type="button" className="text-action" onClick={() => navigate('ordenes')}>Ver todas <ArrowRight size={16}/></button></div>
+                  {filter !== 'todas' && <button type="button" className="active-filter" onClick={() => setFilter('todas')}>Filtro activo · Limpiar <X size={13}/></button>}
+                  <div className="orders-list">
+                    {visibleOrders.length === 0 ? <div className="empty-results"><Search size={24}/><p>Sin coincidencias en los ejemplos.</p><button onClick={() => {setFilter('todas');setSearchText('')}} type="button">Restablecer búsqueda</button></div> : visibleOrders.map(order => (
+                      <button className="order-row" type="button" key={order.id} onClick={() => navigate('ordenes')}>
+                        <span className="order-car"><CarFront size={26}/></span>
+                        <span className="order-detail"><strong>{order.id}</strong><span>{order.vehicle}</span><small>{order.work}</small></span>
+                        <StateBadge status={order.status}/>
+                        <ChevronRight size={16} className="row-arrow"/>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </div>
+              <div className="lower-grid">
+                <section className="dashboard-card activity-panel" aria-labelledby="activity-title">
+                  <div className="card-head"><h2 id="activity-title">Actividad reciente</h2><span className="tag-demo">Simulada</span></div>
+                  <div className="activity-list">
+                    {demoActivities.map(activity => (
+                      <div className="activity-row" key={activity.id}>
+                        <span className={'activity-icon ' + activity.type}>{activity.type === 'success' ? <Check size={19}/> : activity.type === 'document' ? <FileText size={18}/> : <Wrench size={18}/>}</span>
+                        <span><strong>{activity.title}</strong><small>{activity.description}</small></span>
+                        <time>{activity.time}</time>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <section className="dashboard-card shortcuts-panel" aria-labelledby="shortcuts-title">
+                  <div className="card-head"><h2 id="shortcuts-title">Accesos rápidos</h2></div>
+                  <div className="shortcuts-grid">
+                    {quickActions.map(({ label, sub, icon: Icon, to }, index) => (
+                      <button type="button" key={label} className={'shortcut ' + (index === 0 ? 'primary' : '')} onClick={() => navigate(to)}>
+                        <Icon size={27} strokeWidth={1.8}/><strong>{label}</strong><small>{sub}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="card-help">Los módulos se habilitarán al conectar la base de datos.</p>
+                </section>
+              </div>
             </>
           ) : (
-            <section className="module-surface" aria-labelledby="module-title">
-              <div className="module-illustration"><active.icon size={40} strokeWidth={1.45} /></div>
-              <span className="module-overline">MÓDULO EN PREPARACIÓN</span>
-              <h2 id="module-title">{screen === 'clientes' ? 'Cada cliente, bien registrado.' : screen === 'vehiculos' ? 'Un historial para cada vehículo.' : screen === 'revisiones' ? 'Inspecciones sin papeleo.' : 'Cotizaciones claras y formales.'}</h2>
-              <p className="module-intro">{sectionDetails[screen].lead}</p>
-              <div className="module-roadmap">
-                {sectionDetails[screen].steps.map((step) => <div key={step}><CheckCircle2 size={18} /><span>{step}</span></div>)}
+            <section className="module-placeholder">
+              <div className="module-title-row">
+                <div><p className="section-eyebrow">MÓDULO EN DESARROLLO</p><h1>{moduleDetails[screen].title}</h1><p>{moduleDetails[screen].description}</p></div>
+                <span className="module-big-icon">{(() => { const Icon = moduleDetails[screen].icon; return <Icon size={35}/> })()}</span>
               </div>
-              <div className="module-footer"><Info size={17} /> Funcionalidad planificada. Aún no se pueden guardar registros.</div>
+              <div className="module-card dashboard-card">
+                <h2>¿Qué podrás hacer aquí?</h2>
+                {moduleDetails[screen].items.map(item => <div key={item} className="planned-row"><span><Check size={16}/></span>{item}</div>)}
+                <button className="main-action" type="button" onClick={() => planned('Este módulo')}>Próximamente <ArrowRight size={16}/></button>
+              </div>
+              <button className="return-home" type="button" onClick={() => navigate('inicio')}><House size={16}/> Volver al Inicio</button>
             </section>
           )}
         </main>
       </div>
       <nav className="bottom-nav" aria-label="Navegación móvil">
-        {sections.map(({ id, label, icon: Icon }) => (
-          <button key={id} type="button" aria-current={screen === id ? 'page' : undefined}
-            className={`bottom-nav-item ${screen === id ? 'bottom-active' : ''}`} onClick={() => navigate(id)}>
-            <Icon size={22} strokeWidth={1.8}/><span>{label}</span>
-          </button>
-        ))}
+        {navItems.map(({ id, compact, icon: Icon }) =>
+          <button type="button" key={id} className={'bottom-item' + (screen === id ? ' selected' : '')} aria-current={screen === id ? 'page' : undefined} onClick={() => navigate(id)}>
+            <Icon size={22} strokeWidth={screen === id ? 2.3 : 1.8} /><span>{compact}</span>
+          </button>)}
       </nav>
     </div>
   )

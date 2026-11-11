@@ -1,22 +1,22 @@
-# ByteTorque — ROADMAP OFICIAL
+# TallerFlow — ROADMAP OFICIAL
 
-**Edición:** v1.5 — marca comercial ByteTorque + Android APK nativa + iOS PWA Safari + web  
+**Edición:** v1.4 — marca comercial TallerFlow + Android APK nativa + iOS PWA Safari + web  
 **Fecha:** 2026-11-11  
-**Checkpoint de continuidad:** BT-CP01-RENOMBRE-BYTETORQUE-20261111  
+**Checkpoint de continuidad:** BT-CP01-NOMBRE-TALLERFLOW-20261111  
 **Proyecto distinto de:** BIOMOTORS Academia.
 
 ## Marca comercial y denominaciones — decisión 11/11/2026
 
-- [x] **Nombre comercial vigente del producto SaaS: ByteTorque** (reemplaza TallerFlow el 11/11/2026 por indicación del usuario).
-- [x] Distinguir la marca **ByteTorque** de **BIOMOTORS**, primer taller piloto de Ignacio.
+- [x] **Marca oficial del producto SaaS:** **TallerFlow**.
+- [x] Distinguir la marca **TallerFlow** de **BIOMOTORS**, primer taller piloto de Ignacio.
 - [x] Mantener identificadores técnicos existentes `biomotors-taller` (repositorio, proyecto Supabase y Render), sin renombrar servicios hasta planificar migración.
 - [x] Actualizar nombre visible en web/PWA (título, encabezados, manifest).
-- [ ] Desarrollar identidad visual/logotipo definitivo **ByteTorque**, basada en los cinco mockups aprobados (sidebar azul marino, blanco, acento azul).
+- [ ] Desarrollar identidad visual/logotipo definitivo **TallerFlow**, basada en los cinco mockups aprobados (sidebar azul marino, blanco, acento azul).
 - [ ] Diseñar marca y pantalla de inicio para **APK Android nativa**, todavía no construida.
 - [ ] Verificar disponibilidad de dominio y eventuales derechos de marca antes del lanzamiento comercial.
 - [ ] Revisar y aprobar nomenclatura de PDFs, plantillas, correos y formularios de registro público cuando se implementen.
 
-**Las referencias históricas a «BIOMOTORS TALLER» o «TallerFlow» en checkpoints anteriores se conservan para trazabilidad. La única marca vigente para nuevos diseños e interfaces es ByteTorque.**
+**Las referencias históricas a «BIOMOTORS TALLER» en checkpoints anteriores se conservan para trazabilidad, pero NO son el nombre comercial actual.**
 
 ## Visión
 
