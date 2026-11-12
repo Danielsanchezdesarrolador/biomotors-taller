@@ -155,7 +155,10 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] **BT-CP02-C borrador listo:** SQL candidato, tablas `workshops`, `profiles`, `workshop_memberships`, permisos mínimos, políticas RLS y revisión del helper `rls_auto_enable` (sin modificar Supabase).
 - [x] Preparar controles de catálogo y matriz de 16 casos para verificar usuarios/talleres A/B y evitar autoelevación.
 - [ ] **Aprobar explícitamente la candidata** [SQL](docs/sql/BT_CP02_C_SCHEMA_CANDIDATE.sql) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_CP02_C_BORRADOR_20261111.md) antes de aplicar migraciones. No se ha probado aún en PostgreSQL.
-- [ ] Generar migración oficial con Supabase CLI y ejecutar en entorno autorizado; validar Security Advisor, 16 pruebas RLS y cero accesos cruzados; luego implementar onboarding Auth.
+- [x] **Autorización y aplicación efectiva de BT-CP02-C, 12/11/2026:** Supabase registró las migraciones `20261112144646_bt_cp02_c_core_tenants_rls` y `20261112145011_bt_cp02_c_backend_service_grants`; tres tablas creadas, cuatro políticas RLS, permisos mínimos; Security Advisor **0 avisos**.
+- [x] **Verificación SQL posterior:** sin datos ni usuarios, `ensure_rls` activo, `rls_auto_enable()` no ejecutable por `anon`/`authenticated`, `service_role` con grants administrables, navegador sin permisos de escritura para talleres o membresías.
+- [ ] **Pruebas reales de aislamiento A/B pendientes:** crear identidades con Auth oficial y dos talleres ficticios mediante flujo autorizado y probar JWT de usuarios distintos, incluidas membresías desactivadas y autoelevación, sin usar service_role para simular un usuario.
+- [ ] Implementar onboarding de propietario transaccional seguro (todavía no existe), después integrar login web. No introducir clientes reales hasta superar aislamiento entre talleres.
 - [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
 
 
