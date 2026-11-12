@@ -12,7 +12,7 @@ import {
 } from './ordenesData'
 import './ordenes.css'
 
-type Props = { globalSearch: string; onNotify: (message: string) => void }
+type Props = { onClient?: (plate:string) => void; initialOrderId?: string; globalSearch: string; onNotify: (message: string) => void }
 type View = 'listado' | 'detalle' | 'nueva'
 type Preview = 'normal' | 'vacio' | 'cargando' | 'error'
 const demoTotals: { label: string; value: number; icon: LucideIcon; tone: string; status: WorkStatus | 'todas' }[] = [
@@ -31,10 +31,10 @@ function Title({ children }: { children: React.ReactNode }) {
   return <h2 className="bt-ot-card-title">{children}</h2>
 }
 
-export function OrdenesPanel({ globalSearch, onNotify }: Props) {
+export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient }: Props) {
   const [orders, setOrders] = useState<WorkOrder[]>(demoWorkOrders)
-  const [view, setView] = useState<View>('listado')
-  const [selectedId, setSelectedId] = useState('OT-1001')
+  const [view, setView] = useState<View>(initialOrderId && demoWorkOrders.some(o => o.id === initialOrderId) ? 'detalle' : 'listado')
+  const [selectedId, setSelectedId] = useState(initialOrderId || 'OT-1001')
   const [filter, setFilter] = useState<WorkStatus | 'todas'>('todas')
   const [query, setQuery] = useState('')
   const [preview, setPreview] = useState<Preview>('normal')
@@ -176,7 +176,7 @@ export function OrdenesPanel({ globalSearch, onNotify }: Props) {
         </section>
       </>}
 
-      {view === 'detalle' && selected && <OrdenDetalle key={selected.id} order={selected} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => setOrders(previous => previous.map(item => item.id === selected.id ? { ...item, status } : item))}/>}
+      {view === 'detalle' && selected && <OrdenDetalle key={selected.id} order={selected} onClient={onClient ? () => onClient(selected.plate) : undefined} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => setOrders(previous => previous.map(item => item.id === selected.id ? { ...item, status } : item))}/>}
 
       {view === 'nueva' && <>
         <section className="bt-ot-hero bt-ot-hero-compact">
@@ -195,9 +195,9 @@ export function OrdenesPanel({ globalSearch, onNotify }: Props) {
             <label>Cliente DEMO <select value={draft.client} onChange={event => {
               const order = demoWorkOrders.find(item => item.client === event.target.value)
               setDraft(previous => ({ ...previous, client: event.target.value, vehicle: order?.vehicle || '', plate: order?.plate || '' }))
-            }}><option value="">Selecciona un cliente</option>{demoWorkOrders.map(o => <option key={o.id} value={o.client}>{o.client}</option>)}</select></label>
-            <label>Vehículo asociado<input value={draft.vehicle ? draft.vehicle + ' · ' + draft.plate : ''} readOnly placeholder="Selecciona primero un cliente" /></label>
-            <button type="button" className="bt-ot-inline" onClick={() => onNotify('El registro de nuevos clientes se habilitará en el módulo Clientes y vehículos.')}>Registrar otro cliente (próximamente) <ArrowRight size={15}/></button>
+            }}><option value="">Selecciona un cliente</option>{[...new Set(demoWorkOrders.map(o => o.client))].map(client => <option key={client} value={client}>{client}</option>)}</select></label>
+            <label>Vehículo asociado<select value={draft.plate} disabled={!draft.client} onChange={event => { const order = demoWorkOrders.find(o => o.client === draft.client && o.plate === event.target.value); setDraft(previous => ({ ...previous, plate: order?.plate || '', vehicle: order?.vehicle || '' })) }}><option value="">Selecciona un vehículo</option>{demoWorkOrders.filter(o => o.client === draft.client).map(o => <option key={o.id} value={o.plate}>{o.vehicle} · {o.plate}</option>)}</select></label>
+            <button type="button" className="bt-ot-inline" onClick={() => onNotify('Puedes probar el registro DEMO en Clientes y vehículos; sus fichas temporales todavía no se comparten con la creación de órdenes.')}>Registrar otro cliente (próximamente) <ArrowRight size={15}/></button>
           </>}
           {step === 2 && <><Title><Wrench size={23}/> Información del trabajo</Title>
             <div className="bt-ot-form-grid"><label>Motivo de ingreso *<input value={draft.reason} maxLength={140} onChange={event => setDraft(previous => ({ ...previous, reason: event.target.value }))} placeholder="Ej.: revisión de frenos" /></label>

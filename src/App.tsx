@@ -6,6 +6,8 @@ import {
   UsersRound, Wrench, X, type LucideIcon,
 } from 'lucide-react'
 import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
+import { demoVehicles } from './clientes/clientesData'
+import { ClientesPanel } from './clientes/ClientesPanel'
 import { OrdenesPanel } from './ordenes/OrdenesPanel'
 
 type Screen = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
@@ -41,6 +43,8 @@ function StateBadge({ status }: { status: OrderStatus }) {
 
 function App() {
   const [screen, setScreen] = useState<Screen>('inicio')
+  const [requestedOrderId, setRequestedOrderId] = useState<string | undefined>()
+  const [requestedVehicleId, setRequestedVehicleId] = useState<string | undefined>()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
@@ -63,6 +67,8 @@ function App() {
   }, [])
 
   function navigate(next: Screen) {
+    setRequestedVehicleId(undefined)
+    setRequestedOrderId(undefined)
     setScreen(next)
     setMobileMenuOpen(false)
     setShowAccount(false)
@@ -110,7 +116,7 @@ function App() {
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
             <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
-              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
+              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes' && screen !== 'clientes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
             {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}
           </div>
           <div className="topbar-controls">
@@ -207,7 +213,9 @@ function App() {
               </div>
             </>
           ) : screen === 'ordenes' ? (
-            <OrdenesPanel globalSearch={searchText} onNotify={setNotice} />
+            <OrdenesPanel globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={plate => { const vehicle = demoVehicles.find(v => v.plate === plate); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
+          ) : screen === 'clientes' ? (
+            <ClientesPanel initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
           ) : (
             <section className="module-placeholder">
               <div className="module-title-row">
