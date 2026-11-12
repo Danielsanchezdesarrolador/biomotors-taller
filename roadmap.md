@@ -152,7 +152,10 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] **BT-CP02-B inventario de solo lectura completado**: 0 tablas propias en `public`; 0 usuarios Auth; 0 migraciones del proyecto; 0 buckets/archivos en Storage; 0 Edge Functions. Advisors de salud y rendimiento: sin alertas.
 - [x] **Dos advertencias de seguridad del mismo origen**: función `public.rls_auto_enable()`, `SECURITY DEFINER` invocable por `anon` y `authenticated`; está asociada al event trigger `ensure_rls`. Revisión y corrección de privilegios pendiente **antes de migraciones**, sin ejecutar SQL de escritura en esta auditoría.
 - [x] Confirmar commit visual de Órdenes `3258858` en la historia de `main` y en el archivo actual; Render está `LIVE` sobre commit documental descendiente sin revertir los dos archivos corregidos.
-- [ ] Preparar esquema SQL, funciones internas y pruebas RLS con dos talleres ficticios; aprobarlo antes de aplicar cualquier migración.
+- [x] **BT-CP02-C borrador listo:** SQL candidato, tablas `workshops`, `profiles`, `workshop_memberships`, permisos mínimos, políticas RLS y revisión del helper `rls_auto_enable` (sin modificar Supabase).
+- [x] Preparar controles de catálogo y matriz de 16 casos para verificar usuarios/talleres A/B y evitar autoelevación.
+- [ ] **Aprobar explícitamente la candidata** [SQL](docs/sql/BT_CP02_C_SCHEMA_CANDIDATE.sql) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_CP02_C_BORRADOR_20261111.md) antes de aplicar migraciones. No se ha probado aún en PostgreSQL.
+- [ ] Generar migración oficial con Supabase CLI y ejecutar en entorno autorizado; validar Security Advisor, 16 pruebas RLS y cero accesos cruzados; luego implementar onboarding Auth.
 - [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
 
 
