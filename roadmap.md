@@ -203,7 +203,8 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 ### BT-CP08 — Suscripciones y comercialización — PENDIENTE
 
 - [ ] Elegir pasarela y moneda/cobro local tras revisar comisiones y normativa.
-- [ ] Definir precio final y límites de plan; US$5 es hipótesis inicial.
+- [x] **Decisión comercial BT-PLAN-01:** Básico gratis y sin publicidad en lanzamiento; Plus USD 5/mes; Full USD 15/mes por taller; prueba Full 3 días con método de pago y renovación desactivable para evitar cobros involuntarios.
+- [ ] Validar impuestos, moneda real de cobro, pasarela, rentabilidad y límites por plan antes de habilitar pagos.
 - [ ] Implementar alta, pago, renovación, cancelación y suspensión con seguridad e idempotencia.
 - [ ] Asegurar que una suspensión comercial no borre datos de clientes ni historiales.
 - [ ] Lanzamiento comercial progresivo y seguimiento de retención/incidencias.
@@ -219,7 +220,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 ## Riesgos obligatorios
 
-1. **Precio subestimado:** con US$5, emails, almacenamiento, comisiones e impuestos podrían consumir el margen.
+1. **Economía unitaria:** Plus USD 5 puede no cubrir correos, almacenamiento, comisiones e impuestos; validar costos, límites y condiciones.
 2. **Aislamiento de datos:** un fallo de permisos entre talleres sería crítico.
 3. **Formalización comercial:** sin acuerdo escrito podrían existir conflictos sobre código, marca o clientes.
 4. **Adopción:** priorizar rapidez y facilidad en móviles; no saturar con campos.
@@ -318,3 +319,15 @@ Evidencia: [checkpoint BT-UI-03](docs/checkpoints/CHECKPOINT_BT_UI_03_20261111.m
 - [x] **Auditoría remota independiente BT-UI-05 (ChatGPT, 11/11/2026):** GitHub Actions [#43135258201](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43135258201) **SUCCESS** sobre `ed40c33`; Web/iOS PWA y Android Expo ambos PASS; log web confirma **31/31 tests PASS en 7 archivos**, compilación Vite y PWA assets PASS. Render `dep-dbqheiqjnfac73bhukbg`, commit `ed40c33`, estado **LIVE**.
 - [x] Capturas `docs/screenshots/BT_UI_05_1650.png` y `BT_UI_05_390.png` **examinadas directamente desde GitHub**: identidad R2 preservada en el panel Informes; responsive sin desbordamiento horizontal aparente. Evaluación cualitativa favorable, sin reejecutar pixel-diff de pantallas anteriores.
 - [ ] **Visto bueno visual explícito del Director para BT-UI-05**; no avanzar a Configuración antes de su autorización. Safari iPhone físico, PDF real y backend seguro siguen pendientes.
+
+### BT-PLAN-01 — Básico, Plus, Full y prueba Full de 3 días — APROBADO PARA DISEÑO
+
+- [x] Básico **gratis sin publicidad durante el lanzamiento**; publicidad posterior no autorizada automáticamente.
+- [x] Plus **USD 5/mes** y Full **USD 15/mes** por taller.
+- [x] Prueba Full **3 días / 72 horas con método de pago**, sin primer cobro durante trial; mostrar consentimiento explícito y fecha/hora exacta del primer posible cargo.
+- [x] Propietario puede **desactivar renovación automática de inmediato** desde Configuración; cancelación confirmada antes del fin evita cobro al vencer, Full sigue hasta la expiración y luego Básico sin pérdida de datos.
+- [x] Especificación oficial en docs/PLANES_COMERCIALES_BT_PLAN_01.md y checkpoint docs/checkpoints/CHECKPOINT_BT_PLAN_01_20261111.md.
+- [ ] Concretar límites por plan, pasarela, tasas/IVA y cláusulas de contratación.
+- [ ] Construir panel de suscripción, consentimiento, cancelación y backend de cobros seguro **solo tras nueva autorización**.
+
+**Estado: decisión comercial, no hay pagos reales.**

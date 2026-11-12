@@ -12,7 +12,7 @@
 
 - **Desarrollo e infraestructura:** responsable técnico del proyecto.
 - **Comercialización y captación de talleres:** Ignacio, primer usuario piloto y responsable comercial.
-- **Precio inicial en estudio:** US$5 por taller al mes, sujeto a validación de costos, impuestos y demanda.
+- **Planes aprobados para diseño (11/11/2026):** Básico gratis sin publicidad durante el lanzamiento; Plus USD 5/mes; Full USD 15/mes por taller. Trial Full 3 días con método de pago y cancelación de renovación inmediata en Configuración. Sin cobros reales activados; impuestos, límites y pasarela por definir.
 
 ## Producto
 
@@ -104,3 +104,13 @@ La **web publicada en Render** es el espacio principal de revisión de diseños 
 ## Estándar oficial de diseño (11/11/2026)
 
 El Director aprobó **BT-UI-02-R2**, por lo que ya no es una propuesta pendiente: su diseño es obligatorio para **Inicio, Órdenes de trabajo, Clientes y vehículos, Informes y cotizaciones, Configuración**. [Sistema visual oficial R2](docs/SISTEMA_VISUAL_OFICIAL_R2.md) · [Brief próximo panel, Órdenes](docs/briefs/BT_UI_03_ORDENES_TRABAJO_DIRECCION_ARTE.md).
+
+## Planes comerciales oficiales — BT-PLAN-01
+
+- **Básico:** gratis sin publicidad durante lanzamiento. Clientes/vehículos/órdenes manuales, sin enlace automático de registro ni envío de PDF por correo.
+- **Plus:** USD 5/mes por taller, contempla enlaces de registro y envíos automáticos de informes al implementar backend seguro.
+- **Full:** USD 15/mes por taller, con automatización y administración avanzadas sujetas a desarrollo.
+- **Prueba Full:** 3 días (72 h), requiere agregar método de pago mediante proveedor seguro. El propietario podrá **desactivar la renovación automática desde el principio**, sin perder acceso Full antes de expirar. Si se desactiva a tiempo, no se intenta el cargo posterior; después retorna a Básico sin perder información.
+- Límites, pasarela, impuestos y publicidad después del lanzamiento pendientes. **No se han implementado cobros ni trials reales.**
+
+Ver [especificación BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_PLAN_01_20261111.md).
