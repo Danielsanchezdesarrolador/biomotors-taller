@@ -41,3 +41,7 @@ Capturas locales de Chromium, no prueba física Safari/iPhone. GitHub Actions re
 ## Pendientes
 
 Aprobación visual del Director para Clientes y vehículos; Safari/iPhone físico. Backend seguro, RLS por taller, historial durable, clientes/vehículos reales, invitaciones individuales con expiración, antiabuso, verificación del email, PDFs y entrega transaccional quedan para etapas autorizadas posteriores. Nuevos clientes e ítems son temporales; no se simula guardado real. Android y Supabase intactos; sin APK ni credenciales nuevas. No avanzar a Informes y cotizaciones.
+
+## Evidencia posterior al push
+
+Implementación `9bf7d3b` enviada a origin/main. El Render existente sirve HTML público que referencia `/assets/index-CcBhUxMb.js` y `/assets/index-MkcZwIXh.css`; ambos bundles descargados por HTTPS coinciden **byte a byte** con el build local validado. Panel disponible en Clientes y vehículos, con navegación a órdenes y retorno a su ficha. Esto confirma el contenido publicado; el estado administrativo literal LIVE y Actions remoto no se consultaron por las limitaciones de acceso descritas. No se creó otro servicio ni se alteró la configuración cloud publicada.
