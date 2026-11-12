@@ -45,3 +45,15 @@ Pendientes: aprobación visual del Director para este panel; prueba física Safa
 Implementación `776c2de`, ajuste de legibilidad a 1440 px `9e3b08b`, ambos enviados a origin/main. Tras el ajuste se repitieron build y verificaciones de navegador/capturas en los cinco tamaños: PASS. El flujo de nueva orden existente también se ejercitó hasta abrir OT-DEMO-009 sin costos inventados: PASS. Se generó una ficha de impresión DEMO A4 de dos páginas en `/workspace/visual-ui03/ficha-demo.pdf`.
 
 Render existente confirmado sirviendo el build final: HTML público raíz e index.html apuntan a `/assets/index-QkOATr-D.js` y `/assets/index-CKa2_0MK.css`; ambos archivos descargados por HTTPS coinciden **byte a byte** con los artefactos locales validados. Navegación para revisión: Órdenes de trabajo → OT-1002. Esto verifica el contenido desplegado; no implica haber consultado el estado administrativo literal LIVE. Sin acceso a API GitHub/Render para verificar Actions o el estado interno del deploy. Capturas visuales de la ejecución local del código publicado.
+
+## Verificación independiente posterior desde ChatGPT
+
+**Fecha:** 11/11/2026 Chile. La sección previa conserva el informe técnico original de Codex; esta verificación resuelve la limitación de acceso a GitHub Actions y Render.
+
+- **Commit remoto:** `ab51152b3573debf9382efbd4247ce12f7e071f6` en `main`.
+- **GitHub Actions:** run `43124464047` finalizó **SUCCESS**. Jobs `Web / iOS PWA` y `Android React Native / Expo (sin generar APK)`: ambos SUCCESS.
+- **Log CI Web:** **5 archivos de prueba, 18/18 tests PASS**, build Vite PASS, `PWA assets: PASS`. TypeScript web PASS.
+- **Render:** servicio `biomotors-taller-demo`, despliegue `dep-dbqg4m0ae00c738bff40` del mismo commit `ab51152`, estado administrativo **LIVE**.
+- El reporte del agente indica prueba del navegador en cinco anchos y cero diferencia de píxeles para Inicio R2. **No se verificó independientemente esa comparación visual** porque las imágenes permanecen en rutas locales de Codex y no están adjuntas a esta conversación.
+- **Sin aprobación visual aún** para OT. No avanzar automáticamente a Clientes y vehículos; el Inicio R2 es identidad oficial ya aprobada.
+- **Sin APK Android, sin persistencia Supabase y sin correos reales.** La prueba en Safari iPhone físico continúa pendiente.
