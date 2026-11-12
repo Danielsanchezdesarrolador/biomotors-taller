@@ -99,6 +99,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient 
     <div className="bt-ot" aria-label="Órdenes de trabajo DEMO">
       {view === 'listado' && <>
         <section className="bt-ot-hero">
+          <div className="welcome-area bt-ot-hero-art" aria-hidden="true" />
           <div>
             <p className="bt-ot-eyebrow">OPERACIONES DEL TALLER · DEMOSTRACIÓN</p>
             <h1>Órdenes de trabajo</h1>
@@ -180,6 +181,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient 
 
       {view === 'nueva' && <>
         <section className="bt-ot-hero bt-ot-hero-compact">
+          <div className="welcome-area bt-ot-hero-art" aria-hidden="true" />
           <div className="bt-ot-heading"><button type="button" className="bt-ot-back" aria-label="Cancelar nueva orden" onClick={() => { setView('listado'); onNotify('Creación de orden cancelada. No se almacenó información.') }}><ArrowLeft size={20}/></button>
             <div><p className="bt-ot-eyebrow">CREACIÓN GUIADA · DEMOSTRACIÓN</p><h1>Nueva orden</h1><p>Registra un trabajo en tres pasos sencillos.</p></div></div>
           <span className="bt-ot-demo-label"><Info size={15}/> Sin guardado real</span>
