@@ -45,3 +45,14 @@ Aprobación visual del Director para Clientes y vehículos; Safari/iPhone físic
 ## Evidencia posterior al push
 
 Implementación `9bf7d3b` enviada a origin/main. El Render existente sirve HTML público que referencia `/assets/index-CcBhUxMb.js` y `/assets/index-MkcZwIXh.css`; ambos bundles descargados por HTTPS coinciden **byte a byte** con el build local validado. Panel disponible en Clientes y vehículos, con navegación a órdenes y retorno a su ficha. Esto confirma el contenido publicado; el estado administrativo literal LIVE y Actions remoto no se consultaron por las limitaciones de acceso descritas. No se creó otro servicio ni se alteró la configuración cloud publicada.
+
+## Auditoría independiente de GitHub y Render — 11/11/2026
+
+Este complemento registra verificaciones posteriores mediante los conectores GitHub y Render a las que el agente Codex no pudo acceder. Las afirmaciones previas de su informe se conservan como antecedente.
+
+- **GitHub main:** `1280e5e8e8a47638fa568d38e293339438da988a`.
+- **Actions remoto `#43130663129`: SUCCESS**. Job Web/iOS PWA SUCCESS: TypeScript, 24/24 tests PASS (6 archivos), build Vite y validación PWA PASS. Job Android Expo SUCCESS: TypeScript, compatibilidad, export del bundle Android y verificación del perfil APK; **sin generar APK**.
+- **Render:** `dep-dbqgs9psrm7s738hgih0`, correspondiente exactamente a `1280e5e`, estado administrativo `LIVE`.
+- **Capturas:** ambas imágenes versionadas en `docs/screenshots/BT_UI_04_1650.png` y `BT_UI_04_390.png` se pudieron abrir efectivamente mediante GitHub. La auditoría visual independiente considera favorable la correspondencia con el sistema premium R2: sidebar y topbar desktop, hero, tarjetas KPI, columnas listados/ficha/observaciones e historial, y reformulación responsive a tarjetas en teléfono. No se observan desbordamientos horizontales en estas capturas.
+- **Limitaciones de esta auditoría:** la comparación visual es cualitativa, no una certificación de pixel-diff con el mockup original. La igualdad pixel a pixel de Inicio y OT-1002 es evidencia reportada por Codex, no reejecutada aquí. **Aprobación visual del Director pendiente**, igual que pruebas físicas en Safari iPhone.
+- **Alcance:** solo documentación y auditoría; interfaces, Android React Native/Expo, Supabase y despliegue funcional intactos. Sin datos personales reales, correos reales ni persistencia.
