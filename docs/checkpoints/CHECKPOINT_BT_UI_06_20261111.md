@@ -54,3 +54,7 @@ Otras capturas: `/workspace/visual-ui06/`. Regresión visual a 1650 px: Inicio y
 [Contrato multitenant](../ARQUITECTURA_MULTITENANT_CONFIGURACION.md) y [matriz de roles](../MATRIZ_ROLES_Y_PERMISOS.md). Las garantías de autenticación, autorización de servidor/RLS, revocación, archivos privados, respaldos y cobros no están implementadas ni probadas contra backend. Se documentan los controles y pruebas futuros sin confundirlos con las guardas locales.
 
 Pendientes: aprobación visual del Director, Safari/iPhone físico, backend multitenant y suscripción/pagos reales solo con nueva autorización. No se integra Supabase ni ningún proveedor. GitHub Actions no consultable desde este entorno (API Forbidden); estado administrativo Render LIVE sin acceso. El contenido publicado se verifica tras push de forma independiente.
+
+## Publicación comprobada
+
+Implementación `7a040e0` enviada a origin/main preservando la política comercial concurrente `163072f`. El Render existente sirve HTML raíz e index.html que referencian `/assets/index-DSGVpjQI.js` y `/assets/index-C0Q79Jfm.css`; los bundles descargados por HTTPS coinciden **byte a byte** con el build final validado. Disponible en Configuración. No se creó otro servicio ni se alteró la configuración cloud publicada. La evidencia confirma contenido servido; no se dispone de consulta al estado administrativo literal LIVE ni a Actions remoto.
