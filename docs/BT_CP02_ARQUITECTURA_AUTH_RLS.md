@@ -108,9 +108,9 @@
 
 ## 8. Secuencia de implementación y puertas de aprobación
 
-**CP02-A — Auditoría (ahora):** inspeccionar GitHub, Supabase visible y documentos. **Terminada parcialmente**: GitHub auditado, Supabase ByteTorque sin acceso en conector.
+**CP02-A — Auditoría documental:** inspección de GitHub y contrato preliminar: completada.
 
-**CP02-B — Inventario real del proyecto (pendiente):** al conectar el Supabase `biomotors-taller` correcto, leer proyecto, tablas, migraciones, Auth, políticas, buckets y asesores de seguridad, sin ejecutar SQL mutante.
+**CP02-B — Inventario real del proyecto:** **COMPLETADO en solo lectura el 11/11/2026**: acceso a `biomotors-taller` confirmado. Estado y hallazgos documentados en `docs/checkpoints/CHECKPOINT_BT_CP02_B_INVENTARIO_20261111.md`. Hay dos alertas de seguridad originadas por un mismo helper RLS público que deberán revisarse antes de migraciones.
 
 **CP02-C — Esquema y RLS (requiere autorización):** preparar/ejecutar migraciones versionadas, crear policies y grants mínimos, dos talleres y usuarios exclusivamente ficticios, prueba de aislamiento. Mantener el proyecto de producción sin datos reales hasta aprobación.
 
@@ -120,7 +120,9 @@
 
 ## 9. Dependencia bloqueante
 
-**La conexión Supabase disponible no expone `biomotors-taller`.** Es necesario conectar la cuenta/organización que contiene el proyecto o autorizarlo para este conector, y volver a ejecutar `list_projects`. No suponer el ID ni utilizar bases de datos de otros productos. Ninguna credencial se solicita en el chat.
+**Dependencia de conexión resuelta:** el conector expone el proyecto **`biomotors-taller`**, ID `suxcqqnmcjoezfxltoms`, PostgreSQL 17, región `sa-east-1`, `ACTIVE_HEALTHY`.
+
+**Nueva puerta de seguridad previa a DDL:** los advisors detectaron que `public.rls_auto_enable()` es `SECURITY DEFINER` y ejecutable por `anon`/`authenticated` (permisos por defecto); su disparador de evento `ensure_rls` está activo para habilitar RLS cuando se crea una tabla. No eliminarlo a ciegas ni confiar en que activar RLS equivalga a políticas seguras. Diseñar la revocación/ubicación segura de sus privilegios y verificar el efecto sobre el disparador con aprobación expresa antes de modificar la base.
 
 ## Referencias técnicas verificadas
 

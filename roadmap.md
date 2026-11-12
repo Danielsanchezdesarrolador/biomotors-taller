@@ -148,8 +148,11 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 - [x] Inspeccionar frontend web y diseño de configuración: actualmente datos DEMO, `supabase-js` no instalado, guardas locales que no representan seguridad real.
 - [x] Revisar documentación Supabase vigente y diseñar esquema preliminar de `workshops`, membresías, roles, Auth, RLS y pruebas de acceso cruzado.
-- [x] Comprobar visibilidad de Supabase mediante conector; **bloqueo:** el proyecto `biomotors-taller` no está disponible con la conexión actual. No tocar bases de otros proyectos.
-- [ ] Conectar/autorizar el proyecto correcto `biomotors-taller` y verificar su ID real; hacer inventario de tablas, políticas, migraciones, Auth y Storage exclusivamente en lectura.
+- [x] Resolver conexión con Supabase correcta: se confirmó el proyecto **`biomotors-taller`**, ID `suxcqqnmcjoezfxltoms`, `ACTIVE_HEALTHY` (São Paulo); sin tocar Punto Fénix.
+- [x] **BT-CP02-B inventario de solo lectura completado**: 0 tablas propias en `public`; 0 usuarios Auth; 0 migraciones del proyecto; 0 buckets/archivos en Storage; 0 Edge Functions. Advisors de salud y rendimiento: sin alertas.
+- [x] **Dos advertencias de seguridad del mismo origen**: función `public.rls_auto_enable()`, `SECURITY DEFINER` invocable por `anon` y `authenticated`; está asociada al event trigger `ensure_rls`. Revisión y corrección de privilegios pendiente **antes de migraciones**, sin ejecutar SQL de escritura en esta auditoría.
+- [x] Confirmar commit visual de Órdenes `3258858` en la historia de `main` y en el archivo actual; Render está `LIVE` sobre commit documental descendiente sin revertir los dos archivos corregidos.
+- [ ] Preparar esquema SQL, funciones internas y pruebas RLS con dos talleres ficticios; aprobarlo antes de aplicar cualquier migración.
 - [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
 
 
