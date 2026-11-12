@@ -26,3 +26,9 @@ Generar enlace abre una explicación y una vista de formulario público DEMO den
 - Preservar los pendientes no reparados por orden y vehículo en futuras visitas; no borrarlos al finalizar una orden. Historial durable con fechas, kilometraje, técnico, reparaciones, ítems, presupuestos, informes y entregas.
 
 Todo ello requiere una tarea posterior autorizada. BT-UI-04 no activa estos servicios ni avanza a Informes y cotizaciones.
+
+## Ampliación aprobada — formulario cliente + vehículo + visita (BT-REQ-REG-VEH-01)
+
+El Director solicita que el registro mediante enlace incluya **vehículo y razón de ingreso** además de los datos de contacto. Especificación oficial: [BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md](BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md).
+
+El formulario actual `RegistroClienteDemo.tsx` solo captura datos personales. No modificarlo en paralelo mientras Codex trabaja en BT-UI-05: nueva implementación en etapa separada, DEMO primero. Ningún enlace público real ni almacenamiento se habilita con esta actualización documental.
