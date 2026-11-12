@@ -39,3 +39,9 @@ TypeScript PASS; **18/18 pruebas en 5 archivos PASS**; build Vite y recursos PWA
 Push a main y comprobación del contenido servido por el Render existente se registran en el informe de entrega. GitHub Actions remoto no consultable desde el entorno: API devuelve Forbidden; no declarar CI aprobado sin evidencia. El contenido servido y el estado administrativo LIVE de Render son evidencias distintas.
 
 Pendientes: aprobación visual del Director para este panel; prueba física Safari/iPhone; persistencia de ficha, inspección, ítems y observaciones por orden y vehículo, historial durable, permisos/RLS, generación documental definitiva y entrega de correos. Todos requieren etapa posterior de backend seguro. Android, Supabase y otros paneles sin cambios; sin APK ni pagos.
+
+## Resultado de integración y publicación
+
+Implementación `776c2de`, ajuste de legibilidad a 1440 px `9e3b08b`, ambos enviados a origin/main. Tras el ajuste se repitieron build y verificaciones de navegador/capturas en los cinco tamaños: PASS. El flujo de nueva orden existente también se ejercitó hasta abrir OT-DEMO-009 sin costos inventados: PASS. Se generó una ficha de impresión DEMO A4 de dos páginas en `/workspace/visual-ui03/ficha-demo.pdf`.
+
+Render existente confirmado sirviendo el build final: HTML público raíz e index.html apuntan a `/assets/index-QkOATr-D.js` y `/assets/index-CKa2_0MK.css`; ambos archivos descargados por HTTPS coinciden **byte a byte** con los artefactos locales validados. Navegación para revisión: Órdenes de trabajo → OT-1002. Esto verifica el contenido desplegado; no implica haber consultado el estado administrativo literal LIVE. Sin acceso a API GitHub/Render para verificar Actions o el estado interno del deploy. Capturas visuales de la ejecución local del código publicado.

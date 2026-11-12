@@ -266,3 +266,4 @@ Evidencia y limitaciones: [checkpoint BT-UI-02-R2](docs/checkpoints/CHECKPOINT_B
 - [ ] Aprobación visual del Director para OT; prueba Safari en iPhone físico y conexión segura con persistencia en etapa futura.
 
 Evidencia: [checkpoint BT-UI-03](docs/checkpoints/CHECKPOINT_BT_UI_03_20261111.md). No avanzar al panel Clientes y vehículos.
+- [x] Publicación del detalle BT-UI-03 comprobada en el Render existente: HTML y contenido completo de los bundles JS/CSS coinciden con el build final de `9e3b08b`. Estado administrativo LIVE y Actions remoto sin acceso desde este entorno.
