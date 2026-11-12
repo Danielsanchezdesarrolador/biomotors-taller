@@ -58,3 +58,15 @@ Pendientes: aprobación visual del Director, Safari/iPhone físico, backend mult
 ## Publicación comprobada
 
 Implementación `7a040e0` enviada a origin/main preservando la política comercial concurrente `163072f`. El Render existente sirve HTML raíz e index.html que referencian `/assets/index-DSGVpjQI.js` y `/assets/index-C0Q79Jfm.css`; los bundles descargados por HTTPS coinciden **byte a byte** con el build final validado. Disponible en Configuración. No se creó otro servicio ni se alteró la configuración cloud publicada. La evidencia confirma contenido servido; no se dispone de consulta al estado administrativo literal LIVE ni a Actions remoto.
+
+## Auditoría independiente — ChatGPT (11/11/2026, Chile)
+
+Esta sección aclara la evidencia obtenida posteriormente desde conectores con acceso remoto; las limitaciones del informe original de Codex se conservan por trazabilidad.
+
+- **GitHub**: `main` en `04f7bf471465152eb60330546c9bbdb40925e1cb`; implementación anterior `7a040e0`. No se modificó el frontend en esta auditoría.
+- **GitHub Actions**: run `43141082423` **SUCCESS**. Jobs `Web / iOS PWA` y `Android React Native / Expo (sin generar APK)` SUCCESS. Los logs del job Web confirman **40 de 40 tests PASS en 8 archivos**, TypeScript web PASS, build Vite PASS y `PWA assets: PASS`. Android TypeScript/Expo/bundle PASS; **sin construir ni instalar APK**.
+- **Render**: servicio de demo existente, deploy `dep-dbqi6a2vcj2c73evr1dg` para `04f7bf4`, estado administrativo **LIVE**.
+- **Capturas reales examinadas** desde GitHub: `docs/screenshots/BT_UI_06_1650.png` y `BT_UI_06_390.png`. Composición premium R2 coherente: navegación y hero, cuatro KPI, nueve tarjetas, columna derecha de estado/acciones; adaptación móvil apilada, sin desbordamiento horizontal aparente. Es una inspección visual cualitativa, **no** un nuevo cálculo de diferencia de píxeles.
+- **Revisión de código**: el catálogo de Básico gratis sin anuncios durante lanzamiento, Plus USD 5/mes, Full USD 15/mes y trial futuro de 72 h aparece como información DEMO. `Desactivar renovación automática · DEMO` solo muestra explicación: **no cancela suscripción ni cobra**. Correo, respaldos, RLS y Auth no están habilitados.
+- **Limitaciones**: comparaciones píxel a píxel de las cuatro pantallas anteriores son evidencia del agente Codex, no reejecutadas aquí. **Aprobación visual definitiva del Director pendiente**, así como prueba Safari en iPhone físico y futura auditoría de seguridad multitenant real.
+- **Siguiente fase**: antes de usar datos de clientes, implementar de manera autorizada Auth/RLS, aislamiento por taller y protección de documentos; antes de pagos reales, pasarela segura, pruebas de cancelación y transparencia conforme a BT-PLAN-01. Ninguna de estas acciones fue ejecutada en esta auditoría.
