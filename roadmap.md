@@ -142,7 +142,16 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 
 **Regla:** ningún trabajo web implica que Android esté finalizado; usar `apps/android/` como proyecto nativo existente, con backend único Supabase y sin WebView.
 
-### BT-CP02 — Identidad, talleres y aislamiento — PENDIENTE
+### BT-CP02 — Identidad, talleres y aislamiento — AUDITORÍA DOCUMENTAL INICIADA
+
+**Auditoría de solo lectura del 11/11/2026:** [Plan de arquitectura y seguridad](docs/BT_CP02_ARQUITECTURA_AUTH_RLS.md) · [Checkpoint de auditoría](docs/checkpoints/CHECKPOINT_BT_CP02_AUDITORIA_20261111.md).
+
+- [x] Inspeccionar frontend web y diseño de configuración: actualmente datos DEMO, `supabase-js` no instalado, guardas locales que no representan seguridad real.
+- [x] Revisar documentación Supabase vigente y diseñar esquema preliminar de `workshops`, membresías, roles, Auth, RLS y pruebas de acceso cruzado.
+- [x] Comprobar visibilidad de Supabase mediante conector; **bloqueo:** el proyecto `biomotors-taller` no está disponible con la conexión actual. No tocar bases de otros proyectos.
+- [ ] Conectar/autorizar el proyecto correcto `biomotors-taller` y verificar su ID real; hacer inventario de tablas, políticas, migraciones, Auth y Storage exclusivamente en lectura.
+- [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
+
 
 - [ ] Autenticación y recuperación de cuenta.
 - [ ] Crear un taller y asociarle usuario(s) mediante membresías.
