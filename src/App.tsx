@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
 import { demoVehicles } from './clientes/clientesData'
+import { ConfiguracionPanel } from './configuracion/ConfiguracionPanel'
 import { InformesPanel } from './informes/InformesPanel'
 import { ClientesPanel } from './clientes/ClientesPanel'
 import { OrdenesPanel } from './ordenes/OrdenesPanel'
@@ -20,12 +21,6 @@ const navItems: NavItem[] = [
   { id: 'informes', label: 'Informes y cotizaciones', compact: 'Informes', icon: FileText },
   { id: 'configuracion', label: 'Configuración', compact: 'Más', icon: Settings2 },
 ]
-const moduleDetails: Record<Exclude<Screen, 'inicio'>, { title: string; description: string; items: string[]; icon: LucideIcon }> = {
-  ordenes: { title: 'Órdenes de trabajo', description: 'Gestiona diagnósticos, servicios y observaciones de los vehículos.', icon: Wrench, items: ['Crear una orden de trabajo', 'Inspección multipunto', 'Seguimiento del estado de la reparación'] },
-  clientes: { title: 'Clientes y vehículos', description: 'Mantén las fichas y el historial técnico asociados a tu taller.', icon: UsersRound, items: ['Registro de clientes mediante enlace', 'Fichas de vehículos y patentes', 'Historial y observaciones pendientes'] },
-  informes: { title: 'Informes y cotizaciones', description: 'Prepara los documentos y envíalos por correo cuando esté habilitado.', icon: ClipboardCheck, items: ['Informes de revisión multipunto', 'Presupuestos en PDF', 'Envío verificado al correo del cliente'] },
-  configuracion: { title: 'Configuración', description: 'Gestiona el perfil del taller y las preferencias del equipo.', icon: Settings2, items: ['Datos e identidad del taller', 'Usuarios y permisos', 'Plantillas, correos y enlaces'] },
-}
 const quickActions: { label: string; sub: string; icon: LucideIcon; to: Screen }[] = [
   { label: 'Nueva orden', sub: 'Crear OT', icon: FilePlus2, to: 'ordenes' },
   { label: 'Nuevo cliente', sub: 'Registrar cliente', icon: UsersRound, to: 'clientes' },
@@ -77,9 +72,6 @@ function App() {
     setNotice('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  function planned(action: string) {
-    setNotice(action + ' estará disponible después de conectar la cuenta segura del taller.')
-  }
   const formattedDate = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date())
 
   return (
@@ -117,7 +109,7 @@ function App() {
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
             <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
-              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes' && screen !== 'clientes' && screen !== 'informes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
+              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes' && screen !== 'clientes' && screen !== 'informes' && screen !== 'configuracion') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
             {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}
           </div>
           <div className="topbar-controls">
@@ -220,18 +212,7 @@ function App() {
           ) : screen === 'informes' ? (
             <InformesPanel globalSearch={searchText} />
           ) : (
-            <section className="module-placeholder">
-              <div className="module-title-row">
-                <div><p className="section-eyebrow">MÓDULO EN DESARROLLO</p><h1>{moduleDetails[screen].title}</h1><p>{moduleDetails[screen].description}</p></div>
-                <span className="module-big-icon">{(() => { const Icon = moduleDetails[screen].icon; return <Icon size={35}/> })()}</span>
-              </div>
-              <div className="module-card dashboard-card">
-                <h2>¿Qué podrás hacer aquí?</h2>
-                {moduleDetails[screen].items.map(item => <div key={item} className="planned-row"><span><Check size={16}/></span>{item}</div>)}
-                <button className="main-action" type="button" onClick={() => planned('Este módulo')}>Próximamente <ArrowRight size={16}/></button>
-              </div>
-              <button className="return-home" type="button" onClick={() => navigate('inicio')}><House size={16}/> Volver al Inicio</button>
-            </section>
+            <ConfiguracionPanel globalSearch={searchText} />
           )}
           <div className="demo-strip" role="note"><Info size={15} /><span><strong>Entorno de demostración:</strong> todas las cifras y órdenes son ficticias. No se registran clientes ni se envían correos.</span></div>
         </main>

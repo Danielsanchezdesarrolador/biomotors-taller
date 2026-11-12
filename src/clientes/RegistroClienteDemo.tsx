@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { CheckCircle2, Info } from 'lucide-react'
 import { validateRegistration, type RegistrationDraft } from './clientesData'
-export function RegistroClienteDemo({onCreate}:{onCreate?:(draft:RegistrationDraft)=>void}) {
- const [draft,setDraft]=useState<RegistrationDraft>({name:'',email:'',phone:'',address:'',commune:'',consent:false})
+export function RegistroClienteDemo({onCreate,initialDraft}:{onCreate?:(draft:RegistrationDraft)=>void;initialDraft?:RegistrationDraft}) {
+ const [draft,setDraft]=useState<RegistrationDraft>(()=>initialDraft?{...initialDraft}:{name:'',email:'',phone:'',address:'',commune:'',consent:false})
  const [errors,setErrors]=useState<ReturnType<typeof validateRegistration>>({}),[done,setDone]=useState(false)
  if(done)return <div className="cv-register-success" role="status"><CheckCircle2 size={40}/><h3>Simulación local completada</h3><p>No se creó un registro real, no se verificó el correo y no se enviaron datos a un taller ni servidor. Al recargar se perderán.</p><button className="cv-secondary" onClick={()=>setDone(false)}>Volver al formulario</button></div>
  const fields=[['name','Nombre completo *','text'],['email','Correo electrónico *','email'],['phone','Teléfono chileno *','tel'],['address','Dirección (opcional)','text'],['commune','Comuna (opcional)','text']] as const
