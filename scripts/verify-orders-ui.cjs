@@ -51,8 +51,8 @@ async function openSample(page) {
    assert.equal(await page.locator('.od-pending li').count(),3)
    await page.getByRole('button',{name:'Volver al listado de órdenes',exact:true}).click()
    await openSample(page)
-   // Parts/inspection are explicitly temporary within the detail; status lives in this module session.
-   assert.match(await page.getByTestId('order-total').innerText(),/154.879/)
+   // UI-05 keeps the revision in page memory for report preparation; reload still resets it.
+   assert.match(await page.getByTestId('order-total').innerText(),/157.259/)
    await page.reload()
    await page.locator(width>760?'.side-nav button':'.bottom-nav button').nth(1).click()
    await openSample(page)

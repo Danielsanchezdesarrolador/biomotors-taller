@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Play, Printer, Check, FileText, ClipboardCheck, UserRound, CarFront, CalendarDays, Gauge, Wrench, ContactRound, Phone, Mail, MessageSquare, Layers, Plus, TriangleAlert, ClipboardList, BarChart3, Droplet, CircleDot, Battery, Flashlight, Cable, Disc3 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { workStatusLabels, workStatusSequence, type WorkOrder, type WorkStatus, type InspectionState } from './ordenesData'
-import { calculateTotals, clp, completedInspections, exampleItems, initialInspection, inspectionItems, inspectionLabels, type LineItem } from './detalleData'
+import { calculateTotals, clp, completedInspections, inspectionItems, inspectionLabels, type LineItem } from './detalleData'
+import { readOrderRevision, writeOrderRevision } from './orderSession'
 import './detalle.css'
 function Card({title,icon,children,className=''}:{title:string;icon:ReactNode;children:ReactNode;className?:string}) {
   return <section className={'dashboard-card od-card '+className}><h2>{icon}{title}</h2>{children}</section>
@@ -26,12 +27,13 @@ function Progress({status}:{status:WorkStatus}) {
   return <Card title="Historial / progreso de la orden" icon={<BarChart3/>} className="od-progress"><span className="od-count">{status==='finalizada'?'Finalizada · DEMO':'En curso · DEMO'}</span><ol>{steps.map((step,i)=><li key={step} className={i<current?'done':i===current?'current':''}><span>{i<current?<Check/>:i===current?<Wrench/>:<ClipboardCheck/>}</span><strong>{workStatusLabels[step]}</strong><small>{i===current?'Estado actual':i<current?'Completada · DEMO':'—'}</small></li>)}</ol></Card>
 }
 export function OrdenDetalle({order,onBack,onNotify,onStatus,onClient}:{onClient?:()=>void;order:WorkOrder;onBack:()=>void;onNotify:(message:string)=>void;onStatus:(status:WorkStatus)=>void}) {
-  const [states,setStates]=useState<Record<string,InspectionState>>(()=>order.id==='OT-1002'?{...initialInspection}:Object.fromEntries(inspectionItems.map(([key])=>[key,'no-revisado'])))
-  const [items,setItems]=useState<LineItem[]>(()=>order.id==='OT-1002'?exampleItems.map(i=>({...i})):[])
+  const [states,setStates]=useState<Record<string,InspectionState>>(()=>readOrderRevision(order).inspection)
+  const [items,setItems]=useState<LineItem[]>(()=>readOrderRevision(order).items)
+  useEffect(()=>writeOrderRevision({order,inspection:states,items}),[order,states,items])
   const [modal,setModal]=useState<'item'|'report'|'finish'|null>(null)
   const inspectionRef=useRef<HTMLDivElement>(null)
   const reference=order.id==='OT-1002'
-  function review() { inspectionRef.current?.scrollIntoView({behavior:'smooth',block:'center'});inspectionRef.current?.focus();onNotify('Continúa la inspección DEMO. Los cambios son temporales y se perderán al cerrar esta ficha.') }
+  function review() { inspectionRef.current?.scrollIntoView({behavior:'smooth',block:'center'});inspectionRef.current?.focus();onNotify('Continúa la inspección DEMO. Los cambios son temporales y se perderán al recargar la página.') }
   const displayClient=reference?'María Torres':order.client
   const displayPlate=reference?'KZV-482':order.plate
   const summary=[{label:'Cliente',value:displayClient,Icon:UserRound},{label:'Vehículo',value:order.vehicle,Icon:CarFront},{label:'Patente',value:displayPlate,Icon:ContactRound},{label:'Fecha de ingreso',value:order.date,Icon:CalendarDays},{label:'Kilometraje',value:order.mileage.toLocaleString('es-CL')+' km',Icon:Gauge},{label:'Técnico',value:reference?'Carlos Méndez':order.technician,Icon:UserRound}]
@@ -56,5 +58,5 @@ function DetailDialog({title,onClose,children}:{title:string;onClose:()=>void;ch
   return <dialog ref={node=>{ref.current=node;if(node&&!node.open)node.showModal()}} onClose={onClose} onCancel={onClose} aria-label={title} className="od-dialog"><h2>{title}</h2>{children}<button className="bt-ot-secondary" onClick={onClose}>Cerrar / cancelar</button></dialog>
 }
 function ItemForm({onAdd}:{onAdd:(item:LineItem)=>void}) {
-  return <form onSubmit={event=>{event.preventDefault();const data=new FormData(event.currentTarget);onAdd({id:crypto.randomUUID(),description:String(data.get('description')).trim(),type:data.get('type') as LineItem['type'],quantity:Number(data.get('quantity')),price:Number(data.get('price'))})}}><p>Ítem temporal. No se guarda al salir de la ficha. No ingreses datos personales.</p><label>Descripción<input name="description" required maxLength={120} pattern=".*\S.*"/></label><label>Tipo<select name="type"><option>Repuesto</option><option>Servicio</option><option>Mano de obra</option></select></label><label>Cantidad<input name="quantity" type="number" min="0.01" max="10000" step="0.01" defaultValue="1" required/></label><label>Precio unitario (CLP)<input name="price" type="number" min="0" max="100000000" step="1" required/></label><button className="bt-ot-primary">Agregar a la DEMO</button></form>
+  return <form onSubmit={event=>{event.preventDefault();const data=new FormData(event.currentTarget);onAdd({id:crypto.randomUUID(),description:String(data.get('description')).trim(),type:data.get('type') as LineItem['type'],quantity:Number(data.get('quantity')),price:Number(data.get('price'))})}}><p>Ítem temporal. Solo en memoria hasta recargar la página. No ingreses datos personales.</p><label>Descripción<input name="description" required maxLength={120} pattern=".*\S.*"/></label><label>Tipo<select name="type"><option>Repuesto</option><option>Servicio</option><option>Mano de obra</option></select></label><label>Cantidad<input name="quantity" type="number" min="0.01" max="10000" step="0.01" defaultValue="1" required/></label><label>Precio unitario (CLP)<input name="price" type="number" min="0" max="100000000" step="1" required/></label><button className="bt-ot-primary">Agregar a la DEMO</button></form>
 }

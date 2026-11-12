@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
 import { demoVehicles } from './clientes/clientesData'
+import { InformesPanel } from './informes/InformesPanel'
 import { ClientesPanel } from './clientes/ClientesPanel'
 import { OrdenesPanel } from './ordenes/OrdenesPanel'
 
@@ -116,7 +117,7 @@ function App() {
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
             <input ref={searchRef} aria-label="Buscar en órdenes de muestra" placeholder="Buscar cliente, vehículo u orden de trabajo..." value={searchText}
-              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes' && screen !== 'clientes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
+              onFocus={() => { if (screen !== 'inicio' && screen !== 'ordenes' && screen !== 'clientes' && screen !== 'informes') navigate('inicio') }} onChange={e => setSearchText(e.target.value)} />
             {searchText ? <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchText('')}><X size={15} /></button> : <span className="shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>}
           </div>
           <div className="topbar-controls">
@@ -216,6 +217,8 @@ function App() {
             <OrdenesPanel globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={plate => { const vehicle = demoVehicles.find(v => v.plate === plate); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
           ) : screen === 'clientes' ? (
             <ClientesPanel initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
+          ) : screen === 'informes' ? (
+            <InformesPanel globalSearch={searchText} />
           ) : (
             <section className="module-placeholder">
               <div className="module-title-row">
