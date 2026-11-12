@@ -160,7 +160,10 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [ ] **Pruebas reales de aislamiento A/B pendientes:** crear identidades con Auth oficial y dos talleres ficticios mediante flujo autorizado y probar JWT de usuarios distintos, incluidas membresías desactivadas y autoelevación, sin usar service_role para simular un usuario.
 - [x] **BT-CP02-D backend (12/11/2026):** migración `20261112150019_bt_cp02_d_atomic_owner_onboarding` aplicada; Edge Function `bt-owner-onboarding` desplegada con JWT obligatorio, **desactivada por defecto** y con permisos solo de backend. 0 avisos de seguridad.
 - [x] Código y checkpoint versionados: [BT-CP02-D](docs/checkpoints/CHECKPOINT_BT_CP02_D_20261112.md).
-- [ ] Probar dos usuarios Auth verdaderos y dos talleres con JWT separados (suite A/B); no se han creado usuarios Auth todavía.
+- [x] **Prevalidación estructural: 22/22 PASS** en PostgreSQL (RLS, GRANT, permisos públicos y funciones de alta).
+- [x] **Suite A/B preparada**: 25 verificaciones con dos usuarios de Supabase Auth, JWT independientes, talleres ficticios y limpieza al terminar, `scripts/security/bt-cp02-ab.mjs`, con control de ejecución explícito. Validación de sintaxis incluida en CI, **sin ejecutar operaciones remotas desde CI**.
+- [ ] **Ejecutar suite A/B con credenciales protegidas en equipo del operador**, porque el conector no ofrece Auth Admin y el contenedor no tiene acceso de red. No crear usuarios Auth con SQL. Ver `docs/BT_CP02_D_AB_RUNBOOK.md`.
+- [ ] Confirmar resultados auténticos, ausencia de fixtures remanentes y 0 hallazgos en asesor Security antes de abrir registro público.
 - [ ] Completar Auth web/PWA, rate limiting, verificación de emails y controles antiabuso, antes de abrir el registro. No introducir clientes reales hasta superar aislamiento.
 - [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
 
