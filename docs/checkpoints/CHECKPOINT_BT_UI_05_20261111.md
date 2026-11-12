@@ -44,3 +44,7 @@ GitHub Actions remoto no consultable: API devuelve Forbidden. No declarar CI rem
 ## Pendientes y alcance
 
 Aprobación visual del Director, Safari/iPhone físico y descarga PDF directa. Para producción: Auth/RLS por taller, persistencia y versionado, archivo privado, destinatario verificado, PDF definitivo, proveedor transaccional, reintentos e idempotencia, auditoría y evidencia real de entrega. Nada de ello se activa en esta etapa. Android, Supabase, credenciales y pagos intactos. No avanzar a Configuración.
+
+## Publicación verificada
+
+Implementación integrada en `60bc392` de origin/main tras conservar el cambio documental concurrente `39c6bd8` sobre el registro de cliente/vehículo/visita. El Render existente sirve HTML raíz e index.html que apuntan a `/assets/index-CxdbIbFs.js` y `/assets/index-2GkoLkjx.css`; ambos bundles descargados por HTTPS coinciden **byte a byte** con el build final validado. Disponible en Informes y cotizaciones. No se modificó la configuración cloud, no se creó un servicio ni se activó correo. Actions y el estado administrativo literal LIVE siguen sin acceso; la evidencia corresponde al contenido efectivamente servido.
