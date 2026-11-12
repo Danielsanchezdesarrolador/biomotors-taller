@@ -1,0 +1,2 @@
+[functions.bt-owner-onboarding]
+verify_jwt = true

@@ -158,7 +158,10 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [x] **Autorización y aplicación efectiva de BT-CP02-C, 12/11/2026:** Supabase registró las migraciones `20261112144646_bt_cp02_c_core_tenants_rls` y `20261112145011_bt_cp02_c_backend_service_grants`; tres tablas creadas, cuatro políticas RLS, permisos mínimos; Security Advisor **0 avisos**.
 - [x] **Verificación SQL posterior:** sin datos ni usuarios, `ensure_rls` activo, `rls_auto_enable()` no ejecutable por `anon`/`authenticated`, `service_role` con grants administrables, navegador sin permisos de escritura para talleres o membresías.
 - [ ] **Pruebas reales de aislamiento A/B pendientes:** crear identidades con Auth oficial y dos talleres ficticios mediante flujo autorizado y probar JWT de usuarios distintos, incluidas membresías desactivadas y autoelevación, sin usar service_role para simular un usuario.
-- [ ] Implementar onboarding de propietario transaccional seguro (todavía no existe), después integrar login web. No introducir clientes reales hasta superar aislamiento entre talleres.
+- [x] **BT-CP02-D backend (12/11/2026):** migración `20261112150019_bt_cp02_d_atomic_owner_onboarding` aplicada; Edge Function `bt-owner-onboarding` desplegada con JWT obligatorio, **desactivada por defecto** y con permisos solo de backend. 0 avisos de seguridad.
+- [x] Código y checkpoint versionados: [BT-CP02-D](docs/checkpoints/CHECKPOINT_BT_CP02_D_20261112.md).
+- [ ] Probar dos usuarios Auth verdaderos y dos talleres con JWT separados (suite A/B); no se han creado usuarios Auth todavía.
+- [ ] Completar Auth web/PWA, rate limiting, verificación de emails y controles antiabuso, antes de abrir el registro. No introducir clientes reales hasta superar aislamiento.
 - [ ] Aprobar propuesta de esquema y matriz de permisos antes de migraciones.
 
 
