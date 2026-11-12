@@ -48,3 +48,15 @@ Aprobación visual del Director, Safari/iPhone físico y descarga PDF directa. P
 ## Publicación verificada
 
 Implementación integrada en `60bc392` de origin/main tras conservar el cambio documental concurrente `39c6bd8` sobre el registro de cliente/vehículo/visita. El Render existente sirve HTML raíz e index.html que apuntan a `/assets/index-CxdbIbFs.js` y `/assets/index-2GkoLkjx.css`; ambos bundles descargados por HTTPS coinciden **byte a byte** con el build final validado. Disponible en Informes y cotizaciones. No se modificó la configuración cloud, no se creó un servicio ni se activó correo. Actions y el estado administrativo literal LIVE siguen sin acceso; la evidencia corresponde al contenido efectivamente servido.
+
+## Auditoría independiente posterior — GitHub y Render (11/11/2026 Chile)
+
+Esta sección complementa el cierre original de Codex; las limitaciones de acceso a Actions/Render descritas anteriormente corresponden a su entorno, no a esta verificación.
+
+- Repositorio `main`: `ed40c3385a28b9c6b979c8bd9f46e4ee65b8d977`, commit documental de BT-UI-05.
+- GitHub Actions `#43135258201`: **SUCCESS**, dos jobs satisfactorios (Web/iOS PWA y Android React Native/Expo sin APK). El log de web confirma **31 tests aprobados de 31 en 7 archivos**, compilación Vite, validación PWA y TypeScript PASS.
+- Render: despliegue `dep-dbqheiqjnfac73bhukbg` del mismo commit `ed40c33`, estado administrativo **LIVE**.
+- Revisadas imágenes reales versionadas `docs/screenshots/BT_UI_05_1650.png` y `BT_UI_05_390.png`. Se observa continuidad visual de sidebar, topbar, fotografía automotriz, tarjetas, módulos y apilamiento móvil conforme a R2. No se observan desbordamientos horizontales evidentes. La revisión es **cualitativa**: los resultados de pixel-diff de Inicio/OT/Clientes reportados por Codex no fueron reejecutados de forma independiente aquí.
+- La vista previa es HTML ampliable e imprimible, **no descarga PDF real**. KPI, eventos «Enviado» y «Error» y simulación del envío son ficticios; no usar para operaciones comerciales reales.
+- **Estado de aprobación:** técnicamente verificado; evaluación visual independiente favorable; **aprobación final del Director pendiente**, igual que Safari físico, descarga PDF y backend seguro. No implementar Configuración ni activar correo/persistencia por esta auditoría.
+- Solo se actualizaron documentos; web funcional, Android nativo y Supabase permanecen intactos.
