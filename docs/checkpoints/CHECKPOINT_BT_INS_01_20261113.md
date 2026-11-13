@@ -41,4 +41,15 @@ Pendientes: aprobación visual y terminología de Ignacio, prueba física Safari
 
 Sin cambios en Supabase, Auth, onboarding BT-CP02-D desactivado, RLS, suscripciones, pagos, correo real ni Android. No se ejecutaron migraciones ni las pruebas de Auth A/B que requieren credenciales. Se preservan los avances ajenos de seguridad presentes en `main`.
 
-Publicación: mediante push a `main` y autodespliegue del Render existente; evidencia de bundles publicados se registrará tras verificar. Estado administrativo de Render y Actions remoto se distinguen de la comprobación HTTP del sitio.
+## Publicación comprobada
+
+Código principal: `b75bcfb`; corrección final de la leyenda de inspección totalmente revisada: `e59e899`. Ambos publicados mediante `main` y el autodespliegue del Render existente, sin crear infraestructura. Se conservaron las decisiones documentales BT-PLAN-02 / BT-PLAN-IDEAS-01 recibidas durante el trabajo.
+
+El HTML de https://biomotors-taller-demo.onrender.com apunta al build final y los dos bundles coinciden **byte a byte** con `dist`:
+
+- `/assets/index-D6qqfpE6.js`: SHA-256 `651b59dca8b5c6d6234150a426b5febf188dcb38366f141aa453368ac8051e71`.
+- `/assets/index-DdHIPBEk.css`: SHA-256 `a55249088838795c17dd0b2f6c561167f947dc960d3c950894c9174eb87eea6e`.
+
+La leyenda distingue ahora una inspección revisada de una incompleta antes de finalizar. TypeScript, 48 tests y build/PWA se repitieron tras esa corrección. Se añadió y ejecutó la comprobación de los **34/34 ítems revisados y cierre sin pendientes** en navegador a 1650 px, además del recorrido previo completo en los cinco tamaños. Su resultado fue PASS.
+
+Esta evidencia acredita el contenido servido por Render y la prueba de navegador local del mismo frontend; **no se ha consultado el estado administrativo LIVE ni el resultado de GitHub Actions remoto**. Safari físico y aprobación visual del Director continúan pendientes.

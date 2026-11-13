@@ -407,3 +407,5 @@ Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-P
 - [ ] Aprobación visual/terminológica de Ignacio, Safari físico, PDF directo y persistencia segura posterior. Auth, onboarding cerrado, RLS, pagos y Android preservados.
 
 [Checkpoint BT-INS-01](docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md).
+
+- [x] BT-INS-01 publicado en el Render existente: HTML y bundles JS/CSS del build final `e59e899` verificados byte a byte. Cierre 34/34 sin pendientes también PASS; Actions remoto y estado administrativo LIVE sin consulta desde este entorno.
