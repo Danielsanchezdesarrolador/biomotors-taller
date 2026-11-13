@@ -26,7 +26,7 @@ El Director irá aportando gradualmente nuevas funciones para **Básico**, **Plu
 | BT-IDEA-002 | 11/11/2026 | Publicidad durante el lanzamiento | **Sin anuncios** | Sin anuncios como propuesta | Sin anuncios como propuesta | Básico aprobado; publicidad posterior sin decidir | Documentada · `BT-PLAN-01` |
 | BT-IDEA-003 | 11/11/2026 | Prueba Full 3 días/72 horas con método de pago | — | — | Sí | Aprobada para diseño | Documentada · `BT-PLAN-01` |
 | BT-IDEA-004 | 11/11/2026 | Desactivar renovación al instante, sin cargo si se confirma antes del fin; conservar datos tras bajar de plan | Respeta historial | Respeta historial | Sí | Aprobada para diseño | Documentada · `BT-PLAN-01` |
-| BT-IDEA-005 | 11/11/2026 | Registro de clientes mediante enlace con datos personales, vehículo y motivo de ingreso | No, alta manual | Sí | Sí | Aprobada para diseño | Documentada · `BT-REQ-REG-VEH-01` |
+| BT-IDEA-005 | 11/11/2026 | Registro de clientes mediante enlace con datos personales, vehículo y motivo de ingreso | No, alta manual | Sí | Sí | Aprobada para diseño | Implementada DEMO local (sin enlaces reales, suscripciones ni permisos) · `BT-REG-02` |
 | BT-IDEA-006 | 11/11/2026 | Envío automático por correo de informes PDF | No; descarga/impresión cuando exista | Sí | Sí | Aprobada para diseño | Documentada; correo real pendiente · `BT-PLAN-01` |
 | BT-IDEA-007 | 13/11/2026 | Subir, administrar y reutilizar formatos propios de informe (no conversión automática a interactivo) | No, usar predeterminados | Sí | Sí | Aprobada para diseño | Documentada · `BT-PLAN-02` |
 | BT-IDEA-008 | 11/11/2026 | Plantilla multipunto predeterminada y trabajo manual de inspección | Sí | Sí | Sí | Aprobada como objetivo funcional; calidad/implementación aún en desarrollo | Codex BT-INS-01 en curso |
@@ -58,3 +58,5 @@ El Director irá aportando gradualmente nuevas funciones para **Básico**, **Plu
 ## Registro de cambios
 
 - **13/11/2026 — Creación del registro:** se incorporan BT-PLAN-01, BT-PLAN-02 y propuestas explícitamente pendientes, sin modificar el código ni servicios. Nuevas ideas se anexarán con siguiente ID consecutivo.
+
+- **13/11/2026 — BT-REG-02:** BT-IDEA-005 pasa a **Implementada DEMO local**: formulario de tres pasos y solicitudes ficticias en memoria. Sigue **no disponible comercialmente**: sin invitaciones auténticas, controles de plan en servidor, persistencia, RLS verificado, pagos ni envío de correo. Se reserva activación real para etapa posterior y aprobación del Director.

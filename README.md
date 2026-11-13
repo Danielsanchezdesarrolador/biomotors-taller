@@ -114,3 +114,14 @@ El Director aprobó **BT-UI-02-R2**, por lo que ya no es una propuesta pendiente
 - Límites, pasarela, impuestos y publicidad después del lanzamiento pendientes. **No se han implementado cobros ni trials reales.**
 
 Ver [especificación BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_PLAN_01_20261111.md).
+
+
+## BT-REG-02 — registro previo a la visita (DEMO)
+
+En Clientes y vehículos, «Generar enlace de registro» abre **una simulación local sin enlace válido**. Incluye los tres pasos de contacto, vehículo y motivo de visita, revisión editable y bandeja de solicitudes ficticias pendientes de revisión. El registro manual continúa disponible; no se convierten automáticamente solicitudes a órdenes.
+
+Se permite usar únicamente datos de muestra. Sin persistencia, correos, pagos, permisos comerciales, Auth ni llamadas a Supabase. La función se reservará para Plus/Full (y trial Full válido) tras autorización y controles reales en servidor; Básico continuará con registro manual.
+
+Pruebas automáticas: npm run typecheck, npm test, npm run build; el flujo visual Chromium y capturas de escritorio/móvil se ejecutan por separado en GitHub Actions «BT-REG-02 — Capturas y recorrido DEMO». Las capturas de navegador no sustituyen la revisión física en Safari iPhone ni la aprobación visual del Director.
+
+[Requerimiento original](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md) · [Checkpoint de implementación](docs/checkpoints/CHECKPOINT_BT_REG_02_20261113.md).

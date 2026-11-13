@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, CarFront, CheckCircle2, ChevronLeft, ClipboardList, Info, ShieldCheck, UserRound } from 'lucide-react'
 import {
   emptyVisitaDraft, validateVisitaDraft, validateVisitaStep, visitaExamples,
@@ -31,6 +31,12 @@ export function RegistroVisitaDemo({onComplete}:{onComplete:(draft:VisitaDraft)=
   const [review,setReview]=useState(false)
   const [done,setDone]=useState(false)
   const [errors,setErrors]=useState<VisitaErrors>({})
+  const stepContainerRef=useRef<HTMLDivElement>(null)
+  useEffect(()=>{
+    // En Safari móvil el diálogo conserva scroll entre pasos; comenzar cada vista desde arriba.
+    const dialog=stepContainerRef.current?.closest('dialog')
+    if(dialog)dialog.scrollTop=0
+  },[step,review,opened])
   const change=(key:VisitaField,value:string|boolean)=>{
     setDraft(previous=>({...previous,[key]:value}))
     setErrors(previous=>({...previous,[key]:undefined}))
@@ -77,7 +83,7 @@ export function RegistroVisitaDemo({onComplete}:{onComplete:(draft:VisitaDraft)=
     <div className="btreg-plans"><strong>Disponibilidad futura por plan</strong><p>Básico: registro manual · Plus USD 5/mes y Full USD 15/mes: registro por enlace · Prueba Full: durante sus 3 días autorizados. No hay permisos comerciales activos en esta DEMO.</p></div>
     <button type="button" className="cv-primary btreg-main-action" onClick={()=>setOpened(true)}>Abrir formulario público DEMO <ArrowRight size={18}/></button>
   </div>
-  return <div className="btreg">
+  return <div className="btreg" ref={stepContainerRef}>
     <div className="btreg-topline"><span className="btreg-demo-label">BYTE<span>TORQUE</span> · DEMO</span><span>Sin envío ni guardado real</span></div>
     <ol className="btreg-steps" aria-label="Progreso del registro">
       {steps.map(({number,label,icon:Icon})=><li key={number} className={number===step?'active':number<step?'complete':''} aria-current={number===step?'step':undefined}>

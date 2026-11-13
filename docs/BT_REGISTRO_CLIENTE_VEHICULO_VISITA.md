@@ -80,3 +80,19 @@ Ignacio envía un enlace de registro individual a un cliente. Al abrirlo desde e
 ### Decisión de alcance
 
 Esta entrega **solo agrega la especificación oficial en archivos**. No altera `src/clientes/RegistroClienteDemo.tsx`, React, Supabase, correo, Render ni Android y no interfiere con Codex BT-UI-05.
+
+
+---
+
+## Seguimiento de ejecución — BT-REG-02 (13/11/2026)
+
+La declaración histórica de arriba corresponde a la fase de especificación BT-REQ-REG-VEH-01. **Desde BT-REG-02** existe una implementación exclusiva DEMO en main, como extensión acotada de Clientes y vehículos:
+
+- El botón «Generar enlace de registro» abre una explicación y un formulario simulado de tres pasos; **no genera URL, invitación, token ni permisos**.
+- Contacto, vehículo y motivo libre (máximo 500 caracteres), validaciones por etapa, resumen editable y confirmación local. Correo limitado a example.com y móvil al patrón de ejemplo para evitar capturar contactos reales en la simulación.
+- Bandeja de solicitudes ficticias pendientes de revisión; no mezcla clientes nuevos con registros existentes, no deduce propiedad por patente y no crea OT automáticamente.
+- El motivo declarado es un dato separado del diagnóstico técnico; ninguna acción de la DEMO certifica una avería.
+- El estado de solicitudes agregadas permanece solo en memoria del componente y se pierde al cambiar de módulo o recargar. Sin Supabase, Auth, RLS, emails, pagos, suscripciones ni almacenamiento web.
+- Básico: alta manual; Plus/Full: capacidad prevista. **Solo información comercial, no autorización**. Durante el futuro trial Full será accesible únicamente con validación de elegibilidad del servidor.
+
+Pruebas de función pura en src/clientes/registroVisitaData.test.ts y recorrido de navegador en scripts/verify-registro-ui.cjs. El checkpoint BT-REG-02 conserva los resultados y evidencias verificadas, sin sustituir este contrato de seguridad futuro.
