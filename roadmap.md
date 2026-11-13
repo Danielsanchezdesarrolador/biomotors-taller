@@ -485,8 +485,30 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] Expediente de siete hitos / nueve estados internos y retorno desde módulos a los mismos IDs de OT, multipunto y documentos. Abrir módulos no completa etapas.
 - [x] TypeScript, 76 pruebas Vitest, build/PWA; recorrido nuevo y seis regresiones en 1650/1440/768/390/375 PASS; BT-REG-02 a 1650/390 PASS y capturas versionadas.
 - [x] CI remoto confirmado independientemente el 13/11/2026: [GitHub Actions 43525591408](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43525591408) SUCCESS (76/76 Vitest, TypeScript/build/PWA y Android Expo); workflows de BT-FLOW-01/BT-COT-01/BT-REG-02 también PASS en `9c12f97`.
-- [ ] Aprobación visual/funcional del Director y Safari físico. 01D/E pendientes: coordinación de propuesta/versión/respuesta, ejecución autorizada, excepciones y cierre/entrega explícitos. No se inicia 01D.
+- [x] **Aprobación visual BT-FLOW-01B/C:** el Director aprobó expresamente el 13/11/2026 y autorizó continuar con los tres refinamientos móviles propuestos.
+- [ ] Safari físico pendiente. 01D/E siguen por implementar: propuesta/versión/respuesta, ejecución autorizada, excepciones y entrega.
 
 [Checkpoint BT-FLOW-01C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).
 
 - [x] Publicación BT-FLOW-01B/C comprobada en el Render existente: HTML, JS y CSS de `9c12f97` coinciden byte a byte con el build validado. Actions remoto sin confirmación (Forbidden); revisión del Director pendiente, sin iniciar 01D/E.
+
+### BT-FLOW-01C-R1 — Refinamientos móviles aprobados (13/11/2026)
+
+- [x] Inicio móvil: mostrar solo los primeros **4 trabajos** de forma inicial; «Ver todos los trabajos» expande la lista y «Mostrar menos» la contrae. Escritorio conserva todas las filas. Las búsquedas no deben esconder coincidencias.
+- [x] Expediente móvil: mostrar referencia corta de visita, conservar identificador completo en el atributo title y los vínculos internos.
+- [x] Hitos móviles: indicación textual de desplazamiento lateral, scroll-snap y márgenes de foco seguros; se preserva el padding safe-area global del menú inferior, sin tocar R2 global.
+- [x] Nuevas aserciones E2E en scripts/verify-flow-ui.cjs. Commit funcional `07ae7f5`; [CI principal](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43528004145) SUCCESS (TypeScript/build/PWA/Android) y [E2E cinco tamaños](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43528004301) SUCCESS.
+- [ ] Validación en Safari físico iPhone; el CI Chromium no sustituye prueba en dispositivo.
+
+### BT-FLOW-01D — Coordinación de propuestas y cotizaciones por revisión
+
+**Dirección aprobada para continuar:** implementarla sobre la base BT-FLOW-01B/C y el refinamiento C-R1, sin reemplazar BT-COT-01 ni BT-INS-01. Requiere múltiples adaptadores y pruebas, por lo que se prepara contrato técnico para Codex. [Contrato BT-FLOW-01D](docs/BT_FLOW_01D_CONTRATO_IMPLEMENTACION.md).
+
+- [x] Especificar máquina de estados y respuesta **por quoteId + revision**, con aceptación/rechazo/cambios DEMO, caducidad al editar y separación de aprobación simulada frente a aceptación real.
+- [ ] Implementar preparación de trabajos/repuestos expresamente definidos por el mecánico y cotización a partir de datos verificados, sin inferir precios ni diagnóstico.
+- [ ] Registrar respuesta DEMO a la revisión vigente y rechazar autorizaciones obsoletas, cruzadas o duplicadas; conservar evidencia temporal y avisos al usuario.
+- [ ] Precargar informe de trabajo con ítems de cotización vigente **performed: false**, solo tras confirmación humana; sin declarar trabajos realizados ni entrega.
+- [ ] Verificar rechazo, solicitud de cambios, nueva revisión, doble pulsación, otra visita/OT, IVA, impresión únicamente realizados y ruta manual clásica.
+- [ ] TypeScript, Vitest, build/PWA, E2E cinco tamaños, regresiones BT-FLOW-01/BT-COT-01/BT-INS-01/BT-REG-02, capturas y checkpoint 01D; revisión visual posterior del Director. Sin Supabase/Auth/RLS, BT-CP02-D, correos, pagos, firmas o Android nativo.
+
+[Checkpoint de aprobación y refinamientos C-R1](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_R1_20261113.md).
