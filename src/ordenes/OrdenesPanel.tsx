@@ -12,7 +12,7 @@ import {
 } from './ordenesData'
 import './ordenes.css'
 
-type Props = { onMultipunto?: (orderId:string) => void; onClient?: (plate:string) => void; initialOrderId?: string; globalSearch: string; onNotify: (message: string) => void }
+type Props = { onWorkDocument?: (orderId:string,mode:'quote'|'work')=>void; onMultipunto?: (orderId:string) => void; onClient?: (plate:string) => void; initialOrderId?: string; globalSearch: string; onNotify: (message: string) => void }
 type View = 'listado' | 'detalle' | 'nueva'
 type Preview = 'normal' | 'vacio' | 'cargando' | 'error'
 const demoTotals: { label: string; value: number; icon: LucideIcon; tone: string; status: WorkStatus | 'todas' }[] = [
@@ -31,7 +31,7 @@ function Title({ children }: { children: React.ReactNode }) {
   return <h2 className="bt-ot-card-title">{children}</h2>
 }
 
-export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient, onMultipunto }: Props) {
+export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient, onMultipunto, onWorkDocument }: Props) {
   const [orders, setOrders] = useState<WorkOrder[]>(demoWorkOrders)
   const [view, setView] = useState<View>(initialOrderId && demoWorkOrders.some(o => o.id === initialOrderId) ? 'detalle' : 'listado')
   const [selectedId, setSelectedId] = useState(initialOrderId || 'OT-1001')
@@ -177,7 +177,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
         </section>
       </>}
 
-      {view === 'detalle' && selected && <OrdenDetalle onMultipunto={onMultipunto} key={selected.id} order={selected} onClient={onClient ? () => onClient(selected.plate) : undefined} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => setOrders(previous => previous.map(item => item.id === selected.id ? { ...item, status } : item))}/>}
+      {view === 'detalle' && selected && <OrdenDetalle onWorkDocument={onWorkDocument} onMultipunto={onMultipunto} key={selected.id} order={selected} onClient={onClient ? () => onClient(selected.plate) : undefined} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => setOrders(previous => previous.map(item => item.id === selected.id ? { ...item, status } : item))}/>}
 
       {view === 'nueva' && <>
         <section className="bt-ot-hero bt-ot-hero-compact">

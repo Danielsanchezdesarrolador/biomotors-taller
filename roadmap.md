@@ -430,3 +430,15 @@ Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-P
 Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [BT-UI-04](docs/BT_UI_04_DATOS_Y_REGISTRO_DEMO.md), [BT-IDEA-005](docs/REGISTRO_IDEAS_PLANES.md), [checkpoint BT-REG-02](docs/checkpoints/CHECKPOINT_BT_REG_02_20261113.md). Implementación en src/clientes/RegistroVisitaDemo.tsx, validaciones en src/clientes/registroVisitaData.ts, recepción dentro de ClientesPanel.tsx.
 
 **BT-REG-02 cierre de verificaciones (13/11/2026):** commit 91866d9, GitHub Actions principal 43508132071 SUCCESS (57/57 Vitest, TS/build/PWA, Android Expo); E2E/capturas 43508132240 SUCCESS (1650/390 px, sin escrituras ni persistencia). Pendientes solo revisión visual del Director, confirmación administrativa Render y Safari físico; backend real excluido.
+
+### BT-COT-01 — Cotizaciones e informes de trabajo premium R2 DEMO
+
+- [x] Editor interior integrado desde Nueva cotización, Nuevo informe y acciones del diálogo Generar informe de OT; flujos clásicos y multipunto preservados.
+- [x] Ítems editables, confirmación de eliminación/plantilla, validaciones y protección de duplicados; CLP neto/IVA 19 %/total con el cálculo compartido de la OT.
+- [x] Cotización propuesta separada de informe: solo trabajos marcados Realizado se imprimen y suman. Antecedente multipunto opcional de la misma OT, sin alterar controles ni pendientes.
+- [x] Condiciones/comentarios, borrador temporal, estados y aprobación/finalización simuladas; cambios invalidan aprobaciones. Sin firma, correo ni aceptación legal reales.
+- [x] Vista previa e impresión A4; PDF de navegador de una y dos páginas comprobado. Descarga directa pendiente; compartir exclusivamente local/simulado.
+- [x] TypeScript, 66 tests, build/PWA, nuevo recorrido en 1650/1440/768/390/375 y regresiones anteriores PASS; capturas versionadas y CI de navegador añadido.
+- [ ] Confirmación remota de Actions (consulta Forbidden desde este entorno), aprobación visual del Director y Safari físico. Backend, envío/firma, PDF directo y plantillas privadas requieren fases posteriores.
+
+[Checkpoint BT-COT-01](docs/checkpoints/CHECKPOINT_BT_COT_01_20261113.md).

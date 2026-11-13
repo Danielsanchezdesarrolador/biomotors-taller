@@ -39,6 +39,7 @@ function StateBadge({ status }: { status: OrderStatus }) {
 
 function App() {
   const [screen, setScreen] = useState<Screen>('inicio')
+  const [requestedWorkRequest,setRequestedWorkRequest]=useState<{orderId:string;mode:'quote'|'work'}|undefined>()
   const [requestedInspectionOrderId,setRequestedInspectionOrderId]=useState<string|undefined>()
   const [requestedOrderId, setRequestedOrderId] = useState<string | undefined>()
   const [requestedVehicleId, setRequestedVehicleId] = useState<string | undefined>()
@@ -64,6 +65,7 @@ function App() {
   }, [])
 
   function navigate(next: Screen) {
+    setRequestedWorkRequest(undefined)
     setRequestedInspectionOrderId(undefined)
     setRequestedVehicleId(undefined)
     setRequestedOrderId(undefined)
@@ -208,11 +210,11 @@ function App() {
               </div>
             </>
           ) : screen === 'ordenes' ? (
-            <OrdenesPanel onMultipunto={orderId=>{navigate('informes');setRequestedInspectionOrderId(orderId)}} globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={plate => { const vehicle = demoVehicles.find(v => v.plate === plate); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
+            <OrdenesPanel onWorkDocument={(orderId,mode)=>{navigate('informes');setRequestedWorkRequest({orderId,mode})}} onMultipunto={orderId=>{navigate('informes');setRequestedInspectionOrderId(orderId)}} globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={plate => { const vehicle = demoVehicles.find(v => v.plate === plate); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
           ) : screen === 'clientes' ? (
             <ClientesPanel initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
           ) : screen === 'informes' ? (
-            <InformesPanel globalSearch={searchText} initialInspectionOrderId={requestedInspectionOrderId} />
+            <InformesPanel initialWorkRequest={requestedWorkRequest} globalSearch={searchText} initialInspectionOrderId={requestedInspectionOrderId} />
           ) : (
             <ConfiguracionPanel globalSearch={searchText} />
           )}

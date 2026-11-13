@@ -1,0 +1,37 @@
+[
+  {
+    "width": 1650,
+    "status": "PASS",
+    "pageErrors": [],
+    "networkWrites": [],
+    "webStorage": false
+  },
+  {
+    "width": 1440,
+    "status": "PASS",
+    "pageErrors": [],
+    "networkWrites": [],
+    "webStorage": false
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "pageErrors": [],
+    "networkWrites": [],
+    "webStorage": false
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "pageErrors": [],
+    "networkWrites": [],
+    "webStorage": false
+  },
+  {
+    "width": 375,
+    "status": "PASS",
+    "pageErrors": [],
+    "networkWrites": [],
+    "webStorage": false
+  }
+]

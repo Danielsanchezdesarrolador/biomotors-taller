@@ -1,0 +1,45 @@
+name: BT-COT-01 — Editor y documentos DEMO
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/informes/trabajos/**'
+      - 'src/informes/InformesPanel.tsx'
+      - 'src/App.tsx'
+      - 'src/ordenes/OrdenDetalle.tsx'
+      - 'src/ordenes/OrdenesPanel.tsx'
+      - 'scripts/verify-cotizaciones-ui.cjs'
+      - '.github/workflows/bt-cot-01.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cotizaciones-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar aplicación y navegador de prueba
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Validar editor, impresión, aprobación y separación DEMO
+        run: |
+          npm run dev -- --port 5173 --strictPort > /tmp/bytetrq-cot-vite.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-cotizaciones-ui.cjs
+      - name: Conservar capturas, PDF de prueba y reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BT-COT-01-Evidencia-1650-1440-768-390-375
+          path: artifacts/bt-cot-01/
+          if-no-files-found: warn
+          retention-days: 30
