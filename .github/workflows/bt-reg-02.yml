@@ -1,0 +1,41 @@
+name: BT-REG-02 — Capturas y recorrido DEMO
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/clientes/**'
+      - 'scripts/verify-registro-ui.cjs'
+      - '.github/workflows/bt-reg-02.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  registro-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar aplicación web y navegador de prueba
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Validar formulario, recepción, aislamiento DEMO y generar capturas
+        run: |
+          npm run dev -- --port 5173 --strictPort > /tmp/bytetrq-vite.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-registro-ui.cjs
+      - name: Publicar evidencia de escritorio y móvil
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BT-REG-02-Capturas-1650-390
+          path: artifacts/bt-reg-02/
+          if-no-files-found: warn
+          retention-days: 30
