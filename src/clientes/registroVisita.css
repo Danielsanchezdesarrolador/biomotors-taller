@@ -1,0 +1,79 @@
+/* BT-REG-02 — extensión acotada a registro y recepción, fiel al sistema oficial R2. */
+.btreg-intro,.btreg { color:var(--bt-text); }
+.btreg-intro h3,.btreg-content h3,.btreg-review h3 {font-size:23px;letter-spacing:-.6px;line-height:1.2;margin:14px 0 9px}
+.btreg-intro>p,.btreg-content>p,.btreg-review>p {color:var(--bt-muted)}
+.btreg-notice {display:flex;align-items:flex-start;gap:9px;background:#eef6ff;border:1px solid #cfe2ff;border-radius:12px;padding:12px;font-size:13px!important;line-height:1.45!important;color:#254873!important;margin:0 0 12px}
+.btreg-notice svg {flex-shrink:0;color:var(--bt-blue);margin-top:1px}
+.btreg-plans {border:1px solid var(--bt-border);border-radius:13px;background:#f7faff;padding:15px 16px;margin:17px 0}
+.btreg-plans strong {font-size:13px}
+.btreg-plans p {font-size:13px;margin:5px 0 0;line-height:1.5}
+.btreg-main-action {min-height:48px!important;font-size:14px!important;padding:10px 16px!important}
+.btreg-topline {display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--bt-muted);font-size:11px;font-weight:600}
+.btreg-demo-label {font-weight:850;letter-spacing:.4px;color:var(--bt-navy)}
+.btreg-demo-label span {color:var(--bt-blue)}
+.btreg-steps {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;list-style:none;padding:0;margin:17px 0 24px}
+.btreg-steps li {display:flex;align-items:center;gap:8px;border-bottom:3px solid #e1eaf8;padding:0 2px 12px;min-width:0;color:#577294;font-size:12px;font-weight:650}
+.btreg-steps li.active {border-color:var(--bt-blue);color:var(--bt-navy)}
+.btreg-steps li.complete {border-color:#12a16a;color:#285f58}
+.btreg-step-mark {display:grid;place-items:center;width:28px;height:28px;flex-shrink:0;border:1px solid #d5e3f4;border-radius:50%;background:#f5f9ff}
+.btreg-steps li.active .btreg-step-mark {background:#e9f3ff;border-color:#a4caff;color:var(--bt-blue)}
+.btreg-steps li.complete .btreg-step-mark {background:#e3f7ee;border-color:#b1e5d0;color:#08774c}
+.btreg-eyebrow {font-size:11px;font-weight:850;letter-spacing:.8px;text-transform:uppercase;color:var(--bt-blue)}
+.btreg-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:17px 0}
+.btreg-field {display:flex;flex-direction:column;gap:7px;min-width:0;margin:0;color:#1e385e;font-size:13px;font-weight:720}
+.btreg-field input,.btreg-field textarea {box-sizing:border-box;width:100%;border:1px solid #bbcee6;border-radius:11px;background:#fbfdff;color:var(--bt-text);padding:12px;min-height:48px;font:inherit;font-size:16px;font-weight:450;outline-offset:2px}
+.btreg-field input:focus,.btreg-field textarea:focus {border-color:var(--bt-blue);outline:2px solid #c6defe}
+.btreg-field input[aria-invalid=true],.btreg-field textarea[aria-invalid=true] {border-color:#bd364f;background:#fff9fa}
+.btreg-field textarea {min-height:130px;resize:vertical;line-height:1.5}
+.btreg-fields .btreg-field:nth-child(1) {grid-column:1/-1}
+.btreg-error {font-size:12px;color:#ae2840;font-weight:600;line-height:1.35}
+.btreg-consent {display:flex;align-items:flex-start;gap:10px;margin:14px 0;color:#28496e;font-size:13px;line-height:1.45}
+.btreg-consent input {width:20px;height:20px;flex-shrink:0;accent-color:var(--bt-blue)}
+.btreg-help,.btreg-footnote {font-size:12px!important;line-height:1.5!important;color:var(--bt-muted)}
+.btreg-example-title {font-size:13px!important;font-weight:740;margin:17px 0 9px}
+.btreg-examples {display:flex;flex-wrap:wrap;gap:7px}
+.btreg-examples button {border:1px solid #d1e3fc;border-radius:10px;background:#f4f9ff;color:#1d548a;text-align:left;padding:10px 12px;min-height:44px;line-height:1.3;font-size:12px;cursor:pointer}
+.btreg-examples button:hover {border-color:#7cb9ff;background:#eaf4ff}
+.btreg-count {text-align:right;color:#627e9e;font-size:11px;font-weight:600}
+.btreg-review section {margin:13px 0;border:1px solid var(--bt-border);background:#f9fbff;border-radius:13px;padding:14px}
+.btreg-review section header {display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;gap:9px}
+.btreg-review h4 {font-size:14px;margin:0;color:var(--bt-navy)}
+.btreg-review header button {font-size:12px;color:var(--bt-blue);font-weight:750;border:0;background:transparent;cursor:pointer;padding:8px}
+.btreg-review section p {margin:4px 0;font-size:13px;overflow-wrap:anywhere;line-height:1.5}
+.btreg-quoted {white-space:pre-wrap}
+.btreg-actions {display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--bt-border);padding-top:16px;margin-top:20px}
+.btreg-actions button {min-height:48px!important;min-width:120px;padding:10px 16px!important;font-size:13px!important}
+.btreg-actions .cv-primary {margin-left:auto}
+.btreg-actions button:disabled {opacity:.45;cursor:default}
+.btreg-footnote {display:flex;align-items:center;gap:7px;margin:14px 0 0}
+.btreg-footnote svg {flex-shrink:0}
+.btreg-success {text-align:center;padding:24px 12px 12px}
+.btreg-success>svg {color:#0d9a65}
+.btreg-success h3 {font-size:22px}
+.btreg-success p {font-size:14px;max-width:480px;margin:12px auto}
+.cv-intake {margin-top:15px}
+.cv-intake-head {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.cv-intake-head h2 {margin:0!important;min-width:0}
+.cv-intake-head>span {font-size:11px;font-weight:700;color:#176ce2;background:#eaf3ff;padding:6px 10px;border-radius:18px}
+.cv-intake-lead {color:var(--bt-muted);font-size:12px;margin-bottom:13px}
+.cv-intake-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cv-intake-item {border:1px solid var(--bt-border);background:#f9fbff;border-radius:14px;padding:16px;min-width:0}
+.cv-intake-item-top {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cv-intake-item h3 {font-size:15px;margin:10px 0 5px;color:var(--bt-text)}
+.cv-intake-item p {font-size:12px;line-height:1.5;margin:5px 0;color:#365376;overflow-wrap:anywhere}
+.cv-intake-item .cv-badge {background:#fff0ce;color:#925400;font-size:11px;padding:6px 10px}
+.cv-intake-item .cv-intake-reason {background:#eff6ff;border-radius:9px;padding:10px;margin:10px 0;white-space:pre-wrap;color:#244878}
+.cv-intake-date {font-size:11px;color:var(--bt-muted);font-weight:650}
+.cv-intake-note {font-size:11px!important;color:var(--bt-muted)!important;border-top:1px solid var(--bt-border);padding-top:10px;margin-top:12px!important}
+@media(max-width:760px){
+ .btreg-steps li {flex-direction:column;align-items:flex-start;font-size:10px;gap:4px}
+ .btreg-steps {margin:15px 0 18px}
+ .btreg-fields {grid-template-columns:1fr;gap:12px}
+ .btreg-fields .btreg-field:nth-child(1) {grid-column:auto}
+ .btreg-topline {font-size:10px}
+ .btreg-content h3,.btreg-review h3,.btreg-intro h3 {font-size:21px}
+ .btreg-actions button {min-width:0;padding:10px 12px!important}
+ .cv-intake-grid {grid-template-columns:1fr}
+ .cv-intake-item {padding:14px}
+}
+@media(prefers-reduced-motion:reduce){.btreg *,.cv-intake * {scroll-behavior:auto!important;transition:none!important}}

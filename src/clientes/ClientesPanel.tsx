@@ -1,13 +1,16 @@
 import { useMemo, useRef, useState } from 'react'
-import { ArrowRight, CalendarDays, CarFront, ChevronRight, FileText, Filter, Link, Plus, Search, UsersRound } from 'lucide-react'
+import { ArrowRight, CalendarDays, CarFront, ChevronRight, ClipboardList, FileText, Filter, Link, Plus, Search, UsersRound } from 'lucide-react'
 import { ClientBadge, ClientCard, ClienteDetail, ClienteQuickView, HistorialVehiculo, ObservacionesTecnicas, initials } from './ClientViews'
 import { demoClients, demoVehicles, searchClients, vehiclesForClient, type ClientStatus, type DemoClient, type TechnicalObservation, type VehicleHistory } from './clientesData'
-import { RegistroClienteDemo, RegistroPorEnlace } from './RegistroClienteDemo'
+import { RegistroClienteDemo } from './RegistroClienteDemo'
+import { RegistroVisitaDemo } from './RegistroVisitaDemo'
+import { crearSolicitudDemo, solicitudesDemoIniciales, type SolicitudIngresoDemo } from './registroVisitaData'
 import type { ReactNode } from 'react'
 import './clientes.css'
 type Dialog = {type:'new'}|{type:'link'}|{type:'client'}|{type:'observation';observation:TechnicalObservation}|{type:'history';history:VehicleHistory}
 export function ClientesPanel({globalSearch,onOrder,initialVehicleId}:{globalSearch:string;onOrder:(id:string)=>void;initialVehicleId?:string}) {
  const [query,setQuery]=useState(''),[filter,setFilter]=useState<ClientStatus|'Todos'>('Todos'),[clients,setClients]=useState(demoClients)
+ const [requests,setRequests]=useState<SolicitudIngresoDemo[]>(solicitudesDemoIniciales)
  const [clientId,setClientId]=useState(demoVehicles.find(v=>v.id===initialVehicleId)?.clientId??demoClients[0].id),[vehicleId,setVehicleId]=useState(initialVehicleId??demoVehicles[0].id),[dialog,setDialog]=useState<Dialog|null>(null)
  const quickRef=useRef<HTMLElement>(null)
  const client=clients.find(c=>c.id===clientId)??clients[0],vehicles=vehiclesForClient(client.id)
@@ -23,11 +26,27 @@ export function ClientesPanel({globalSearch,onOrder,initialVehicleId}:{globalSea
    <div className="cv-client-mobile">{filtered.map(c=><button key={c.id} onClick={()=>selectClient(c)} aria-label={`Seleccionar ${c.name}`}><span className="cv-avatar">{initials(c.name)}</span><span><strong>{c.name}</strong><small>{c.phone} · {vehiclesForClient(c.id).length} vehículos</small></span><ClientBadge status={c.status}/><ChevronRight/></button>)}</div>
    {!filtered.length&&<div className="cv-empty" role="status"><Search/><p>No hay clientes de muestra que coincidan.</p><button className="cv-secondary" onClick={()=>{setQuery('');setFilter('Todos')}}>Limpiar filtros locales</button></div>}
   </ClientCard><section ref={quickRef} tabIndex={-1} className="cv-quick-wrap" aria-label="Ficha rápida seleccionada"><ClienteQuickView client={client} vehicleId={vehicle?.id??''} onVehicle={setVehicleId} onDetail={()=>setDialog({type:'client'})}/></section>{vehicle?<ObservacionesTecnicas clientId={client.id} vehicle={vehicle} onOpen={observation=>setDialog({type:'observation',observation})}/>:<ClientCard title="Observaciones técnicas (0)" icon={<FileText/>}><p className="cv-empty">Sin vehículos asociados en esta ficha temporal.</p></ClientCard>}</div>
+  <SolicitudesIngresoDemo requests={requests}/>
   {vehicle&&<HistorialVehiculo clientId={client.id} vehicle={vehicle} onVehicle={setVehicleId} onOpen={history=>setDialog({type:'history',history})}/>}
   <p className="cv-sample-note">{clients.length} fichas de muestra · KPI ilustrativos DEMO; no representan el tamaño de este listado ni proceden de Supabase. Cambios temporales, sin guardado real.</p>
   {dialog&&<ClientDialog title={dialog.type==='new'?'Nuevo cliente · DEMO':dialog.type==='link'?'Registro mediante enlace · DEMO':dialog.type==='client'?'Ficha completa del cliente · DEMO':dialog.type==='observation'?'Observación técnica · DEMO':'Antecedente del vehículo · DEMO'} onClose={close}>
-   {dialog.type==='new'?<RegistroClienteDemo onCreate={draft=>{const created:DemoClient={id:crypto.randomUUID(),emailVerified:false,name:draft.name.trim(),phone:draft.phone,email:draft.email,address:draft.address||'No indicada',commune:draft.commune||'No indicada',status:'Pendiente',lastVisit:'Sin visitas'};setClients(previous=>[...previous,created])}}/>:dialog.type==='link'?<RegistroPorEnlace/>:dialog.type==='client'?<ClienteDetail client={client} onOrder={onOrder}/>:dialog.type==='observation'?<><p>{dialog.observation.text}</p><p>Vehículo: {demoVehicles.find(v=>v.id===dialog.observation.vehicleId)?.plate}</p><p>Pendiente técnico vinculado a {dialog.observation.orderId}. No reparado ni eliminado en esta demo.</p><button className="cv-primary" onClick={()=>onOrder(dialog.observation.orderId)}>Ver orden asociada <ArrowRight/></button></>:<><h3>{dialog.history.work}</h3><p>{dialog.history.date} · {vehicle?.plate}</p><p>Kilometraje: {dialog.history.mileage.toLocaleString('es-CL')} km · {dialog.history.technician}</p><p>Repuestos: {dialog.history.parts.join(', ')||'Sin detalle en este ejemplo'}</p><p>Informe: {dialog.history.reportId??'No generado'} · Cotización: {dialog.history.estimateId??'No generada'}</p><p>Entrega de documentos: {dialog.history.deliveryStatus}. El envío futuro requerirá correo verificado, destinatario confirmado, PDF seguro y bitácora.</p>{dialog.history.orderId?<button className="cv-primary" onClick={()=>onOrder(dialog.history.orderId!)}>Ver orden {dialog.history.orderId} <ArrowRight/></button>:<p className="cv-privacy">Visita histórica de muestra, sin una ficha de orden navegable.</p>}</>}
+   {dialog.type==='new'?<RegistroClienteDemo onCreate={draft=>{const created:DemoClient={id:crypto.randomUUID(),emailVerified:false,name:draft.name.trim(),phone:draft.phone,email:draft.email,address:draft.address||'No indicada',commune:draft.commune||'No indicada',status:'Pendiente',lastVisit:'Sin visitas'};setClients(previous=>[...previous,created])}}/>:dialog.type==='link'?<RegistroVisitaDemo onComplete={draft=>setRequests(previous=>[crearSolicitudDemo(draft,'sol-local-'+crypto.randomUUID()),...previous])}/>:dialog.type==='client'?<ClienteDetail client={client} onOrder={onOrder}/>:dialog.type==='observation'?<><p>{dialog.observation.text}</p><p>Vehículo: {demoVehicles.find(v=>v.id===dialog.observation.vehicleId)?.plate}</p><p>Pendiente técnico vinculado a {dialog.observation.orderId}. No reparado ni eliminado en esta demo.</p><button className="cv-primary" onClick={()=>onOrder(dialog.observation.orderId)}>Ver orden asociada <ArrowRight/></button></>:<><h3>{dialog.history.work}</h3><p>{dialog.history.date} · {vehicle?.plate}</p><p>Kilometraje: {dialog.history.mileage.toLocaleString('es-CL')} km · {dialog.history.technician}</p><p>Repuestos: {dialog.history.parts.join(', ')||'Sin detalle en este ejemplo'}</p><p>Informe: {dialog.history.reportId??'No generado'} · Cotización: {dialog.history.estimateId??'No generada'}</p><p>Entrega de documentos: {dialog.history.deliveryStatus}. El envío futuro requerirá correo verificado, destinatario confirmado, PDF seguro y bitácora.</p>{dialog.history.orderId?<button className="cv-primary" onClick={()=>onOrder(dialog.history.orderId!)}>Ver orden {dialog.history.orderId} <ArrowRight/></button>:<p className="cv-privacy">Visita histórica de muestra, sin una ficha de orden navegable.</p>}</>}
   </ClientDialog>}
  </div>
 }
 function ClientDialog({title,onClose,children}:{title:string;onClose:()=>void;children:ReactNode}) {return <dialog className="cv-dialog" ref={node=>{if(node&&!node.open)node.showModal()}} onCancel={onClose} onClose={onClose} aria-label={title}><header><h2>{title}</h2><button className="cv-close" aria-label="Cerrar diálogo" onClick={onClose}>×</button></header>{children}<button className="cv-secondary cv-dialog-cancel" onClick={onClose}>Cerrar / cancelar</button></dialog>}
+
+function SolicitudesIngresoDemo({requests}:{requests:SolicitudIngresoDemo[]}) {
+ return <section className="dashboard-card cv-card cv-intake" aria-label="Solicitudes de ingreso DEMO">
+  <div className="cv-intake-head"><h2><ClipboardList/> Solicitudes de ingreso ({requests.length})</h2><span>Solo solicitudes ficticias</span></div>
+  <p className="cv-intake-lead">Antecedentes declarados por clientes de muestra, pendientes de revisión del taller. No son órdenes de trabajo.</p>
+  <div className="cv-intake-grid">{requests.map(request=><article className="cv-intake-item" key={request.id}>
+   <div className="cv-intake-item-top"><span className="cv-intake-date">{request.date} · DEMO</span><span className="cv-badge amber">{request.status}</span></div>
+   <h3>{request.name}</h3>
+   <p><strong>Vehículo:</strong> {request.vehicle}{request.plate==='No indicada'?'':' · Patente: '+request.plate}</p>
+   <p><strong>Kilometraje:</strong> {request.mileage.toLocaleString('es-CL')} km</p>
+   <p className="cv-intake-reason"><strong>Motivo informado:</strong> {request.clientReportedReason}</p>
+   <p className="cv-intake-note">Sin diagnóstico profesional. La revisión y conversión a OT estarán disponibles en otra etapa, previa autorización del taller.</p>
+  </article>)}</div>
+ </section>
+}
