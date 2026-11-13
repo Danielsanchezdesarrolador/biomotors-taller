@@ -65,3 +65,12 @@ Se distingue la comprobación del contenido servido de un estado administrativo 
 Los pushes activan el workflow principal y el nuevo recorrido. Tras publicar, `gh run list` volvió a devolver **Forbidden**; no se atribuye CI remoto PASS. Los resultados locales 76/76, build/PWA y recorridos de navegador sí están ejecutados. Revisión remota: [Actions](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions).
 
 Al cierre, detenerse para revisión del Director; no comenzar 01D.
+
+
+## Verificación independiente posterior — 13/11/2026
+
+GitHub Actions remoto se pudo consultar desde ChatGPT, pese al `Forbidden` del entorno Codex. [CI final 43525591408](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43525591408) sobre `4eaf123`: **SUCCESS** (Web/iOS PWA: **76/76 Vitest en 13 archivos**, TypeScript, Vite build y verificación PWA; Android React Native/Expo: SUCCESS, sin APK). Además [recorrido BT-FLOW-01 43525267992](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43525267992) SUCCESS, y regresiones BT-COT-01 y BT-REG-02 SUCCESS.
+
+Se descargó el artefacto GitHub `BT-FLOW-01-Recepcion-Expediente-Capturas` (ID 14084054421): seis capturas de Chromium y reporte de pruebas. Revisión visual preliminar: identidad R2 y cinco paneles preservados, recepción y expediente legibles en escritorio/móvil. **Observaciones UX para el Director, no errores de CI**: en móvil los ocho expedientes DEMO alargan mucho Inicio y llevan la tarjeta de expediente muy abajo; evaluar mostrar 3–4 primero y «Ver todas». Validar en Safari físico que la navegación inferior no oculte el CTA y el scroll horizontal de los siete hitos sea claro. La vista móvil muestra IDs extensos de visita que podrían relegarse a detalles técnicos. Ninguna observación representa aprobación visual ni autoriza cambios de código.
+
+BT-FLOW-01D/E continúan pendientes de autorización y diseño detallado. No se alteran Supabase, Auth/RLS, BT-CP02-D ni Android por esta nota.

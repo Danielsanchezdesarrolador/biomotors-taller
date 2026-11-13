@@ -484,7 +484,8 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] Recepción de cliente/vehículo existente o nuevo y solicitud BT-REG-02, confirmación de visita y OT idempotente; borradores independientes conservados al navegar.
 - [x] Expediente de siete hitos / nueve estados internos y retorno desde módulos a los mismos IDs de OT, multipunto y documentos. Abrir módulos no completa etapas.
 - [x] TypeScript, 76 pruebas Vitest, build/PWA; recorrido nuevo y seis regresiones en 1650/1440/768/390/375 PASS; BT-REG-02 a 1650/390 PASS y capturas versionadas.
-- [ ] Aprobación visual/funcional del Director, Safari físico y confirmación remota de CI. 01D/E pendientes: coordinación de propuesta/versión/respuesta, ejecución autorizada, excepciones y cierre/entrega explícitos. No se inicia 01D.
+- [x] CI remoto confirmado independientemente el 13/11/2026: [GitHub Actions 43525591408](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43525591408) SUCCESS (76/76 Vitest, TypeScript/build/PWA y Android Expo); workflows de BT-FLOW-01/BT-COT-01/BT-REG-02 también PASS en `9c12f97`.
+- [ ] Aprobación visual/funcional del Director y Safari físico. 01D/E pendientes: coordinación de propuesta/versión/respuesta, ejecución autorizada, excepciones y cierre/entrega explícitos. No se inicia 01D.
 
 [Checkpoint BT-FLOW-01C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).
 
