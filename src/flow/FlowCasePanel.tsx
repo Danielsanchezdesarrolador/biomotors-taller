@@ -30,6 +30,7 @@ export function FlowCasePanel({
     [confirm, setConfirm] = useState(false),
     [error, setError] = useState('')
   const heading = useRef<HTMLHeadingElement>(null)
+  const shortVisitRef = visit.id.slice(-8).toUpperCase()
   const current = milestones.find((m) => m.id === stage) ?? milestones[0]
   function select(value: string) {
     setStage(value)
@@ -50,7 +51,7 @@ export function FlowCasePanel({
         </span>
         <div>
           <h1>Expediente de visita · DEMO</h1>
-          <p>{visit.id} · Memoria temporal de esta pestaña</p>
+          <p><span title={visit.id}>Ref. {shortVisitRef}</span> · Memoria temporal de esta pestaña</p>
         </div>
       </header>
       <p className="fl-memory">
@@ -73,6 +74,8 @@ export function FlowCasePanel({
         ))}
       </section>
       <div className="fl-case-layout">
+        <div className="fl-milestone-container">
+        <p className="fl-mobile-milestone-hint">Desliza los hitos para ver las 7 etapas →</p>
         <nav className="dashboard-card fl-milestones" aria-label="Hitos del expediente">
           {milestones.map((m, i) => (
             <button
@@ -97,6 +100,7 @@ export function FlowCasePanel({
             </button>
           ))}
         </nav>
+        </div>
         <section className="dashboard-card fl-stage-content">
           <span className="fl-pill">
             Hito {milestones.findIndex((m) => m.id === stage) + 1} de 7 ·{' '}
@@ -321,7 +325,7 @@ export function FlowCasePanel({
           )}
           <footer className="fl-stage-footer">
             <span>
-              Visita {visit.id} · {order?.id ?? 'Recepción sin OT'}
+              <span title={visit.id}>Ref. {shortVisitRef}</span> · {order?.id ?? 'Recepción sin OT'}
             </span>
             <button className="rp-inline" onClick={onBack}>
               Volver a Inicio

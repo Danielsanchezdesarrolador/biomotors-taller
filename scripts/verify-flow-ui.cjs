@@ -68,6 +68,17 @@ const { chromium } = require('playwright'),
       }
       await p.goto(process.env.BASE_URL || 'http://localhost:5173')
       assert.equal(await p.locator('.fl-case-row').count(), 8)
+      if (width <= 760) {
+        assert.equal(await p.locator('.fl-case-row:visible').count(), 4)
+        const expand = p.getByRole('button', { name: 'Ver todos los trabajos (8)', exact: true })
+        assert.equal(await expand.getAttribute('aria-expanded'), 'false')
+        await expand.click()
+        assert.equal(await p.locator('.fl-case-row:visible').count(), 8)
+        await p.getByRole('button', { name: 'Mostrar menos trabajos', exact: true }).click()
+        assert.equal(await p.locator('.fl-case-row:visible').count(), 4)
+      } else {
+        assert.equal(await p.locator('.fl-case-row:visible').count(), 8)
+      }
       await noOverflow()
       await capture('INICIO')
       const name = `Cliente flujo ${width} DEMO`,
@@ -89,6 +100,12 @@ const { chromium } = require('playwright'),
       await receptionStep2(reason)
       assert.match(await p.locator('.fl-case-summary').innerText(), /Sin crear/)
       const visit = await p.locator('.fl-heading p').innerText()
+      assert.match(visit, /Ref\. [A-Z0-9-]{8} · Memoria temporal/)
+      if (width <= 760) {
+        await p.getByText('Desliza los hitos para ver las 7 etapas').waitFor()
+        await p.locator('.fl-milestones button').last().scrollIntoViewIfNeeded()
+        assert.equal(await nav().count(), 5)
+      }
       const orderId = await confirmOrder()
       assert.match(orderId, /^OT-DEMO-/)
       await capture('EXPEDIENTE')

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ArrowRight, CarFront, Layers, Plus, Wrench } from 'lucide-react'
 import {
   allCases,
@@ -18,6 +19,7 @@ export function FlowHome({
   onOrders: () => void
   query: string
 }) {
+  const [showAll, setShowAll] = useState(false)
   const visits = allCases().filter((v) => {
       const { client, vehicle } = caseContext(v.id)
       return [client.name, vehicle.description, vehicle.plate, v.orderId ?? '', v.id]
@@ -50,7 +52,7 @@ export function FlowHome({
           </div>
           <div className="fl-hero-art" aria-hidden="true" />
         </section>
-        <section className="dashboard-card fl-continuing">
+        <section className={"dashboard-card fl-continuing" + (!showAll && !query.trim() ? " fl-collapsed" : "")}>
           <header>
             <h2>
               <Wrench />
@@ -64,6 +66,7 @@ export function FlowHome({
           <p className="fl-help">
             Expedientes de esta sesión DEMO; los KPI superiores siguen siendo muestras ilustrativas.
           </p>
+          <div id="fl-active-visits">
           {visits.map((visit) => {
             const { vehicle } = caseContext(visit.id),
               p = caseProgress(visit.id)
@@ -100,6 +103,19 @@ export function FlowHome({
               </article>
             )
           })}
+          </div>
+          {visits.length > 4 && !query.trim() && (
+            <button
+              type="button"
+              className="fl-expand-visits"
+              aria-expanded={showAll}
+              aria-controls="fl-active-visits"
+              onClick={() => setShowAll((previous) => !previous)}
+            >
+              {showAll ? 'Mostrar menos trabajos' : `Ver todos los trabajos (${visits.length})`}
+              <ArrowRight aria-hidden="true" />
+            </button>
+          )}
           {!visits.length && (
             <p className="fl-empty">Sin expedientes que coincidan con la búsqueda.</p>
           )}
