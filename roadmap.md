@@ -383,3 +383,16 @@ Evidencia: [checkpoint BT-UI-03](docs/checkpoints/CHECKPOINT_BT_UI_03_20261111.m
 - [ ] Probar downgrade a Básico conservando lectura/exportación de formatos propios existentes y documentos históricos, aunque ya no pueda usarlos para nuevos informes.
 
 Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-PLAN-02. **Solo documentación: BT-INS-01 sigue en desarrollo por Codex, sin cambiar su alcance.**
+
+### BT-PLAN-IDEAS-01 — Registro continuo de ideas de Básico, Plus y Full (13/11/2026)
+
+**Decisión del Director:** se añadirán gradualmente nuevas funciones a los planes según surjan ideas. Todas deberán **guardarse con trazabilidad** para una revisión comercial integral antes del lanzamiento, sin olvidarlas ni implementarlas automáticamente.
+
+- [x] Crear un [registro maestro evolutivo](docs/REGISTRO_IDEAS_PLANES.md) con identificadores `BT-IDEA-001` en adelante, fecha, plan, decisión, estado y referencias.
+- [x] Cargar decisiones actuales: Básico gratuito sin anuncios en lanzamiento, Plus USD 5, Full USD 15, prueba Full 72 h cancelable, registro por enlace, envío de informes PDF y subida de formatos propios en Plus/Full.
+- [x] Separar decisiones aprobadas de **propuestas por evaluar**, como límites de uso, métricas/roles avanzados y publicidad posterior al lanzamiento.
+- [ ] Con cada idea futura, asignar nuevo ID y conservar historial (nunca borrar sin rastro); enlazar cambios de estado a checkpoint.
+- [ ] **Revisión final obligatoria antes de lanzar los planes:** confirmar prestaciones realmente implementadas, límites, costes, rentabilidad, impuestos, condiciones comerciales y aprobación expresa del Director.
+- [ ] No agregar funciones al código, activar pagos, alterar Supabase ni modificar el trabajo de Codex BT-INS-01 a partir de este registro sin autorización específica.
+
+**Fuente viva:** [docs/REGISTRO_IDEAS_PLANES.md](docs/REGISTRO_IDEAS_PLANES.md).
