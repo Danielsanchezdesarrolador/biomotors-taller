@@ -455,7 +455,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 - [x] Revisar el cierre BT-COT-01 y confirmar CI remoto: [GitHub Actions 43516223991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43516223991) **SUCCESS**, 66/66 Vitest, TypeScript, Vite/PWA y Android Expo PASS. El frontend publicado fue verificado por Codex; aprobación visual y Safari físico pendientes.
 - [x] Establecer plan documental y reglas de seguridad: único expediente por visita, próximos pasos, posibilidad de retorno y selección de cliente/vehículo existente, sin diagnóstico ni precio inferidos.
-- [ ] **BT-FLOW-01A — Arquitectura y UX:** matriz de estados/eventos y de datos compartidos; inventario de `ClientesPanel`, `OrdenesPanel`, `orderSession`, `multipuntoSession`, `trabajosSession`, `reportSession`; mockups escritorio/móvil de Inicio/expediente; revisión del Director antes de tocar R2.
+- [ ] **BT-FLOW-01A — Arquitectura y UX:** auditoría de los módulos, expediente por visita, matriz de etapas/eventos y primera propuesta de mockups de Inicio/expediente escritorio+móvil **documentados (13/11/2026)**. **Pendiente aprobación visual del Director y homologación exacta con R2** antes de cambiar interfaz. [Diseño y arquitectura 01A](docs/BT_FLOW_01A_DISENO_ARQUITECTURA.md).
 - [ ] **BT-FLOW-01B — Recepción y expediente DEMO:** fuente compartida **solo en memoria** y vínculo estable de cliente, vehículo, solicitud y visita; integrar alta manual, cliente recurrente, solicitud BT-REG-02 confirmada y OT sin reescritura. Resolver la discontinuidad actual: las solicitudes y OT nuevas no son visibles en todos los módulos.
 - [ ] **BT-FLOW-01C — Inicio y «Continuar trabajo»:** CTA Nuevo ingreso, lista contextual de expedientes activos, paso actual y siguiente acción; permitir abrir menús laterales y regresar al mismo expediente.
 - [ ] **BT-FLOW-01D — Multipunto, trabajos y cotización:** reutilizar BT-INS-01 y BT-COT-01; preparar documentos desde ítems expresamente definidos y valorizados por el mecánico, nunca por deducción del motivo. Respetar aprobación de versión, `performed`, revisiones y pendientes técnicos. Nada se envía ni se aprueba realmente en DEMO.
@@ -465,3 +465,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **Puerta de arranque:** completar la aprobación visual de BT-COT-01 y validar el diseño de BT-FLOW-01A antes de programar cambios en los módulos aprobados. No se crea sexta sección de navegación ni se modifica código por esta actualización de roadmap.
 
 [Checkpoint de planificación BT-FLOW-01](docs/checkpoints/CHECKPOINT_BT_FLOW_01_PLAN_20261113.md).
+
+**Evidencia BT-FLOW-01A:** revisión de main `c4ccd5f`, CI remoto previo SUCCESS; dos mockups conceptuales entregados en la conversación (no Render ni capturas de la app), especificación técnica y checkpoint en GitHub. No se modificaron archivos React, Supabase, seguridad, los cinco paneles o BT-COT-01. El avance es documental y requiere visto bueno.
+
+[Checkpoint BT-FLOW-01A](docs/checkpoints/CHECKPOINT_BT_FLOW_01A_20261113.md).

@@ -86,10 +86,10 @@ La primera tarea técnica debe ser un inventario de relaciones/identidades y de 
 ## 6. Roadmap incremental — NO ejecutar sin nueva orden
 
 ### BT-FLOW-01A — Contratos y UX del recorrido
-- [ ] Auditar exhaustivamente clientes, vehículos, solicitudes, OT, multipunto, cotización, informe, sesiones y dependencia entre componentes en HEAD actualizado.
-- [ ] Diseñar el expediente único y matriz de eventos/transiciones/gates; distinguir solicitud, visita, OT, documento, realización y aprobación.
-- [ ] Proponer wireframes escritorio 1650/1440 y móvil 390/375; obtener revisión visual del Director antes de alterar Inicio R2.
-- [ ] Identificar riesgos de duplicación y diagramar qué información se escribe una vez y dónde se reutiliza.
+- [x] Auditar clientes, vehículos, solicitudes, OT, multipunto, cotización, informe, sesiones y dependencia entre componentes en HEAD `c4ccd5f`. Inventario en `docs/BT_FLOW_01A_DISENO_ARQUITECTURA.md`.
+- [x] Diseñar conceptualmente el expediente único, vínculos por ID, etapas/transiciones y validaciones; distinguir solicitud, visita, OT, documento, realización y aprobación. Aún NO implementado.
+- [ ] Revisar y aprobar visualmente los mockups conceptuales de Inicio y Expediente (escritorio y móvil) creados en conversación, homologarlos al R2 real y obtener visto bueno del Director antes de alterar Inicio. La propuesta visual está preparada, la aprobación sigue pendiente.
+- [x] Identificar brechas de vida útil de estado local y duplicación de entidades; tabla de orígenes de datos y reutilización documentada en `docs/BT_FLOW_01A_DISENO_ARQUITECTURA.md`.
 
 ### BT-FLOW-01B — Estado de expediente y recepción DEMO
 - [ ] Crear/adaptar un **único estado en memoria**, con ID estable, adaptadores a modelos actuales y pruebas de propiedad/vínculo.
@@ -129,3 +129,5 @@ Tras BT-CP02-D y autorización independiente: persistencia multitenant por `work
 4. Cierre final: recorrido de entrada a entrega ejecutado en DEMO sin duplicación de datos, roles/sincronización claramente limitados, regresiones PASS, capturas y revisión Director. No confundir página-memory con respaldo ni simulación con autorización.
 
 **Referencias:** `docs/checkpoints/CHECKPOINT_BT_COT_01_20261113.md`, `docs/checkpoints/CHECKPOINT_BT_REG_02_20261113.md`, `docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md`, `docs/SISTEMA_VISUAL_OFICIAL_R2.md`, `docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md`, `roadmap.md`.
+
+**Actualización BT-FLOW-01A (13/11/2026):** especificación detallada y dos conceptos visuales preparados para revisión. El diseño sigue SIN APROBACIÓN del Director y no se modificó código. [Diseño UX y contratos](BT_FLOW_01A_DISENO_ARQUITECTURA.md) · [Checkpoint de planificación 01A](checkpoints/CHECKPOINT_BT_FLOW_01A_20261113.md).
