@@ -1,3 +1,4 @@
+import { allCases } from '../flow/flowSession'
 import { useDemoSession } from '../session/useDemoSession'
 import { addSessionClient } from './directorySession'
 import { addSessionRequest, sessionRequests } from './intakeSession'
@@ -45,13 +46,13 @@ function SolicitudesIngresoDemo({requests,onReview}:{requests:SolicitudIngresoDe
   <div className="cv-intake-head"><h2><ClipboardList/> Solicitudes de ingreso ({requests.length})</h2><span>Solo solicitudes ficticias</span></div>
   <p className="cv-intake-lead">Antecedentes declarados por clientes de muestra, pendientes de revisión del taller. No son órdenes de trabajo.</p>
   <div className="cv-intake-grid">{requests.map(request=><article className="cv-intake-item" key={request.id}>
-   <div className="cv-intake-item-top"><span className="cv-intake-date">{request.date} · DEMO</span><span className="cv-badge amber">{request.status}</span></div>
+   <div className="cv-intake-item-top"><span className="cv-intake-date">{request.date} · DEMO</span><span className="cv-badge amber">{allCases().some(v=>v.intakeRequestId===request.id)?'Recepción vinculada · DEMO':request.status}</span></div>
    <h3>{request.name}</h3>
    <p><strong>Vehículo:</strong> {request.vehicle}{request.plate==='No indicada'?'':' · Patente: '+request.plate}</p>
    <p><strong>Kilometraje:</strong> {request.mileage.toLocaleString('es-CL')} km</p>
    <p className="cv-intake-reason"><strong>Motivo informado:</strong> {request.clientReportedReason}</p>
    <p className="cv-intake-note">Sin diagnóstico profesional. Antecedentes temporales de esta pestaña; la OT requiere confirmación humana.</p>
-   {onReview&&<button className="cv-secondary" onClick={()=>onReview(request.id)}>Revisar ingreso <ArrowRight/></button>}
+   {onReview&&<button className="cv-secondary" onClick={()=>onReview(request.id)}>{allCases().some(v=>v.intakeRequestId===request.id)?'Abrir expediente':'Revisar ingreso'} <ArrowRight/></button>}
   </article>)}</div>
  </section>
 }

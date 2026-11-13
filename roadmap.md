@@ -477,3 +477,13 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] TypeScript, 74/74 Vitest, build/PWA PASS antes de iniciar la interfaz C. Motores de inspección y documentos preservados; D/E pendientes.
 
 [Checkpoint BT-FLOW-01B](docs/checkpoints/CHECKPOINT_BT_FLOW_01B_20261113.md).
+
+### BT-FLOW-01C — Inicio, recepción y navegación guiada DEMO (13/11/2026)
+
+- [x] Referencias visuales 01A aprobadas expresamente para esta implementación; Inicio R2 con KPI conservados, Nuevo ingreso, Continuar trabajos y progreso contextual, sin sexto menú.
+- [x] Recepción de cliente/vehículo existente o nuevo y solicitud BT-REG-02, confirmación de visita y OT idempotente; borradores independientes conservados al navegar.
+- [x] Expediente de siete hitos / nueve estados internos y retorno desde módulos a los mismos IDs de OT, multipunto y documentos. Abrir módulos no completa etapas.
+- [x] TypeScript, 76 pruebas Vitest, build/PWA; recorrido nuevo y seis regresiones en 1650/1440/768/390/375 PASS; BT-REG-02 a 1650/390 PASS y capturas versionadas.
+- [ ] Aprobación visual/funcional del Director, Safari físico y confirmación remota de CI. 01D/E pendientes: coordinación de propuesta/versión/respuesta, ejecución autorizada, excepciones y cierre/entrega explícitos. No se inicia 01D.
+
+[Checkpoint BT-FLOW-01C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).

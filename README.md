@@ -125,3 +125,11 @@ Se permite usar únicamente datos de muestra. Sin persistencia, correos, pagos, 
 Pruebas automáticas: npm run typecheck, npm test, npm run build; el flujo visual Chromium y capturas de escritorio/móvil se ejecutan por separado en GitHub Actions «BT-REG-02 — Capturas y recorrido DEMO». Las capturas de navegador no sustituyen la revisión física en Safari iPhone ni la aprobación visual del Director.
 
 [Requerimiento original](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md) · [Checkpoint de implementación](docs/checkpoints/CHECKPOINT_BT_REG_02_20261113.md).
+
+## BT-FLOW-01B/C — Ingreso y expediente guiado DEMO
+
+Desde Inicio, «Nuevo ingreso de vehículo» permite elegir una ficha existente, registrar cliente/vehículo ficticios o revisar una solicitud BT-REG-02. La recepción abre un expediente por visita; la OT requiere confirmación humana y no se duplica por repetir la acción. «Continuar trabajos» y «Volver al expediente» conservan el contexto al navegar entre los cinco paneles.
+
+Las fichas, solicitudes, visitas y OT nuevas se comparten en memoria de la pestaña y pueden abrir su mismo multipunto, cotización e informe. Recargar/cerrar descarta los datos nuevos. No hay almacenamiento permanente, enlaces públicos, correos, firmas, pagos ni backend real conectado al flujo.
+
+BT-FLOW-01D/E siguen pendientes: coordinación profunda de propuesta, respuesta/versiones de cotización, ejecución autorizada, excepciones y cierre/entrega. Abrir módulos no completa etapas ni constituye autorización legal. [Checkpoint B](docs/checkpoints/CHECKPOINT_BT_FLOW_01B_20261113.md) · [Checkpoint C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).

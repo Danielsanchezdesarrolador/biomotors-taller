@@ -79,7 +79,12 @@ export function readCase(id: string) {
   allCases()
   const v = cases.get(id)
   if (!v) throw new Error('Expediente DEMO inexistente.')
-  return structuredClone(v)
+  const result = structuredClone(v)
+  if (result.quoteId) {
+    const quote = readWorkDocument(result.quoteId)
+    if (quote && quote.orderId === result.orderId) result.quoteRevision = quote.revision
+  }
+  return result
 }
 export function caseContext(id: string) {
   const visit = readCase(id),
@@ -255,4 +260,8 @@ export function caseProgress(id: string) {
     entrega: 'Cierre guiado pendiente 01E'
   }
   return { stage, states, action: actions[stage], inspection, quote, work }
+}
+
+export function activeCaseId() {
+  return selectedId
 }

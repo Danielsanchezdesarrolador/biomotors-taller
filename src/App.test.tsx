@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import App from './App'
 
-describe('BT-UI-02 — Inicio premium (DEMOSTRACIÓN)', () => {
+describe('BT-FLOW-01C — Inicio premium guiado (DEMOSTRACIÓN)', () => {
   const output = renderToStaticMarkup(<App />)
 
   it('mantiene los cinco paneles de navegación aprobados', () => {
@@ -11,19 +11,19 @@ describe('BT-UI-02 — Inicio premium (DEMOSTRACIÓN)', () => {
     }
   })
 
-  it('muestra el Inicio premium con sus tarjetas, gráfico y accesos', () => {
-    for (const text of ['Byte', 'Torque', '¡Hola, equipo!', 'Órdenes activas', 'Vehículos en taller', 'Informes pendientes', 'Cotizaciones pendientes', 'Estado de órdenes', 'Órdenes recientes', 'Actividad reciente', 'Accesos rápidos']) {
+  it('muestra los KPI conservados, ingreso, expedientes y progreso verificable', () => {
+    for (const text of ['Byte', 'Torque', '¿Qué vamos a hacer hoy?', 'Órdenes activas', 'Vehículos en taller', 'Informes pendientes', 'Cotizaciones pendientes', 'Nuevo ingreso de vehículo', 'Continuar trabajos', 'Expediente de visita', 'Iniciar inspección']) {
       expect(output).toContain(text)
     }
     expect((output.match(/class="metric-card"/g) ?? []).length).toBe(4)
-    expect((output.match(/class="order-row"/g) ?? []).length).toBe(4)
-    expect(output).toContain('status-legend')
+    expect((output.match(/class="fl-case-row"/g) ?? []).length).toBe(8)
+    expect(output).toContain('Navegar no completa hitos')
   })
 
   it('no presenta datos ficticios como operaciones reales', () => {
     expect(output).toContain('Entorno de demostración:')
-    expect(output).toContain('las cifras y órdenes son ficticias')
-    expect(output).toContain('No se registran clientes ni se envían correos.')
+    expect(output).toContain('datos ficticios solo en memoria de esta pestaña')
+    expect(output).toContain('Recargar descarta los cambios nuevos. Sin guardado permanente ni correos.')
     expect(output).toContain('Taller de demostración')
   })
 

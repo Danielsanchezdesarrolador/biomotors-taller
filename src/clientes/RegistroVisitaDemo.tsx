@@ -73,7 +73,7 @@ export function RegistroVisitaDemo({onComplete}:{onComplete:(draft:VisitaDraft)=
   if(done)return <div className="btreg-success" role="status">
     <CheckCircle2 size={49}/><h3>Simulación completada</h3>
     <p><strong>Simulación completada. No se enviaron ni almacenaron datos reales.</strong></p>
-    <p>La solicitud ficticia aparece en «Solicitudes de ingreso» de esta pantalla mientras permanezcas en el módulo. No se creó una orden ni un diagnóstico profesional.</p>
+    <p>La solicitud ficticia aparece en «Solicitudes de ingreso» de esta pantalla mientras mantengas abierta esta pestaña; se descarta al recargar o cerrar. No se creó una orden ni un diagnóstico profesional.</p>
     <button type="button" className="cv-secondary" onClick={()=>{setDraft({...emptyVisitaDraft});setStep(1);setReview(false);setDone(false);setOpened(false);setErrors({})}}>Nueva simulación</button>
   </div>
   if(!opened)return <div className="btreg-intro">

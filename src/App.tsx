@@ -1,11 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useDemoSession } from './session/useDemoSession'
+import { FlowHome } from './flow/FlowHome'
+import { FlowCasePanel } from './flow/FlowCasePanel'
+import { ReceptionWizard } from './flow/ReceptionWizard'
+import { activeCaseId, selectedCase, selectCase, allCases, openCaseResource, type FlowResource } from './flow/flowSession'
+import './flow/flow.css'
+import { useEffect, useRef, useState } from 'react'
 import {
-  ArrowRight, BarChart3, Bell, CalendarDays, CarFront, Check, ChevronDown, Clock3, Zap,
-  ChevronRight, CircleAlert, ClipboardCheck, FilePlus2,
+  ArrowRight, Bell, CalendarDays, CarFront, ChevronDown,
+  CircleAlert, ClipboardCheck,
   FileText, House, Info, Menu, Search, Settings2,
-  UsersRound, Wrench, X, type LucideIcon,
+  Wrench, X, type LucideIcon,
 } from 'lucide-react'
-import { demoActivities, filterDemoOrders, getDashboardMetrics, orderStatuses, type OrderStatus } from './demo/dashboard'
 import { demoVehicles } from './clientes/clientesData'
 import { ConfiguracionPanel } from './configuracion/ConfiguracionPanel'
 import { InformesPanel } from './informes/InformesPanel'
@@ -21,11 +26,6 @@ const navItems: NavItem[] = [
   { id: 'informes', label: 'Informes y cotizaciones', compact: 'Informes', icon: FileText },
   { id: 'configuracion', label: 'Configuración', compact: 'Más', icon: Settings2 },
 ]
-const quickActions: { label: string; sub: string; icon: LucideIcon; to: Screen }[] = [
-  { label: 'Nueva orden', sub: 'Crear OT', icon: FilePlus2, to: 'ordenes' },
-  { label: 'Nuevo cliente', sub: 'Registrar cliente', icon: UsersRound, to: 'clientes' },
-  { label: 'Nuevo informe', sub: 'Preparar revisión', icon: FileText, to: 'informes' },
-]
 const metricItems: { label: string; value: number; icon: LucideIcon; className: string; destination: Screen }[] = [
   { label: 'Órdenes activas', value: 18, icon: Wrench, className: 'blue', destination: 'ordenes' },
   { label: 'Vehículos en taller', value: 14, icon: CarFront, className: 'violet', destination: 'clientes' },
@@ -33,13 +33,14 @@ const metricItems: { label: string; value: number; icon: LucideIcon; className: 
   { label: 'Cotizaciones pendientes', value: 5, icon: FileText, className: 'purple', destination: 'informes' },
 ]
 
-function StateBadge({ status }: { status: OrderStatus }) {
-  return <span className={'order-status status-' + status.key}>{status.label}</span>
-}
-
 function App() {
+  useDemoSession()
+  const [homeView,setHomeView]=useState<'dashboard'|'reception'|'case'>('dashboard')
+  const [receptionRequest,setReceptionRequest]=useState<string|undefined>()
+  const [requestedInspectionReportId,setRequestedInspectionReportId]=useState<string|undefined>()
+  const activeVisit=activeCaseId()?selectedCase():undefined
   const [screen, setScreen] = useState<Screen>('inicio')
-  const [requestedWorkRequest,setRequestedWorkRequest]=useState<{orderId:string;mode:'quote'|'work'}|undefined>()
+  const [requestedWorkRequest,setRequestedWorkRequest]=useState<{orderId:string;mode:'quote'|'work';draftId?:string}|undefined>()
   const [requestedInspectionOrderId,setRequestedInspectionOrderId]=useState<string|undefined>()
   const [requestedOrderId, setRequestedOrderId] = useState<string | undefined>()
   const [requestedVehicleId, setRequestedVehicleId] = useState<string | undefined>()
@@ -49,9 +50,6 @@ function App() {
   const [notice, setNotice] = useState('')
   const [showAccount, setShowAccount] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const [filter, setFilter] = useState('todas')
-  const metrics = useMemo(getDashboardMetrics, [])
-  const visibleOrders = useMemo(() => filterDemoOrders(searchText, filter), [searchText, filter])
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
@@ -65,17 +63,22 @@ function App() {
   }, [])
 
   function navigate(next: Screen) {
+    setRequestedInspectionReportId(undefined)
     setRequestedWorkRequest(undefined)
     setRequestedInspectionOrderId(undefined)
     setRequestedVehicleId(undefined)
     setRequestedOrderId(undefined)
     setScreen(next)
+    if(next==='inicio')setHomeView('dashboard')
     setMobileMenuOpen(false)
     setShowAccount(false)
     setShowNotifications(false)
     setNotice('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  function openVisit(id:string){selectCase(id);setHomeView('case');window.scrollTo({top:0})}
+  function returnToVisit(){navigate('inicio');setHomeView('case')}
+  function openResource(resource:FlowResource){if(!activeVisit)return;const target=openCaseResource(activeVisit.id,resource);if(resource==='order'){navigate('ordenes');setRequestedOrderId(target.orderId)}else{navigate('informes');if(resource==='inspection'){setRequestedInspectionOrderId(target.orderId);setRequestedInspectionReportId(target.resourceId)}else setRequestedWorkRequest({orderId:target.orderId,mode:resource==='quote'?'quote':'work',draftId:target.resourceId})}}
   const formattedDate = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date())
 
   return (
@@ -134,12 +137,13 @@ function App() {
 
         <main className="dashboard-main" id="main-content">
           {notice && <div className="action-alert" role="status"><CircleAlert size={17}/><span>{notice}</span><button type="button" aria-label="Cerrar aviso" onClick={() => setNotice('')}><X size={17}/></button></div>}
-          {screen === 'inicio' ? (
+          {screen!=='inicio'&&activeVisit&&<div className="fl-return"><span>Expediente {activeVisit.orderId??activeVisit.id} · Memoria temporal</span><button className="rp-secondary" onClick={returnToVisit}>Volver al expediente <ArrowRight/></button></div>}
+          {screen==='inicio'&&homeView==='reception'?<ReceptionWizard key={receptionRequest??'reception'} requestId={receptionRequest} onBack={()=>setHomeView('dashboard')} onComplete={openVisit}/>:screen==='inicio'&&homeView==='case'&&activeVisit?<FlowCasePanel key={activeVisit.id} id={activeVisit.id} onBack={()=>setHomeView('dashboard')} onOpen={openResource} onClient={vehicleId=>{navigate('clientes');setRequestedVehicleId(vehicleId)}}/>:screen === 'inicio' ? (
             <>
               <section className="welcome-area">
                 <div className="welcome-art" aria-hidden="true" />
                 <div className="welcome-head">
-                  <div><h1>¡Hola, equipo! <span aria-hidden="true">👋</span></h1><p>Aquí tienes el resumen de tu taller hoy.</p></div>
+                  <div><h1>¿Qué vamos a hacer hoy?</h1><p>Gestiona el ingreso de vehículos y continúa los trabajos de tu taller.</p></div>
                   <span className="date-pill"><CalendarDays size={18}/> {formattedDate}</span>
                 </div>
                 <div className="metric-grid">
@@ -153,72 +157,18 @@ function App() {
                 </div>
               </section>
 
-              <div className="overview-grid">
-                <section className="dashboard-card statuses-panel" aria-labelledby="statuses-title">
-                  <div className="card-head"><h2 id="statuses-title"><BarChart3 size={21} aria-hidden="true"/> Estado de órdenes</h2><span className="tag-demo">Ejemplo</span></div>
-                  <div className="statuses-layout">
-                    <div className="donut"><span><strong>{metrics.active}</strong><small>órdenes</small></span></div>
-                    <div className="status-legend">
-                      {orderStatuses.map(status => (
-                        <button type="button" key={status.key} className="legend-line" onClick={() => setFilter(filter === status.key ? 'todas' : status.key)}>
-                          <i style={{ background: status.color }} /> <span>{status.label}</span><strong>{status.count}</strong>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="card-help">Selecciona un estado para filtrar las órdenes de ejemplo.</p>
-                </section>
-                <section className="dashboard-card orders-panel" aria-labelledby="orders-title">
-                  <div className="card-head"><h2 id="orders-title"><CarFront size={21} aria-hidden="true"/> Órdenes recientes</h2><button type="button" className="text-action" onClick={() => navigate('ordenes')}>Ver todas <ArrowRight size={16}/></button></div>
-                  {filter !== 'todas' && <button type="button" className="active-filter" onClick={() => setFilter('todas')}>Filtro activo · Limpiar <X size={13}/></button>}
-                  <div className="orders-list">
-                    {visibleOrders.length === 0 ? <div className="empty-results"><Search size={24}/><p>Sin coincidencias en los ejemplos.</p><button onClick={() => {setFilter('todas');setSearchText('')}} type="button">Restablecer búsqueda</button></div> : visibleOrders.map(order => (
-                      <button className="order-row" type="button" key={order.id} onClick={() => navigate('ordenes')}>
-                        <span className="order-car"><CarFront size={26}/></span>
-                        <span className="order-detail"><strong>{order.id}</strong><span>{order.vehicle}</span><small>{order.work}</small></span>
-                        <StateBadge status={order.status}/>
-                        <ChevronRight size={16} className="row-arrow"/>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              </div>
-              <div className="lower-grid">
-                <section className="dashboard-card activity-panel" aria-labelledby="activity-title">
-                  <div className="card-head"><h2 id="activity-title"><Clock3 size={21} aria-hidden="true"/> Actividad reciente</h2><span className="tag-demo">Simulada</span></div>
-                  <div className="activity-list">
-                    {demoActivities.map(activity => (
-                      <div className="activity-row" key={activity.id}>
-                        <span className={'activity-icon ' + activity.type}>{activity.type === 'success' ? <Check size={19}/> : activity.type === 'document' ? <FileText size={18}/> : <Wrench size={18}/>}</span>
-                        <span><strong>{activity.title}</strong><small>{activity.description}</small></span>
-                        <time>{activity.time}</time>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-                <section className="dashboard-card shortcuts-panel" aria-labelledby="shortcuts-title">
-                  <div className="card-head"><h2 id="shortcuts-title"><Zap size={21} aria-hidden="true"/> Accesos rápidos</h2></div>
-                  <div className="shortcuts-grid">
-                    {quickActions.map(({ label, sub, icon: Icon, to }, index) => (
-                      <button type="button" key={label} className={'shortcut ' + (index === 0 ? 'primary' : '')} onClick={() => navigate(to)}>
-                        <Icon size={27} strokeWidth={1.8}/><strong>{label}</strong><small>{sub}</small>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="card-help sr-only">Los módulos se habilitarán al conectar la base de datos.</p>
-                </section>
-              </div>
+              <FlowHome query={searchText} onNew={()=>{setReceptionRequest(undefined);setHomeView('reception');window.scrollTo({top:0})}} onContinue={openVisit} onOrders={()=>navigate('ordenes')}/>
             </>
           ) : screen === 'ordenes' ? (
             <OrdenesPanel onWorkDocument={(orderId,mode)=>{navigate('informes');setRequestedWorkRequest({orderId,mode})}} onMultipunto={orderId=>{navigate('informes');setRequestedInspectionOrderId(orderId)}} globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={vehicleId => { const vehicle = demoVehicles.find(v => v.id === vehicleId); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
           ) : screen === 'clientes' ? (
-            <ClientesPanel initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
+            <ClientesPanel onReviewRequest={id=>{const existing=allCases().find(v=>v.intakeRequestId===id);navigate('inicio');if(existing)openVisit(existing.id);else{setReceptionRequest(id);setHomeView('reception')}}} initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
           ) : screen === 'informes' ? (
-            <InformesPanel initialWorkRequest={requestedWorkRequest} globalSearch={searchText} initialInspectionOrderId={requestedInspectionOrderId} />
+            <InformesPanel initialInspectionReportId={requestedInspectionReportId} initialWorkRequest={requestedWorkRequest} globalSearch={searchText} initialInspectionOrderId={requestedInspectionOrderId} />
           ) : (
             <ConfiguracionPanel globalSearch={searchText} />
           )}
-          <div className="demo-strip" role="note"><Info size={15} /><span><strong>Entorno de demostración:</strong> todas las cifras y órdenes son ficticias. No se registran clientes ni se envían correos.</span></div>
+          <div className="demo-strip" role="note"><Info size={15} /><span><strong>Entorno de demostración:</strong> datos ficticios solo en memoria de esta pestaña. Recargar descarta los cambios nuevos. Sin guardado permanente ni correos.</span></div>
         </main>
       </div>
       <nav className="bottom-nav" aria-label="Navegación móvil">

@@ -14,9 +14,9 @@ import { WorkDocumentPanel } from './trabajos/WorkDocumentPanel'
 import { WorkDocumentLauncher } from './trabajos/WorkDocumentLauncher'
 import type { WorkRequest } from './trabajos/trabajosData'
 type Modal={type:'all'}|{type:'preview'}|{type:'history'}|{type:'pdf'}|{type:'new';kind:DocumentKind;id:string}|{type:'send'}
-export function InformesPanel({globalSearch,initialInspectionOrderId,initialWorkRequest}:{globalSearch:string;initialInspectionOrderId?:string;initialWorkRequest?:WorkRequest}) {
+export function InformesPanel({globalSearch,initialInspectionOrderId,initialWorkRequest,initialInspectionReportId}:{globalSearch:string;initialInspectionOrderId?:string;initialInspectionReportId?:string;initialWorkRequest?:WorkRequest}) {
  const [workRequest,setWorkRequest]=useState<WorkRequest|null>(initialWorkRequest??null)
- const [multipunto,setMultipunto]=useState<{orderId:string;reportId?:string}|null>(()=>initialInspectionOrderId?{orderId:initialInspectionOrderId}:null)
+ const [multipunto,setMultipunto]=useState<{orderId:string;reportId?:string}|null>(()=>initialInspectionOrderId?{orderId:initialInspectionOrderId,reportId:initialInspectionReportId}:null)
  const [documents,setDocuments]=useState(()=>readReportSession()?.documents??initialDocuments()),[events,setEvents]=useState<DeliveryEvent[]>(()=>readReportSession()?.events??historicalEvents(initialDocuments()))
  const [selectedId,setSelectedId]=useState(()=>readReportSession()?.selectedId??'INF-2047'),[modal,setModal]=useState<Modal|null>(null),[status,setStatus]=useState<DocumentStatus|'Todos'>('Todos'),[query,setQuery]=useState(''),[vehicleFilter,setVehicleFilter]=useState('Todos')
  useEffect(()=>saveReportSession({documents,events,selectedId}),[documents,events,selectedId])
