@@ -74,4 +74,15 @@ Aprobación visual del Director y Safari físico; PDF directo; almacenamiento mu
 
 Supabase, Auth/RLS, onboarding cerrado `bt-owner-onboarding`, BT-CP02-D y pruebas A/B, pagos, suscripciones, Android y código BT-INS-01/BT-REG-02 permanecen sin cambios. No se creó infraestructura ni otra rama.
 
-CI remoto: el push a `main` ejecuta el workflow principal y el nuevo recorrido de navegador. La consulta `gh run list` desde este entorno devuelve **Forbidden**; no confundir pruebas locales PASS con confirmación de GitHub Actions remoto. Publicación Render y SHA se registrarán tras comprobar los archivos servidos.
+## Publicación y trazabilidad
+
+Implementación: [`7c1683f`](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/7c1683f). Ajuste de compatibilidad del navegador de CI: [`25f1633`](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/25f1633): el recorrido usa Chromium del entorno si existe, o el navegador que instala Playwright en GitHub. Sintaxis y lanzamiento local comprobados tras ese ajuste; no cambia el frontend.
+
+El HTML de https://biomotors-taller-demo.onrender.com apunta al nuevo build. Ambos bundles fueron descargados y comparados **byte a byte** con `dist`:
+
+- `/assets/index-CE2JNZPC.js`: SHA-256 `a0d8a7300c1974dd4eca7cf92602bd264202492d2cb4184f897b3fa5630d7402`.
+- `/assets/index-DtG7puos.css`: SHA-256 `95102a1050e0daf5a6f4d3e747cda30cfc27d4da9e6b439020179e7097447a1e`.
+
+Publicación efectiva del contenido verificada por HTTP; no se consulta el estado administrativo LIVE. Capturas y recorridos corresponden al navegador local del mismo frontend validado, no a Safari físico.
+
+Los pushes a `main` disparan el workflow principal y, para cambios pertinentes, el nuevo recorrido de navegador. La consulta `gh run list` desde este entorno devuelve **Forbidden**; no confundir pruebas locales PASS con confirmación de GitHub Actions remoto. Revisión remota: [Actions del repositorio](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions). No se afirma CI remoto aprobado.

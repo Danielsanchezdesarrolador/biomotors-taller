@@ -442,3 +442,5 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [ ] Confirmación remota de Actions (consulta Forbidden desde este entorno), aprobación visual del Director y Safari físico. Backend, envío/firma, PDF directo y plantillas privadas requieren fases posteriores.
 
 [Checkpoint BT-COT-01](docs/checkpoints/CHECKPOINT_BT_COT_01_20261113.md).
+
+- [x] BT-COT-01 publicado en el Render existente: HTML, JS y CSS del frontend `7c1683f` verificados byte a byte. Compatibilidad del navegador de CI ajustada en `25f1633`; Actions remoto pendiente de consulta autorizada (Forbidden desde este entorno).
