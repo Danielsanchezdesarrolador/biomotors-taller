@@ -53,6 +53,15 @@ No se modificaron los motores de inspección, cálculo, precios, aprobación, fi
 
 ## Publicación
 
-Commit C y verificación de los bundles del Render existente se registrarán después de comprobar el despliegue. Los pushes activan el workflow principal y el nuevo recorrido; no se atribuye CI remoto PASS sin consultar su resultado. En tareas previas la API de Actions devolvió Forbidden desde este entorno.
+Incrementos en `main`: B [`645e2e3`](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/645e2e3), C [`9c12f97`](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/9c12f97). Sin ramas ni infraestructura nuevas.
+
+**Contenido publicado verificado por HTTP:** https://biomotors-taller-demo.onrender.com apunta al build C y ambos bundles descargados coinciden byte a byte con `dist`:
+
+- `/assets/index-DdTU3fxN.js`: SHA-256 `6088db594d533824da7aff4525cf1c5a9c21125c4ffc8b328b00bb8b0141da96`.
+- `/assets/index-BBxbq_oD.css`: SHA-256 `9ece95a0452ab54d761dbec2ea9ca8b5ce7322c56d11f75f930ab40e51af6939`.
+
+Se distingue la comprobación del contenido servido de un estado administrativo LIVE, no consultado. Capturas y recorridos corresponden al navegador local del mismo frontend validado, no a Safari físico.
+
+Los pushes activan el workflow principal y el nuevo recorrido. Tras publicar, `gh run list` volvió a devolver **Forbidden**; no se atribuye CI remoto PASS. Los resultados locales 76/76, build/PWA y recorridos de navegador sí están ejecutados. Revisión remota: [Actions](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions).
 
 Al cierre, detenerse para revisión del Director; no comenzar 01D.
