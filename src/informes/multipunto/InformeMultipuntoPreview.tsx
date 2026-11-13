@@ -107,7 +107,9 @@ export function InformeMultipuntoPreview({
         {c.reviewed} de {c.total} revisados · {c.unreviewed} sin revisar.{' '}
         {r.finalized
           ? 'Finalizado DEMO' + (r.closedWithPending ? ' con pendientes identificados.' : '.')
-          : 'Inspección incompleta / editable DEMO.'}
+          : c.unreviewed > 0
+            ? 'Inspección incompleta / editable DEMO.'
+            : 'Inspección revisada / editable DEMO.'}
         <br />
         Rojo: prioridad técnica del taller; no certifica seguridad de circulación.
         <br />

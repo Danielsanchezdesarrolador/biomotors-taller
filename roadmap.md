@@ -396,6 +396,7 @@ Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-P
 - [ ] No agregar funciones al código, activar pagos, alterar Supabase ni modificar el trabajo de Codex BT-INS-01 a partir de este registro sin autorización específica.
 
 **Fuente viva:** [docs/REGISTRO_IDEAS_PLANES.md](docs/REGISTRO_IDEAS_PLANES.md).
+
 ### BT-INS-01 — Informe multipunto interactivo DEMO
 
 - [x] Página interior de Informes con 34 componentes / cinco categorías; X única verde, amarilla o roja, limpieza y pendientes explícitos; teclado y controles móviles.

@@ -9,7 +9,7 @@ const { chromium } = require('playwright'),
   })
   fs.mkdirSync('/tmp/bt-ins01-evidence', { recursive: true })
   try {
-    for (const width of [1650, 1440, 768, 390, 375]) {
+    for (const width of JSON.parse(process.env.INS_WIDTHS || '[1650,1440,768,390,375]')) {
       const page = await browser.newPage({ viewport: { width, height: 941 } }),
         errors = [],
         writes = []
@@ -231,6 +231,15 @@ const { chromium } = require('playwright'),
       await page.getByRole('button', { name: 'Reabrir edición DEMO' }).click()
       await sheet().getByRole('radio', { name: 'Pastillas de freno · OK', exact: true }).check()
       assert.match(await page.locator('.mp-summary').innerText(), /En edición/)
+      if (width === 1650) {
+        for (const radio of await sheet().getByRole('radio', { name: / · OK$/ }).all()) await radio.check()
+        assert.match(await page.locator('.mp-count').innerText(), /34 de 34/)
+        assert.match(await sheet().locator('.mp-sheet-footer').innerText(), /Inspección revisada/)
+        await page.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+        assert.equal(await page.getByRole('checkbox', { name: /Acepto finalizar/ }).count(), 0)
+        await page.getByRole('button', { name: 'Confirmar finalización sin envío real' }).click()
+        assert.match(await page.locator('.mp-summary').innerText(), /Finalizado DEMO/)
+      }
       await page.getByRole('button', { name: 'Descartar informe temporal', exact: true }).click()
       await page.getByRole('button', { name: 'Confirmar descarte', exact: true }).click()
       await page.getByRole('heading', { name: 'Informes y cotizaciones', exact: true }).waitFor()
