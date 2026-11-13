@@ -48,7 +48,7 @@
 
 **Capturas reales del frontend en Chromium local** (artefacto del run anterior): formulario, resumen y solicitudes a 1650/390 px. Artefacto GitHub 14076667876, con 6 PNG y reporte JSON. No confundir con capturas de Safari ni con evidencia administrativa del Render.
 
-**Ajuste posterior:** se añadió reinicio de scroll interno al cambiar de etapa o entrar al resumen para Safari móvil. Requiere nueva CI/capturas de la revisión final; no declarar la aprobación visual hasta que el Director revise la demo.
+**Ajuste posterior verificado:** se añadió reinicio de scroll interno al cambiar de etapa o entrar al resumen para Safari móvil. **Revalidación final de código y Chromium PASS** en commit 91866d9; la captura móvil del resumen confirma visualmente que encabezado y progreso vuelven a estar visibles. Pendiente Safari físico y aprobación visual del Director.
 
 ## Pendientes y siguiente checkpoint
 
@@ -63,3 +63,11 @@
 ## Orden de continuidad
 
 Antes de cualquier nuevo cambio: consultar HEAD de main y los checkpoints posteriores, confirmar si el Director aprobó BT-REG-02 y si otros agentes están trabajando en los mismos archivos. Preservar R2 y BT-INS-01; no intervenir BT-CP02-D ni servicios reales. Todo cambio de alcance requiere decisión separada. **No reconstruir el formulario ya implementado.**
+
+## Revalidación final antes del cierre
+
+- **Commit de cierre de código y documentación inicial:** 91866d9777de6c062f2d1a224efa3408cd725df7.
+- **CI principal:** https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43508132071 — SUCCESS: TS, 57/57 Vitest (10 archivos), Vite build/PWA PASS; Android Expo typecheck/bundle/config PASS. No APK.
+- **E2E/capturas finales:** https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43508132240 — SUCCESS en 1650 y 390 px; sin errores de página, escrituras de red, almacenamiento web ni overflow horizontal. Tras una solicitud hay tres tarjetas y tras recargar se restablecen dos.
+- **Artefacto de captura final:** GitHub Actions 14076577584 («BT-REG-02-Capturas-1650-390»), seis PNG (FORM, RESUMEN y SOLICITUDES a 1650/390 px), más BT_REG_02_RESULTADOS.json; capturas verificadas manualmente del build web en Chromium local.
+- **Límite de evidencia:** no existe confirmación del estado administrativo de Render para este commit; no se realizó Safari físico ni aprobación visual del Director. La rama main es la única modificada; no se tocaron BT-CP02-D ni BT-INS-01.

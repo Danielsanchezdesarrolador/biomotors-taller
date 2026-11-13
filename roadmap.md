@@ -422,9 +422,11 @@ Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-P
 - [x] Bandeja de **solicitudes ficticias pendientes de revisión**, dos ejemplos iniciales y nuevas solicitudes únicamente en memoria del panel; al recargar desaparecen las agregadas.
 - [x] Explicar planes: Básico manual, Plus USD 5/mes y Full USD 15/mes con función futura, prueba Full de tres días solo cuando exista facturación real; **no hay permisos ni compras implementados**.
 - [x] Pruebas unitarias de validación y modelo DEMO; TypeScript y build/PWA mediante CI.
-- [ ] Completar revisión de navegador Chromium a 1650/390 px, generar/inspeccionar capturas de escritorio y móvil.
+- [x] Revisión de navegador Chromium a 1650/390 px: prueba E2E PASS, captura y revisión del formulario, resumen y bandeja. Artefacto visual del commit 91866d9, run 43508132240. No equivale a Safari físico.
 - [ ] Verificar estado de despliegue y contenido efectivo en Render actual; aprobación visual del Director.
 - [ ] Probar Safari físico del iPhone; futura adaptación React Native Android nativo sin WebView.
 - [ ] **Fase real separada, NO autorizada:** tokens de invitación seguros, consentimientos definitivos, procesamiento backend protegido, cuota/rate limit, RLS multitenant y pruebas A/B con credenciales autorizadas; recepción persistente, correo verificado, deduplicación de vehículo, conversión a OT con confirmación del taller y gestión comercial desde servidor.
 
 Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [BT-UI-04](docs/BT_UI_04_DATOS_Y_REGISTRO_DEMO.md), [BT-IDEA-005](docs/REGISTRO_IDEAS_PLANES.md), [checkpoint BT-REG-02](docs/checkpoints/CHECKPOINT_BT_REG_02_20261113.md). Implementación en src/clientes/RegistroVisitaDemo.tsx, validaciones en src/clientes/registroVisitaData.ts, recepción dentro de ClientesPanel.tsx.
+
+**BT-REG-02 cierre de verificaciones (13/11/2026):** commit 91866d9, GitHub Actions principal 43508132071 SUCCESS (57/57 Vitest, TS/build/PWA, Android Expo); E2E/capturas 43508132240 SUCCESS (1650/390 px, sin escrituras ni persistencia). Pendientes solo revisión visual del Director, confirmación administrativa Render y Safari físico; backend real excluido.
