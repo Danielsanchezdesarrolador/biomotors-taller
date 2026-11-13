@@ -439,8 +439,29 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] Condiciones/comentarios, borrador temporal, estados y aprobación/finalización simuladas; cambios invalidan aprobaciones. Sin firma, correo ni aceptación legal reales.
 - [x] Vista previa e impresión A4; PDF de navegador de una y dos páginas comprobado. Descarga directa pendiente; compartir exclusivamente local/simulado.
 - [x] TypeScript, 66 tests, build/PWA, nuevo recorrido en 1650/1440/768/390/375 y regresiones anteriores PASS; capturas versionadas y CI de navegador añadido.
-- [ ] Confirmación remota de Actions (consulta Forbidden desde este entorno), aprobación visual del Director y Safari físico. Backend, envío/firma, PDF directo y plantillas privadas requieren fases posteriores.
+- [x] Confirmación remota de Actions: ejecución `43516223991` SUCCESS, 66/66 Vitest, build/PWA y verificaciones Android PASS. (Codex no pudo consultar Actions en su entorno; se verificó posteriormente con acceso GitHub). 
+- [ ] Aprobación visual del Director y prueba Safari físico. Backend, envío/firma, PDF directo y plantillas privadas requieren fases posteriores.
 
 [Checkpoint BT-COT-01](docs/checkpoints/CHECKPOINT_BT_COT_01_20261113.md).
 
 - [x] BT-COT-01 publicado en el Render existente: HTML, JS y CSS del frontend `7c1683f` verificados byte a byte. Compatibilidad del navegador de CI ajustada en `25f1633`; Actions remoto pendiente de consulta autorizada (Forbidden desde este entorno).
+
+
+### BT-FLOW-01 — Flujo de Trabajo Inteligente y expediente único por visita — NUEVA PRIORIDAD
+
+**Decisión del Director (13/11/2026):** conservar íntegramente los cinco paneles R2 y simplificar el trabajo diario con un recorrido guiado y contextual que enlace **cliente/vehículo → recepción → OT → inspección multipunto → trabajos valorados → cotización → respuesta/aprobación → realización → informe final → entrega**. Los menús laterales continúan disponibles para consulta libre y navegación directa. El operador no debe copiar antecedentes entre pantallas ni buscar manualmente qué hacer a continuación.
+
+**Estado:** plan aprobado como objetivo funcional; **no implementado**, sujeto a revisión de interfaz y entregas DEMO incrementales. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
+
+- [x] Revisar el cierre BT-COT-01 y confirmar CI remoto: [GitHub Actions 43516223991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43516223991) **SUCCESS**, 66/66 Vitest, TypeScript, Vite/PWA y Android Expo PASS. El frontend publicado fue verificado por Codex; aprobación visual y Safari físico pendientes.
+- [x] Establecer plan documental y reglas de seguridad: único expediente por visita, próximos pasos, posibilidad de retorno y selección de cliente/vehículo existente, sin diagnóstico ni precio inferidos.
+- [ ] **BT-FLOW-01A — Arquitectura y UX:** matriz de estados/eventos y de datos compartidos; inventario de `ClientesPanel`, `OrdenesPanel`, `orderSession`, `multipuntoSession`, `trabajosSession`, `reportSession`; mockups escritorio/móvil de Inicio/expediente; revisión del Director antes de tocar R2.
+- [ ] **BT-FLOW-01B — Recepción y expediente DEMO:** fuente compartida **solo en memoria** y vínculo estable de cliente, vehículo, solicitud y visita; integrar alta manual, cliente recurrente, solicitud BT-REG-02 confirmada y OT sin reescritura. Resolver la discontinuidad actual: las solicitudes y OT nuevas no son visibles en todos los módulos.
+- [ ] **BT-FLOW-01C — Inicio y «Continuar trabajo»:** CTA Nuevo ingreso, lista contextual de expedientes activos, paso actual y siguiente acción; permitir abrir menús laterales y regresar al mismo expediente.
+- [ ] **BT-FLOW-01D — Multipunto, trabajos y cotización:** reutilizar BT-INS-01 y BT-COT-01; preparar documentos desde ítems expresamente definidos y valorizados por el mecánico, nunca por deducción del motivo. Respetar aprobación de versión, `performed`, revisiones y pendientes técnicos. Nada se envía ni se aprueba realmente en DEMO.
+- [ ] **BT-FLOW-01E — Entrega y QA:** proceso completo con correcciones, excepciones, rechazos, repuestos pendientes y finalización explícita; tests de integridad/reanudación, TypeScript, Vitest, build/PWA, E2E 1650/1440/768/390/375, regresión de paneles e informes, capturas y checkpoint.
+- [ ] **Solo fase futura autorizada:** backend seguro multitenant, RLS A/B, historial persistente, enlaces/correos, firma y facturación/planes. Mantener BT-CP02-D reservado a otro chat y sin cambios en Supabase/Auth, secretos, migraciones, pagos ni Android en esta etapa.
+
+**Puerta de arranque:** completar la aprobación visual de BT-COT-01 y validar el diseño de BT-FLOW-01A antes de programar cambios en los módulos aprobados. No se crea sexta sección de navegación ni se modifica código por esta actualización de roadmap.
+
+[Checkpoint de planificación BT-FLOW-01](docs/checkpoints/CHECKPOINT_BT_FLOW_01_PLAN_20261113.md).
