@@ -40,3 +40,7 @@ Los KPI 128 / 18 / 12 / 2 son estadísticas ilustrativas, no contadores de opera
 6. Confirmación del destinatario antes de enviar; documento, OT, cliente, vehículo, taller, fecha de intento, referencia de archivo y resultado real en la bitácora. No marcar Enviado por emitir una solicitud: usar evidencia del proveedor y distinguir entrega, rechazo y rebote.
 
 Nada de ello está activo en BT-UI-05. Configuración, Supabase, correo, pagos y Android quedan fuera de esta tarea.
+
+## Regla de planes para informes personalizados — BT-PLAN-02 (13/11/2026)
+
+**Básico** usa las plantillas predeterminadas ByteTorque. **Plus y Full** podrán subir/gestionar formatos propios de informes del taller, cuando exista backend de almacenamiento seguro y control por suscripción. Esta función **no está implementada** en BT-UI-05. La importación de archivos no equivale a conversión automática en formulario editable; adaptación interactiva requiere mapeo y aprobación posterior. La plantilla multipunto de Ignacio constituye una plantilla inicial compartida solo cuando su contenido y derechos de uso estén aprobados. No modificar el editor DEMO en paralelo con BT-INS-01.

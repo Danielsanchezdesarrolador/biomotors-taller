@@ -72,3 +72,27 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 - Implementar posteriormente suscripción real solo con autorización específica del Director.
 
 **Alcance presente:** documentación únicamente; no se modifica interfaz, Render, Android, Supabase ni se activa pago alguno.
+
+## BT-PLAN-02 — Plantillas propias de informes según plan (decisión aprobada 13/11/2026)
+
+**Regla comercial confirmada por el Director:** cada taller podrá trabajar con las plantillas predeterminadas incluidas en ByteTorque. **Solo talleres con Plus (USD 5/mes) o Full (USD 15/mes)** podrán subir y administrar sus **propios archivos/formatos de informes**. Básico (gratis, sin publicidad en el lanzamiento) utilizará exclusivamente las plantillas oficiales de ByteTorque.
+
+| Capacidad | Básico | Plus | Full |
+|---|---|---|---|
+| Crear informes con plantillas predeterminadas | Sí | Sí | Sí |
+| Usar plantilla multipunto predeterminada de Ignacio, si está incorporada al catálogo | Sí | Sí | Sí |
+| Subir formatos propios de informes del taller | **No** | **Sí** | **Sí** |
+| Guardar, elegir y reutilizar plantillas propias | No para nuevas operaciones | Sí | Sí |
+| Adaptación interactiva del archivo subido | No | Tras validación/conversión | Tras validación/conversión |
+| Descargar/imprimir informes según funciones disponibles | Sí | Sí | Sí |
+| Envío automático al correo con PDF | No | Sí, cuando exista backend | Sí, cuando exista backend |
+
+**Interpretación del alcance:** «subir un archivo» no garantiza que cualquier PDF, Word, Excel o imagen se convierta automáticamente en un formulario interactivo. La primera versión deberá permitir subir, identificar, visualizar y seleccionar formatos propios autorizados, y luego **adaptarlos a plantillas editables/interactivas únicamente mediante un proceso explícito de mapeo, validación y vista previa aprobada por el taller**. La compatibilidad de tipos se definirá durante la implementación (candidatos: PDF y documentos ofimáticos sin macros; el soporte real puede variar). No afirmar que un archivo importado sea editable si todavía es solo un archivo adjunto o una referencia.
+
+**Ubicación propuesta:** `Configuración → Plantillas de documentos → Mis formatos de informe`; al crear un informe, selector «Plantilla predeterminada» / «Plantilla de mi taller». El formato multipunto de Ignacio será el punto de partida para BIOMOTORS; el SaaS no impondrá la identidad visual de un taller sobre otro.
+
+**Permisos y almacenamiento:** el privilegio pertenece al **taller y su plan validado en backend**, no solo a un botón React. Los archivos deben almacenarse en área privada por `workshop_id`, sujetos a RLS/reglas de Storage, propietario o administradores autorizados, validación de contenido/tamaño y tipo real, rechazo de macros/código activo, saneamiento y límites antiabuso. Cada plantilla requiere versión e identificación, no mezclar contenido entre talleres. **Cuotas de espacio/cantidad de formatos pendientes de decisión.**
+
+**Cambio o vencimiento de plan:** al bajar a Básico, no eliminar silenciosamente formatos propios ni información histórica. El taller podrá consultar/exportar sus archivos existentes por medios autorizados, pero **crear, importar, editar o escoger plantillas premium para nuevos documentos quedará bloqueado** mientras esté en Básico. Los informes históricos ya emitidos mantendrán su versión de plantilla para consulta. En **prueba Full de 72 horas** la función estará disponible temporalmente, sujeta a controles de seguridad y elegibilidad; una vez expirada aplica el plan efectivo.
+
+**Estado de implementación:** **requisito aprobado y documentado, NO implementado**. No se ha habilitado subida real, conversión, storage ni políticas. Codex trabaja en la digitalización interactiva BT-INS-01: **no modificar código ni alcance de Codex en paralelo** sin nueva indicación.

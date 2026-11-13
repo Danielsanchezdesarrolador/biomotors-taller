@@ -371,3 +371,15 @@ Evidencia: [checkpoint BT-UI-03](docs/checkpoints/CHECKPOINT_BT_UI_03_20261111.m
 - [x] **Auditoría externa de ChatGPT 11/11/2026:** GitHub Actions `#43141082423` **SUCCESS** en `04f7bf4` (web 40/40 tests PASS en 8 archivos, TypeScript, build/PWA; job Android Expo PASS, sin APK). Render `dep-dbqi6a2vcj2c73evr1dg`, commit `04f7bf4`, estado administrativo **LIVE**.
 - [x] Capturas `docs/screenshots/BT_UI_06_1650.png` y `BT_UI_06_390.png` abiertas y examinadas desde GitHub; continuidad premium R2 adecuada, nueve tarjetas y panel derecho en escritorio, apilado móvil sin scroll horizontal visible. Comparación **cualitativa**; no se realizó pixel-diff independiente.
 - [ ] **Aprobación visual expresa del Director** para declarar BT-UI-06 oficialmente aceptada; después definir próxima fase segura sin activar pagos/servicios ni modificar pantallas sin autorización.
+
+### BT-PLAN-02 — Plantillas de informes propias por plan — APROBADO PARA ROADMAP (13/11/2026)
+
+- [x] **Básico gratuito:** crear informes solo con formatos predeterminados ByteTorque; **no puede subir nuevos informes/plantillas propias**.
+- [x] **Plus USD 5/mes y Full USD 15/mes:** podrán subir, administrar y reutilizar archivos de formatos propios de informe, privados por taller.
+- [x] Durante prueba **Full de 3 días**, la capacidad estará habilitada mientras el plan efectivo sea Full; al finalizar sin renovación se aplican límites del plan al que descienda, sin borrar documentos ni plantillas históricas.
+- [ ] Diseñar `Configuración → Plantillas → Mis formatos` y selector de plantilla en «Nuevo informe», usando identidad premium R2; estimar tipos de archivo, cuotas y almacenamiento por taller.
+- [ ] Implementar subida/visualización segura, versiones, aislamiento multitenant y control de acceso según suscripción validada; **no habilitar en DEMO actual ni tocar Supabase sin nueva autorización**.
+- [ ] Permitir conversión **interactiva** del formato propio solo después de mapear, validar y aprobar sus campos; no prometer que un PDF/Word/Excel se convierte automáticamente.
+- [ ] Probar downgrade a Básico conservando lectura/exportación de formatos propios existentes y documentos históricos, aunque ya no pueda usarlos para nuevos informes.
+
+Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-PLAN-02. **Solo documentación: BT-INS-01 sigue en desarrollo por Codex, sin cambiar su alcance.**
