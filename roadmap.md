@@ -396,3 +396,13 @@ Contrato comercial: [BT-PLAN-01](docs/PLANES_COMERCIALES_BT_PLAN_01.md), § BT-P
 - [ ] No agregar funciones al código, activar pagos, alterar Supabase ni modificar el trabajo de Codex BT-INS-01 a partir de este registro sin autorización específica.
 
 **Fuente viva:** [docs/REGISTRO_IDEAS_PLANES.md](docs/REGISTRO_IDEAS_PLANES.md).
+### BT-INS-01 — Informe multipunto interactivo DEMO
+
+- [x] Página interior de Informes con 34 componentes / cinco categorías; X única verde, amarilla o roja, limpieza y pendientes explícitos; teclado y controles móviles.
+- [x] Datos compartidos OT/cliente/vehículo y branding del taller; adaptador conservador solo para nivel de aceite, sin alterar los ocho controles de la OT.
+- [x] Observaciones, fotos temporales validadas, borradores en memoria y cierre DEMO explícito con pendientes, sin correo ni persistencia real.
+- [x] Misma hoja en editor/vista previa, impresión A4 con colores y X; PDF de navegador verificado, descarga PDF directa pendiente.
+- [x] TypeScript, 48 tests, build/PWA y cinco recorridos de navegador (nuevo y cuatro existentes), en 1650/1440/768/390/375 px; capturas versionadas.
+- [ ] Aprobación visual/terminológica de Ignacio, Safari físico, PDF directo y persistencia segura posterior. Auth, onboarding cerrado, RLS, pagos y Android preservados.
+
+[Checkpoint BT-INS-01](docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md).
