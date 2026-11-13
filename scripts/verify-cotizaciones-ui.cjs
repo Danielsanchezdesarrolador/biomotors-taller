@@ -5,7 +5,9 @@ const { chromium } = require('playwright'),
   path = require('node:path')
 ;(async () => {
   const browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium',
+    executablePath:
+      process.env.CHROMIUM_PATH ||
+      (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined),
     args: ['--no-sandbox']
   })
   const output = process.env.OUTPUT_DIR || 'artifacts/bt-cot-01'
