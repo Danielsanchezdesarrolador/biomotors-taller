@@ -1,4 +1,4 @@
-import { demoClients, demoVehicles } from '../clientes/clientesData'
+import { demoClients, demoVehicles, vehicleForOrder } from '../clientes/clientesData'
 import { baseOrderRevision, readOrderRevision, sessionOrders, type OrderRevision } from '../ordenes/orderSession'
 import { calculateTotals, type LineItem } from '../ordenes/detalleData'
 export type DocumentKind='Informe'|'Cotización'
@@ -8,13 +8,13 @@ export type DemoDocument={id:string;workshopId:'workshop-demo';orderId:string;cl
 export type DeliveryEvent={id:string;documentId:string;workshopId:'workshop-demo';orderId:string;clientId:string;vehicleId:string;recipient:string;date:string;status:DocumentStatus;origin:'Histórico ficticio'|'Simulación local';result:string;fileRef:null}
 export function documentContext(doc:Pick<DemoDocument,'orderId'|'clientId'|'vehicleId'>) {
  const order=sessionOrders().find(o=>o.id===doc.orderId),client=demoClients.find(c=>c.id===doc.clientId),vehicle=demoVehicles.find(v=>v.id===doc.vehicleId)
- if(!order||!client||!vehicle||vehicle.clientId!==client.id||vehicle.plate!==order.plate||order.client.replace(/ · DEMO$/,'')!==client.name)throw new Error('Relación de documento inválida')
+ if(!order||!client||!vehicle||vehicle.clientId!==client.id||vehicleForOrder(order)?.id!==vehicle.id||vehicle.plate!==order.plate||order.client.replace(/ · DEMO$/,'')!==client.name)throw new Error('Relación de documento inválida')
  return {order,client,vehicle}
 }
 export function createDocument(id:string,kind:DocumentKind,orderId:string,source:'session'|'baseline'='session'):DemoDocument {
  const order=sessionOrders().find(o=>o.id===orderId)
  if(!order)throw new Error('Orden inexistente')
- const vehicle=demoVehicles.find(v=>v.plate===order.plate),client=demoClients.find(c=>c.id===vehicle?.clientId)
+ const vehicle=vehicleForOrder(order),client=demoClients.find(c=>c.id===vehicle?.clientId)
  if(!vehicle||!client)throw new Error('La orden no tiene una ficha DEMO asociada')
  const revision=source==='session'?readOrderRevision(order):baseOrderRevision(order)
  const doc:DemoDocument={id,workshopId:'workshop-demo',kind,orderId,clientId:client.id,vehicleId:vehicle.id,status:'Borrador',date:new Date().toISOString(),validDays:15,taxApplicable:true,diagnosis:order.diagnosis,work:order.service,recommendations:order.recommendation,pending:order.pending.join('\n'),inspection:revision.inspection,items:revision.items,include:{diagnosis:true,work:true,recommendations:true,pending:true,inspection:true},historical:false,finalized:false,simulationComplete:false}

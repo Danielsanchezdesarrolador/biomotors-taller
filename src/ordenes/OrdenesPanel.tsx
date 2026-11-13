@@ -1,3 +1,6 @@
+import { useDemoSession } from '../session/useDemoSession'
+import { registerSessionOrder, sessionOrders, writeOrderRevision, readOrderRevision } from './orderSession'
+import { demoClients, demoVehicles, vehicleForOrder } from '../clientes/clientesData'
 import { OrdenDetalle } from './OrdenDetalle'
 import { useMemo, useState } from 'react'
 import {
@@ -7,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import {
-  demoWorkOrders, searchWorkOrders, workStatusLabels,
+  searchWorkOrders, workStatusLabels,
   workStatusSequence, type WorkOrder, type WorkStatus,
 } from './ordenesData'
 import './ordenes.css'
@@ -32,8 +35,9 @@ function Title({ children }: { children: React.ReactNode }) {
 }
 
 export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient, onMultipunto, onWorkDocument }: Props) {
-  const [orders, setOrders] = useState<WorkOrder[]>(demoWorkOrders)
-  const [view, setView] = useState<View>(initialOrderId && demoWorkOrders.some(o => o.id === initialOrderId) ? 'detalle' : 'listado')
+  const revision=useDemoSession()
+  const orders=sessionOrders()
+  const [view, setView] = useState<View>(initialOrderId && sessionOrders().some(o => o.id === initialOrderId) ? 'detalle' : 'listado')
   const [selectedId, setSelectedId] = useState(initialOrderId || 'OT-1001')
   const [filter, setFilter] = useState<WorkStatus | 'todas'>('todas')
   const [query, setQuery] = useState('')
@@ -41,10 +45,10 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
   const [step, setStep] = useState(1)
   const [formError, setFormError] = useState('')
   const [draft, setDraft] = useState({
-    client: '', vehicle: '', plate: '', date: demoDate(), mileage: '', reason: '', symptoms: '', notes: '',
+    clientId:'',vehicleId:'',client: '', vehicle: '', plate: '', date: demoDate(), mileage: '', reason: '', symptoms: '', notes: '',
   })
   const combinedQuery = [query, globalSearch].filter(Boolean).join(' ')
-  const filtered = useMemo(() => searchWorkOrders(orders, combinedQuery, filter), [orders, combinedQuery, filter])
+  const filtered = useMemo(() => searchWorkOrders(orders, combinedQuery, filter), [orders, combinedQuery, filter, revision])
   const selected = orders.find(o => o.id === selectedId) || orders[0]
 
   function openDetail(id: string) {
@@ -55,7 +59,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
   function newOrder() {
     setStep(1)
     setFormError('')
-    setDraft({ client: '', vehicle: '', plate: '', date: demoDate(), mileage: '', reason: '', symptoms: '', notes: '' })
+    setDraft({ clientId:'',vehicleId:'',client: '', vehicle: '', plate: '', date: demoDate(), mileage: '', reason: '', symptoms: '', notes: '' })
     setView('nueva')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -79,13 +83,13 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
     }
     const id = 'OT-DEMO-' + String(orders.length + 1).padStart(3, '0')
     const created: WorkOrder = {
-      id, client: draft.client, vehicle: draft.vehicle, plate: draft.plate, service: draft.reason.trim(),
+      id, clientId:draft.clientId,vehicleId:draft.vehicleId, client: draft.client, vehicle: draft.vehicle, plate: draft.plate, service: draft.reason.trim(),
       date: draft.date.split('-').reverse().join('-'), mileage: Number(draft.mileage),
       status: 'diagnostico', technician: 'Sin asignar · DEMO', symptoms: draft.symptoms || 'Sin síntomas añadidos.',
       diagnosis: 'Diagnóstico pendiente (DEMOSTRACIÓN).',
       recommendation: 'Completar revisión técnica.', pending: draft.notes.trim() ? [draft.notes.trim()] : [],
     }
-    setOrders(previous => [created, ...previous])
+    registerSessionOrder(created)
     onNotify('Orden creada únicamente en memoria DEMO. No se guardó en Supabase ni en un servidor; se perderá al recargar.')
     openDetail(id)
   }
@@ -177,7 +181,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
         </section>
       </>}
 
-      {view === 'detalle' && selected && <OrdenDetalle onWorkDocument={onWorkDocument} onMultipunto={onMultipunto} key={selected.id} order={selected} onClient={onClient ? () => onClient(selected.plate) : undefined} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => setOrders(previous => previous.map(item => item.id === selected.id ? { ...item, status } : item))}/>}
+      {view === 'detalle' && selected && <OrdenDetalle onWorkDocument={onWorkDocument} onMultipunto={onMultipunto} key={selected.id} order={selected} onClient={onClient ? () => {const vehicle=vehicleForOrder(selected);if(vehicle)onClient(vehicle.id)} : undefined} onBack={() => setView('listado')} onNotify={onNotify} onStatus={status => writeOrderRevision({...readOrderRevision(selected),order:{...selected,status}})}/>}
 
       {view === 'nueva' && <>
         <section className="bt-ot-hero bt-ot-hero-compact">
@@ -194,12 +198,9 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
         </div>
         <section className="dashboard-card bt-ot-form">
           {step === 1 && <><Title><CarFront size={23}/> Cliente y vehículo</Title><p>Elige un registro completamente ficticio.</p>
-            <label>Cliente DEMO <select value={draft.client} onChange={event => {
-              const order = demoWorkOrders.find(item => item.client === event.target.value)
-              setDraft(previous => ({ ...previous, client: event.target.value, vehicle: order?.vehicle || '', plate: order?.plate || '' }))
-            }}><option value="">Selecciona un cliente</option>{[...new Set(demoWorkOrders.map(o => o.client))].map(client => <option key={client} value={client}>{client}</option>)}</select></label>
-            <label>Vehículo asociado<select value={draft.plate} disabled={!draft.client} onChange={event => { const order = demoWorkOrders.find(o => o.client === draft.client && o.plate === event.target.value); setDraft(previous => ({ ...previous, plate: order?.plate || '', vehicle: order?.vehicle || '' })) }}><option value="">Selecciona un vehículo</option>{demoWorkOrders.filter(o => o.client === draft.client).map(o => <option key={o.id} value={o.plate}>{o.vehicle} · {o.plate}</option>)}</select></label>
-            <button type="button" className="bt-ot-inline" onClick={() => onNotify('Puedes probar el registro DEMO en Clientes y vehículos; sus fichas temporales todavía no se comparten con la creación de órdenes.')}>Registrar otro cliente (próximamente) <ArrowRight size={15}/></button>
+            <label>Cliente DEMO <select value={draft.clientId} aria-label="Cliente DEMO" onChange={event=>{const client=demoClients.find(c=>c.id===event.target.value),vehicle=demoVehicles.find(v=>v.clientId===client?.id);setDraft(previous=>({...previous,clientId:client?.id??'',vehicleId:vehicle?.id??'',client:client?client.name+' · DEMO':'',vehicle:vehicle?.description??'',plate:vehicle?.plate??''}))}}><option value="">Selecciona un cliente</option>{demoClients.map(client=><option key={client.id} value={client.id}>{client.name} · DEMO</option>)}</select></label>
+            <label>Vehículo asociado<select aria-label="Vehículo asociado" value={draft.vehicleId} disabled={!draft.clientId} onChange={event=>{const vehicle=demoVehicles.find(v=>v.id===event.target.value&&v.clientId===draft.clientId);setDraft(previous=>({...previous,vehicleId:vehicle?.id??'',vehicle:vehicle?.description??'',plate:vehicle?.plate??''}))}}><option value="">Selecciona un vehículo</option>{demoVehicles.filter(v=>v.clientId===draft.clientId).map(v=><option key={v.id} value={v.id}>{v.description} · {v.plate}</option>)}</select></label>
+            <button type="button" className="bt-ot-inline" onClick={() => onNotify('Registra el cliente en Clientes y vehículos o utiliza Nuevo ingreso desde Inicio. Sus fichas quedan disponibles en esta pestaña hasta recargar.')}>Registrar otro cliente (próximamente) <ArrowRight size={15}/></button>
           </>}
           {step === 2 && <><Title><Wrench size={23}/> Información del trabajo</Title>
             <div className="bt-ot-form-grid"><label>Motivo de ingreso *<input value={draft.reason} maxLength={140} onChange={event => setDraft(previous => ({ ...previous, reason: event.target.value }))} placeholder="Ej.: revisión de frenos" /></label>

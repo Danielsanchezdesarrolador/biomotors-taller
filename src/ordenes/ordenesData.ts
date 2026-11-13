@@ -3,6 +3,9 @@
 export type WorkStatus = 'diagnostico' | 'servicio' | 'repuestos' | 'entrega' | 'finalizada'
 export type InspectionState = 'correcto' | 'atencion' | 'no-revisado'
 export type WorkOrder = {
+  clientId?: string
+  vehicleId?: string
+  visitId?: string
   id: string
   client: string
   vehicle: string

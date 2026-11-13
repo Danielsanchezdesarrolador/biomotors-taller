@@ -210,7 +210,7 @@ function App() {
               </div>
             </>
           ) : screen === 'ordenes' ? (
-            <OrdenesPanel onWorkDocument={(orderId,mode)=>{navigate('informes');setRequestedWorkRequest({orderId,mode})}} onMultipunto={orderId=>{navigate('informes');setRequestedInspectionOrderId(orderId)}} globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={plate => { const vehicle = demoVehicles.find(v => v.plate === plate); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
+            <OrdenesPanel onWorkDocument={(orderId,mode)=>{navigate('informes');setRequestedWorkRequest({orderId,mode})}} onMultipunto={orderId=>{navigate('informes');setRequestedInspectionOrderId(orderId)}} globalSearch={searchText} onNotify={setNotice} initialOrderId={requestedOrderId} onClient={vehicleId => { const vehicle = demoVehicles.find(v => v.id === vehicleId); if (vehicle) { navigate('clientes'); setRequestedVehicleId(vehicle.id) } else { setNotice('Este vehículo temporal todavía no tiene una ficha DEMO asociada.') } }} />
           ) : screen === 'clientes' ? (
             <ClientesPanel initialVehicleId={requestedVehicleId} globalSearch={searchText} onOrder={id => { navigate('ordenes'); setRequestedOrderId(id) }} />
           ) : screen === 'informes' ? (

@@ -469,3 +469,11 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **Evidencia BT-FLOW-01A:** revisión de main `c4ccd5f`, CI remoto previo SUCCESS; dos mockups conceptuales entregados en la conversación (no Render ni capturas de la app), especificación técnica y checkpoint en GitHub. No se modificaron archivos React, Supabase, seguridad, los cinco paneles o BT-COT-01. El avance es documental y requiere visto bueno.
 
 [Checkpoint BT-FLOW-01A](docs/checkpoints/CHECKPOINT_BT_FLOW_01A_20261113.md).
+
+### BT-FLOW-01B — Infraestructura DEMO comprobada (13/11/2026)
+
+- [x] Entidades actuales compartidas en memoria; solicitudes estructuradas, nuevas OT e IDs estables disponibles al navegar y en selectores de documentos.
+- [x] Expediente por visita, recurrencia de vehículo, recepción original, confirmación/idempotencia de OT y solicitud; vínculos verificados por ID, nunca por patente como autorización.
+- [x] TypeScript, 74/74 Vitest, build/PWA PASS antes de iniciar la interfaz C. Motores de inspección y documentos preservados; D/E pendientes.
+
+[Checkpoint BT-FLOW-01B](docs/checkpoints/CHECKPOINT_BT_FLOW_01B_20261113.md).

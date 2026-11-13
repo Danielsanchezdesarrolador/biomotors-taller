@@ -1,3 +1,4 @@
+import { sessionOrders } from '../ordenes/orderSession'
 import { demoWorkOrders, type WorkOrder } from '../ordenes/ordenesData'
 export type ClientStatus = 'Activo' | 'Frecuente' | 'Pendiente'
 export type DemoClient = { id:string; name:string; phone:string; email:string; address:string; commune:string; status:ClientStatus; lastVisit:string; emailVerified:false }
@@ -9,7 +10,7 @@ const groups = [ ['OT-1001','OT-1005'], ['OT-1002'], ['OT-1003'], ['OT-1004','OT
 const status:ClientStatus[]=['Activo','Frecuente','Activo','Pendiente','Frecuente']
 export const demoClients:DemoClient[]=groups.map((ids,i)=>({id:`customer-${i+1}`,emailVerified:false,name:demoWorkOrders.find(o=>o.id===ids[0])!.client.replace(/ · DEMO$/,''),phone:`+56 9 0000 000${i+1}`,email:`cliente${i+1}@example.com`,address:`Calle de Muestra ${100+i} · dirección ficticia`,commune:'Comuna DEMO',status:status[i],lastVisit:demoWorkOrders.find(o=>o.id===ids[0])!.date}))
 export const demoVehicles:DemoVehicle[]=groups.flatMap((ids,i)=>ids.map(id=>{const o=demoWorkOrders.find(order=>order.id===id)!;return{id:'vehicle-'+id,clientId:`customer-${i+1}`,plate:o.plate,description:o.vehicle,mileage:o.mileage,status:status[i]}}))
-export function ordersForVehicle(vehicleId:string):WorkOrder[] {const vehicle=demoVehicles.find(v=>v.id===vehicleId);return vehicle?demoWorkOrders.filter(order=>order.plate===vehicle.plate):[]}
+export function ordersForVehicle(vehicleId:string):WorkOrder[] {const vehicle=demoVehicles.find(v=>v.id===vehicleId);return vehicle?sessionOrders().filter(order=>order.vehicleId?order.vehicleId===vehicle.id:vehicle.id==='vehicle-'+order.id):[]}
 export const demoHistory:VehicleHistory[]=demoVehicles.flatMap(v=>{
  const order=ordersForVehicle(v.id)[0]
  return [
@@ -19,8 +20,8 @@ export const demoHistory:VehicleHistory[]=demoVehicles.flatMap(v=>{
 })
 export const demoObservations:TechnicalObservation[]=demoVehicles.flatMap(v=>ordersForVehicle(v.id).flatMap(o=>o.pending.map((text,i)=>({id:`observation-${o.id}-${i}`,clientId:v.clientId,vehicleId:v.id,orderId:o.id,text,status:'Pendiente' as const}))))
 export const vehiclesForClient=(clientId:string)=>demoVehicles.filter(v=>v.clientId===clientId)
-export const historyForVehicle=(vehicleId:string)=>demoHistory.filter(h=>h.vehicleId===vehicleId)
-export const observationsForVehicle=(clientId:string,vehicleId:string)=>demoObservations.filter(o=>o.clientId===clientId&&o.vehicleId===vehicleId)
+export const historyForVehicle=(vehicleId:string)=>[...demoHistory.filter(h=>h.vehicleId===vehicleId),...ordersForVehicle(vehicleId).filter(o=>!demoHistory.some(h=>h.orderId===o.id)).map(o=>({id:'visit-'+o.id,vehicleId,orderId:o.id,date:o.date,work:o.service,status:'Ingreso DEMO',mileage:o.mileage,technician:o.technician,parts:[],deliveryStatus:'No enviado · DEMO' as const}))]
+export const observationsForVehicle=(clientId:string,vehicleId:string)=>[...demoObservations.filter(o=>o.clientId===clientId&&o.vehicleId===vehicleId),...ordersForVehicle(vehicleId).filter(o=>!demoWorkOrders.some(seed=>seed.id===o.id)).flatMap(o=>o.pending.map((text,i)=>({id:o.id+'-'+i,clientId,vehicleId,orderId:o.id,text,status:'Pendiente' as const}))) ]
 export function searchClients(clients:DemoClient[],query:string|string[],filter:ClientStatus|'Todos') {
  const normalize=(s:string)=>s.toLocaleLowerCase('es-CL').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9@]/g,'')
  const terms=(Array.isArray(query)?query:[query]).map(normalize).filter(Boolean)
@@ -35,3 +36,6 @@ export function validateRegistration(draft:RegistrationDraft) {
  if(!draft.consent)errors.consent='Confirma que usarás exclusivamente datos ficticios.'
  return errors
 }
+
+// Stable-ID adapter for legacy fixtures; a plate is never an identity or authorization.
+export function vehicleForOrder(order:WorkOrder){return demoVehicles.find(v=>v.id===(order.vehicleId??'vehicle-'+order.id)&&(!order.clientId||v.clientId===order.clientId))}

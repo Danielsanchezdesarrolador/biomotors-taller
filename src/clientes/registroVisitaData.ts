@@ -9,7 +9,7 @@ export type VisitaErrors = Partial<Record<VisitaField,string>>
 export type VisitaStep = 1|2|3
 export type SolicitudIngresoDemo = {
   id:string; name:string; vehicle:string; mileage:number; plate:string
-  clientReportedReason:string; date:string; status:'Pendiente de revisión'
+  clientReportedReason:string; date:string; status:'Pendiente de revisión';details?:VisitaDraft
 }
 export const emptyVisitaDraft:VisitaDraft = {
   name:'',email:'',phone:'',address:'',commune:'',
@@ -64,7 +64,7 @@ export function validateVisitaDraft(draft:VisitaDraft,year=new Date().getFullYea
 export function crearSolicitudDemo(draft:VisitaDraft,id:string,date=new Date()):SolicitudIngresoDemo {
   if(Object.keys(validateVisitaDraft(draft,date.getFullYear())).length)throw new Error('Datos DEMO incompletos')
   return {
-    id,name:draft.name.trim(),
+    id,name:draft.name.trim(),details:structuredClone(draft),
     vehicle:[draft.brand.trim(),draft.model.trim()].join(' ')+' · '+draft.year,
     mileage:Number(draft.mileage),plate:draft.plate.trim().toUpperCase()||'No indicada',
     clientReportedReason:draft.clientReportedReason.trim(),

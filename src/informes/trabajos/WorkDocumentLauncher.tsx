@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { sessionOrders } from '../../ordenes/orderSession'
-import { demoVehicles } from '../../clientes/clientesData'
+import { vehicleForOrder } from '../../clientes/clientesData'
 import { workDrafts } from './trabajosSession'
 import { workModes, type WorkMode, type WorkRequest } from './trabajosData'
 export function WorkDocumentLauncher({
@@ -26,7 +26,7 @@ export function WorkDocumentLauncher({
           onChange={(e) => setOrderId(e.target.value)}
         >
           {sessionOrders()
-            .filter((o) => demoVehicles.some((v) => v.plate === o.plate))
+            .filter((o) => !!vehicleForOrder(o))
             .map((o) => (
               <option key={o.id} value={o.id}>
                 {o.id} · {o.vehicle} · {o.client}

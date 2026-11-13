@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react'
-import { demoVehicles } from '../clientes/clientesData'
+import { vehicleForOrder } from '../clientes/clientesData'
 import { sessionOrders } from '../ordenes/orderSession'
 import { clp, type LineItem } from '../ordenes/detalleData'
 import { createDocument, documentContext, documentTotals, type DemoDocument, type DocumentKind, type SectionKey } from './documentosData'
 import { DocumentoPreview } from './DocumentoPreview'
 export function DocumentoEditorDemo({kind,id,onCreate}:{kind:DocumentKind;id:string;onCreate:(document:DemoDocument)=>void}) {
- const orders=sessionOrders().filter(o=>demoVehicles.some(v=>v.plate===o.plate))
+ const orders=sessionOrders().filter(o=>!!vehicleForOrder(o))
  const [orderId,setOrderId]=useState(orders.find(o=>o.id==='OT-1002')?.id??orders[0].id)
  const [draft,setDraft]=useState(()=>createDocument(id,kind,orderId)),[step,setStep]=useState(1),[error,setError]=useState('')
  const update=(patch:Partial<DemoDocument>)=>setDraft(previous=>({...previous,...patch}))

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { demoVehicles } from '../../clientes/clientesData'
+import { vehicleForOrder } from '../../clientes/clientesData'
 import { sessionOrders } from '../../ordenes/orderSession'
 import { listMultipunto } from './multipuntoSession'
 export function MultipuntoLauncher({
@@ -21,7 +21,7 @@ export function MultipuntoLauncher({
           onChange={(e) => setOrderId(e.target.value)}
         >
           {sessionOrders()
-            .filter((o) => demoVehicles.some((v) => v.plate === o.plate))
+            .filter((o) => !!vehicleForOrder(o))
             .map((o) => (
               <option key={o.id} value={o.id}>
                 {o.id} · {o.vehicle} · {o.client}

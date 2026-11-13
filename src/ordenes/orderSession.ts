@@ -1,3 +1,4 @@
+import { sessionChanged } from '../session/sessionSignal'
 import { demoWorkOrders, type InspectionState, type WorkOrder } from './ordenesData'
 import { exampleItems, initialInspection, inspectionItems, type LineItem } from './detalleData'
 export type OrderRevision = { order:WorkOrder; inspection:Record<string,InspectionState>; items:LineItem[] }
@@ -9,5 +10,7 @@ export function readOrderRevision(order:WorkOrder):OrderRevision {
  const saved=revisions.get(order.id)
  return clone(saved??baseOrderRevision(order))
 }
-export function writeOrderRevision(revision:OrderRevision) { revisions.set(revision.order.id,clone(revision)) }
+export function writeOrderRevision(revision:OrderRevision) { if(JSON.stringify(revisions.get(revision.order.id))===JSON.stringify(revision))return;revisions.set(revision.order.id,clone(revision));sessionChanged() }
 export function sessionOrders():WorkOrder[] {return [...new Map([...demoWorkOrders,...[...revisions.values()].map(r=>r.order)].map(o=>[o.id,o])).values()]}
+
+export function registerSessionOrder(order:WorkOrder){if(sessionOrders().some(o=>o.id===order.id))return;writeOrderRevision(baseOrderRevision(order))}
