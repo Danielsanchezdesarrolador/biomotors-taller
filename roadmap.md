@@ -684,8 +684,23 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 - [x] **BT-CP02-D** aprobado: 25/25 pruebas reales entre dos talleres, limpieza confirmada y RLS estructural activo.
 - [x] Auditar el acceso visual actual y redactar [orden técnica BT-AUTH-01B-R1](docs/BT_AUTH_01B_R1_ORDEN_IMPLEMENTACION.md) y [checkpoint de inicio](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_INICIO_20261114.md).
-- [ ] **Codex R1:** añadir Supabase JS con `VITE_SUPABASE_URL`, publishable key y flag apagado por defecto; implementar login, recuperar sesión y logout sin habilitar signup público.
-- [ ] **Autorización:** validar email confirmado, membership `active` y taller real por RLS; separar roles `owner/admin/mechanic/reception` sin confiar en selector UI.
-- [ ] **Regresión:** conservar rutas de revisión DEMO, los cinco paneles premium R2, diseño/marca, IOS PWA y Android sin cambios; impedir flash privado y acciones sin backend.
+- [x] **Codex R1:** añadir Supabase JS con `VITE_SUPABASE_URL`, publishable key y flag apagado por defecto; implementar login, recuperar sesión y logout sin habilitar signup público.
+- [x] **Autorización:** validar email confirmado, membership `active` y taller real por RLS; separar roles `owner/admin/mechanic/reception` sin confiar en selector UI.
+- [x] **Regresión:** conservar rutas de revisión DEMO, los cinco paneles premium R2, diseño/marca, IOS PWA y Android sin cambios; impedir flash privado y acciones sin backend.
 - [ ] **Validar:** pruebas unitarias, build, CI, capturas de cinco tamaños; después prueba controlada con cuentas Auth ficticias y aprobación explícita antes de activar en Render.
 - [ ] R2 posterior: recuperación de contraseña/correos transaccionales tras configurar SMTP seguro; invitaciones y cuotas por taller en etapas separadas.
+
+
+### BT-AUTH-01B-R1 — implementación con activación apagada (14/11/2026)
+
+- [x] Base actualizada a `aa3a64d`; sin cambios concurrentes. Supabase JS 2.119.0 y lockfile, login por contraseña, identidad verificada, correo confirmado, lecturas RLS de membresías y talleres activos. Sin cambios de Supabase/SQL/Edge/onboarding ni Android.
+- [x] Flag apagado por defecto; carga diferida del SDK evita incluso su sonda temporal de Storage. Publicación no activa Auth. Validación de variables públicas, rechazo de secret/legacy keys sin exponer valores.
+- [x] Restauración y eventos de sesión; revalidación al foco/visibilidad/reconexión; bloqueo inmediato del contexto durante verificación, offline/revocación/logout; protección frente a respuestas tardías. Logout local del SDK con aviso si no se confirma revocación en servidor.
+- [x] Taller múltiple con selección explícita y nueva validación. Owner/admin: cinco paneles vacíos. Mechanic: espacio técnico vacío. Reception: restringido. Selector/metadata/URL nunca conceden permisos.
+- [x] Revisión DEMO separada y read-only; siete pantallas premium y marca conservadas. Registro, recuperación, enlaces seguros, correo y operaciones de negocio deshabilitados.
+- [x] TypeScript, **185/185 Vitest** (146 anteriores +39), build/PWA/brand; pruebas de navegador con SDK real y HTTP **simulado**, cinco anchos (1650/1440/768/390/375), negativas de sesión/membresía/roles y build de claves prohibidas.
+- [x] Regresiones locales de paneles, acceso, marca, BT-REG-02, flujo B/C/D, QA-02, cotización y A4. Carrera ya documentada del test Enter/Escape resuelta esperando el atributo antes de comprobarlo, sin cambios funcionales del flujo.
+- [ ] **Activación pública y E2E Auth/RLS real pendientes**: cuentas controladas del Director, revisión de sesiones/refresh/revocación real y Safari/iPhone/PWA físico. El PASS A/B anterior no sustituye esta validación.
+- [ ] CI remoto por confirmar; consulta de Actions denegada desde esta sesión. Estado y evidencias de Render en el [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
+
+[Variables y procedimiento de Render](docs/BT_AUTH_01B_R1_CONFIGURACION_RENDER.md). No se inicia R2, recuperación/correo, invitaciones ni backend operativo.

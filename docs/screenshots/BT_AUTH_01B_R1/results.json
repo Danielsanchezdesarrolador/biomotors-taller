@@ -1,0 +1,93 @@
+{
+  "kind": "SDK HTTP MOCKS — not real Auth/RLS E2E",
+  "realAuth": "NOT EXECUTED",
+  "results": [
+    {
+      "width": 1650,
+      "sdkMock": "PASS",
+      "tests": "login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout"
+    },
+    {
+      "width": 1440,
+      "sdkMock": "PASS",
+      "tests": "login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout"
+    },
+    {
+      "width": 768,
+      "sdkMock": "PASS",
+      "tests": "login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout"
+    },
+    {
+      "width": 390,
+      "sdkMock": "PASS",
+      "tests": "login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout"
+    },
+    {
+      "width": 375,
+      "sdkMock": "PASS",
+      "tests": "login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout"
+    },
+    {
+      "scenario": "invalid",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "no-member",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "disabled",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "unconfirmed",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "mechanic",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "reception",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "multiple",
+      "sdkMock": "PASS"
+    },
+    {
+      "scenario": "offline",
+      "sdkMock": "PASS"
+    },
+    {
+      "width": 1650,
+      "publicFlagOff": "PASS",
+      "externalRequests": 0,
+      "storage": 0
+    },
+    {
+      "width": 1440,
+      "publicFlagOff": "PASS",
+      "externalRequests": 0,
+      "storage": 0
+    },
+    {
+      "width": 768,
+      "publicFlagOff": "PASS",
+      "externalRequests": 0,
+      "storage": 0
+    },
+    {
+      "width": 390,
+      "publicFlagOff": "PASS",
+      "externalRequests": 0,
+      "storage": 0
+    },
+    {
+      "width": 375,
+      "publicFlagOff": "PASS",
+      "externalRequests": 0,
+      "storage": 0
+    }
+  ]
+}

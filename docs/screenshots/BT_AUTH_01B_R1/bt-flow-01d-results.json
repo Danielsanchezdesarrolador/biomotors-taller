@@ -1,0 +1,52 @@
+[
+  {
+    "width": 1650,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-09FACB3D",
+    "oldWorkId": "ITR-DEMO-1701CCB8",
+    "newWorkId": "ITR-DEMO-0FB4D1EB",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 1440,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-2B77EFAC",
+    "oldWorkId": "ITR-DEMO-5F86ADA4",
+    "newWorkId": "ITR-DEMO-52987D6A",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-2FF49F45",
+    "oldWorkId": "ITR-DEMO-01465B49",
+    "newWorkId": "ITR-DEMO-FCBBA689",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-7D5D921B",
+    "oldWorkId": "ITR-DEMO-1188F120",
+    "newWorkId": "ITR-DEMO-63F68C74",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 375,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-C0690144",
+    "oldWorkId": "ITR-DEMO-55F1151B",
+    "newWorkId": "ITR-DEMO-69D7141F",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  }
+]

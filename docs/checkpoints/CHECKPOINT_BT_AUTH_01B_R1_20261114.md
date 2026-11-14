@@ -1,0 +1,77 @@
+# CHECKPOINT BT-AUTH-01B-R1 — Login y sesiones con activación apagada
+
+**Fecha:** 14/11/2026 · **Rama:** `main` · **Base verificada:** `aa3a64d21de14dbf63fc0ac601940445b3cde35d`.
+
+**Estado:** implementación y verificaciones locales completas; Auth público permanece apagado. Pendiente validación del Director con cuentas controladas, aprobación de activación y comprobación física Safari/PWA. **No iniciado R2**.
+
+## Fuentes y alcance
+
+Se leyeron AGENTS, README, roadmap, la orden BT-AUTH-01B-R1, el contrato BT-AUTH-01 y el checkpoint BT-CP02-D A/B. Se actualizó `main` y se comprobó que remoto no avanzó durante la implementación. La única carpeta local previa sin seguimiento era `artifacts/`; no se descartó. No se crearon ramas, cuentas, talleres ni servicios.
+
+El PASS A/B 25/25 del Director y su limpieza son antecedentes documentados; **no se repitieron ni equivalen a E2E de esta integración**. No se accedió a claves privilegiadas ni a la consola Supabase.
+
+## Implementado
+
+- Supabase JS **2.119.0**, dependencia fijada y lockfile. Configuración exclusiva del proyecto `suxcqqnmcjoezfxltoms` con URL y **publishable key**. Flag `VITE_BT_AUTH_R1_ENABLED` apagado por defecto.
+- Login `signInWithPassword`; `getSession` como candidato, `getUser` como verificación; correo confirmado obligatorio. SELECT por RLS de membresías propias activas y talleres activos. Ni selector, metadata, URL ni caché de permisos conceden acceso.
+- Restauración, cambios de sesión y renovación; revalidación al volver al foco/visibilidad/reconexión. Contexto retirado antes de consultas; generaciones descartan respuestas tardías tras logout/cambio/teardown. Callback Auth difiere las consultas fuera del lock del SDK.
+- Sin membresía o membresía deshabilitada: «Sin taller autorizado». Roles desconocidos, usuarios ajenos y talleres suspendidos/ocultos se rechazan. Varias membresías legítimas requieren selección explícita y nueva lectura. Ningún UUID de URL define el taller.
+- Owner/admin: identidad del taller y cinco paneles existentes vacíos. Mechanic: solo espacio técnico sin OT/datos; elegir Administrador no concede acceso administrativo. Reception: restringido, pendiente definición.
+- Logout local: contexto retirado inmediatamente; SDK elimina sesión local y solicita revocación de refresh token. Aviso si la red impide confirmar cierre en servidor; no se promete revocación inmediata de JWT emitidos ni logout global.
+- Estados de carga, credenciales genéricas inválidas, correo sin confirmar, sesión vencida, revocación y red interrumpida. Fetch acotado a 12 s por intento, compatible con Safari sin `AbortSignal.any`. Autocompletado apropiado, disabled durante carga y mensajes accesibles. Contraseña retirada del formulario al enviar, nunca persistida ni registrada.
+- Carga diferida del SDK: se detectó y eliminó incluso la escritura temporal que su importación producía al sondear Storage. Con flag apagado no se ejecuta el SDK y las regresiones comprueban cero escrituras/almacenamiento.
+- Rutas de revisión explícitamente **DEMO**, read-only y separadas del contexto autenticado, incluso si el navegador conserva una sesión SDK. Siete pantallas y entradas de Administrador/Mecánico preservadas. Registro, recuperación, verificación por enlace, OTP, magic links, correo e invitaciones siguen inactivos; `detectSessionInUrl=false`.
+- Build bloquea claves secretas, claves legacy y nombres públicos reservados a secretos, sin imprimir valores. PWA/service worker sin cambios: no cachea API, tokens ni datos privados.
+
+No se alteraron SQL, migraciones, RLS, Supabase Auth/configuración, Edge/onboarding, planes, pagos, Android, fuentes de marca ni el motor/documento multipunto de Ignacio. No se conectó persistencia operativa.
+
+## Archivos
+
+| Área | Archivos principales |
+| --- | --- |
+| Auth | `src/auth/{config,controller,supabaseGateway,lazyGateway,fetchWithTimeout}.ts`, `RealAccess.tsx`, `auth.css` |
+| Integración R2 | `src/App.tsx`, `src/access/{AccessScreens,ReviewBanner,TechnicianReview}.tsx`, `src/layout/AppShell.tsx` |
+| Dependencias/configuración | `package.json`, `package-lock.json`, `.env.example`, `vite.config.ts`, `scripts/verify-official-bundle.mjs` |
+| Pruebas | Cuatro archivos `src/auth/*.test.*`; `scripts/verify-auth-r1-{ui.cjs,env.mjs}`; harness privado; workflow público existente |
+| Regresiones | `scripts/verify-official-ui.cjs` admite el rótulo DEMO exigido por R1 pero conserva exclusión de fixtures; `verify-qa02-ui.cjs` espera transición React antes de comprobar Enter/Escape |
+| Documentación | README, AGENTS, roadmap, [guía Render](../BT_AUTH_01B_R1_CONFIGURACION_RENDER.md), este checkpoint y [capturas/resultados](../screenshots/BT_AUTH_01B_R1/README.md) |
+
+## Evidencia ejecutada localmente
+
+| Comprobación | Resultado y alcance |
+| --- | --- |
+| `npm run typecheck` | PASS |
+| `npm test` | **185/185 PASS, 25 archivos**; 146 anteriores intactas +39 nuevas. SDK/stubs, no cuentas reales |
+| `npm run build` | PASS Vite/PWA, fronteras de módulos públicos, exclusión de fixtures, hashes/transparencia y recursos de marca protegidos |
+| `verify-auth-r1-env.mjs` | 4/4 builds negativos rechazados, valores sintéticos no impresos |
+| `verify-auth-r1-ui.cjs` | PASS SDK oficial + HTTP interceptado, 1650/1440/768/390/375: login, cinco paneles vacíos, recarga, URL ajena, DEMO separado, revocación y logout |
+| Build **local** con flag `true` | PASS sobre `/tmp/bt-auth-enabled-dist`, clave sintética y servidor loopback 5178; mismos recorridos y negativas. No se publicó ni se contactó Supabase |
+| Negativas de navegador | Credenciales inválidas, ausencia/desactivación de membresía, correo sin confirmar, mecánico, recepción, varios talleres y pérdida/reconexión de red: PASS con respuestas simuladas |
+| `verify-auth-ui.cjs` | PASS siete pantallas, navegación inicial/back/forward/refresh/PWA en Chromium y revisión, cinco anchos; cero escrituras de red/Storage/cookies |
+| `verify-official-ui.cjs` | PASS cinco paneles y cinco anchos, sin registros ficticios, escrituras ni persistencia |
+| `verify-brand-ui.cjs`, `verify-brand-02-ui.cjs` | PASS cinco anchos, logo R2/transparencia sin cambios |
+| `verify-flow-ui.cjs`, `verify-flow-d-ui.cjs` | PASS B/C/D en cinco anchos, IDs/continuidad, aceptación por revisión, pendientes/realizados y ausencia de escrituras/persistencia |
+| `verify-qa02-ui.cjs` | PASS flujo de cotización a entrega, cinco anchos. Se reprodujo la carrera Enter/Escape ya anotada en BRAND-02; se sincronizó exclusivamente el test conservando ambas aserciones |
+| `verify-cotizaciones-ui.cjs` | PASS cinco anchos; cálculos, revisión, invalidación, documentos y exclusión de no realizados preservados |
+| `verify-registro-ui.cjs` | PASS 1650/390, sin red de escritura/Storage. Se usó Chromium instalado mediante wrapper de lanzamiento; no se modificó registro |
+| `verify-qa02-print.cjs` + `analyze-qa02-pdfs.py` | PASS seis PDFs A4, 1650/390/375: informe corto 1 página, largo 2; **0 páginas en blanco** |
+| Auth/RLS real nuevo | **NO EJECUTADO**. No hay cuentas/claves configuradas para esta sesión |
+| Dispositivos físicos | Safari/iPhone/PWA instalada real **pendiente**. Emulación Chromium no certifica Safari físico |
+| CI remoto | Workflow ampliado para repetir mocks/guardas y subir capturas. Consulta `gh run list` denegada (`Forbidden`); **no se declara CI remoto PASS** |
+
+No se cuentan las primeras ejecuciones interrumpidas por HMR como PASS: los recorridos se repitieron sobre código estable. No se modificaron módulos de negocio para superar pruebas.
+
+## Commits
+
+- `9df5111` — integración R1, sesiones/roles/membresías y pruebas unitarias, flag apagado.
+- `45d9fa4` — navegador con SDK/HTTP simulado, entorno negativo, rutas y sincronización de test QA.
+- `cc8163f` — build local activado aislado, cinco paneles y ejecución reproducible en workflow existente.
+- El commit documental de este checkpoint incorpora capturas/resultados, roadmap y guía de configuración; el SHA final se entrega al Director.
+
+## Render
+
+Publicación del código en el sitio existente solicitada con **Auth apagado**; comprobación de versión servida pendiente al crear este checkpoint. Se actualizará este apartado tras verificar assets y navegación. No se han establecido variables reales ni activado el login al público.
+
+## Revisión pendiente
+
+Validar con cuentas controladas del Director identidad/membresía real, dos talleres aislados, cambio/desactivación/revocación, renovación de tokens, multiventana, logout sin red y dispositivos físicos. Aprobar explícitamente antes de cambiar el flag en Render. Variables y pasos en la [guía de configuración](../BT_AUTH_01B_R1_CONFIGURACION_RENDER.md). Operaciones de negocio, invitaciones, correo, recuperación y R2 siguen fuera de alcance.

@@ -20,6 +20,8 @@ Verificación adicional con preview de producción en 5173 y harness privado en 
 
 **BT-BRAND-01:** los dos PNG oficiales se conservan intactos en [assets/brand/originals](assets/brand/originals/), con transparencia y hashes verificados. Acceso, paneles, PWA/favicon y recursos Expo reutilizan sus derivados. [Fuentes y reproducción](assets/brand/README.md) · [Checkpoint y capturas](docs/checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md). La identidad del taller en documentos sigue siendo independiente de «Software ByteTorque».
 
+**BT-AUTH-01B-R1:** login/sesiones mediante Supabase Auth implementados detrás de `VITE_BT_AUTH_R1_ENABLED=false` por defecto. La publicación conserva revisión DEMO sin autenticación real; registro, correos y operaciones siguen inactivos. [Configuración pública de Render y validación pendiente](docs/BT_AUTH_01B_R1_CONFIGURACION_RENDER.md) · [Checkpoint](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
+
 ## Nombre e identidad comercial
 
 **ByteTorque** es la marca comercial vigente para la aplicación SaaS (reemplaza al nombre anterior, según decisión del usuario del 11/11/2026). El nombre técnico del repositorio, Supabase y Render puede continuar siendo `biomotors-taller` para preservar las integraciones. **BIOMOTORS** es el taller piloto de Ignacio; no es el nombre de la plataforma destinada a todos los talleres. Logotipo e icono gráficos oficiales aprobados por el Director el 14/11/2026 (BT-BRAND-01); disponibilidad legal de marca/dominio todavía pendiente.
