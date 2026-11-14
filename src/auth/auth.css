@@ -1,0 +1,41 @@
+.auth-status {
+  display: grid;
+  gap: 12px;
+  margin-block: 20px;
+}
+.auth-status p {
+  color: var(--muted, #3b5279);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.auth-status button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.auth-session-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.auth-session-controls button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #bfd5f8;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #005bdf;
+  font: inherit;
+  cursor: pointer;
+}
+.access-review-note small {
+  display: block;
+  color: #31557e;
+  margin-block: 3px;
+}
+
+.auth-login-message {
+  background: #eff6ff;
+  border-color: #c6dcff;
+  color: #31557e;
+}

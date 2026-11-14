@@ -1,27 +1,37 @@
+import type { ReactNode } from 'react'
 import { BrandLogo } from '../brand/BrandLogo'
 import { ArrowLeft, Camera, ClipboardCheck, Wrench } from 'lucide-react'
 import { EmptyCard, UnavailableAction } from '../official/OfficialPanels'
 import { ReviewBanner } from './ReviewBanner'
 import { accessPaths, technicalAreas } from './accessContract'
-export function TechnicianReview({ onNavigate }: { onNavigate: (path: string) => void }) {
+export function TechnicianReview({
+  onNavigate,
+  session
+}: {
+  onNavigate: (path: string) => void
+  session?: ReactNode
+}) {
   return (
     <main className="technician-review">
       <header>
         <BrandLogo variant="icon" decorative />
         <div>
           <strong>ByteTorque</strong>
-          <small>Área técnica · Revisión visual</small>
+          <small>
+            {session ? 'Área técnica · Sesión verificada' : 'Área técnica · Revisión visual'}
+          </small>
         </div>
         <button type="button" onClick={() => onNavigate(accessPaths.mechanic)}>
           <ArrowLeft />
-          Volver al acceso
+          {session ? 'Cerrar sesión' : 'Volver al acceso'}
         </button>
       </header>
       <div className="technician-content">
-        <ReviewBanner />
+        {session || <ReviewBanner />}
         <div className="official-readiness" id="official-readiness" role="note">
-          No hay sesión ni asignaciones verificadas. El acceso técnico y el guardado permanente
-          están en preparación.
+          {session
+            ? 'Sesión verificada. Sin asignaciones autorizadas ni operaciones de negocio habilitadas.'
+            : 'No hay sesión ni asignaciones verificadas. El acceso técnico y el guardado permanente están en preparación.'}
         </div>
         <h1>Tu espacio de trabajo técnico</h1>
         <p>Órdenes asignadas, inspecciones y seguimiento de los trabajos de tu taller.</p>

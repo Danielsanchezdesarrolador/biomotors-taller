@@ -12,6 +12,7 @@ export function ReviewBanner({
       <Eye aria-hidden="true" />
       <div>
         <strong>{reviewNotice}</strong>
+        <small>DEMO · Sin autenticación ni permisos reales</small>
         <span>
           {compact
             ? 'Solo lectura: sin sesión ni envíos. No ingreses credenciales reales.'

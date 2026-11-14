@@ -55,11 +55,19 @@ export function AccessScreens({
   page,
   presentation,
   onNavigate,
-  onReviewSubmit
+  onReviewSubmit,
+  auth
 }: {
   page: AccessPage
   presentation: AccessPresentation
   onNavigate: (path: string) => void
+  auth?: {
+    enabled: boolean
+    busy: boolean
+    message: string
+    onLogin: (email: string, password: string) => void
+    content?: ReactNode
+  }
   onReviewSubmit?: (draft: AccessDraft, presentation: AccessPresentation) => string | void
 }) {
   const [draft, setDraft] = useState<AccessDraft>({ ...blank }),
@@ -68,7 +76,8 @@ export function AccessScreens({
     [message, setMessage] = useState(''),
     [legal, setLegal] = useState(false),
     [registrationRole, setRegistrationRole] = useState<AccessPresentation>(presentation)
-  const interactive = !!onReviewSubmit
+  const realLogin = !!auth?.enabled && page === 'login'
+  const interactive = !!onReviewSubmit || (realLogin && !auth?.busy)
   const patch = <K extends keyof AccessDraft>(key: K, value: AccessDraft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }))
   const criteria = passwordCriteria(draft.password),
@@ -119,7 +128,15 @@ export function AccessScreens({
             placeholder={placeholder}
             value={String(draft[key])}
             disabled={!interactive}
-            autoComplete="off"
+            autoComplete={
+              realLogin
+                ? key === 'email'
+                  ? 'username'
+                  : key === 'password'
+                    ? 'current-password'
+                    : 'off'
+                : 'off'
+            }
             autoCapitalize={type === 'email' ? 'none' : undefined}
             spellCheck={false}
             onChange={(e) => patch(key, e.target.value)}
@@ -168,6 +185,16 @@ export function AccessScreens({
   function submit(e: React.FormEvent) {
     e.preventDefault()
     setMessage('')
+    if (realLogin && auth && !auth.busy) {
+      if (!draft.email.trim() || !draft.password) {
+        setMessage('Completa el correo y la contraseña.')
+        return
+      }
+      const password = draft.password
+      patch('password', '')
+      auth.onLogin(draft.email, password)
+      return
+    }
     if (!onReviewSubmit) return
     if (page === 'login') {
       if (!draft.email.trim() || !draft.password) {
@@ -230,7 +257,25 @@ export function AccessScreens({
       </section>
       <section className="access-form-side">
         <div className={'access-card access-card-' + page}>
-          <ReviewBanner compact />
+          {realLogin ? (
+            <div className="access-review-note" role="note">
+              <ShieldCheck />
+              <div>
+                <strong>Acceso seguro · Supabase Auth</strong>
+                <span>
+                  El taller y el rol se verifican en el servidor. Registro y recuperación todavía
+                  deshabilitados.
+                </span>
+              </div>
+            </div>
+          ) : (
+            <ReviewBanner compact />
+          )}
+          {auth && !realLogin && (
+            <p className="access-message auth-login-message" role="status">
+              {auth.message}
+            </p>
+          )}
           {page === 'passwordUpdated' && (
             <div className="access-success-art" aria-hidden="true">
               <Check />
@@ -240,7 +285,8 @@ export function AccessScreens({
             <h1>{titles[page][0]}</h1>
             <p>{titles[page][1]}</p>
           </header>
-          {(page === 'login' || page === 'register') && (
+          {auth?.content}
+          {!auth?.content && (page === 'login' || page === 'register') && (
             <section className="access-type">
               <strong>{page === 'login' ? 'Acceso para' : 'Tipo de acceso'}</strong>
               <div role="group" aria-label="Tipo de acceso visual">
@@ -248,6 +294,7 @@ export function AccessScreens({
                   <button
                     type="button"
                     key={role}
+                    disabled={auth?.busy}
                     className={role === context ? 'selected' : ''}
                     aria-pressed={role === context}
                     onClick={() =>
@@ -271,172 +318,180 @@ export function AccessScreens({
               </div>
             </section>
           )}
-          {(page === 'login' ||
-            page === 'register' ||
-            page === 'recover' ||
-            page === 'newPassword') && (
-            <form className="access-form" onSubmit={submit} noValidate>
-              {page === 'register' && context === 'mecanico' ? (
-                <div className="access-information">
-                  <Info />
-                  <p>
-                    El mecánico accede mediante invitación de su taller. No hay autorregistro ni
-                    invitaciones habilitadas en esta vista.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {page === 'recover' && (
-                    <p className="access-instructions">
-                      Ingresa el correo de tu cuenta cuando el servicio esté habilitado para
-                      solicitar un enlace de recuperación.
+          {!auth?.content &&
+            (page === 'login' ||
+              page === 'register' ||
+              page === 'recover' ||
+              page === 'newPassword') && (
+              <form className="access-form" onSubmit={submit} noValidate>
+                {page === 'register' && context === 'mecanico' ? (
+                  <div className="access-information">
+                    <Info />
+                    <p>
+                      El mecánico accede mediante invitación de su taller. No hay autorregistro ni
+                      invitaciones habilitadas en esta vista.
                     </p>
-                  )}
-                  {page === 'register' &&
-                    field('name', 'Nombre completo', 'Ingresa tu nombre completo')}
-                  {page !== 'newPassword' &&
-                    field(
-                      'email',
-                      'Correo electrónico',
-                      'Ingresa tu correo electrónico',
-                      'email',
-                      <Mail />
+                  </div>
+                ) : (
+                  <>
+                    {page === 'recover' && (
+                      <p className="access-instructions">
+                        Ingresa el correo de tu cuenta cuando el servicio esté habilitado para
+                        solicitar un enlace de recuperación.
+                      </p>
                     )}
-                  {page === 'register' && (
-                    <>
-                      {field('phone', 'Teléfono', 'Ej. +56 9 XXXX XXXX', 'tel', <Smartphone />)}
-                      {field(
-                        'workshop',
-                        'Nombre del taller',
-                        'Ingresa el nombre de tu taller',
-                        'text',
-                        <Store />
+                    {page === 'register' &&
+                      field('name', 'Nombre completo', 'Ingresa tu nombre completo')}
+                    {page !== 'newPassword' &&
+                      field(
+                        'email',
+                        'Correo electrónico',
+                        'Ingresa tu correo electrónico',
+                        'email',
+                        <Mail />
                       )}
-                    </>
-                  )}
-                  {(page === 'login' || page === 'register' || page === 'newPassword') &&
-                    field(
-                      'password',
-                      page === 'newPassword' ? 'Nueva contraseña' : 'Contraseña',
-                      page === 'register'
-                        ? 'Crea una contraseña segura'
-                        : page === 'newPassword'
-                          ? 'Ingresa tu nueva contraseña'
-                          : 'Ingresa tu contraseña',
-                      'password',
-                      <LockKeyhole />
+                    {page === 'register' && (
+                      <>
+                        {field('phone', 'Teléfono', 'Ej. +56 9 XXXX XXXX', 'tel', <Smartphone />)}
+                        {field(
+                          'workshop',
+                          'Nombre del taller',
+                          'Ingresa el nombre de tu taller',
+                          'text',
+                          <Store />
+                        )}
+                      </>
                     )}
-                  {(page === 'register' || page === 'newPassword') &&
-                    field(
-                      'confirmPassword',
-                      page === 'newPassword'
-                        ? 'Confirmar nueva contraseña'
-                        : 'Confirmar contraseña',
-                      'Confirma tu contraseña',
-                      'password',
-                      <LockKeyhole />
+                    {(page === 'login' || page === 'register' || page === 'newPassword') &&
+                      field(
+                        'password',
+                        page === 'newPassword' ? 'Nueva contraseña' : 'Contraseña',
+                        page === 'register'
+                          ? 'Crea una contraseña segura'
+                          : page === 'newPassword'
+                            ? 'Ingresa tu nueva contraseña'
+                            : 'Ingresa tu contraseña',
+                        'password',
+                        <LockKeyhole />
+                      )}
+                    {(page === 'register' || page === 'newPassword') &&
+                      field(
+                        'confirmPassword',
+                        page === 'newPassword'
+                          ? 'Confirmar nueva contraseña'
+                          : 'Confirmar contraseña',
+                        'Confirma tu contraseña',
+                        'password',
+                        <LockKeyhole />
+                      )}
+                    {page === 'login' && (
+                      <div className="access-form-options">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={realLogin || draft.remember}
+                            disabled={realLogin || !interactive}
+                            onChange={(e) => patch('remember', e.target.checked)}
+                          />
+                          {realLogin ? 'Sesión guardada por Supabase' : 'Recordarme'}
+                        </label>
+                        <button type="button" onClick={() => navigate(accessPaths.recover)}>
+                          ¿Olvidaste tu contraseña?
+                        </button>
+                      </div>
                     )}
-                  {page === 'login' && (
-                    <div className="access-form-options">
-                      <label>
+                    {page === 'register' && (
+                      <label className="access-terms">
                         <input
                           type="checkbox"
-                          checked={draft.remember}
+                          checked={draft.terms}
                           disabled={!interactive}
-                          onChange={(e) => patch('remember', e.target.checked)}
+                          onChange={(e) => patch('terms', e.target.checked)}
                         />
-                        Recordarme
-                      </label>
-                      <button type="button" onClick={() => navigate(accessPaths.recover)}>
-                        ¿Olvidaste tu contraseña?
-                      </button>
-                    </div>
-                  )}
-                  {page === 'register' && (
-                    <label className="access-terms">
-                      <input
-                        type="checkbox"
-                        checked={draft.terms}
-                        disabled={!interactive}
-                        onChange={(e) => patch('terms', e.target.checked)}
-                      />
-                      <span>
-                        Acepto los{' '}
-                        <button type="button" onClick={() => setLegal(true)}>
-                          Términos de servicio
-                        </button>{' '}
-                        y la{' '}
-                        <button type="button" onClick={() => setLegal(true)}>
-                          Política de privacidad
-                        </button>
-                      </span>
-                    </label>
-                  )}
-                  {page === 'newPassword' && (
-                    <div className="access-password-guide">
-                      <div>
-                        <strong>Seguridad de la contraseña</strong>
                         <span>
-                          {score === 4
-                            ? 'Criterios completos'
-                            : score > 1
-                              ? 'Media'
-                              : score
-                                ? 'Inicial'
-                                : 'Por definir'}
+                          Acepto los{' '}
+                          <button type="button" onClick={() => setLegal(true)}>
+                            Términos de servicio
+                          </button>{' '}
+                          y la{' '}
+                          <button type="button" onClick={() => setLegal(true)}>
+                            Política de privacidad
+                          </button>
                         </span>
+                      </label>
+                    )}
+                    {page === 'newPassword' && (
+                      <div className="access-password-guide">
+                        <div>
+                          <strong>Seguridad de la contraseña</strong>
+                          <span>
+                            {score === 4
+                              ? 'Criterios completos'
+                              : score > 1
+                                ? 'Media'
+                                : score
+                                  ? 'Inicial'
+                                  : 'Por definir'}
+                          </span>
+                        </div>
+                        <meter
+                          min={0}
+                          max={4}
+                          value={score}
+                          aria-label="Criterios visuales de contraseña"
+                        />
+                        <section>
+                          <strong>Tu contraseña debe cumplir con:</strong>
+                          {(
+                            [
+                              ['length', '8 o más caracteres'],
+                              ['uppercase', 'Al menos una letra mayúscula (A–Z)'],
+                              ['number', 'Al menos un número (0–9)'],
+                              ['symbol', 'Al menos un símbolo (p. ej., !@#$%)']
+                            ] as const
+                          ).map(([key, label]) => (
+                            <p key={key} className={criteria[key] ? 'met' : ''}>
+                              <span>{criteria[key] ? <Check /> : '○'}</span>
+                              {label}
+                            </p>
+                          ))}
+                        </section>
                       </div>
-                      <meter
-                        min={0}
-                        max={4}
-                        value={score}
-                        aria-label="Criterios visuales de contraseña"
-                      />
-                      <section>
-                        <strong>Tu contraseña debe cumplir con:</strong>
-                        {(
-                          [
-                            ['length', '8 o más caracteres'],
-                            ['uppercase', 'Al menos una letra mayúscula (A–Z)'],
-                            ['number', 'Al menos un número (0–9)'],
-                            ['symbol', 'Al menos un símbolo (p. ej., !@#$%)']
-                          ] as const
-                        ).map(([key, label]) => (
-                          <p key={key} className={criteria[key] ? 'met' : ''}>
-                            <span>{criteria[key] ? <Check /> : '○'}</span>
-                            {label}
-                          </p>
-                        ))}
-                      </section>
-                    </div>
-                  )}
-                  {message && (
-                    <p className="access-message" role="status">
-                      {message}
-                    </p>
-                  )}
-                  {action(
-                    page === 'login'
-                      ? 'Ingresar'
-                      : page === 'register'
-                        ? 'Crear cuenta'
-                        : page === 'recover'
-                          ? 'Enviar enlace de recuperación'
-                          : 'Actualizar contraseña',
-                    page === 'login' ? (
-                      <LogIn />
-                    ) : page === 'register' ? (
-                      <UserPlus />
-                    ) : page === 'recover' ? (
-                      <Mail />
-                    ) : (
-                      <RotateCcw />
-                    )
-                  )}
-                </>
-              )}
-            </form>
-          )}
+                    )}
+                    {(message || (realLogin && auth?.message)) && (
+                      <p
+                        className={
+                          'access-message' + (realLogin && !message ? ' auth-login-message' : '')
+                        }
+                        role="status"
+                      >
+                        {message || auth?.message}
+                      </p>
+                    )}
+                    {action(
+                      page === 'login'
+                        ? auth?.busy
+                          ? 'Verificando…'
+                          : 'Ingresar'
+                        : page === 'register'
+                          ? 'Crear cuenta'
+                          : page === 'recover'
+                            ? 'Enviar enlace de recuperación'
+                            : 'Actualizar contraseña',
+                      page === 'login' ? (
+                        <LogIn />
+                      ) : page === 'register' ? (
+                        <UserPlus />
+                      ) : page === 'recover' ? (
+                        <Mail />
+                      ) : (
+                        <RotateCcw />
+                      )
+                    )}
+                  </>
+                )}
+              </form>
+            )}
           {page === 'login' && (
             <>
               <div className="access-divider">O también puedes</div>
@@ -584,7 +639,7 @@ export function AccessScreens({
             </button>
           )}
           <footer className="access-review-tools">
-            {interactive && (
+            {interactive && !realLogin && (
               <p>
                 Usa exclusivamente la credencial ficticia de revisión. Nunca una contraseña real.
               </p>

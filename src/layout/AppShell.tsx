@@ -48,12 +48,14 @@ export function AppShell({
   onNavigate,
   search,
   copy = officialCopy,
-  children
+  children,
+  accountControls
 }: {
   screen: Screen
   onNavigate: (screen: Screen) => void
   search?: { value: string; onChange: (value: string) => void; label: string }
   copy?: ShellCopy
+  accountControls?: ReactNode
   children: ReactNode
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false),
@@ -228,16 +230,21 @@ export function AppShell({
               </button>
               {showAccount && (
                 <div className="top-popover account-popover">
-                  <strong>ByteTorque</strong>
-                  <a className="access-entry-link" href="/#/acceso">
-                    Ver pantalla de acceso
-                  </a>
-                  <p>
-                    La autenticación y gestión de talleres se habilitarán en una etapa posterior.
-                  </p>
-                  <button type="button" onClick={() => navigate('configuracion')}>
-                    Ver configuración <ArrowRight size={15} />
-                  </button>
+                  {accountControls || (
+                    <>
+                      <strong>ByteTorque</strong>
+                      <a className="access-entry-link" href="/#/acceso">
+                        Ver pantalla de acceso
+                      </a>
+                      <p>
+                        La autenticación y gestión de talleres se habilitarán en una etapa
+                        posterior.
+                      </p>
+                      <button type="button" onClick={() => navigate('configuracion')}>
+                        Ver configuración <ArrowRight size={15} />
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

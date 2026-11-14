@@ -1,44 +1,59 @@
-import { defineConfig, normalizePath } from 'vite'
+import { defineConfig, normalizePath, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
 const root = normalizePath(fileURLToPath(new URL('.', import.meta.url)))
-export default defineConfig({
-  plugins: [
-    react(),
-    {
-      name: 'official-public-boundary',
-      generateBundle() {
-        const files = [...this.getModuleIds()].map((id) => normalizePath(id))
-        const application = files.filter(
-          (id) => id.startsWith(root + 'src/') || id.startsWith(root + 'tests/')
-        )
-        const forbidden = application.filter(
-          (id) =>
-            /\.test\./.test(id) ||
-            (!id.endsWith('.css') &&
-              !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/)/.test(id))
-        )
-        if (forbidden.length)
-          this.error('Public build imported non-public modules: ' + forbidden.join(', '))
-        this.emitFile({
-          type: 'asset',
-          fileName: '.vite/public-modules.json',
-          source: JSON.stringify(
-            application.map((id) => id.slice(id.indexOf('/src/') + 1)),
-            null,
-            2
+export default defineConfig(({ mode }) => {
+  const env = { ...loadEnv(mode, process.cwd(), 'VITE_'), ...process.env }
+  for (const [name, value] of Object.entries(env)) {
+    if (!name.startsWith('VITE_') || !value) continue
+    if (/SECRET|SERVICE_ROLE|PASSWORD/i.test(name) || value.startsWith('sb_secret_'))
+      throw new Error('Unsafe public environment configuration; no build was generated.')
+  }
+  const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
+  if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
+    throw new Error('Only a Supabase publishable key may be included in the frontend.')
+  if (env.VITE_SUPABASE_ANON_KEY)
+    throw new Error('Remove the legacy public key; configure VITE_SUPABASE_PUBLISHABLE_KEY.')
+  return {
+    plugins: [
+      react(),
+      {
+        name: 'official-public-boundary',
+        generateBundle() {
+          const files = [...this.getModuleIds()].map((id) => normalizePath(id))
+          const application = files.filter(
+            (id) => id.startsWith(root + 'src/') || id.startsWith(root + 'tests/')
           )
-        })
+          const forbidden = application.filter(
+            (id) =>
+              /\.test\./.test(id) ||
+              (!id.endsWith('.css') &&
+                !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
+                  id
+                ))
+          )
+          if (forbidden.length)
+            this.error('Public build imported non-public modules: ' + forbidden.join(', '))
+          this.emitFile({
+            type: 'asset',
+            fileName: '.vite/public-modules.json',
+            source: JSON.stringify(
+              application.map((id) => id.slice(id.indexOf('/src/') + 1)),
+              null,
+              2
+            )
+          })
+        }
       }
-    }
-  ],
-  resolve: {
-    alias: {
-      '#test-records': fileURLToPath(new URL('./src/data/emptyTestRecords.ts', import.meta.url))
-    }
-  },
-  server: {
-    fs: { deny: ['**/tests/**', '**/docs/**', '**/scripts/**', '**/.git/**', '**/.env*'] }
-  },
-  build: { target: 'es2022', manifest: true }
+    ],
+    resolve: {
+      alias: {
+        '#test-records': fileURLToPath(new URL('./src/data/emptyTestRecords.ts', import.meta.url))
+      }
+    },
+    server: {
+      fs: { deny: ['**/tests/**', '**/docs/**', '**/scripts/**', '**/.git/**', '**/.env*'] }
+    },
+    build: { target: 'es2022', manifest: true }
+  }
 })
