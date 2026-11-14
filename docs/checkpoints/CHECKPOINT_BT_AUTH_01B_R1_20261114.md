@@ -89,3 +89,45 @@ El commit documental final no modifica estos assets. No se declara CI remoto apr
 ## Revisión pendiente
 
 Validar con cuentas controladas del Director identidad/membresía real, dos talleres aislados, cambio/desactivación/revocación, renovación de tokens, multiventana, logout sin red y dispositivos físicos. Aprobar explícitamente antes de cambiar el flag en Render. Variables y pasos en la [guía de configuración](../BT_AUTH_01B_R1_CONFIGURACION_RENDER.md). Operaciones de negocio, invitaciones, correo, recuperación y R2 siguen fuera de alcance.
+
+## Anexo: validación R1 con Supabase real (14/11/2026)
+
+**Fuente:** pruebas manuales efectuadas por el Director con Chrome y PowerShell en su PC durante el chat, 14/11/2026. Esta evidencia complementa y no sustituye las pruebas de Codex con mocks registradas anteriormente. El sitio Render permanece con `VITE_BT_AUTH_R1_ENABLED` apagado; las pruebas reales fueron sobre el `localhost:5173` del Director con clave exclusivamente publishable.
+
+### Pruebas de interfaz real reportadas por el Director
+
+1. Login de propietario con cuenta de prueba y membresía de taller: **PASS**; se muestra nombre de taller y rol owner.
+2. Sesión conservada tras F5: **PASS**.
+3. Logout y recarga sin restauración automática del panel: **PASS**.
+4. Contraseña errónea rechazada: **PASS**.
+5. Cuenta confirmada sin membresía denegada: **PASS**.
+6. Revocación del estado de membresía `active → disabled` bloquea el panel tras F5: **PASS**.
+7. Restauración `disabled → active` devuelve el acceso al propietario: **PASS**.
+8. Dos propietarios activos en Chrome normal/incógnito visualizan cada uno su taller: **PASS**.
+
+Las operaciones administrativas de vinculación, desactivación y restauración se hicieron para las cuentas ficticias, no para clientes reales. Las pruebas descritas por el Director no certifican Safari físico ni la invalidación inmediata de todos los JWT en todos los dispositivos.
+
+### Prueba API RLS directa con dos usuarios reales
+
+`scripts/security/bt-auth-r1-rls-readonly.mjs`:
+
+- Primera ejecución: **PASS 1–14**, incluyendo identidad confirmada de ambos propietarios, lectura exclusiva de talleres, rechazo cruzado por UUID, aislamiento de membresías y perfiles.
+- Primera comprobación anónima: `FAIL — Consulta fallida: workshops (HTTP ?)` **por expectativa demasiado estricta del script**, no se adjudicó PASS; la auditoría SQL mostró ausencia de `GRANT SELECT` a `anon` y política `workshops_read_member` restringida a `authenticated` con membresía activa.
+- Corrección del script `a2f7a3a`: acepta solo respuesta vacía válida o rechazo HTTP **401/403**, no errores arbitrarios. `--anon-only` ejecuta una prueba separada **sin contraseñas**.
+- Segunda ejecución mostrada por el Director en PowerShell: `PASS 1 — Anonimo rechazado por API (HTTP 401)`; `RESULTADO: prueba anonima independiente PASS; no se usaron contrasenas.`
+- **Resultado consolidado: 14 pruebas autenticadas PASS + 1 prueba anónima independiente PASS = 15 comprobaciones validadas en dos ejecuciones.** No declarar que la corrida original fue 15/15 PASS.
+
+### Verificación administrativa posterior
+
+- Supabase consultado en modo lectura: **2 usuarios de prueba, 2 talleres, 2 perfiles, 2 membresías**; ambos talleres `active` y ambos propietarios con membresía `owner / active`.
+- Security Advisor muestra una **advertencia**: protección de contraseñas filtradas desactivada (característica a evaluar antes de producción); no afirmar cero advertencias.
+- Scripts y documentación actualizados en `main`, sin nuevos cambios a esquema, SQL, políticas RLS, Auth, Render ni Android.
+- GitHub Actions: CI del commit `a2f7a3a` incluye un workflow completado con SUCCESS y otro que seguía en curso durante la consulta; no asumir que todos estaban finalizados.
+
+### Puertas todavía pendientes
+
+- Validar sesiones simultáneas/multiventana en mismo perfil, revalidación con pérdida y recuperación de conectividad, vencimiento/renovación de token y cierre en escenarios de red interrumpida.
+- Validar visualización y restricciones reales de roles `mechanic`, `admin` y `reception`, y selección de múltiples talleres bajo una misma identidad, con fixtures estrictamente controlados.
+- Safari/iPhone físico y PWA instalada. Correo transaccional SMTP propio aún no configurado; correos de verificación/recuperación reales no comprobados.
+- No habilitar registro público, onboarding, persistencia operativa, planes/pagos ni correo externo todavía. **No activar Auth en Render sin aprobación expresa del Director.**
+- Mantener los dos talleres ficticios para completar pruebas; definir y verificar limpieza al cerrar todo R1.

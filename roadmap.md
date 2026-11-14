@@ -705,3 +705,12 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] CI remoto por confirmar; consulta de Actions denegada desde esta sesión. Estado y evidencias de Render en el [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
 
 [Variables y procedimiento de Render](docs/BT_AUTH_01B_R1_CONFIGURACION_RENDER.md). No se inicia R2, recuperación/correo, invitaciones ni backend operativo.
+
+### BT-AUTH-01B-R1 — Validación real local y API RLS (14/11/2026)
+
+- [x] **8 pruebas manuales de interfaz con Supabase real** reportadas por el Director: propietario, F5, logout, error de contraseña, falta de membresía, revocación, restauración y dos talleres simultáneos.
+- [x] **API RLS real: 14/14 pruebas autenticadas PASS + 1/1 anónima PASS en dos ejecuciones**. La anónima devolvió `HTTP 401`; no se califica como 15/15 en la corrida inicial. Ver [anexo al checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md) y [procedimiento](docs/BT_AUTH_01B_R1_PRUEBA_RLS_REAL.md).
+- [x] Supabase verificado: 2 usuarios y 2 talleres ficticios, 2 membresías `owner/active`, 2 perfiles, sin cambios en esquema/RLS. Advertencia vigente: protección contra contraseñas filtradas desactivada.
+- [x] GitHub Actions: al menos un workflow `SUCCESS` para el commit de corrección `a2f7a3a`; otro estaba en curso al consultar.
+- [ ] **R1 pendiente de validación ampliada**: refresh real, pérdida de red/recuperación, logout sin red, roles mecánico/recepción, Safari/PWA física, decisión de limpieza de fixtures y aprobación formal de posible activación Render.
+- [ ] **Mantener apagado en Render** el flag de login real y cerrado el registro público hasta autorización posterior. No iniciar R2/correo/invitaciones ni persistencia operativa.
