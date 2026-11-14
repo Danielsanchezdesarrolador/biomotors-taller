@@ -628,3 +628,6 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [ ] Backend debe comprobar cupos activos y reservas de invitación vigentes en operación atómica; impedir invitaciones excedentes y acceso a talleres ajenos, sin habilitar Auth ni RLS en la fase visual BT-AUTH-01A.
 - [ ] Antes de activar cambios reales de plan, acordar tratamiento de exceso de mecánicos al bajar a Básico **sin borrar historias ni desactivar usuarios silenciosamente**.
 - [ ] Pruebas del límite Básico 2→3 y Plus/Full 8→9, concurrencia, revocación de invitación, email confirmado y bloqueo de autoelevación. BT-CP02-D sigue en el otro chat.
+
+
+**BT-AUTH-01A — Verificación CI remota posterior (14/11/2026):** [workflow 43603192218](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43603192218) **SUCCESS** para `45e5200` (125/125 Vitest en 18 archivos, PWA y Android Expo); [interfaz pública 43602975602](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43602975602) y regresiones asociadas SUCCESS. Capturas de acceso, registro, mecánico y Usuarios y permisos revisadas preliminarmente sin hallazgos bloqueantes; aprobación del Director y Safari/iPhone físicos pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md).

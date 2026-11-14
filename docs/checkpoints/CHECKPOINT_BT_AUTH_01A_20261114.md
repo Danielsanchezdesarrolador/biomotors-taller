@@ -106,3 +106,13 @@ No existe sesión autenticada ni protección de información privada en estas ru
 - BT-CP02-D y sus pruebas A/B permanecen reservados. Posteriormente, y solo con autorización/puertas aprobadas: Auth, correo verificado, sesiones seguras, invitaciones, revocación, membresías, aislamiento RLS de talleres/OT asignadas y cuotas del servidor, redirecciones y mensajes del proveedor real.
 - Antes de habilitar datos reales: persistencia autorizada, control de permisos por operación y datos, recuperación/expiración reales, términos y privacidad aprobados. Botones de creación/edición, correo y guardado siguen bloqueados.
 - No iniciar **BT-AUTH-01B, BT-CP02-D, BT-COM-01 ni backend** al cerrar esta entrega.
+
+
+## Verificación posterior de CI y capturas (ChatGPT, 14/11/2026)
+
+- Se confirmó el último HEAD funcional/documental `45e52000cbeb427d3564e23bac7cc0b66f3ea228` sin solicitudes de integración abiertas.
+- [GitHub Actions — Verificación ByteTorque 43603192218](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43603192218) **SUCCESS** sobre `45e5200`. Job Web/iOS PWA PASS: **18 archivos y 125/125 pruebas Vitest**, Vite y PWA PASS; job Android React Native/Expo sin generar APK SUCCESS.
+- [Interfaz pública y exclusión de fixtures 43602975602](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43602975602), y regresiones BT-FLOW-01, BT-REG-02, BT-COT-01, verificaciones generales del commit `0fc21ad`: **SUCCESS**.
+- Se examinaron las capturas en GitHub de `BT_AUTH_01A_LOGIN_390.png`, `BT_AUTH_01A_REGISTRO_390.png`, `BT_AUTH_01A_MECANICO_390.png`, `BT_AUTH_01A_USUARIOS_PERMISOS_390.png`. Identidad visual R2 consistente, navegación con dos roles visible, advertencia de no autenticación visible, mecánico sin información financiera y diálogo de cupos ilustrativos Básico 0/2, Plus 0/8, Full 0/8. Sin defecto bloqueante evidente en estas capturas; son evidencias Chromium y no equivalen a Safari físico ni aprobación del Director. Capturas `fullPage` del modal no permiten concluir que la barra inferior tape controles durante una interacción real.
+- El usuario debe probar desde Android la ruta pública `/#/acceso`, **sin usar la credencial QA privada** del harness local, y revisar siete pantallas, los dos perfiles y Usuarios y permisos. La contraseña del harness no se emplea ni se distribuye como autenticación real.
+- No se modificó código de acceso ni se inició BT-AUTH-01B, BT-CP02-D, correo o Supabase con esta verificación.
