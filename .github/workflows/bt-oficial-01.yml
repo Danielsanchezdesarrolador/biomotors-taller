@@ -1,0 +1,42 @@
+name: BT-OFICIAL-01A — Interfaz pública y exclusión de fixtures
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'tests/**', 'vite*.ts', 'vitest.config.ts', 'scripts/**', 'public/**', 'package.json', '.github/workflows/bt-oficial-01.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  interfaz-publica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preparar pruebas
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Comprobar tipos, modelos y bundle público
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+      - name: Cinco paneles públicos en cinco tamaños
+        run: |
+          npm run preview -- --port 5173 --strictPort > /tmp/bt-oficial-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-official-ui.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BT-OFICIAL-01A-Estados-vacios-Capturas
+          path: artifacts/bt-oficial-01a/
+          if-no-files-found: warn
+          retention-days: 30

@@ -10,6 +10,7 @@ assert.ok(
 for (const name of readdirSync('dist/assets')) {
   if (!/\.(js|css)$/.test(name)) continue
   const text = readFileSync('dist/assets/' + name, 'utf8')
+  if (name.endsWith('.js')) assert.doesNotMatch(text, /\bDEMO\b|TallerFlow/)
   assert.doesNotMatch(
     text,
     /OT-100[1-8]|workshop-demo|DEMO-KZV|@example\.com|Camila Muñoz|demoWorkOrders|tests\/fixtures|WorkflowApp/
