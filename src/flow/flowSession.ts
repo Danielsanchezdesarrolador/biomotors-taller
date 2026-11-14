@@ -6,8 +6,15 @@ import type { WorkOrder } from '../ordenes/ordenesData'
 import { sessionChanged } from '../session/sessionSignal'
 import { createMultipunto } from '../informes/multipunto/multipuntoData'
 import { readMultipunto, rememberMultipunto } from '../informes/multipunto/multipuntoSession'
-import { createWorkDocument, type WorkMode } from '../informes/trabajos/trabajosData'
-import { readWorkDocument, rememberWorkDocument } from '../informes/trabajos/trabajosSession'
+import {
+  businessState,
+  beginProposal,
+  prepareWorkFromQuote,
+  authorizedWork,
+  visitQuote,
+  type QuoteRef
+} from './flowBusiness'
+import { readWorkDocument } from '../informes/trabajos/trabajosSession'
 export type FlowStage =
   | 'recepcion'
   | 'orden'
@@ -199,11 +206,13 @@ export function openCaseResource(id: string, resource: FlowResource) {
     stage = 'inspeccion'
     updateCase(id, { inspectionId: resourceId })
   } else if (resource === 'quote' || resource === 'work') {
-    const mode: WorkMode = resource === 'quote' ? 'quote' : 'work',
-      previousId = resource === 'quote' ? visit.quoteId : visit.workReportId
-    const previous = previousId ? readWorkDocument(previousId) : undefined
-    const doc = previous ?? createWorkDocument(order.id, mode)
-    if (!previous) rememberWorkDocument(doc)
+    const doc = resource === 'quote' ? visitQuote(visit) : authorizedWork(visit)
+    if (!doc)
+      throw new Error(
+        resource === 'quote'
+          ? 'Define primero la propuesta de esta visita.'
+          : 'Confirma primero la precarga desde una aceptación DEMO vigente.'
+      )
     resourceId = doc.id
     stage = resource === 'quote' ? 'cotizacion' : 'ejecucion'
     updateCase(
@@ -217,11 +226,29 @@ export function openCaseResource(id: string, resource: FlowResource) {
   selectCase(id)
   return { resource, resourceId, orderId: order.id, visitId: id }
 }
+export function beginCaseProposal(id: string) {
+  const doc = beginProposal(readCase(id))
+  updateCase(id, {
+    quoteId: doc.id,
+    quoteRevision: doc.revision,
+    lastContext: { resource: 'order', resourceId: readCase(id).orderId!, stage: 'propuesta' }
+  })
+  return doc
+}
+export function prepareCaseWork(id: string, ref: QuoteRef, confirmed: boolean) {
+  const doc = prepareWorkFromQuote(readCase(id), ref, confirmed)
+  updateCase(id, {
+    workReportId: doc.id,
+    lastContext: { resource: 'work', resourceId: doc.id, stage: 'ejecucion' }
+  })
+  return doc
+}
 export function caseProgress(id: string) {
   const { visit, order } = caseContext(id)
   const inspection = visit.inspectionId ? readMultipunto(visit.inspectionId) : undefined,
-    quote = visit.quoteId ? readWorkDocument(visit.quoteId) : undefined,
-    work = visit.workReportId ? readWorkDocument(visit.workReportId) : undefined
+    business = order ? businessState(visit) : undefined,
+    quote = business?.quote,
+    work = business?.work
   const states: Record<FlowStage, StageState> = {
     recepcion: 'completado',
     orden: order ? 'completado' : 'pendiente',
@@ -232,34 +259,64 @@ export function caseProgress(id: string) {
         : inspection
           ? 'en_curso'
           : 'pendiente',
-    propuesta: order ? 'pendiente' : 'bloqueado',
-    cotizacion: !order ? 'bloqueado' : quote ? 'en_curso' : 'pendiente',
-    respuesta_cliente: quote ? 'pendiente' : 'bloqueado',
-    ejecucion: !order ? 'bloqueado' : work ? 'en_curso' : 'pendiente',
-    informe_final: work ? 'pendiente' : 'bloqueado',
+    propuesta: !inspection?.finalized
+      ? 'bloqueado'
+      : business?.proposalValid
+        ? 'completado'
+        : quote
+          ? 'en_curso'
+          : 'pendiente',
+    cotizacion: !business?.proposalValid
+      ? 'bloqueado'
+      : business.reviewValid
+        ? 'completado'
+        : quote
+          ? 'en_curso'
+          : 'pendiente',
+    respuesta_cliente: !business?.reviewValid
+      ? 'bloqueado'
+      : business.response
+        ? 'completado'
+        : 'pendiente',
+    ejecucion: !business?.authorized
+      ? 'bloqueado'
+      : work?.approval
+        ? 'completado'
+        : work
+          ? 'en_curso'
+          : 'pendiente',
+    informe_final: work?.approval ? 'completado' : work ? 'en_curso' : 'bloqueado',
     entrega: 'bloqueado'
   }
-  // Further coordinated gates belong to 01D/E. Existing module approvals are shown,
-  // never treated as blanket permission to execute or to deliver this visit.
-  let stage: FlowStage = !order ? 'orden' : !inspection?.finalized ? 'inspeccion' : 'propuesta'
-  const last = visit.lastContext
-  if (last?.resource === 'inspection' && inspection && !inspection.finalized) stage = 'inspeccion'
-  if (last?.resource === 'quote' && quote)
-    stage = quote.approval ? 'respuesta_cliente' : 'cotizacion'
-  if (last?.resource === 'work' && work) stage = work.approval ? 'informe_final' : 'ejecucion'
-  if (last?.resource === 'order' && order) stage = 'propuesta'
+  let stage: FlowStage = !order
+    ? 'orden'
+    : !inspection?.finalized
+      ? 'inspeccion'
+      : !business?.proposalValid
+        ? 'propuesta'
+        : !business.reviewValid
+          ? 'cotizacion'
+          : !business.response
+            ? 'respuesta_cliente'
+            : !business.authorized
+              ? 'propuesta'
+              : work?.approval
+                ? 'informe_final'
+                : 'ejecucion'
+  if (visit.lastContext?.resource === 'inspection' && inspection && !inspection.finalized)
+    stage = 'inspeccion'
   const actions: Record<FlowStage, string> = {
     recepcion: 'Revisar recepción',
     orden: 'Crear orden de trabajo',
     inspeccion: inspection ? 'Continuar inspección' : 'Iniciar inspección',
-    propuesta: 'Definir trabajos',
-    cotizacion: quote ? 'Continuar cotización' : 'Preparar cotización',
-    respuesta_cliente: 'Revisar aprobación',
-    ejecucion: work ? 'Registrar trabajos realizados' : 'Preparar informe de trabajo',
+    propuesta: quote ? 'Revisar propuesta' : 'Definir trabajos',
+    cotizacion: 'Revisar cotización',
+    respuesta_cliente: 'Registrar respuesta DEMO',
+    ejecucion: work ? 'Registrar trabajos realizados' : 'Preparar trabajo desde cotización',
     informe_final: 'Revisar informe final',
     entrega: 'Cierre guiado pendiente 01E'
   }
-  return { stage, states, action: actions[stage], inspection, quote, work }
+  return { stage, states, action: actions[stage], inspection, quote, work, business }
 }
 
 export function activeCaseId() {

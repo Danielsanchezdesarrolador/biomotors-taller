@@ -87,11 +87,15 @@ const { chromium } = require('playwright'),
       await newReception(name, email)
       await capture('INGRESO')
       await p.getByRole('button', { name: 'Guardar borrador y salir', exact: true }).click()
-      if(width===1650){
+      if (width === 1650) {
         await nav().nth(2).click()
-        await p.locator('.cv-intake-item').first().getByRole('button',{name:'Revisar ingreso',exact:true}).click()
-        assert.equal(await p.getByLabel('Nombre completo DEMO').inputValue(),'Cliente demo A')
-        await p.getByRole('button',{name:'Guardar borrador y salir',exact:true}).click()
+        await p
+          .locator('.cv-intake-item')
+          .first()
+          .getByRole('button', { name: 'Revisar ingreso', exact: true })
+          .click()
+        assert.equal(await p.getByLabel('Nombre completo DEMO').inputValue(), 'Cliente demo A')
+        await p.getByRole('button', { name: 'Guardar borrador y salir', exact: true }).click()
       }
       await nav().nth(4).click()
       await nav().nth(0).click()
@@ -137,19 +141,40 @@ const { chromium } = require('playwright'),
         await p.locator('#mp-observations').inputValue(),
         'Observación propia de esta visita DEMO.'
       )
+      await p.getByLabel('Hora de inicio', { exact: true }).fill('09:00')
+      await p.getByLabel('Hora de término', { exact: true }).fill('10:30')
+      await p.getByLabel('Combustible', { exact: true }).fill('Gasolina DEMO')
+      await p.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+      await p.getByRole('checkbox', { name: /Acepto finalizar/ }).check()
+      await p
+        .getByRole('button', { name: 'Confirmar finalización sin envío real', exact: true })
+        .click()
       await nav().nth(1).click()
       const ot = p.getByRole('button', { name: 'Abrir ' + orderId, exact: true })
       if (await ot.isVisible()) await ot.click()
       else await p.locator('.bt-ot-mobile-order').filter({ hasText: orderId }).click()
       assert.match(await p.locator('.od-summary').innerText(), new RegExp(name))
       await back().click()
-      await p.locator('.fl-milestones button').nth(4).click()
+      await p.locator('.fl-milestones button').nth(3).click()
+      await p.getByRole('button', { name: 'Definir trabajos', exact: true }).click()
+      await p
+        .getByLabel('Diagnóstico profesional del mecánico', { exact: true })
+        .fill('Diagnóstico manual confirmado de prueba.')
+      await p.getByRole('button', { name: 'Agregar otro ítem', exact: true }).click()
+      await p.getByLabel('Descripción del ítem').fill('Partida confirmada del expediente')
+      await p.getByLabel('Precio del ítem').fill('1000')
+      await p.getByRole('button', { name: 'Guardar ítem DEMO', exact: true }).click()
+      await p.getByRole('button', { name: 'Revisar y confirmar propuesta', exact: true }).click()
+      await p
+        .getByRole('checkbox', { name: /Confirmo que revisé expresamente el diagnóstico/ })
+        .check()
+      await p.getByRole('button', { name: 'Confirmar propuesta DEMO', exact: true }).click()
       await p.getByRole('button', { name: 'Preparar cotización', exact: true }).click()
       await p.locator('.wt-panel').waitFor()
       assert.match(await p.locator('.wt-identity').innerText(), new RegExp(name))
       assert.match(await p.locator('.wt-identity').innerText(), new RegExp(orderId))
-      assert.equal(await p.locator('.wt-items tbody tr').count(), 0)
-      assert.equal(await p.locator('.wt-metric-total').innerText(), '$0 CLP')
+      assert.equal(await p.locator('.wt-items tbody tr').count(), 1)
+      assert.equal(await p.locator('.wt-metric-total').innerText(), '$1.190 CLP')
       const quoteId = await p.locator('.wt-metric').nth(1).locator('strong').innerText()
       await p.getByRole('button', { name: 'Agregar ítem', exact: true }).click()
       await p.getByLabel('Descripción del ítem').fill('Repuesto decidido por operador DEMO')
@@ -165,9 +190,10 @@ const { chromium } = require('playwright'),
       await p.getByRole('button', { name: 'Seleccionar ' + name, exact: true }).click()
       assert.match(await p.locator('.cv-vehicle').innerText(), /Toyota Yaris/)
       await back().click()
-      await p.getByRole('button', { name: 'Continuar cotización', exact: true }).click()
+      await p.locator('.fl-milestones button').nth(4).click()
+      await p.getByRole('button', { name: 'Revisar cotización', exact: true }).click()
       assert.equal(await p.locator('.wt-metric').nth(1).locator('strong').innerText(), quoteId)
-      assert.equal(await p.locator('.wt-metric-total').innerText(), '$23.800 CLP')
+      assert.equal(await p.locator('.wt-metric-total').innerText(), '$24.990 CLP')
       assert.equal(
         await p.getByLabel('Comentarios técnicos').inputValue(),
         'Sin trabajo automáticamente realizado.'

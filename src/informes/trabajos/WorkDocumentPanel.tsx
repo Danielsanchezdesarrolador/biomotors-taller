@@ -171,6 +171,13 @@ export function WorkDocumentPanel({
           <Save /> Guardar borrador
         </button>
       </p>
+      {doc.sourceQuote && (
+        <p className="wt-source-quote">
+          Origen de precarga: {doc.sourceQuote.quoteId} · Revisión {doc.sourceQuote.revision}. La
+          vigencia de la aceptación DEMO se consulta en el expediente. Esta referencia no autoriza
+          trabajos reales ni acredita entrega.
+        </p>
+      )}
       {message && (
         <p className="wt-message" role="status">
           {message}

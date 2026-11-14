@@ -12,6 +12,8 @@ on:
       - 'src/informes/InformesPanel.tsx'
       - 'src/informes/documentosData.ts'
       - 'scripts/verify-flow-ui.cjs'
+      - 'scripts/verify-flow-d-ui.cjs'
+      - 'src/informes/trabajos/**'
       - '.github/workflows/bt-flow-01.yml'
   workflow_dispatch:
 permissions:
@@ -38,10 +40,13 @@ jobs:
             sleep 1
           done
           node scripts/verify-flow-ui.cjs
+          node scripts/verify-flow-d-ui.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: BT-FLOW-01-Recepcion-Expediente-Capturas
-          path: artifacts/bt-flow-01/
+          path: |
+            artifacts/bt-flow-01/
+            artifacts/bt-flow-01d/
           if-no-files-found: warn
           retention-days: 30

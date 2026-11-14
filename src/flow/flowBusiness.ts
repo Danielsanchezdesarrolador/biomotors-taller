@@ -27,6 +27,7 @@ export type QuoteResponse = QuoteRef & {
   decision: ClientDecision
   date: string
   note: string
+  reviewId: string
   simulated: true
   actor: 'Operador DEMO'
 }
@@ -40,7 +41,7 @@ type ProposalConfirmation = {
   actor: 'Operador DEMO'
   itemSources: Record<string, string>
 }
-type QuoteReview = QuoteRef & { visitId: string; date: string; actor: 'Operador DEMO' }
+type QuoteReview = QuoteRef & { id: string; visitId: string; date: string; actor: 'Operador DEMO' }
 export type WorkTransfer = QuoteRef & {
   visitId: string
   workReportId: string
@@ -165,6 +166,7 @@ export function confirmProposal(visit: FlowCase, ref: QuoteRef, confirmed: boole
     )
   }
   proposals.set(visit.id, p)
+  reviews.delete(visit.id)
   sessionChanged()
   return structuredClone(p)
 }
@@ -189,6 +191,7 @@ export function markQuoteReviewed(visit: FlowCase, ref: QuoteRef, confirmed: boo
   if (!quoteReviewed(visit)) {
     rememberWorkDocument(q.approval ? { ...q, saved: true } : reviewed)
     reviews.set(visit.id, {
+      id: 'review-demo-' + crypto.randomUUID(),
       visitId: visit.id,
       quoteId: q.id,
       revision: q.revision,
@@ -206,7 +209,10 @@ export function responseHistory(visit: FlowCase) {
 export function currentResponse(visit: FlowCase) {
   const q = visitQuote(visit)
   if (!q || !quoteReviewed(visit)) return undefined
-  return responseHistory(visit).find((r) => r.quoteId === q.id && r.revision === q.revision)
+  return responseHistory(visit).find(
+    (r) =>
+      r.quoteId === q.id && r.revision === q.revision && r.reviewId === reviews.get(visit.id)?.id
+  )
 }
 export function authorizedDemo(visit: FlowCase) {
   return currentResponse(visit)?.decision === 'aceptada_demo'
@@ -241,6 +247,7 @@ export function recordClientResponse(
     decision,
     note: note.trim(),
     date: new Date().toISOString(),
+    reviewId: reviews.get(visit.id)!.id,
     simulated: true,
     actor: 'Operador DEMO'
   }
@@ -347,12 +354,7 @@ export function businessState(visit: FlowCase) {
     lastResponse,
     history,
     authorized: authorizedDemo(visit),
-    responseStale:
-      !!lastResponse &&
-      (!quote ||
-        lastResponse.quoteId !== quote.id ||
-        lastResponse.revision !== quote.revision ||
-        !quoteReviewed(visit)),
+    responseStale: !!lastResponse && lastResponse.id !== response?.id,
     work,
     transfers: transferHistory(visit)
   }

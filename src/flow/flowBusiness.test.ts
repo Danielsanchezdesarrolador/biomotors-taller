@@ -267,4 +267,18 @@ describe('BT-FLOW-01D — exact quote revision and controlled work preparation',
     expect(authorizedDemo(f.visit)).toBe(false)
     expect(mp.items.every((i) => i.state === 'unreviewed')).toBe(true)
   })
+  it('requires a fresh response after inspection changes and explicit proposal reconfirmation', () => {
+    const f = accepted(),
+      mp = readMultipunto(f.inspectionId)!
+    mp.observations = 'Nuevo antecedente técnico revisado'
+    rememberMultipunto(mp)
+    expect(authorizedDemo(f.visit)).toBe(false)
+    confirmProposal(f.visit, ref(f.q), true)
+    markQuoteReviewed(f.visit, ref(f.q), true)
+    expect(authorizedDemo(f.visit)).toBe(false)
+    expect(currentResponse(f.visit)).toBeUndefined()
+    recordClientResponse(f.visit, ref(f.q), 'aceptada_demo', 'Nueva revisión de antecedentes', true)
+    expect(authorizedDemo(f.visit)).toBe(true)
+    expect(responseHistory(f.visit)).toHaveLength(2)
+  })
 })

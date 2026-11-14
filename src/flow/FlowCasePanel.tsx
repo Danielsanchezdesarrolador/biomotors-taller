@@ -1,3 +1,5 @@
+import { FlowProposalPanel } from './FlowProposalPanel'
+import { FlowQuotePanel, FlowExecutionPanel } from './FlowQuotePanels'
 import { useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, CarFront, Check, ClipboardList, Layers } from 'lucide-react'
 import {
@@ -51,7 +53,9 @@ export function FlowCasePanel({
         </span>
         <div>
           <h1>Expediente de visita · DEMO</h1>
-          <p><span title={visit.id}>Ref. {shortVisitRef}</span> · Memoria temporal de esta pestaña</p>
+          <p>
+            <span title={visit.id}>Ref. {shortVisitRef}</span> · Memoria temporal de esta pestaña
+          </p>
         </div>
       </header>
       <p className="fl-memory">
@@ -73,33 +77,39 @@ export function FlowCasePanel({
           </div>
         ))}
       </section>
+      {progress.business?.responseStale && (
+        <p className="fl-business-warning" role="status">
+          La cotización cambió y necesita nueva respuesta. La autorización simulada anterior no está
+          vigente; los informes previos se conservan.
+        </p>
+      )}
       <div className="fl-case-layout">
         <div className="fl-milestone-container">
-        <p className="fl-mobile-milestone-hint">Desliza los hitos para ver las 7 etapas →</p>
-        <nav className="dashboard-card fl-milestones" aria-label="Hitos del expediente">
-          {milestones.map((m, i) => (
-            <button
-              key={m.id}
-              onClick={() => select(m.id)}
-              aria-current={stage === m.id ? 'step' : undefined}
-              className={(stage === m.id ? 'active ' : '') + progress.states[m.id]}
-            >
-              <span>{progress.states[m.id] === 'completado' ? <Check /> : i + 1}</span>
-              <div>
-                <strong>{m.label}</strong>
-                <small>
-                  {progress.states[m.id] === 'completado'
-                    ? 'Completado con evidencia'
-                    : progress.states[m.id] === 'en_curso'
-                      ? 'En curso'
-                      : progress.states[m.id] === 'bloqueado'
-                        ? 'Bloqueado / pendiente'
-                        : 'Pendiente'}
-                </small>
-              </div>
-            </button>
-          ))}
-        </nav>
+          <p className="fl-mobile-milestone-hint">Desliza los hitos para ver las 7 etapas →</p>
+          <nav className="dashboard-card fl-milestones" aria-label="Hitos del expediente">
+            {milestones.map((m, i) => (
+              <button
+                key={m.id}
+                onClick={() => select(m.id)}
+                aria-current={stage === m.id ? 'step' : undefined}
+                className={(stage === m.id ? 'active ' : '') + progress.states[m.id]}
+              >
+                <span>{progress.states[m.id] === 'completado' ? <Check /> : i + 1}</span>
+                <div>
+                  <strong>{m.label}</strong>
+                  <small>
+                    {progress.states[m.id] === 'completado'
+                      ? 'Completado con evidencia'
+                      : progress.states[m.id] === 'en_curso'
+                        ? 'En curso'
+                        : progress.states[m.id] === 'bloqueado'
+                          ? 'Bloqueado / pendiente'
+                          : 'Pendiente'}
+                  </small>
+                </div>
+              </button>
+            ))}
+          </nav>
         </div>
         <section className="dashboard-card fl-stage-content">
           <span className="fl-pill">
@@ -232,77 +242,50 @@ export function FlowCasePanel({
               </button>
             </>
           ) : stage === 'propuesta' ? (
-            <>
-              <p>
-                Registra diagnóstico, trabajos y repuestos de la misma OT. Los ítems y precios deben
-                ser decisiones explícitas del mecánico.
-              </p>
-              <p className="fl-notice">
-                Coordinación de propuesta y versiones pendiente de BT-FLOW-01D. Se abre el módulo
-                existente; este hito no se marca completado por consultarlo ni por añadir un ítem.
-              </p>
-              <button className="rp-primary" disabled={!order} onClick={() => onOpen('order')}>
-                Definir trabajos
-                <ArrowRight />
-              </button>
-            </>
-          ) : stage === 'cotizacion' ? (
-            <>
-              <p>
-                Abre BT-COT-01 con los antecedentes de{' '}
-                <strong>{order?.id ?? 'la OT pendiente'}</strong>, su revisión disponible e ítems
-                definidos por el operador.
-              </p>
-              {progress.quote && (
-                <div className="fl-notice">
-                  <strong>
-                    {progress.quote.id} · Revisión {progress.quote.revision}
-                  </strong>
-                  <p>
-                    Estado del documento: {progress.quote.status}.{' '}
-                    {progress.quote.approval
-                      ? 'Aprobación simulada, sin consentimiento legal.'
-                      : 'Sin aprobación simulada vigente.'}
-                  </p>
-                </div>
-              )}
-              <p className="fl-help">
-                La coordinación de respuesta del cliente para esa versión, rechazo o cambios
-                corresponde a 01D. Nada se aprueba ni se envía automáticamente.
-              </p>
-              <button className="rp-primary" disabled={!order} onClick={() => onOpen('quote')}>
-                {progress.quote?.approval
-                  ? 'Revisar aprobación'
-                  : progress.quote
-                    ? 'Continuar cotización'
-                    : 'Preparar cotización'}
-                <ArrowRight />
-              </button>
-            </>
-          ) : stage === 'ejecucion' ? (
-            <>
-              <p>BT-COT-01 registra solo trabajos marcados expresamente como realizados.</p>
-              {progress.work && (
+            order && progress.inspection?.finalized ? (
+              <FlowProposalPanel
+                visit={visit}
+                onInspection={() => onOpen('inspection')}
+                onQuote={() => onOpen('quote')}
+                onConfirmed={() => select('cotizacion')}
+              />
+            ) : (
+              <>
                 <p className="fl-notice">
-                  {progress.work.id} · {progress.work.status} ·{' '}
-                  {progress.work.items.filter((i) => i.performed).length} ítems realizados por el
-                  operador DEMO.
+                  Finaliza la inspección de esta OT para definir y confirmar su propuesta. Los
+                  controles pendientes no se convierten en OK.
                 </p>
-              )}
-              <p className="fl-help">
-                Se abre la revisión de la misma OT; copiar y coordinar partidas aprobadas entre
-                versiones queda pendiente de 01D. No se infiere ejecución a partir de una
-                cotización. Finalizar el documento no entrega ni cierra esta visita.
-              </p>
-              <button className="rp-primary" disabled={!order} onClick={() => onOpen('work')}>
-                {progress.work?.approval
-                  ? 'Revisar informe final'
-                  : progress.work
-                    ? 'Registrar trabajos realizados'
-                    : 'Preparar informe final'}
-                <ArrowRight />
-              </button>
-            </>
+                <button
+                  className="rp-primary"
+                  disabled={!order}
+                  onClick={() => onOpen('inspection')}
+                >
+                  Continuar inspección
+                  <ArrowRight />
+                </button>
+              </>
+            )
+          ) : stage === 'cotizacion' ? (
+            order ? (
+              <FlowQuotePanel
+                visit={visit}
+                onProposal={() => select('propuesta')}
+                onQuote={() => onOpen('quote')}
+                onWork={() => select('ejecucion')}
+              />
+            ) : (
+              <p>Confirma primero la OT de la visita.</p>
+            )
+          ) : stage === 'ejecucion' ? (
+            order ? (
+              <FlowExecutionPanel
+                visit={visit}
+                onQuote={() => select('cotizacion')}
+                onOpenWork={() => onOpen('work')}
+              />
+            ) : (
+              <p>Confirma primero la OT de la visita.</p>
+            )
           ) : (
             <>
               <p className="fl-notice">

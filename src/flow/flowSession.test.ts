@@ -1,3 +1,5 @@
+import { confirmProposal, markQuoteReviewed, recordClientResponse } from './flowBusiness'
+import { editWorkDocument, putWorkItem } from '../informes/trabajos/trabajosData'
 import { describe, it, expect } from 'vitest'
 import { demoClients, demoVehicles, vehicleForOrder } from '../clientes/clientesData'
 import { addSessionRequest, sessionRequests } from '../clientes/intakeSession'
@@ -5,6 +7,8 @@ import { validateReception } from '../clientes/directorySession'
 import { emptyVisitaDraft } from '../clientes/registroVisitaData'
 import {
   allCases,
+  beginCaseProposal,
+  prepareCaseWork,
   caseContext,
   caseProgress,
   confirmVisitOrder,
@@ -16,7 +20,7 @@ import {
 } from './flowSession'
 import { createDocument, documentContext } from '../informes/documentosData'
 import { readMultipunto, rememberMultipunto } from '../informes/multipunto/multipuntoSession'
-import { readWorkDocument } from '../informes/trabajos/trabajosSession'
+import { readWorkDocument, rememberWorkDocument } from '../informes/trabajos/trabajosSession'
 import { sessionOrders } from '../ordenes/orderSession'
 const fresh = () => ({
   draft: {
@@ -128,9 +132,36 @@ describe('BT-FLOW-01B — shared relationships and visit indexes', () => {
       b = openCaseResource(visit.id, 'inspection')
     expect(a.resourceId).toBe(b.resourceId)
     expect(readMultipunto(a.resourceId)?.items.every((i) => i.state === 'unreviewed')).toBe(true)
+    expect(() => openCaseResource(visit.id, 'quote')).toThrow('propuesta')
+    const inspection = readMultipunto(a.resourceId)!
+    inspection.finalized = true
+    rememberMultipunto(inspection)
+    let draft = beginCaseProposal(visit.id)
+    expect(draft.items).toEqual([])
+    draft = editWorkDocument(draft, { diagnosis: 'Diagnóstico manual DEMO' })
+    draft = putWorkItem(draft, {
+      id: 'item-' + visit.id,
+      description: 'Trabajo manual DEMO',
+      type: 'Servicio',
+      quantity: 1,
+      price: 1000,
+      performed: false
+    })
+    rememberWorkDocument(draft)
+    confirmProposal(readCase(visit.id), { quoteId: draft.id, revision: draft.revision }, true)
     const quote = openCaseResource(visit.id, 'quote')
     expect(readWorkDocument(quote.resourceId)?.orderId).toBe(a.orderId)
-    expect(readWorkDocument(quote.resourceId)?.items).toEqual([])
+    expect(readWorkDocument(quote.resourceId)?.items).toHaveLength(1)
+    expect(() => openCaseResource(visit.id, 'work')).toThrow('precarga')
+    markQuoteReviewed(readCase(visit.id), { quoteId: draft.id, revision: draft.revision }, true)
+    recordClientResponse(
+      readCase(visit.id),
+      { quoteId: draft.id, revision: draft.revision },
+      'aceptada_demo',
+      '',
+      true
+    )
+    prepareCaseWork(visit.id, { quoteId: draft.id, revision: draft.revision }, true)
     const work = openCaseResource(visit.id, 'work')
     expect(readWorkDocument(work.resourceId)?.items.every((i) => !i.performed)).toBe(true)
   })

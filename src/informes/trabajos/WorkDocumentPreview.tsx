@@ -71,6 +71,12 @@ export function WorkDocumentPreview({ document: d }: { document: WorkDocument })
           </small>
         </div>
       </header>
+      {d.sourceQuote && (
+        <p className="wt-paper-disclaimer">
+          Precarga desde {d.sourceQuote.quoteId} · Revisión {d.sourceQuote.revision} · Solo se
+          documentan partidas expresamente realizadas; no acredita entrega ni autorización legal.
+        </p>
+      )}
       <div className="wt-paper-facts">
         <div>
           <strong>Cliente: {client.name}</strong>
