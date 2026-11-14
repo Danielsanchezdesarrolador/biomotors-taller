@@ -159,3 +159,14 @@ El hito «Entrega del vehículo» incluye un resumen de inspección, cotización
 El registro de entrega está vinculado a los IDs y revisiones canónicas, no duplica partidas ni genera una factura. Si un documento cambia después, el cierre anterior se marca «desactualizado» y no puede presentarse como entrega vigente. El expediente queda en memoria únicamente; al recargar se elimina cualquier historial DEMO nuevo. Para una devolución/revisión posterior se crea otra visita del vehículo, en lugar de sobrescribir una cerrada.
 
 **Sin backend, persistencia, correo, firma, pagos ni entrega física.** El Director revisará el recorrido completo A–E al terminar las etapas; Safari físico sigue pendiente. [Contrato E](docs/BT_FLOW_01E_CIERRE_Y_ENTREGA_DEMO.md) · [Checkpoint E](docs/checkpoints/CHECKPOINT_BT_FLOW_01E_20261113.md).
+
+
+## BT-QA-02 — Correcciones UX del recorrido DEMO
+
+Al abrir una cotización desde el expediente en celular se presenta primero una lista compacta de todas las partidas, tipos, cantidades y valores, junto al subtotal, IVA y total del motor existente. «Ver detalle / Editar ítems» conserva el editor completo; escritorio, plantillas avanzadas y modo informe mantienen sus herramientas.
+
+La propuesta guiada ya no ofrece plantillas. Espera y cancelación están bajo «Opciones de visita»; el estado general y las pausas por resolver siguen visibles. El multipunto usa «Finalizar inspección DEMO» y «No se enviará correo ni documento». Los hitos muestran estados en lenguaje natural y el flujo A–E se anuncia disponible exclusivamente en DEMO.
+
+Validación: **103/103 Vitest** (las 101 anteriores más dos pruebas de resumen), TypeScript, Vite/PWA, recorrido de ingreso nuevo a entrega y regresiones en 1650/1440/768/390/375 px. Cotizaciones de 4/8/12 partidas, edición, estado vacío, aceptación por revisión, realizados/pendientes, pausas y recarga comprobados. Impresión: cuatro trabajos generan una página A4 y el contenido largo dos páginas con texto; la hoja vacía no se reprodujo en Chromium/emulación Android, sin cambiar estilos de impresión. Safari y visor Android físicos siguen pendientes.
+
+[Checkpoint BT-QA-02](docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md) · [Matriz de QA y resolución](docs/qa/BT_QA_01_MATRIZ_20261113.md). BT-COM-01 y backend continúan fuera de alcance; se espera revisión visual del Director.

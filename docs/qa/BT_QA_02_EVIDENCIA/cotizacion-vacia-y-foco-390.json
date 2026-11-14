@@ -1,0 +1,15 @@
+[
+  {
+    "width": 390,
+    "quoteId": "COT-DEMO-C5835481",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  }
+]

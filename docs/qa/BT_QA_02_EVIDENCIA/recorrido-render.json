@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1650,
+    "quoteId": "COT-DEMO-E62EE6C8",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "quoteId": "COT-DEMO-B55293BD",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  }
+]

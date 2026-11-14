@@ -451,7 +451,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 **Decisión del Director (13/11/2026):** conservar íntegramente los cinco paneles R2 y simplificar el trabajo diario con un recorrido guiado y contextual que enlace **cliente/vehículo → recepción → OT → inspección multipunto → trabajos valorados → cotización → respuesta/aprobación → realización → informe final → entrega**. Los menús laterales continúan disponibles para consulta libre y navegación directa. El operador no debe copiar antecedentes entre pantallas ni buscar manualmente qué hacer a continuación.
 
-**Estado actual:** B/C y refinamientos C-R1 aprobados; D implementada en DEMO para revisión visual; E pendiente. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
+**Estado actual:** recorrido A–E disponible solo en DEMO; BT-QA-02 implementada y verificada técnicamente, pendiente revisión visual del Director. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
 
 - [x] Revisar el cierre BT-COT-01 y confirmar CI remoto: [GitHub Actions 43516223991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43516223991) **SUCCESS**, 66/66 Vitest, TypeScript, Vite/PWA y Android Expo PASS. El frontend publicado fue verificado por Codex; aprobación visual y Safari físico pendientes.
 - [x] Establecer plan documental y reglas de seguridad: único expediente por visita, próximos pasos, posibilidad de retorno y selección de cliente/vehículo existente, sin diagnóstico ni precio inferidos.
@@ -560,15 +560,20 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 ### BT-QA-02 — Correcciones de usabilidad verificadas con el Director
 
-**Estado: AUTORIZADO PARA CODEX; pendiente implementación, pruebas y publicación.** Base revisada: `main` en `21f08aa` (comprobar HEAD nuevamente antes de modificar). [Orden oficial BT-QA-02](docs/BT_QA_02_ORDEN_CODEX.md) · [Matriz de hallazgos BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
+**Estado: IMPLEMENTADA Y VERIFICADA EN DEMO; pendiente revisión visual del Director.** Base real comprobada antes de modificar: `main` en `1a4c6ff`. [Orden oficial BT-QA-02](docs/BT_QA_02_ORDEN_CODEX.md) · [Matriz de hallazgos BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
 
-- [ ] **H004 P1:** primera vista de cotización **compacta en móvil**, con lista de ítems, cantidad, precio unitario, total, subtotal/IVA/total y acceso a edición completa; escritorio y modo informe intactos.
-- [ ] **H003 P2:** retirar «Cargar plantilla» del flujo guiado de propuesta, preservando plantillas del editor avanzado y añadir/editar/eliminar ítems.
-- [ ] **H005 P2:** colocar pausa y cancelación bajo «Opciones de visita», preservando estado visible, alertas, resolución y confirmaciones.
-- [ ] **H002 P2:** cambiar «Finalizar y enviar» en multipunto por «Finalizar inspección DEMO» sin enviar correo/PDF; actualizar modal e icono.
-- [ ] **H001/H006 P2–P3:** eliminar aviso desactualizado BT-FLOW-01D/E pendiente y sustituir estados técnicos visibles como `en_curso` por lenguaje natural.
-- [ ] **R005 P2:** investigar posible segunda página en blanco al imprimir A4 en Android; corregir estilos solo si se reproduce y no recortar contenido legítimo.
-- [ ] Confirmar TypeScript, Vitest con al menos las 101 pruebas previas, build/PWA, regresiones de BT-FLOW-01A–E y 5 paneles R2, E2E 1650/1440/768/390/375; capturas antes/después, CI remoto y Render existente; checkpoint `BT-QA-02`.
+- [x] **H004 P1:** primera vista de cotización **compacta en móvil**, con lista de ítems, cantidad, precio unitario, total, subtotal/IVA/total y acceso a edición completa; escritorio y modo informe intactos.
+- [x] **H003 P2:** retirar «Cargar plantilla» del flujo guiado de propuesta, preservando plantillas del editor avanzado y añadir/editar/eliminar ítems.
+- [x] **H005 P2:** colocar pausa y cancelación bajo «Opciones de visita», preservando estado visible, alertas, resolución y confirmaciones.
+- [x] **H002 P2:** cambiar «Finalizar y enviar» en multipunto por «Finalizar inspección DEMO» sin enviar correo/PDF; actualizar modal e icono.
+- [x] **H001/H006 P2–P3:** eliminar aviso desactualizado BT-FLOW-01D/E pendiente y sustituir estados técnicos visibles como `en_curso` por lenguaje natural.
+- [x] **R005 P2:** investigar posible segunda página en blanco al imprimir A4 en Android; corregir estilos solo si se reproduce y no recortar contenido legítimo.
+- [x] TypeScript, **103/103 Vitest**, build/PWA, regresiones A–E y cinco paneles, E2E 1650/1440/768/390/375, capturas antes/después y checkpoint. Actions remoto no verificable desde este entorno (Forbidden); publicación y evidencias detalladas en el checkpoint.
 - [ ] Revisión visual posterior del Director antes de abrir nuevas etapas funcionales.
 
 **Fuera de alcance:** [BT-COM-01](docs/BT_COM_01_CORREO_CONSOLIDADO_ENTREGA.md) sigue reservado para posterior fase segura (correo consolidado y adjuntos PDF reales). No envíos, backend, Supabase/Auth/RLS, BT-CP02-D, pagos, firma ni Android nativo. No crear ramas ni otro Render.
+
+
+**Resultado BT-QA-02:** H001–H006 corregidos; resumen móvil de 4/8/12 partidas y estado vacío, edición completa, revisión/aceptación e informe preservados, espera/cancelación agrupadas con confirmaciones y foco. R005 investigado: cuatro trabajos producen 1 página A4, contenido largo 2 páginas no vacías en Chromium y emulación Android a 390/375; estilos print intactos al no reproducirse el defecto. Quedan prueba en dispositivos físicos y aprobación visual. [Checkpoint QA-02](docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md).
+
+- [x] BT-QA-02 publicada en el Render existente: frontend `2529494`, HTML/JS/CSS comparados byte a byte y recorrido completo publicado 1650/390 PASS. Sin nuevo servicio ni rama; sin BT-COM-01/backend.

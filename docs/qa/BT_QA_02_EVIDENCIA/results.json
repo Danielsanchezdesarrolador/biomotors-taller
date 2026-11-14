@@ -1,0 +1,59 @@
+[
+  {
+    "file": "BT_QA_02_A4_4_1650.pdf",
+    "pages": 1,
+    "charactersPerPage": [
+      2039
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  },
+  {
+    "file": "BT_QA_02_A4_4_375.pdf",
+    "pages": 1,
+    "charactersPerPage": [
+      2039
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  },
+  {
+    "file": "BT_QA_02_A4_4_390.pdf",
+    "pages": 1,
+    "charactersPerPage": [
+      2039
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  },
+  {
+    "file": "BT_QA_02_A4_LARGO_1650.pdf",
+    "pages": 2,
+    "charactersPerPage": [
+      4525,
+      3980
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  },
+  {
+    "file": "BT_QA_02_A4_LARGO_375.pdf",
+    "pages": 2,
+    "charactersPerPage": [
+      4525,
+      3980
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  },
+  {
+    "file": "BT_QA_02_A4_LARGO_390.pdf",
+    "pages": 2,
+    "charactersPerPage": [
+      4525,
+      3980
+    ],
+    "blankPages": 0,
+    "pageSize": "595.92 x 842.88 pts (A4)"
+  }
+]

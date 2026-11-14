@@ -1,0 +1,67 @@
+[
+  {
+    "width": 1650,
+    "quoteId": "COT-DEMO-630C770A",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 1440,
+    "quoteId": "COT-DEMO-7ED28B53",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 768,
+    "quoteId": "COT-DEMO-99D98B55",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "quoteId": "COT-DEMO-8475AB57",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 375,
+    "quoteId": "COT-DEMO-3600605B",
+    "compactCounts": [
+      4,
+      8,
+      12
+    ],
+    "delivery": true,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  }
+]
