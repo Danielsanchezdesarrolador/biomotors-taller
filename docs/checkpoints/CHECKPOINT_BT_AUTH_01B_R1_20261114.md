@@ -180,6 +180,13 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - El Director creó `bt-r1-recepcion-1411@example.com` en Supabase Auth. SQL verificó email confirmado y 0 membresías antes de la vinculación.
 - Mediante operación administrativa de alcance estricto se creó perfil ficticio `Recepcion de Pruebas` y una membresía `reception/active` exclusivamente para `Taller ByteTorque de Pruebas` (Taller A).
 - Verificación posterior de solo lectura: propietario A `owner/active`, mecánico A `mechanic/active`, propietario B `owner/active` y recepcionista A `reception/active`. Taller B sin membresía de recepción.
-- Código existente `src/auth/controller.ts`: rol `reception` produce estado `restricted` y mensaje «Acceso restringido. Las funciones de recepción están pendientes de definición.»; `RealAccess.tsx` no renderiza panel privado para ese estado. **Prueba manual del Director en el navegador pendiente**.
+- Código existente `src/auth/controller.ts`: rol `reception` produce estado `restricted` y mensaje «Acceso restringido. Las funciones de recepción están pendientes de definición.»; `RealAccess.tsx` no renderiza panel privado para ese estado. **Prueba manual del Director en el navegador: PASS**, al seleccionar «Administrador» con la cuenta de recepción se mostró «Acceso restringido» sin abrir el panel privado. La prueba se registró por declaración explícita del Director; F5 aún pendiente.
 - Prueba planificada: iniciar sesión con recepción seleccionando «Administrador» y confirmar que se muestra aviso restringido sin panel administrativo; luego F5 y comprobar que no se elevan permisos.
 - No se modificaron tablas, RLS ni frontend; solo fixture de prueba autorizado. Render continúa con login real apagado.
+
+
+### Prueba manual de recepción (14/11/2026) — resultado
+
+- El Director confirmó **«RECEPCIÓN RESTRINGIDA»** tras el login real de su cuenta ficticia con selector «Administrador». La interfaz negó el panel administrativo y presentó la restricción prevista.
+- Comprobación de solo lectura posterior en Supabase: `reception/active` solo en el Taller A; `owner/active` A/B y `mechanic/active` A sin cambios.
+- Próximo control: F5 y logout como recepcionista, sin cambios de SQL, RLS ni Render hasta finalizar pruebas.

@@ -738,5 +738,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 ### BT-AUTH-01B-R1 — Recepción, preparación real (14/11/2026)
 
 - [x] Usuario de prueba confirmado y miembro `reception/active` exclusivamente en Taller A. SQL confirmó que los tres miembros anteriores siguen con sus roles intactos.
-- [ ] Probar login real de recepción seleccionando «Administrador»: debe mostrar «Acceso restringido. Las funciones de recepción están pendientes de definición.» sin panel administrativo; verificar F5 y logout después.
+- [x] **Login de recepción PASS reportado por el Director**: seleccionó «Administrador» pero recibió estado `restricted` sin panel administrativo. Membresía `reception/active` y pertenencia al Taller A confirmadas por SQL.
+- [ ] **F5 con recepción**: comprobar que sigue bloqueado el panel administrativo y conserva el mensaje de acceso restringido. Luego verificar cierre de sesión.
 - [ ] Definir permisos operativos de recepción en fase posterior y probarlos mediante API RLS cuando exista backend de negocio. Mantener Render/Auth público sin cambios.
