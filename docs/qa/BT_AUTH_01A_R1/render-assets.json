@@ -1,0 +1,37 @@
+{
+  "base": "https://biomotors-taller-demo.onrender.com",
+  "htmlMatches": true,
+  "tlsVerified": true,
+  "assets": [
+    {
+      "path": "/assets/index-CHidsL3E.js",
+      "sha256": "212681b64772ad7aff619a9534ccf5713732ed04431e34ade045eb9560dfe033",
+      "bytes": 264847,
+      "matchesLocal": true
+    },
+    {
+      "path": "/assets/index-CduF0wul.css",
+      "sha256": "f2cc259e98bc342eed2c1797b0c65713d760469ec2c694aca5b421cc2cfb0b24",
+      "bytes": 83938,
+      "matchesLocal": true
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "sha256": "d64ae20862101e672cc9d17828e5aee5d6ab52794dcaff04c06b85b960a80fb2",
+      "bytes": 710,
+      "matchesLocal": true
+    },
+    {
+      "path": "/sw.js",
+      "sha256": "1ca20e425794afe0bd37391e9d1e9e550c9d34ae67053f868cbd667aaf910d57",
+      "bytes": 371,
+      "matchesLocal": true
+    },
+    {
+      "path": "/hero-workshop.webp",
+      "sha256": "b877d76ca2292da1cb73d3830447b91c90812ab22a3438ab078481e12c0921d3",
+      "bytes": 198956,
+      "matchesLocal": true
+    }
+  ]
+}

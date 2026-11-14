@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1650,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": false,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": false,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  }
+]

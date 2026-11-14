@@ -631,3 +631,13 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 
 **BT-AUTH-01A — Verificación CI remota posterior (14/11/2026):** [workflow 43603192218](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43603192218) **SUCCESS** para `45e5200` (125/125 Vitest en 18 archivos, PWA y Android Expo); [interfaz pública 43602975602](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43602975602) y regresiones asociadas SUCCESS. Capturas de acceso, registro, mecánico y Usuarios y permisos revisadas preliminarmente sin hallazgos bloqueantes; aprobación del Director y Safari/iPhone físicos pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md).
+
+
+### BT-AUTH-01A-R1 — Entrada inicial (14/11/2026)
+
+- [x] Abrir `/` muestra acceso desde el primer render y reemplaza la URL por `/#/acceso`, compatible con Render Static Site y sin entrada extra de historial.
+- [x] `Ver interfaz pública sin sesión` abre `/#/revision/publica`; revisión explícita de cinco paneles, recarga y regreso al acceso.
+- [x] Preservar siete pantallas, Administrador/Mecánico, enlaces directos y harness privado; sin Auth ni permisos reales.
+- [x] 135/135 pruebas (125 preservadas + 10 nuevas), TypeScript/build/PWA y recorridos de acceso/paneles en cinco tamaños. Inicio del manifiesto `/` y service worker verificados.
+- [x] Publicación R1 en el Render existente: frontend `6ab5de0`, HTML/JS/CSS/recursos comparados byte a byte y entrada por raíz/recarga/historial/enlaces/previsualización verificados en Render 1650/390.
+- [ ] Revisión del Director y apertura desde PWA instalada física: instalación automatizada no disponible en este Chromium (`kWebAppDisabled`). [Checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md#bt-auth-01a-r1--entrada-inicial-y-previsualización-explícita-14112026).

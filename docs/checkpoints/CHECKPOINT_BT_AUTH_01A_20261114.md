@@ -1,5 +1,7 @@
 # CHECKPOINT — BT-AUTH-01A — 14/11/2026
 
+> **Actualización BT-AUTH-01A-R1:** la entrada `/` ahora abre `/#/acceso`; la interfaz pública se revisa en `/#/revision/publica`. Ver el apartado R1 al final. El comportamiento de entrada original descrito abajo queda como antecedente histórico.
+
 ## Resultado y alcance
 
 **Siete pantallas R2 de acceso y dos vistas de revisión, sin autenticación real.** Se utiliza la alternativa de solo lectura autorizada por el Director para el sitio estático. La cuenta ficticia está exclusivamente en el harness privado; Render no pide ni valida una contraseña incrustada y no aparenta proteger datos. Se usan rutas `/#/…` porque el Render existente devuelve 404 para rutas de servidor sin reescritura SPA. Así los enlaces directos, recarga y atrás/adelante funcionan sin cambiar infraestructura. El harness privado conserva también sus rutas locales por pathname. La página inicial `/` conserva la interfaz oficial vacía BT-OFICIAL-01A.
@@ -116,3 +118,34 @@ No existe sesión autenticada ni protección de información privada en estas ru
 - Se examinaron las capturas en GitHub de `BT_AUTH_01A_LOGIN_390.png`, `BT_AUTH_01A_REGISTRO_390.png`, `BT_AUTH_01A_MECANICO_390.png`, `BT_AUTH_01A_USUARIOS_PERMISOS_390.png`. Identidad visual R2 consistente, navegación con dos roles visible, advertencia de no autenticación visible, mecánico sin información financiera y diálogo de cupos ilustrativos Básico 0/2, Plus 0/8, Full 0/8. Sin defecto bloqueante evidente en estas capturas; son evidencias Chromium y no equivalen a Safari físico ni aprobación del Director. Capturas `fullPage` del modal no permiten concluir que la barra inferior tape controles durante una interacción real.
 - El usuario debe probar desde Android la ruta pública `/#/acceso`, **sin usar la credencial QA privada** del harness local, y revisar siete pantallas, los dos perfiles y Usuarios y permisos. La contraseña del harness no se emplea ni se distribuye como autenticación real.
 - No se modificó código de acceso ni se inició BT-AUTH-01B, BT-CP02-D, correo o Supabase con esta verificación.
+
+
+## BT-AUTH-01A-R1 — Entrada inicial y previsualización explícita (14/11/2026)
+
+**Orden del Director:** corregir la URL principal sin cambiar las siete pantallas, roles visuales ni seguridad. Base actualizada antes de editar: `52dfa36a4b0c2c44b517dc6b94f2c6a0544ad2a5`, integrada por fast-forward; se preserva su verificación posterior de Actions. Sin cambios concurrentes de código observados.
+
+- Abrir **https://biomotors-taller-demo.onrender.com/** muestra el acceso desde el primer render, sin destello del dashboard, y reemplaza la URL por `/#/acceso` mediante `history.replaceState`. No se añade una entrada artificial al historial ni se necesitan reescrituras del Render estático. Se conservan los parámetros de consulta sin conceder permisos.
+- **Ver interfaz pública sin sesión** abre `/#/revision/publica`: cinco paneles vacíos, aviso de revisión sin autenticación y retorno explícito al acceso. Recargar esa ruta mantiene la previsualización; atrás/adelante mantiene la pantalla correcta. La marca ByteTorque regresa al acceso.
+- Registro, recuperación, verificación y las siete pantallas conservan enlaces directos hash y recarga. Las entradas Administrador/Mecánico y sus revisiones siguen disponibles. Una ruta desconocida tampoco abre implícitamente el dashboard.
+- Se preservan `manifest.id: "/"`, `start_url: "/"`, scope, iconos y service worker. Por tanto el punto de entrada de las instalaciones existentes sigue siendo el mismo y aplica la redirección en el cliente actualizado. No se cambia la identidad de la PWA ni se fuerza una reinstalación.
+- La raíz del **harness privado** sigue ejecutando su flujo histórico de fixtures. La normalización de entrada pública es independiente; la previsualización explícita dentro del harness permanece vacía y sin sesión.
+
+### Archivos y pruebas R1
+
+`src/App.tsx`, `src/access/accessContract.ts` y `AccessScreens.tsx` implementan entrada, historial y destino explícito. `src/access/initialNavigation.test.tsx` añade **10 pruebas**; `src/official/official.test.tsx` conserva la prueba de shell R2 sobre `OfficialWorkspaceView`, ahora que App representa el acceso inicial. No se elimina ninguna prueba previa. Los scripts `verify-auth-ui.cjs` y `verify-official-ui.cjs` verifican las rutas nuevas; el workflow existente ya los ejecuta. README y roadmap actualizados.
+
+- **TypeScript PASS**, **Vitest 135/135 PASS** (125 anteriores + 10 nuevas, 19 archivos), **Vite/build/PWA/guardia pública PASS**. [Evidencia R1](../qa/BT_AUTH_01A_R1/).
+- **1650/1440/768/390/375 PASS**: entrada desde marcador de raíz en contexto nuevo; canonicalización y recarga; retorno desde registro sin bucle ni entrada extra de historial; previsualización, recarga, atrás, adelante y vuelta al acceso; siete enlaces directos recargados; ambos perfiles; credencial QA solo local y contratos sin privilegios. [JSON acceso](../qa/BT_AUTH_01A_R1/access-five-sizes.json).
+- Los cinco paneles de solo lectura pasan en los mismos cinco tamaños desde la nueva ruta explícita, sin formularios habilitados, fixtures, red de escritura ni almacenamiento. [JSON paneles](../qa/BT_AUTH_01A_R1/panels-five-sizes.json).
+- La prueba de arranque PWA lee el manifiesto servido, comprueba identidad/display/start_url, espera el service worker activo y abre su URL de inicio: termina en `/#/acceso`. **No equivale a una instalación física**. Se intentó instalar con CDP en un perfil persistente temporal de Chromium; el entorno devuelve **`kWebAppDisabled`**. [Limitación registrada](../qa/BT_AUTH_01A_R1/installed-pwa-limitation.txt). Queda pendiente abrir el icono de una PWA instalada físicamente en el teléfono, cerrándola y reabriéndola después de actualizar, además de Safari/iPhone físico.
+- Monitoreo de navegador: **0 sesiones, 0 errores JS, 0 escrituras de red y 0 almacenamiento persistente**. No se modificaron Supabase/Auth/RLS, backend, permisos reales, BT-CP02-D, onboarding, correos, planes, pagos ni Android nativo.
+
+### Publicación R1
+
+- **Commit de implementación `6ab5de0` en `main`**, publicado en el Render existente. HTML, JS `index-CHidsL3E.js`, CSS `index-CduF0wul.css`, manifiesto, SW y hero comparados byte a byte con el build verificado, con TLS validado. [Hashes Render](../qa/BT_AUTH_01A_R1/render-assets.json).
+- **Recorrido en Render 1650/390 PASS**: abrir raíz → acceso, recarga, historial sin bucles, previsualización explícita, siete enlaces directos, entradas de Administrador/Mecánico y arranque desde la URL del manifiesto con service worker activo. [JSON publicado](../qa/BT_AUTH_01A_R1/render-access.json). El navegador de la prueba tolera el certificado del proxy de ejecución; la comparación de archivos publicada valida TLS normalmente.
+- Capturas reales de entrada por `/`: [Render escritorio 1650](../screenshots/BT_AUTH_01A_R1/BT_AUTH_01A_ENTRADA_RAIZ_1650.png), [Render móvil 390](../screenshots/BT_AUTH_01A_R1/BT_AUTH_01A_ENTRADA_RAIZ_390.png) y [mismo build local 375](../screenshots/BT_AUTH_01A_R1/BT_AUTH_01A_ENTRADA_RAIZ_375.png).
+- CI remoto de R1 no verificable desde este entorno: `gh run list` devuelve Forbidden. No se confunde con los SUCCESS de la entrega anterior documentados arriba; TypeScript, 135 pruebas, build y recorridos locales están comprobados. El workflow existente incorpora automáticamente los nuevos casos de navegación.
+- La documentación y la evidencia se registran en el commit posterior de cierre; no alteran los bundles publicados.
+
+**Punto de parada:** revisión del Director, abrir la URL principal y probar las dos entradas y el enlace de previsualización. BT-AUTH-01B y BT-CP02-D no iniciados.
