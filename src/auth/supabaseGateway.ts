@@ -14,7 +14,15 @@ function check(error: unknown): void {
   )
     throw new AuthFailure('offline')
   if (e.code === 'email_not_confirmed') throw new AuthFailure('unconfirmed')
-  if (e.status === 401 || e.status === 403) throw new AuthFailure('expired')
+  if (
+    e.name === 'AuthSessionMissingError' ||
+    e.status === 401 ||
+    e.status === 403 ||
+    ['session_not_found', 'refresh_token_not_found', 'refresh_token_already_used'].includes(
+      e.code || ''
+    )
+  )
+    throw new AuthFailure('expired')
   throw new AuthFailure('permission')
 }
 export function supabaseGateway(client: SupabaseClient): AuthGateway {

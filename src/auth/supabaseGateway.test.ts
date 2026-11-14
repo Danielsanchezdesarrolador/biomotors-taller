@@ -90,6 +90,8 @@ describe('Official Supabase SDK adapter · mocked client only', () => {
       [{ code: 'email_not_confirmed' }, 'unconfirmed'],
       [{ name: 'AuthRetryableFetchError' }, 'offline'],
       [{ status: 401 }, 'expired'],
+      [{ name: 'AuthSessionMissingError' }, 'expired'],
+      [{ status: 400, code: 'refresh_token_not_found' }, 'expired'],
       [{ status: 500 }, 'permission']
     ] as const) {
       c.auth.signInWithPassword.mockResolvedValue({ error } as never)
