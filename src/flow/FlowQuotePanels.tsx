@@ -378,8 +378,8 @@ export function FlowExecutionPanel({
         </>
       )}
       <p className="fl-help">
-        El editor clásico continúa disponible para consulta y correcciones. Finalizar el informe no
-        entrega el vehículo ni cierra la visita: BT-FLOW-01E permanece bloqueado.
+        El editor clásico continúa disponible para consulta y correcciones. Finalizar el informe
+        mantiene la visita abierta hasta confirmar expresamente la entrega en su hito.
       </p>
       {state.transfers.length > 0 && (
         <details>

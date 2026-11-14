@@ -165,8 +165,8 @@ export function FlowHome({
           <p>Inicia una recepción DEMO para abrir el expediente.</p>
         )}
         <p className="fl-help">
-          Navegar no completa hitos. Integración profunda y cierre guiado pendientes de
-          BT-FLOW-01D/E.
+          Recorrido guiado A–E disponible solo en DEMO. Los cambios se pierden al recargar.
+          Navegar no completa hitos y no hay envío real.
         </p>
       </aside>
     </div>

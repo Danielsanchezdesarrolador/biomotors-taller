@@ -144,10 +144,10 @@ const { chromium } = require('playwright'),
       await p.getByLabel('Hora de inicio', { exact: true }).fill('09:00')
       await p.getByLabel('Hora de término', { exact: true }).fill('10:30')
       await p.getByLabel('Combustible', { exact: true }).fill('Gasolina DEMO')
-      await p.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+      await p.getByRole('button', { name: 'Finalizar inspección DEMO', exact: true }).click()
       await p.getByRole('checkbox', { name: /Acepto finalizar/ }).check()
       await p
-        .getByRole('button', { name: 'Confirmar finalización sin envío real', exact: true })
+        .getByRole('button', { name: 'Confirmar finalización DEMO', exact: true })
         .click()
       await nav().nth(1).click()
       const ot = p.getByRole('button', { name: 'Abrir ' + orderId, exact: true })
@@ -170,6 +170,7 @@ const { chromium } = require('playwright'),
         .check()
       await p.getByRole('button', { name: 'Confirmar propuesta DEMO', exact: true }).click()
       await p.getByRole('button', { name: 'Preparar cotización', exact: true }).click()
+      if (width <= 760) await p.getByRole('button', { name: 'Ver detalle / Editar ítems', exact: true }).click()
       await p.locator('.wt-panel').waitFor()
       assert.match(await p.locator('.wt-identity').innerText(), new RegExp(name))
       assert.match(await p.locator('.wt-identity').innerText(), new RegExp(orderId))
@@ -192,6 +193,7 @@ const { chromium } = require('playwright'),
       await back().click()
       await p.locator('.fl-milestones button').nth(4).click()
       await p.getByRole('button', { name: 'Revisar cotización', exact: true }).click()
+      if (width <= 760) await p.getByRole('button', { name: 'Ver detalle / Editar ítems', exact: true }).click()
       assert.equal(await p.locator('.wt-metric').nth(1).locator('strong').innerText(), quoteId)
       assert.equal(await p.locator('.wt-metric-total').innerText(), '$24.990 CLP')
       assert.equal(

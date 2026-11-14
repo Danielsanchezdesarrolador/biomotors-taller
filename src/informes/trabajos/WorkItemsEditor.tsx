@@ -23,9 +23,11 @@ export function WorkItemsTable({
             ? 'Detalle de los trabajos a realizar'
             : 'Detalle de trabajos · Confirmación del operador'}
         </h2>
-        {onTemplate && <button className="rp-secondary" onClick={onTemplate}>
-          Cargar plantilla
-        </button>}
+        {onTemplate && (
+          <button className="rp-secondary" onClick={onTemplate}>
+            Cargar plantilla
+          </button>
+        )}
       </header>
       {d.mode === 'work' && (
         <p className="wt-help">

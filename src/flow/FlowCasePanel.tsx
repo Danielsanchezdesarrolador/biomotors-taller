@@ -116,7 +116,9 @@ export function FlowCasePanel({
         <section className="dashboard-card fl-stage-content">
           <span className="fl-pill">
             Hito {milestones.findIndex((m) => m.id === stage) + 1} de 7 ·{' '}
-            {progress.states[current.id]}
+            {
+              { pendiente: 'Pendiente', en_curso: 'En curso', completado: 'Completado', bloqueado: 'Bloqueado' }[progress.states[current.id]]
+            }
           </span>
           <h2 tabIndex={-1} ref={heading}>
             {current.label}

@@ -6,7 +6,7 @@ import {
   FileText,
   Printer,
   Save,
-  Send,
+  CheckCircle2,
   Wrench
 } from 'lucide-react'
 import { InformeMultipuntoPreview } from './InformeMultipuntoPreview'
@@ -96,7 +96,7 @@ export function InformeMultipuntoPanel({
               setModal('finish')
             }}
           >
-            <Send /> Finalizar y enviar
+            <CheckCircle2 /> Finalizar inspección DEMO
           </button>
         </div>
       </header>
@@ -301,7 +301,7 @@ export function InformeMultipuntoPanel({
               {modal === 'preview'
                 ? 'Vista previa multipunto'
                 : modal === 'finish'
-                  ? 'Finalizar y enviar · DEMO'
+                  ? 'Confirmar finalización DEMO'
                   : 'Descartar informe temporal'}
             </h2>
             <button className="rp-secondary" onClick={() => setModal(null)}>
@@ -381,8 +381,8 @@ export function InformeMultipuntoPanel({
                 </div>
               )}
               <p className="mp-demo">
-                Solo simulación: no se contacta ningún destinatario, no se genera PDF adjunto ni se
-                marca Correo enviado.
+                No se enviará correo ni documento. Solo se registra la finalización DEMO en memoria;
+                no se genera un PDF adjunto.
               </p>
               {error && (
                 <p className="rp-error" role="alert">
@@ -394,7 +394,7 @@ export function InformeMultipuntoPanel({
                 disabled={validation.length > 0 || (c.unreviewed > 0 && !acceptPending)}
                 onClick={finish}
               >
-                Confirmar finalización sin envío real
+                Confirmar finalización DEMO
               </button>
             </>
           )}

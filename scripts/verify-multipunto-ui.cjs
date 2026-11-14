@@ -100,10 +100,10 @@ const { chromium } = require('playwright'),
         const box = await row('pastillas').locator('.mp-cell').first().boundingBox()
         assert.ok(box.width >= 44 && box.height >= 44)
       }
-      await page.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+      await page.getByRole('button', { name: 'Finalizar inspección DEMO', exact: true }).click()
       assert.equal(
         await page
-          .getByRole('button', { name: 'Confirmar finalización sin envío real' })
+          .getByRole('button', { name: 'Confirmar finalización DEMO' })
           .isEnabled(),
         false
       )
@@ -219,9 +219,9 @@ const { chromium } = require('playwright'),
           await page.screenshot({ path: 'docs/screenshots/BT_INS_01_390_CONTROLES.png' })
         }
       }
-      await page.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+      await page.getByRole('button', { name: 'Finalizar inspección DEMO', exact: true }).click()
       await page.getByRole('checkbox', { name: /Acepto finalizar/ }).check()
-      await page.getByRole('button', { name: 'Confirmar finalización sin envío real' }).click()
+      await page.getByRole('button', { name: 'Confirmar finalización DEMO' }).click()
       assert.match(await page.getByRole('status').innerText(), /no se envió ningún correo/i)
       assert.match(await page.locator('.mp-summary').innerText(), /Finalizado DEMO/)
       assert.equal(
@@ -235,9 +235,9 @@ const { chromium } = require('playwright'),
         for (const radio of await sheet().getByRole('radio', { name: / · OK$/ }).all()) await radio.check()
         assert.match(await page.locator('.mp-count').innerText(), /34 de 34/)
         assert.match(await sheet().locator('.mp-sheet-footer').innerText(), /Inspección revisada/)
-        await page.getByRole('button', { name: 'Finalizar y enviar', exact: true }).click()
+        await page.getByRole('button', { name: 'Finalizar inspección DEMO', exact: true }).click()
         assert.equal(await page.getByRole('checkbox', { name: /Acepto finalizar/ }).count(), 0)
-        await page.getByRole('button', { name: 'Confirmar finalización sin envío real' }).click()
+        await page.getByRole('button', { name: 'Confirmar finalización DEMO' }).click()
         assert.match(await page.locator('.mp-summary').innerText(), /Finalizado DEMO/)
       }
       await page.getByRole('button', { name: 'Descartar informe temporal', exact: true }).click()
