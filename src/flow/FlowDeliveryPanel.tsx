@@ -4,7 +4,7 @@ import { readCase, type FlowCase } from './flowSession'
 import { FlowDialog } from './FlowQuotePanels'
 import { currency } from '../informes/trabajos/trabajosData'
 import {
-  activeHolds, cancelVisit, completeDelivery, deliveryRequirements, deliveryState,
+  cancelVisit, completeDelivery, deliveryRequirements, deliveryState,
   holdLabels, recordHold, resolveHold, type VisitHoldReason,
   type DeliveryChecklist
 } from './flowClosure'
