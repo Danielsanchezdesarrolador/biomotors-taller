@@ -557,3 +557,18 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **BT-QA-01 — Primera observación del Director (13/11/2026):** completó una recepción desde móvil y llegó al expediente sin dificultad; la captura muestra Recepción completada, OT aún sin crear, cinco menús y siete hitos. Q01/Q02 parcialmente verificados; Q04 (creación OT), Safari físico y comprobación de SHA Render siguen pendientes. **Reconfirmado alcance del registro del cliente por enlace individual:** invitación segura del taller → formulario del cliente → solicitud pendiente → revisión humana y conversión a OT; simulación BT-REG-02 ya disponible, función pública real diferida a backend seguro para Plus/Full/trial Full habilitado. Ver [matriz BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md). No modificar interfaz ni activar envío de enlaces por este recordatorio.
 
 **BT-QA-01 — Recorrido A–E del Director completado en Android (13/11/2026):** capturas verifican precarga de informe desde cotización aceptada DEMO, cuatro ítems inicialmente no realizados, impresión A4 con los cuatro trabajos finalmente ejecutados y entrega 7/7 completada. Camino principal satisfactorio; QA-01 sigue abierto por excepciones, revisión PDF hoja adicional, Safari físico y correcciones UX. **Nuevo requisito prioritario BT-COM-01:** al cerrar visita, preparar **un único correo consolidado** con cotización aprobada, informe técnico/realizado y constancia de entrega; solicitud previa de autorización de cotización debe poder hacerse por un canal seguro aparte antes de reparar. Diseño en [BT-COM-01](docs/BT_COM_01_CORREO_CONSOLIDADO_ENTREGA.md). Aún no implementado; no activar correo, Supabase ni pagos por esta actualización.
+
+### BT-QA-02 — Correcciones de usabilidad verificadas con el Director
+
+**Estado: AUTORIZADO PARA CODEX; pendiente implementación, pruebas y publicación.** Base revisada: `main` en `21f08aa` (comprobar HEAD nuevamente antes de modificar). [Orden oficial BT-QA-02](docs/BT_QA_02_ORDEN_CODEX.md) · [Matriz de hallazgos BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
+
+- [ ] **H004 P1:** primera vista de cotización **compacta en móvil**, con lista de ítems, cantidad, precio unitario, total, subtotal/IVA/total y acceso a edición completa; escritorio y modo informe intactos.
+- [ ] **H003 P2:** retirar «Cargar plantilla» del flujo guiado de propuesta, preservando plantillas del editor avanzado y añadir/editar/eliminar ítems.
+- [ ] **H005 P2:** colocar pausa y cancelación bajo «Opciones de visita», preservando estado visible, alertas, resolución y confirmaciones.
+- [ ] **H002 P2:** cambiar «Finalizar y enviar» en multipunto por «Finalizar inspección DEMO» sin enviar correo/PDF; actualizar modal e icono.
+- [ ] **H001/H006 P2–P3:** eliminar aviso desactualizado BT-FLOW-01D/E pendiente y sustituir estados técnicos visibles como `en_curso` por lenguaje natural.
+- [ ] **R005 P2:** investigar posible segunda página en blanco al imprimir A4 en Android; corregir estilos solo si se reproduce y no recortar contenido legítimo.
+- [ ] Confirmar TypeScript, Vitest con al menos las 101 pruebas previas, build/PWA, regresiones de BT-FLOW-01A–E y 5 paneles R2, E2E 1650/1440/768/390/375; capturas antes/después, CI remoto y Render existente; checkpoint `BT-QA-02`.
+- [ ] Revisión visual posterior del Director antes de abrir nuevas etapas funcionales.
+
+**Fuera de alcance:** [BT-COM-01](docs/BT_COM_01_CORREO_CONSOLIDADO_ENTREGA.md) sigue reservado para posterior fase segura (correo consolidado y adjuntos PDF reales). No envíos, backend, Supabase/Auth/RLS, BT-CP02-D, pagos, firma ni Android nativo. No crear ramas ni otro Render.
