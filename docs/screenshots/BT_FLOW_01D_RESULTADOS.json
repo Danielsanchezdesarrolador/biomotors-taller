@@ -1,0 +1,52 @@
+[
+  {
+    "width": 1650,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-CF2CCC4B",
+    "oldWorkId": "ITR-DEMO-3563D440",
+    "newWorkId": "ITR-DEMO-4AF19BE7",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 1440,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-ABACACA7",
+    "oldWorkId": "ITR-DEMO-972F5B2E",
+    "newWorkId": "ITR-DEMO-8AAC2E9F",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-AE253871",
+    "oldWorkId": "ITR-DEMO-A67BF452",
+    "newWorkId": "ITR-DEMO-114C8EAA",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-4FB7BD42",
+    "oldWorkId": "ITR-DEMO-1D8A93FE",
+    "newWorkId": "ITR-DEMO-163D4B6C",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 375,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-E4D40EAA",
+    "oldWorkId": "ITR-DEMO-497ED37A",
+    "newWorkId": "ITR-DEMO-10193F8A",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  }
+]

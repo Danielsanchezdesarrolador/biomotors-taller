@@ -451,14 +451,14 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 **Decisión del Director (13/11/2026):** conservar íntegramente los cinco paneles R2 y simplificar el trabajo diario con un recorrido guiado y contextual que enlace **cliente/vehículo → recepción → OT → inspección multipunto → trabajos valorados → cotización → respuesta/aprobación → realización → informe final → entrega**. Los menús laterales continúan disponibles para consulta libre y navegación directa. El operador no debe copiar antecedentes entre pantallas ni buscar manualmente qué hacer a continuación.
 
-**Estado:** plan aprobado como objetivo funcional; **no implementado**, sujeto a revisión de interfaz y entregas DEMO incrementales. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
+**Estado actual:** B/C y refinamientos C-R1 aprobados; D implementada en DEMO para revisión visual; E pendiente. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
 
 - [x] Revisar el cierre BT-COT-01 y confirmar CI remoto: [GitHub Actions 43516223991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43516223991) **SUCCESS**, 66/66 Vitest, TypeScript, Vite/PWA y Android Expo PASS. El frontend publicado fue verificado por Codex; aprobación visual y Safari físico pendientes.
 - [x] Establecer plan documental y reglas de seguridad: único expediente por visita, próximos pasos, posibilidad de retorno y selección de cliente/vehículo existente, sin diagnóstico ni precio inferidos.
 - [x] **BT-FLOW-01A — Arquitectura y UX:** mockups y contratos documentados en `88ea19e`, aprobados expresamente como referencia en la orden BT-FLOW-01B/C. Implementación homologada con R2; aprobación final de la nueva interfaz C pendiente del Director.
 - [x] **BT-FLOW-01B — Recepción y expediente DEMO:** integrado en `645e2e3`, entidades compartidas en memoria, visitas recurrentes, solicitud confirmada y OT idempotente con vínculos por ID. TypeScript, 74 pruebas y build/PWA comprobados antes de C.
 - [x] **BT-FLOW-01C — Inicio y Continuar trabajo:** integrado en `9c12f97`, recepción, expediente y retorno a recursos por ID. Validación final: 76 pruebas, TypeScript/build/PWA y recorridos responsive PASS; aprobación visual y Safari físico pendientes.
-- [ ] **BT-FLOW-01D — Multipunto, trabajos y cotización:** reutilizar BT-INS-01 y BT-COT-01; preparar documentos desde ítems expresamente definidos y valorizados por el mecánico, nunca por deducción del motivo. Respetar aprobación de versión, `performed`, revisiones y pendientes técnicos. Nada se envía ni se aprueba realmente en DEMO.
+- [x] **BT-FLOW-01D — Multipunto, trabajos y cotización (DEMO implementada):** reutilizar BT-INS-01 y BT-COT-01; preparar documentos desde ítems expresamente definidos y valorizados por el mecánico, nunca por deducción del motivo. Respetar aprobación de versión, `performed`, revisiones y pendientes técnicos. Nada se envía ni se aprueba realmente en DEMO.
 - [ ] **BT-FLOW-01E — Entrega y QA:** proceso completo con correcciones, excepciones, rechazos, repuestos pendientes y finalización explícita; tests de integridad/reanudación, TypeScript, Vitest, build/PWA, E2E 1650/1440/768/390/375, regresión de paneles e informes, capturas y checkpoint.
 - [ ] **Solo fase futura autorizada:** backend seguro multitenant, RLS A/B, historial persistente, enlaces/correos, firma y facturación/planes. Mantener BT-CP02-D reservado a otro chat y sin cambios en Supabase/Auth, secretos, migraciones, pagos ni Android en esta etapa.
 
@@ -502,13 +502,21 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 ### BT-FLOW-01D — Coordinación de propuestas y cotizaciones por revisión
 
-**Dirección aprobada para continuar:** implementarla sobre la base BT-FLOW-01B/C y el refinamiento C-R1, sin reemplazar BT-COT-01 ni BT-INS-01. Requiere múltiples adaptadores y pruebas, por lo que se prepara contrato técnico para Codex. [Contrato BT-FLOW-01D](docs/BT_FLOW_01D_CONTRATO_IMPLEMENTACION.md).
+**Implementada exclusivamente en DEMO** sobre BT-FLOW-01B/C y C-R1, reutilizando los modelos y editores BT-COT-01 y el motor BT-INS-01. Pendiente revisión visual del Director. [Contrato BT-FLOW-01D](docs/BT_FLOW_01D_CONTRATO_IMPLEMENTACION.md).
 
 - [x] Especificar máquina de estados y respuesta **por quoteId + revision**, con aceptación/rechazo/cambios DEMO, caducidad al editar y separación de aprobación simulada frente a aceptación real.
-- [ ] Implementar preparación de trabajos/repuestos expresamente definidos por el mecánico y cotización a partir de datos verificados, sin inferir precios ni diagnóstico.
-- [ ] Registrar respuesta DEMO a la revisión vigente y rechazar autorizaciones obsoletas, cruzadas o duplicadas; conservar evidencia temporal y avisos al usuario.
-- [ ] Precargar informe de trabajo con ítems de cotización vigente **performed: false**, solo tras confirmación humana; sin declarar trabajos realizados ni entrega.
-- [ ] Verificar rechazo, solicitud de cambios, nueva revisión, doble pulsación, otra visita/OT, IVA, impresión únicamente realizados y ruta manual clásica.
-- [ ] TypeScript, Vitest, build/PWA, E2E cinco tamaños, regresiones BT-FLOW-01/BT-COT-01/BT-INS-01/BT-REG-02, capturas y checkpoint 01D; revisión visual posterior del Director. Sin Supabase/Auth/RLS, BT-CP02-D, correos, pagos, firmas o Android nativo.
+- [x] Implementar preparación de trabajos/repuestos expresamente definidos por el mecánico y cotización a partir de datos verificados, sin inferir precios ni diagnóstico.
+- [x] Registrar respuesta DEMO a la revisión vigente y rechazar autorizaciones obsoletas, cruzadas o duplicadas; conservar evidencia temporal y avisos al usuario.
+- [x] Precargar informe de trabajo con ítems de cotización vigente **performed: false**, solo tras confirmación humana; sin declarar trabajos realizados ni entrega.
+- [x] Verificar rechazo, solicitud de cambios, nueva revisión, doble pulsación, otra visita/OT, IVA, impresión únicamente realizados y ruta manual clásica.
+- [x] TypeScript, Vitest, build/PWA, E2E cinco tamaños, regresiones BT-FLOW-01/BT-COT-01/BT-INS-01/BT-REG-02, capturas y checkpoint 01D; revisión visual posterior del Director. Sin Supabase/Auth/RLS, BT-CP02-D, correos, pagos, firmas o Android nativo.
 
 [Checkpoint de aprobación y refinamientos C-R1](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_R1_20261113.md).
+
+
+**Cierre técnico BT-FLOW-01D:** 91/91 Vitest y TypeScript/build/PWA PASS; propuesta explícita sobre documento canónico, respuesta por revisión, caducidad sin borrar historial y precarga confirmada/idempotente con todos los trabajos sin realizar. Nueva aceptación de otra revisión conserva los informes anteriores. E2E y regresiones en cinco tamaños; BT-REG-02 escritorio/móvil. Cero escrituras de red y cero uso de almacenamiento de datos persistente en los recorridos. [Checkpoint D](docs/checkpoints/CHECKPOINT_BT_FLOW_01D_20261113.md).
+
+- [ ] Revisión visual del Director y Safari físico para D. Estado remoto de Actions no confirmado desde este entorno (Forbidden); comprobaciones locales documentadas.
+- [ ] **BT-FLOW-01E no iniciada:** no hay entrega, cierre de expediente ni conexiones reales. Requiere una nueva autorización.
+
+- [x] Publicación D comprobada en el Render existente: HTML/JS/CSS idénticos al build de `d7ae7c1`; recorrido completo publicado en 1650/390 PASS y capturas reales versionadas. Sin nuevo Render ni rama.

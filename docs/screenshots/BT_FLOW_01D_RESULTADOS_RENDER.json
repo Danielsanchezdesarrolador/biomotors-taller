@@ -1,0 +1,22 @@
+[
+  {
+    "width": 1650,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-AD885AA8",
+    "oldWorkId": "ITR-DEMO-1EC63E3C",
+    "newWorkId": "ITR-DEMO-5D910E12",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "quoteId": "COT-DEMO-ACBA2997",
+    "oldWorkId": "ITR-DEMO-68820D23",
+    "newWorkId": "ITR-DEMO-2361B616",
+    "networkWrites": 0,
+    "persistentStorage": 0,
+    "pageErrors": 0
+  }
+]

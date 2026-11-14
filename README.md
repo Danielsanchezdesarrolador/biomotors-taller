@@ -132,4 +132,19 @@ Desde Inicio, «Nuevo ingreso de vehículo» permite elegir una ficha existente,
 
 Las fichas, solicitudes, visitas y OT nuevas se comparten en memoria de la pestaña y pueden abrir su mismo multipunto, cotización e informe. Recargar/cerrar descarta los datos nuevos. No hay almacenamiento permanente, enlaces públicos, correos, firmas, pagos ni backend real conectado al flujo.
 
-BT-FLOW-01D/E siguen pendientes: coordinación profunda de propuesta, respuesta/versiones de cotización, ejecución autorizada, excepciones y cierre/entrega. Abrir módulos no completa etapas ni constituye autorización legal. [Checkpoint B](docs/checkpoints/CHECKPOINT_BT_FLOW_01B_20261113.md) · [Checkpoint C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).
+BT-FLOW-01D conecta ahora propuesta, cotización y respuesta DEMO por revisión con el informe de trabajo. BT-FLOW-01E (excepciones, cierre y entrega) permanece pendiente y bloqueado. Abrir módulos no completa etapas ni constituye autorización legal. [Checkpoint B](docs/checkpoints/CHECKPOINT_BT_FLOW_01B_20261113.md) · [Checkpoint C](docs/checkpoints/CHECKPOINT_BT_FLOW_01C_20261113.md).
+
+
+## BT-FLOW-01D — Propuesta, cotización y respuesta por versión (DEMO)
+
+Tras finalizar la inspección de la misma OT, el mecánico define y confirma diagnóstico, partidas y precios en el expediente. «Preparar cotización» reabre el mismo documento BT-COT-01, con sus cálculos existentes. La revisión económica requiere confirmación expresa. La aprobación local del documento y la respuesta del cliente son registros distintos.
+
+Las respuestas «Aceptada DEMO», «Rechazada DEMO» y «Solicita cambios DEMO» conservan fecha, nota, operador y `quoteId + revision`. Cambiar la cotización invalida su respuesta anterior; cambiar antecedentes técnicos exige reconfirmar propuesta, revisión y respuesta. Rechazo o cambios bloquean la ejecución guiada. Los registros anteriores siguen visibles en memoria.
+
+Una aceptación DEMO vigente habilita una precarga confirmada e idempotente del informe: todos los ítems comienzan con `performed: false`. Únicamente el mecánico marca realizados; solo ellos se suman e imprimen. Otra revisión aceptada genera un informe nuevo sin sobrescribir los trabajos anteriores. Las rutas clásicas y el retorno desde los cinco paneles se conservan.
+
+Todo vive en RAM, se descarta al recargar y carece de efectos legales o de red. Finalizar un informe no cierra la visita ni entrega el vehículo. **BT-FLOW-01E no se ha iniciado.**
+
+Validación: 91 pruebas Vitest, TypeScript/build/PWA y recorridos Chromium en 1650/1440/768/390/375 px, más regresiones BT-FLOW-01B/C, BT-INS-01, BT-COT-01 y BT-REG-02. Ejecutar `node scripts/verify-flow-d-ui.cjs` con Vite en 5173 y Playwright/Chromium disponibles. Safari físico y aprobación visual del Director pendientes.
+
+[Checkpoint BT-FLOW-01D](docs/checkpoints/CHECKPOINT_BT_FLOW_01D_20261113.md).
