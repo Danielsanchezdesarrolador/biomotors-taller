@@ -1,0 +1,28 @@
+
+> biomotors-taller@0.1.0 prebuild
+> node scripts/generate-pwa-icons.mjs
+
+BT-BRAND-01: official versioned PWA artwork published
+
+> biomotors-taller@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 1676 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/.vite/manifest.json          0.18 kB │ gzip:  0.14 kB
+dist/.vite/public-modules.json    0.50 kB │ gzip:  0.21 kB
+dist/index.html                   1.10 kB │ gzip:  0.53 kB
+dist/assets/index-2yVxbxI0.css   84.98 kB │ gzip: 18.00 kB
+dist/assets/index-BORUKPYG.js   264.94 kB │ gzip: 81.64 kB
+
+✓ built in 541ms
+
+> biomotors-taller@0.1.0 postbuild
+> node scripts/verify-pwa.mjs && node scripts/verify-official-bundle.mjs && node scripts/verify-dark-brand.mjs
+
+BT-BRAND-01 PWA: original hashes/transparency, official PNGs, manifest, favicon and maskable safe area PASS
+Public module graph, fixture exclusion and ByteTorque PWA identity: PASS
+BT-BRAND-02: dark derivative, original/symbol/alpha provenance and protected PWA/Android assets PASS

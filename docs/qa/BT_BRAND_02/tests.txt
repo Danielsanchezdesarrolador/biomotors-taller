@@ -1,0 +1,16 @@
+
+> biomotors-taller@0.1.0 test
+> vitest run
+
+
+ RUN  v5.1.0 /workspace/biomotors-taller
+
+
+ Test Files  21 passed (21)
+      Tests  146 passed (146)
+   Start at  18:54:59
+   Duration  4.88s (import 44%, tests 32%, transform 18%, worker 6%)
+
+    Isolate  21 workers spawned · ~327ms startup each (spawn + environment, per file)
+             at least ~1.96s faster with isolate: false — reuses workers across files instead of one per file
+

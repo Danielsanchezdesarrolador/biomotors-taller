@@ -6,7 +6,7 @@
 
 ## Marca gráfica definitiva BT-BRAND-01 — aprobación 14/11/2026
 
-Los dos PNG aportados por el Director son la fuente definitiva: `assets/brand/originals/bytetorque_icono_oficial_original.png` y `bytetorque_logo_horizontal_oficial_original.png`. Reemplazan los logos provisionales, conservando R2. No modificar colores, proporciones, transparencia interior ni formas; los originales permanecen byte a byte. Horizontal sobre superficie clara mediante `BrandLogo`; icono para tamaños pequeños, PWA y recursos Expo. No duplicar el nombre/subtítulo que ya contiene el horizontal. Los iconos funcionales Wrench de herramientas/OT se conservan; no son la marca.
+Los dos PNG aportados por el Director son la fuente definitiva: `assets/brand/originals/bytetorque_icono_oficial_original.png` y `bytetorque_logo_horizontal_oficial_original.png`. Reemplazan los logos provisionales, conservando R2. No modificar colores, proporciones, transparencia interior ni formas; los originales permanecen byte a byte. Horizontal original sobre superficies claras y variante de texto claro para navy mediante `BrandLogo surface="dark"` (BT-BRAND-02); integración transparente sin soporte blanco, bordes ni sombras. Icono para tamaños pequeños, PWA y recursos Expo. No duplicar el nombre/subtítulo que ya contiene el horizontal. Los iconos funcionales Wrench de herramientas/OT se conservan; no son la marca.
 
 Derivados y proveniencia: [catálogo de assets](../assets/brand/README.md). Los documentos pertenecen comercialmente al taller, con su propio nombre/logo; ByteTorque se identifica mediante atribución pequeña del software. BIOMOTORS es un futuro piloto, no una identidad por defecto. [Checkpoint y evidencia](checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md).
 
@@ -68,3 +68,8 @@ El menú principal sigue teniendo **cinco** secciones. Citas, inventario, factur
 - Cada tarea incluye checkpoint, commit, pruebas y evidencias separando **diseño visual aprobado**, **CI PASS**, **Render LIVE** y **APK real**.
 
 **La aprobación R2 no valida todavía instalación en iPhone físico; esa prueba sigue pendiente.**
+
+
+## BT-BRAND-02 — corrección de contexto oscuro (14/11/2026)
+
+Las dos capturas del Director —sidebar móvil y acceso móvil— son referencia de integración: marca directamente sobre navy/imagen de taller, sin placas ni fondos decorativos. Se mantiene la imagen oficial, su B/engranaje/llave y gradientes; exclusivamente el texto navy de «Byte» y «Gestión de Talleres» recibe RGB claro en un derivado RGBA. Originales y canal alfa intactos, sin filtros sobre la imagen completa ni nueva tipografía. `BrandLogo` elige recurso por `surface`; CSS conserva `object-fit: contain` y ancho adaptable dentro del sidebar. La variante clara original permanece disponible y los formularios/tarjetas R2 conservan sus fondos blancos. [Evidencia y checkpoint](checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).

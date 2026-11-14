@@ -658,3 +658,16 @@ No se inició Auth real, Supabase/RLS, backend, planes/pagos/correo ni adaptaci�
 
 
 **BT-BRAND-01 — CI remoto verificado posteriormente (14/11/2026):** [workflow 43615950760](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950760) **SUCCESS** en `1430cea`, 141/141 Vitest (20 archivos), PWA/recursos de marca y Android Expo PASS sin APK. [Verificación de interfaz oficial 43615950713](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950713) SUCCESS. Capturas de login/iconos/A4 revisadas preliminarmente; aprobación del Director e instalación física pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md).
+
+
+### BT-BRAND-02 — integración transparente en navy (14/11/2026)
+
+- [x] Recuperar íntegro el trabajo local interrumpido; base/remoto `1b3978e`, sin descartar cambios ni reconstruir componentes.
+- [x] Variante derivada de texto claro «Byte»/«Gestión de Talleres», símbolo y alfa intactos. Originales, iconos PWA/favicon/adaptativos y recursos anteriores protegidos por hashes.
+- [x] `BrandLogo surface="dark" | "light"`; navy sin soporte blanco, padding, borde ni sombra. Acceso/navegación comparten variante oscura, original disponible sobre claro.
+- [x] Corregir ancho de marca en tablet 768; validar menú/cierre, ocho entradas de acceso y sidebar en 1650/1440/768/390/375. Navegación y formularios R2 preservados.
+- [x] 146/146 Vitest, TypeScript, build/PWA y generador/recursos protegidos PASS; seis PDFs A4 sin páginas en blanco. Encabezado nativo gráfico actualizado, iconos/configuración sin cambios; bundle Expo verificado sin APK.
+- [x] Publicación en el Render existente: frontend `89c6355`, recursos comparados con el build y recorrido publicado 1650/390 PASS; capturas reales antes/después.
+- [ ] Revisión visual del Director de BT-BRAND-02 y prueba física. [Checkpoint, antes/después y evidencia](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
+
+No se inició BT-AUTH-01B, BT-CP02-D ni backend.

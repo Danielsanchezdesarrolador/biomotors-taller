@@ -1,0 +1,24 @@
+{
+  "originalsIntact": true,
+  "protectedResourcesIntact": true,
+  "alphaIdentical": true,
+  "symbolIdentical": true,
+  "optimizedVisibleSymbolIdentical": true,
+  "onlyTextRgbChanged": true,
+  "changedPixels": 73494,
+  "protectedHashes": {
+    "assets/brand/originals/bytetorque_icono_oficial_original.png": "1322fdbc00c4dccad0d7c7e8fe69a5a6533414236168165165390843d8c8f04c",
+    "assets/brand/originals/bytetorque_logo_horizontal_oficial_original.png": "fb8c59ec252194ef03240c0be53200d628cb0d416a7dc8e390ca0bf05560a693",
+    "assets/brand/generated/icon-192.png": "1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67",
+    "assets/brand/generated/icon-512.png": "7096ba46f51d4402771c2421e0ad848dc9416a3fd2d660ba9e50f96afd62f3c0",
+    "assets/brand/generated/apple-touch-icon.png": "bebade7bc7f0a888680b9982020fae2c1cb0c9943c8247d744372468f51117fa",
+    "assets/brand/generated/icon-maskable-512.png": "6eb1ab1b8db86c03a4d28cbd755ba8c40f8f9db3b12c19faaefe619a95101d43",
+    "assets/brand/generated/favicon-32.png": "4cbabd3cc4b8d96e4d2a8ae708d53496d678affb0671e66d3d52611ad1e53146",
+    "assets/brand/generated/favicon-48.png": "5ff44b463665d5b8e462d727842b7d2c35bdf867cd28dd42a3188262ae851f2e",
+    "public/brand/icon.webp": "4925700b4196f87c1c60a2b2caeaaa45c1975f4bb797220000a3a27d9b8b39be",
+    "public/brand/logo-horizontal.webp": "4581e38165d28161346013a5160135126fd1ad2bfdbd9921ce2d90d92bc2e99d",
+    "apps/android/assets/brand/icon.png": "075021bbb6880fb6a397cce42bdcba65512da48b3d3b5ea8b88cbf257628f7b1",
+    "apps/android/assets/brand/adaptive-foreground.png": "4ecfa079c7f24fa2793d43383e45a466e6555feb90911cfb085ae1cc80d3d980",
+    "apps/android/assets/brand/logo-horizontal.png": "d47484d31979089e12019893fd1632eda980dbc7bddc100a9f40f1d6da3395f4"
+  }
+}

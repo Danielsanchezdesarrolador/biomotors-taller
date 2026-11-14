@@ -16,6 +16,8 @@ Verificación adicional con preview de producción en 5173 y harness privado en 
 
 **Estado (11-11-2026):** Inicio web/iOS PWA **BT-UI-02-R2 visualmente APROBADO como identidad oficial premium** para todo ByteTorque. Proyecto Android nativo BT-UI-01 en `apps/android/`, sin backend ni APK real. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
 
+**BT-BRAND-02:** marca transparente sobre navy en acceso y navegación, sin placas blancas. Variante derivada de texto claro por contexto; originales, símbolos, iconos PWA/Android y documentos intactos. [Checkpoint y antes/después](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
+
 **BT-BRAND-01:** los dos PNG oficiales se conservan intactos en [assets/brand/originals](assets/brand/originals/), con transparencia y hashes verificados. Acceso, paneles, PWA/favicon y recursos Expo reutilizan sus derivados. [Fuentes y reproducción](assets/brand/README.md) · [Checkpoint y capturas](docs/checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md). La identidad del taller en documentos sigue siendo independiente de «Software ByteTorque».
 
 ## Nombre e identidad comercial

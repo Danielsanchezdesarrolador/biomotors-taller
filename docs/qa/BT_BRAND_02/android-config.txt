@@ -1,0 +1,6 @@
+
+> bytetorque-android@0.1.0 verify-config
+> node scripts/verify-config.mjs
+
+ByteTorque Android: configuración nativa y perfil APK PASS (APK no generada)
+BT-BRAND-01: native icon, adaptive foreground, splash and horizontal artwork PASS

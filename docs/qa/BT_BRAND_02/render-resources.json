@@ -1,0 +1,91 @@
+{
+  "base": "https://biomotors-taller-demo.onrender.com",
+  "htmlMatches": true,
+  "tlsVerified": true,
+  "resources": [
+    {
+      "path": "/assets/index-BORUKPYG.js",
+      "sha256": "d484b62ddbbb4ec8b0c33b1f310c9e77984b2427665f9aeb0c5c0be30b932e5a",
+      "bytes": 264945,
+      "matchesLocal": true
+    },
+    {
+      "path": "/assets/index-2yVxbxI0.css",
+      "sha256": "973ec4fa46f7a68ac39978668e0d6ff641c78792cd5fae6a837f0960ca1f7e0f",
+      "bytes": 84983,
+      "matchesLocal": true
+    },
+    {
+      "path": "/brand/logo-horizontal-dark.webp",
+      "sha256": "a36205c818836426ef26e97414e6cf3871268e9ae33f78f65933f176ca1f49be",
+      "bytes": 104062,
+      "matchesLocal": true
+    },
+    {
+      "path": "/brand/logo-horizontal.webp",
+      "sha256": "4581e38165d28161346013a5160135126fd1ad2bfdbd9921ce2d90d92bc2e99d",
+      "bytes": 116256,
+      "matchesLocal": true
+    },
+    {
+      "path": "/brand/icon.webp",
+      "sha256": "4925700b4196f87c1c60a2b2caeaaa45c1975f4bb797220000a3a27d9b8b39be",
+      "bytes": 99922,
+      "matchesLocal": true
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "sha256": "21b25839d42cfc2f8a1f6aee05809945f2ca7118c91f2649b99cbe1c5f6c0552",
+      "bytes": 772,
+      "matchesLocal": true
+    },
+    {
+      "path": "/sw.js",
+      "sha256": "9a09c2138e9bc07322d2268beb1a3b4b9a560e1472c0e8d9b54f63ea96f72bf0",
+      "bytes": 472,
+      "matchesLocal": true
+    },
+    {
+      "path": "/icon.svg",
+      "sha256": "9916dd56bd1e46f8ac5790e7334cad56b71d485094cca311d6800f81a2d7469c",
+      "bytes": 327126,
+      "matchesLocal": true
+    },
+    {
+      "path": "/favicon-32.png?v=bt-brand-01",
+      "sha256": "4cbabd3cc4b8d96e4d2a8ae708d53496d678affb0671e66d3d52611ad1e53146",
+      "bytes": 2374,
+      "matchesLocal": true
+    },
+    {
+      "path": "/favicon-48.png?v=bt-brand-01",
+      "sha256": "5ff44b463665d5b8e462d727842b7d2c35bdf867cd28dd42a3188262ae851f2e",
+      "bytes": 4444,
+      "matchesLocal": true
+    },
+    {
+      "path": "/apple-touch-icon.png?v=bt-brand-01",
+      "sha256": "bebade7bc7f0a888680b9982020fae2c1cb0c9943c8247d744372468f51117fa",
+      "bytes": 32253,
+      "matchesLocal": true
+    },
+    {
+      "path": "/icon-192.png?v=bt-brand-01",
+      "sha256": "1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67",
+      "bytes": 41142,
+      "matchesLocal": true
+    },
+    {
+      "path": "/icon-512.png?v=bt-brand-01",
+      "sha256": "7096ba46f51d4402771c2421e0ad848dc9416a3fd2d660ba9e50f96afd62f3c0",
+      "bytes": 245179,
+      "matchesLocal": true
+    },
+    {
+      "path": "/icon-maskable-512.png?v=bt-brand-01",
+      "sha256": "6eb1ab1b8db86c03a4d28cbd755ba8c40f8f9db3b12c19faaefe619a95101d43",
+      "bytes": 86938,
+      "matchesLocal": true
+    }
+  ]
+}

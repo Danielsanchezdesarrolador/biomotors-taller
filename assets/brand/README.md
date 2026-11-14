@@ -16,3 +16,10 @@ Los derivados web están en `public/brand/`. Los nativos están en `apps/android
 El icono `any` conserva transparencia; Apple Touch usa fondo navy opaco, sin recortar el símbolo. Maskable/adaptativo usan padding conservador del 56 %: todo el cuadrado que contiene el arte queda dentro del círculo seguro central de radio 40 %. Así ninguna máscara estándar corta engranaje, llave o borde. No se recolorea el arte.
 
 Los iconos nuevos usan `?v=bt-brand-01` en HTML/manifiesto. La revisión del service worker cambia para activar su ciclo existente de actualización; no se añaden caches ni almacenamiento de datos. `id`, `start_url`, `scope` y navegación se conservan. Los navegadores pueden mantener el icono del acceso instalado en su caché del sistema: actualizar/cerrar/reabrir primero; si no cambia, quitar y volver a añadir el acceso. No equivale a una APK Android.
+
+
+## BT-BRAND-02 — variante para navy
+
+`derived/bytetorque_logo_horizontal_fondo_oscuro.png` conserva el tamaño y alfa del original. `scripts/prepare-dark-brand.py` modifica exclusivamente los RGB navy de las dos regiones de texto registradas en `dark-variant.json` (73.494 píxeles); el símbolo completo y las zonas azul/cian se conservan. La imagen optimizada es `public/brand/logo-horizontal-dark.webp`, y el encabezado nativo usa un PNG oscuro adicional sin modificar los iconos nativos previos. `surface="dark"` selecciona este recurso, sin fondos, bordes, padding ni sombras. El recurso original sigue disponible en superficies claras.
+
+`python scripts/verify-dark-brand.py` verifica sin escribir archivos: originales/protegidos por SHA, alfa completo, todos los píxeles del símbolo y RGB alterados solo dentro de los textos permitidos. En el WebP se comparan los píxeles visibles del símbolo; el RGB de píxeles totalmente transparentes puede optimizarse por el codec sin cambiar lo visible. `npm run build` añade validación Node de hashes/procedencia y recursos protegidos. Ni el manifiesto BT-BRAND-01 ni sus PNG se reemplazan por la variante oscura. [Checkpoint](../../docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
