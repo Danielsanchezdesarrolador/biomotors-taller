@@ -19,6 +19,7 @@ import {
   Wrench,
   type LucideIcon
 } from 'lucide-react'
+import { UsersPreparationDialog } from '../access/UsersPreparation'
 import type { ReactNode } from 'react'
 import type { Screen } from '../layout/AppShell'
 import { officialWorkspace as workspace, unavailableReason } from './officialWorkspace'
@@ -449,14 +450,12 @@ function OfficialSettings() {
             </h2>
             <p>{description}</p>
             <span>{state}</span>
-            <button
+            {title === 'Usuarios y permisos' ? <UsersPreparationDialog/> : <button
               type="button"
               disabled
               aria-describedby="official-readiness"
               title={unavailableReason}
-            >
-              Disponible con acceso seguro
-            </button>
+            >Disponible con acceso seguro</button>}
           </section>
         ))}
       </div>

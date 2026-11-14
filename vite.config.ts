@@ -15,7 +15,8 @@ export default defineConfig({
         const forbidden = application.filter(
           (id) =>
             /\.test\./.test(id) ||
-            (!id.endsWith('.css') && !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/)/.test(id))
+            (!id.endsWith('.css') &&
+              !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/)/.test(id))
         )
         if (forbidden.length)
           this.error('Public build imported non-public modules: ' + forbidden.join(', '))

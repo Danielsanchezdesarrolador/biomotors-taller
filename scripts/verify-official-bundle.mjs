@@ -4,7 +4,8 @@ const modules = JSON.parse(readFileSync('dist/.vite/public-modules.json', 'utf8'
 assert.ok(modules.length > 0)
 assert.ok(
   modules.every(
-    (id) => id.endsWith('.css') || /src\/(?:main\.tsx|App\.tsx|layout\/|official\/)/.test(id)
+    (id) =>
+      id.endsWith('.css') || /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/)/.test(id)
   )
 )
 for (const name of readdirSync('dist/assets')) {
@@ -13,7 +14,7 @@ for (const name of readdirSync('dist/assets')) {
   if (name.endsWith('.js')) assert.doesNotMatch(text, /\bDEMO\b|TallerFlow/)
   assert.doesNotMatch(
     text,
-    /OT-100[1-8]|workshop-demo|DEMO-KZV|@example\.com|Camila Muñoz|demoWorkOrders|tests\/fixtures|WorkflowApp/
+    /OT-100[1-8]|workshop-demo|DEMO-KZV|@example\.com|Camila Muñoz|demoWorkOrders|tests\/fixtures|WorkflowApp|revision\.admin@bytetorque\.test|VistaBT-2026!/
   )
 }
 const manifest = JSON.parse(readFileSync('dist/manifest.webmanifest', 'utf8'))
