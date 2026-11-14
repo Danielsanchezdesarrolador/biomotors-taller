@@ -21,10 +21,17 @@ const url = process.env.VITE_SUPABASE_URL
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const passwordA = process.env.BT_R1_PASSWORD_A
 const passwordB = process.env.BT_R1_PASSWORD_B
+// Comprobacion independiente de acceso anonimo, sin contrasenas ni sesiones Auth.
+const anonOnly = process.argv.length === 3 && process.argv[2] === '--anon-only'
+const fullRun = process.argv.length === 2
+if (!anonOnly && !fullRun) {
+  console.error('Uso: node script.mjs [--anon-only]')
+  process.exit(2)
+}
 if (
   url !== PROJECT_URL ||
   !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key || '') ||
-  !passwordA || !passwordB ||
+  (fullRun && (!passwordA || !passwordB)) ||
   process.env.BT_R1_RLS_READONLY !== 'YES'
 ) {
   console.error('BLOQUEADO: confirma URL, clave publishable, ambas contrasenas y BT_R1_RLS_READONLY=YES. No compartas secretos.')
@@ -49,6 +56,19 @@ function test(ok, label) {
   if (!ok) throw new Error('No se verifico: ' + label)
   console.log('PASS ' + ++count + ' — ' + label)
 }
+// Un rechazo HTTP 401/403 tambien valida que los anonimos no pueden leer.
+// Cualquier error de red, SQL o API distinto NO se acepta como PASS.
+async function checkAnonymous() {
+  const response = await anon.from('workshops').select('id')
+  const denied = !!response.error && [401, 403].includes(response.status)
+  const empty = !response.error && Array.isArray(response.data) && response.data.length === 0
+  if (!denied && !empty) {
+    throw new Error('Consulta anonima no validada (HTTP ' + response.status + ').')
+  }
+  test(true, denied
+    ? 'Anonimo rechazado por API (HTTP ' + response.status + ')'
+    : 'Anonimo recibe cero talleres')
+}
 async function read(client, table, columns, field, value) {
   let request = client.from(table).select(columns)
   if (field) request = request.eq(field, value)
@@ -70,6 +90,10 @@ async function login(client, email, password, label) {
 }
 
 try {
+  if (anonOnly) {
+    await checkAnonymous()
+    console.log('RESULTADO: prueba anonima independiente PASS; no se usaron contrasenas.')
+  } else {
   const userA = await login(a, EMAIL_A, passwordA, 'A')
   const userB = await login(b, EMAIL_B, passwordB, 'B')
   test(userA !== userB, 'Identidades Auth A y B independientes')
@@ -105,22 +129,24 @@ try {
        'A no lee perfil del propietario B')
   test((await read(b, 'profiles', 'user_id', 'user_id', userA)).length === 0,
        'B no lee perfil del propietario A')
-  test((await read(anon, 'workshops', 'id')).length === 0,
-       'Una peticion anonima no lee talleres')
+  await checkAnonymous()
 
   console.log('RESULTADO: ' + count + '/' + count + ' pruebas reales de API RLS PASS. Sin cambios de datos.')
+  }
 } catch (err) {
   console.error('FAIL — ' + (err instanceof Error ? err.message : 'Error no identificado'))
   process.exitCode = 1
 } finally {
-  const done = await Promise.allSettled([
-    a.auth.signOut({ scope: 'local' }),
-    b.auth.signOut({ scope: 'local' })
-  ])
-  if (done.some(x => x.status !== 'fulfilled' || x.value.error)) {
-    console.error('Aviso: no se pudo verificar el cierre de todas las sesiones de prueba del script.')
-  } else {
-    console.log('Sesiones del script cerradas; sesiones de Chrome independientes.')
+  if (fullRun) {
+    const done = await Promise.allSettled([
+      a.auth.signOut({ scope: 'local' }),
+      b.auth.signOut({ scope: 'local' })
+    ])
+    if (done.some(x => x.status !== 'fulfilled' || x.value.error)) {
+      console.error('Aviso: no se pudo verificar el cierre de todas las sesiones de prueba del script.')
+    } else {
+      console.log('Sesiones del script cerradas; sesiones de Chrome independientes.')
+    }
   }
   delete process.env.BT_R1_PASSWORD_A
   delete process.env.BT_R1_PASSWORD_B
