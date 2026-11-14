@@ -37,6 +37,7 @@ export function FlowVisitActions({visit}:{visit:FlowCase}) {
       else if(mode==='resolve')resolveHold(current,target,note,accepted)
       else if(mode==='cancel')cancelVisit(current,note,accepted)
       setMode(null)
+      requestAnimationFrame(()=>optionsTrigger.current?.focus())
     }catch(e){setError((e as Error).message)}
   }
   return <section className="fl-visit-actions dashboard-card" aria-label="Estado y excepciones de la visita" onKeyDown={e=>{
