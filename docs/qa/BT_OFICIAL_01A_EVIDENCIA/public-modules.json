@@ -1,0 +1,11 @@
+[
+  "src/official/official.css",
+  "src/App.tsx",
+  "src/main.tsx",
+  "src/informes/informes.css",
+  "src/styles.css",
+  "src/official/OfficialPanels.tsx",
+  "src/premium.css",
+  "src/layout/AppShell.tsx",
+  "src/official/officialWorkspace.ts"
+]

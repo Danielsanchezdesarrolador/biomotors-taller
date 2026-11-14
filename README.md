@@ -1,5 +1,8 @@
 # ByteTorque
 
+**Estado actual — 14/11/2026:** BT-OFICIAL-01A presenta ByteTorque R2 con los cinco paneles vacíos y sin registros ficticios. Es una interfaz de preparación: **no hay acceso autenticado, guardado permanente ni operaciones habilitadas para clientes reales**. Las funciones y datos de prueba se conservan exclusivamente en el harness local. [Checkpoint 01A](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md).
+
+
 **ByteTorque** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
 **Estado (11-11-2026):** Inicio web/iOS PWA **BT-UI-02-R2 visualmente APROBADO como identidad oficial premium** para todo ByteTorque. Proyecto Android nativo BT-UI-01 en `apps/android/`, sin backend ni APK real. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.
@@ -170,3 +173,16 @@ La propuesta guiada ya no ofrece plantillas. Espera y cancelación están bajo �
 Validación: **103/103 Vitest** (las 101 anteriores más dos pruebas de resumen), TypeScript, Vite/PWA, recorrido de ingreso nuevo a entrega y regresiones en 1650/1440/768/390/375 px. Cotizaciones de 4/8/12 partidas, edición, estado vacío, aceptación por revisión, realizados/pendientes, pausas y recarga comprobados. Impresión: cuatro trabajos generan una página A4 y el contenido largo dos páginas con texto; la hoja vacía no se reprodujo en Chromium/emulación Android, sin cambiar estilos de impresión. Safari y visor Android físicos siguen pendientes.
 
 [Checkpoint BT-QA-02](docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md) · [Matriz de QA y resolución](docs/qa/BT_QA_01_MATRIZ_20261113.md). BT-COM-01 y backend continúan fuera de alcance; se espera revisión visual del Director.
+
+
+## BT-OFICIAL-01A — Interfaz pública y pruebas separadas
+
+`npm run dev`, `npm run build` y `npm run preview` usan siempre la interfaz pública vacía. No existe un modo activable por URL, rol React o almacenamiento para recuperar registros de muestra. El build comprueba el grafo de módulos y excluye fixtures, sesiones y pantallas operativas de prueba. El manifiesto PWA identifica ByteTorque con la paleta R2.
+
+El visitante conserva Inicio, Órdenes, Clientes y vehículos, Informes y Configuración. Puede recorrer sus estados vacíos. Alta/edición, recepción, OT, inspección/documentos/entrega y configuración operativa quedan deshabilitadas con explicación mientras se preparan acceso seguro y guardado. Tampoco se habilitan correo, planes, pagos, enlaces ni respaldos reales.
+
+Los 103 casos originales siguen ejecutándose mediante inyección de fixtures solo en Vitest; ocho pruebas nuevas verifican los vacíos y su independencia. Para recorridos históricos: `npm run dev:harness -- --port 5177 --strictPort` (solo loopback y datos ficticios), seguido de los scripts de regresión existentes. Para comprobar la versión pública compilada: `npm run preview -- --port 5173 --strictPort` y `node scripts/verify-official-ui.cjs`. Los workflows de GitHub mantienen estas dos comprobaciones separadas.
+
+Se sustituyó la demostración operativa del Render existente; el harness privado conserva la posibilidad de probar el flujo A–E y los editores. No se creó otro servicio ni dominio. La URL con `-demo` permanece hasta autorización separada.
+
+[Inventario y funciones deshabilitadas](docs/BT_OFICIAL_01A_INVENTARIO_20261114.md) · [Pruebas, capturas y publicación](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md). **BT-OFICIAL-01B y BT-CP02-D no iniciados.**

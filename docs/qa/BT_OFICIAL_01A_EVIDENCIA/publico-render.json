@@ -1,0 +1,16 @@
+[
+  {
+    "width": 1650,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  }
+]

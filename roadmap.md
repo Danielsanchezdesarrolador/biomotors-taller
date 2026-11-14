@@ -451,7 +451,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 **Decisión del Director (13/11/2026):** conservar íntegramente los cinco paneles R2 y simplificar el trabajo diario con un recorrido guiado y contextual que enlace **cliente/vehículo → recepción → OT → inspección multipunto → trabajos valorados → cotización → respuesta/aprobación → realización → informe final → entrega**. Los menús laterales continúan disponibles para consulta libre y navegación directa. El operador no debe copiar antecedentes entre pantallas ni buscar manualmente qué hacer a continuación.
 
-**Estado actual:** recorrido A–E disponible solo en DEMO; BT-QA-02 implementada y verificada técnicamente, pendiente revisión visual del Director. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
+**Estado actual:** BT-QA-02 aprobado por el Director; BT-OFICIAL-01A presenta la interfaz pública vacía. A–E sigue preservado en pruebas privadas; los datos reales requieren una etapa de backend aún no autorizada. Base técnica revisada: `e9e2001` (BT-COT-01). Ver [plan maestro BT-FLOW-01](docs/BT_FLOW_01_FLUJO_TRABAJO_INTELIGENTE.md).
 
 - [x] Revisar el cierre BT-COT-01 y confirmar CI remoto: [GitHub Actions 43516223991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43516223991) **SUCCESS**, 66/66 Vitest, TypeScript, Vite/PWA y Android Expo PASS. El frontend publicado fue verificado por Codex; aprobación visual y Safari físico pendientes.
 - [x] Establecer plan documental y reglas de seguridad: único expediente por visita, próximos pasos, posibilidad de retorno y selección de cliente/vehículo existente, sin diagnóstico ni precio inferidos.
@@ -560,7 +560,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 ### BT-QA-02 — Correcciones de usabilidad verificadas con el Director
 
-**Estado: IMPLEMENTADA Y VERIFICADA EN DEMO; pendiente revisión visual del Director.** Base real comprobada antes de modificar: `main` en `1a4c6ff`. [Orden oficial BT-QA-02](docs/BT_QA_02_ORDEN_CODEX.md) · [Matriz de hallazgos BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
+**Estado: APROBADA VISUALMENTE por el Director, 14/11/2026.** Base real comprobada antes de modificar: `main` en `1a4c6ff`. [Orden oficial BT-QA-02](docs/BT_QA_02_ORDEN_CODEX.md) · [Matriz de hallazgos BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
 
 - [x] **H004 P1:** primera vista de cotización **compacta en móvil**, con lista de ítems, cantidad, precio unitario, total, subtotal/IVA/total y acceso a edición completa; escritorio y modo informe intactos.
 - [x] **H003 P2:** retirar «Cargar plantilla» del flujo guiado de propuesta, preservando plantillas del editor avanzado y añadir/editar/eliminar ítems.
@@ -569,7 +569,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] **H001/H006 P2–P3:** eliminar aviso desactualizado BT-FLOW-01D/E pendiente y sustituir estados técnicos visibles como `en_curso` por lenguaje natural.
 - [x] **R005 P2:** investigar posible segunda página en blanco al imprimir A4 en Android; corregir estilos solo si se reproduce y no recortar contenido legítimo.
 - [x] TypeScript, **103/103 Vitest**, build/PWA, regresiones A–E y cinco paneles, E2E 1650/1440/768/390/375, capturas antes/después y checkpoint. Actions remoto verificado posteriormente desde ChatGPT: [CI final 43547511794](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43547511794) SUCCESS sobre `9495e05` (103/103 Vitest, 16 archivos, build/PWA y Android Expo); [BT-FLOW-01 43546894985](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43546894985) y [BT-COT-01 43546894989](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43546894989) SUCCESS sobre implementación.
-- [ ] Revisión visual posterior del Director antes de abrir nuevas etapas funcionales.
+- [x] Director aprueba BT-QA-02 y autoriza BT-OFICIAL-01A (14/11/2026); backend y BT-COM-01 no autorizados.
 
 **Fuera de alcance:** [BT-COM-01](docs/BT_COM_01_CORREO_CONSOLIDADO_ENTREGA.md) sigue reservado para posterior fase segura (correo consolidado y adjuntos PDF reales). No envíos, backend, Supabase/Auth/RLS, BT-CP02-D, pagos, firma ni Android nativo. No crear ramas ni otro Render.
 
@@ -583,12 +583,18 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **Autorización del Director:** iniciar la preparación de la versión oficial y retirar de **las pantallas públicas** nombres, clientes, vehículos, OT, usuarios y estadísticas ficticias. **No** significa activar operaciones con datos reales sin persistencia y seguridad. [Especificación y puertas de lanzamiento](docs/BT_OFICIAL_01_TRANSICION_PRODUCTO.md).
 
 - [x] Auditoría inicial de código: fixtures `demoWorkOrders`, `demoClients`, `demoVehicles`, métricas del Inicio fijas, configuración/miembros y talleres ficticios; `flowSession` de memoria temporal. La interfaz actual NO es todavía apta para operar con clientes reales.
-- [ ] **01A — Codex, frontend oficial limpio:** conservar R2/cinco paneles; quitar información de muestra de ejecución pública; estados vacíos útiles para todas las secciones; cero estadísticas inventadas.
-- [ ] Separar fixtures para pruebas automáticas no expuestos por URL/flag pública; preservar las 103 pruebas y el flujo E2E dentro de un harness controlado.
-- [ ] Eliminar `DEMO` como branding público sin ocultar limitaciones: mientras no exista backend autorizado, mostrar «Acceso seguro y guardado permanente en preparación» y bloquear entradas que pudieran confundirse con registros reales.
-- [ ] TypeScript, Vitest, build/PWA, cinco tamaños, regresiones, capturas antes/después y checkpoint `BT-OFICIAL-01A`; no publicar una apariencia de producción que permita perder datos reales.
-- [ ] Revisión visual del Director y publicación controlada en el Render existente. La URL `biomotors-taller-demo.onrender.com` no se considera dominio comercial oficial; su cambio requiere decisión separada.
+- [x] **01A — Codex, frontend oficial limpio:** conservar R2/cinco paneles; quitar información de muestra de ejecución pública; estados vacíos útiles para todas las secciones; cero estadísticas inventadas.
+- [x] Separar fixtures para pruebas automáticas no expuestos por URL/flag pública; preservar las 103 pruebas y el flujo E2E dentro de un harness controlado.
+- [x] Eliminar `DEMO` como branding público sin ocultar limitaciones: mientras no exista backend autorizado, mostrar «Acceso seguro y guardado permanente en preparación» y bloquear entradas que pudieran confundirse con registros reales.
+- [x] TypeScript, Vitest, build/PWA, cinco tamaños, regresiones, capturas antes/después y checkpoint `BT-OFICIAL-01A`; no publicar una apariencia de producción que permita perder datos reales.
+- [x] Publicación controlada y verificación de HTML/JS/CSS/manifiesto en el Render existente. Revisión visual del Director pendiente. La URL `biomotors-taller-demo.onrender.com` no se considera dominio comercial oficial; su cambio requiere decisión separada.
 - [ ] **01B (chat reservado BT-CP02-D):** validar Auth/RLS con usuarios A/B y aislamiento real; conectar backend seguro, registros/historial/respaldos en entregas incrementales, sin datos reales antes de autorización.
 - [ ] **01C:** correo consolidado BT-COM-01, solicitud previa de aprobación, enlace seguro de cliente, PDF versionado y piloto BIOMOTORS, tras puertas de seguridad.
 
 **No autorizado en 01A:** Supabase/Auth/RLS/migraciones, BT-CP02-D, `bt-owner-onboarding`, claves, pagos, firma, correos reales ni Android nativo. No crear otras ramas, Render o estudios.
+
+
+**Resultado BT-OFICIAL-01A:** interfaz pública sin registros precargados, cifras inventadas, perfil de muestra ni operaciones que reciban datos personales; cinco paneles R2 y estado honesto sin configuración. Fixtures extraídos e inyectados solo en Vitest/harness loopback. **111/111 pruebas**, TypeScript, build/PWA, grafo público limpio, cinco paneles en 1650/1440/768/390/375 y regresiones privadas A–E/REG/INS/COT/configuración PASS. Publicación y capturas reales: [checkpoint 01A](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md). [Inventario](docs/BT_OFICIAL_01A_INVENTARIO_20261114.md).
+
+- [ ] Revisión visual del Director de 01A y pruebas físicas Safari/iPhone. No equivale a habilitar datos reales.
+- [ ] 01B / BT-CP02-D siguen reservados; no se inició Auth/RLS, persistencia, correo, cobros ni piloto real.
