@@ -165,3 +165,12 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - Comprobación SQL: cuenta `mechanic/active` del Taller A; propietario A y propietario B mantienen su `owner/active` sin cambios.
 - Añadido script [RLS mecánico](../../scripts/security/bt-auth-r1-mechanic-readonly.mjs) y [runbook](../BT_AUTH_01B_R1_MECHANIC_RLS_RUNBOOK.md), con **11 comprobaciones esperadas aún no ejecutadas**.
 - Sin cambios en políticas Supabase, esquema, Android ni flags de Render. No afirmar certificación de permisos de escritura de módulos futuros.
+
+### Cierre de prueba API RLS real del mecánico — 14/11/2026
+
+- El Director presentó la salida completa de PowerShell del script `scripts/security/bt-auth-r1-mechanic-readonly.mjs`: **PASS 1–11 y RESULTADO 11/11**. Se observaron: identidad/correo confirmado, exclusividad del Taller A, no lectura del Taller B incluso por UUID, propia membresía `mechanic`, denegación de consulta de membresías de propietarios A/B, y de sus perfiles, perfil propio autorizado.
+- El proceso devolvió `Sesion aislada cerrada. Chrome no se modifico.` y `Sin escrituras operativas`. Estos resultados corroboran controles de lectura del esquema actual, **no** de las futuras escrituras de OT, presupuestos, clientes o usuarios.
+- Comprobación administrativa adicional en Supabase: Taller A conserva propietario `owner/active` y mecánico `mechanic/active`; Taller B conserva propietario `owner/active`. No se modificaron políticas ni tablas durante la ejecución de estas pruebas.
+- GitHub Actions: al menos un workflow del commit `dcb6653` finalizó `SUCCESS`; otro estaba en ejecución al consultarlo, no declararlo aprobado hasta confirmar.
+- La advertencia de Security Advisor `auth_leaked_password_protection` permanece, no corresponde decir «0 advertencias». No habilitar login público, registro, correos ni operaciones reales.
+- Siguiente foco: rol `reception` y rol `admin` mediante cuentas ficticias controladas, selección de talleres y dispositivo físico. Los dos propietarios y el mecánico no se deben eliminar hasta concluir pruebas y definir limpieza.
