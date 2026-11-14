@@ -1,5 +1,5 @@
 // Every build publishes the versioned approved artwork. No drawing or fallback logo.
-import { readFileSync, copyFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import assert from 'node:assert/strict'
 const manifest = JSON.parse(readFileSync('assets/brand/manifest.json', 'utf8'))
@@ -23,3 +23,10 @@ for (const file of [
   copyFileSync('assets/brand/generated/' + file, 'public/' + file)
 }
 console.log('BT-BRAND-01: official versioned PWA artwork published')
+
+// Legacy bookmarks may retain /icon.svg. Embed the exact approved PNG, without vector reinterpretation.
+const icon = readFileSync('assets/brand/generated/icon-512.png').toString('base64')
+writeFileSync(
+  'public/icon.svg',
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>ByteTorque</title><image width="512" height="512" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,${icon}"/></svg>\n`
+)

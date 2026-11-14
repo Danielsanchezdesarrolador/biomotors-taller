@@ -1,5 +1,5 @@
 // Checks approved source provenance, actual build bytes and conservative mask safe area.
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import assert from 'node:assert/strict'
 const pack = JSON.parse(readFileSync('assets/brand/manifest.json', 'utf8'))
@@ -11,7 +11,14 @@ assert.equal(manifest.scope, '/')
 assert.equal(manifest.display, 'standalone')
 assert.ok(html.includes('/apple-touch-icon.png?v=bt-brand-01'))
 assert.ok(html.includes('/favicon-32.png?v=bt-brand-01'))
-assert.ok(!existsSync('dist/icon.svg'), 'Provisional SVG must not return')
+const legacySvg = readFileSync('dist/icon.svg', 'utf8')
+assert.ok(
+  legacySvg.includes(
+    'data:image/png;base64,' +
+      readFileSync('assets/brand/generated/icon-512.png').toString('base64')
+  )
+)
+assert.doesNotMatch(legacySvg, /<(?:path|circle|rect)\b/)
 for (const original of pack.originals) {
   assert.equal(
     createHash('sha256').update(readFileSync(original.path)).digest('hex'),
