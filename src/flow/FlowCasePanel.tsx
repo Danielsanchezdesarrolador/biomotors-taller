@@ -1,4 +1,5 @@
 import { FlowProposalPanel } from './FlowProposalPanel'
+import { FlowDeliveryPanel, FlowVisitActions } from './FlowDeliveryPanel'
 import { FlowQuotePanel, FlowExecutionPanel } from './FlowQuotePanels'
 import { useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, CarFront, Check, ClipboardList, Layers } from 'lucide-react'
@@ -83,6 +84,7 @@ export function FlowCasePanel({
           vigente; los informes previos se conservan.
         </p>
       )}
+      <FlowVisitActions visit={visit} />
       <div className="fl-case-layout">
         <div className="fl-milestone-container">
           <p className="fl-mobile-milestone-hint">Desliza los hitos para ver las 7 etapas →</p>
@@ -287,19 +289,12 @@ export function FlowCasePanel({
               <p>Confirma primero la OT de la visita.</p>
             )
           ) : (
-            <>
-              <p className="fl-notice">
-                La entrega y el cierre guiado están pendientes de BT-FLOW-01E. Esta visita no se ha
-                finalizado ni se ha enviado documentación.
-              </p>
-              <p>
-                La revisión final de pendientes, evidencia de entrega y confirmación explícita del
-                operador se integrarán en esa fase. No se generan firmas ni autorizaciones legales.
-              </p>
-              <button className="rp-primary" disabled>
-                Cierre guiado pendiente 01E
-              </button>
-            </>
+            <FlowDeliveryPanel
+              visit={visit}
+              onInspection={() => select('inspeccion')}
+              onQuote={() => select('cotizacion')}
+              onWork={() => select('ejecucion')}
+            />
           )}
           {error && (
             <p role="alert" className="fl-error">

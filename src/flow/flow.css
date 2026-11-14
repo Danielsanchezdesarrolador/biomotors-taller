@@ -1356,3 +1356,55 @@
     min-height: 44px;
   }
 }
+
+/* BT-FLOW-01E — controles de excepciones y entrega solo DEMO. */
+.fl-visit-actions{margin:0 0 18px;padding:17px!important;min-width:0}
+.fl-status-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fl-status-head>strong{font-size:15px;color:#103056}
+.fl-lifecycle{display:inline-flex;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:720;background:#e8f2ff;color:#1256b4}
+.fl-life-en_espera{background:#fff4d6;color:#83530c}
+.fl-life-cancelada,.fl-life-cierre_desactualizado{background:#fff0f0;color:#a3283c}
+.fl-life-cerrada_demo{background:#e0f8ea;color:#08774b}
+.fl-visit-buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.fl-visit-buttons button{min-height:44px}
+.fl-visit-buttons svg,.fl-business-actions svg{width:18px;height:18px;flex-shrink:0}
+.fl-hold-list{display:grid;gap:8px;margin-top:12px}
+.fl-hold-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff7e5;border:1px solid #ffe0a5;padding:12px;border-radius:11px}
+.fl-hold-row strong,.fl-hold-row small{display:block;overflow-wrap:anywhere}
+.fl-hold-row strong{font-size:13px;color:#6e4910}
+.fl-hold-row small{font-size:12px;color:#785d37;margin-top:4px;line-height:1.5}
+.fl-hold-row button{flex-shrink:0;min-height:44px}
+.fl-hold-history{font-size:12px;margin-top:12px;color:#3f5b82}
+.fl-hold-history summary{cursor:pointer;font-weight:700;min-height:40px}
+.fl-hold-history p{padding:8px 10px;border:1px solid #dce7f7;border-radius:8px;line-height:1.5}
+.fl-hold-history span{display:block;margin-top:3px}
+.fl-delivery{display:grid;gap:13px;min-width:0}
+.fl-delivery>p{margin:0;font-size:13px}
+.fl-delivery-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fl-delivery-overview>div{padding:12px;border:1px solid #dbe7f8;border-radius:11px;background:#f7faff;min-width:0}
+.fl-delivery-overview small{display:block;color:#547192;font-size:11px;line-height:1.4}
+.fl-delivery-overview strong{display:block;color:#13365d;margin-top:6px;font-size:13px;overflow-wrap:anywhere}
+.fl-delivery .fl-notice ul,.fl-delivery .fl-business-warning ul{padding-left:19px;margin:8px 0}
+.fl-delivery-checks{display:grid;gap:9px}
+.fl-delivery-checks label{display:flex;align-items:flex-start;gap:9px;padding:12px;border:1px solid #dbe7f8;border-radius:9px;font-size:13px;line-height:1.5;cursor:pointer;color:#1f3f65}
+.fl-delivery-checks input{flex-shrink:0;margin-top:2px;min-width:19px;min-height:19px;accent-color:#0567e8}
+.fl-delivery-field{display:flex;flex-direction:column;gap:8px;font-weight:650;font-size:13px;color:#1d3d63}
+.fl-delivery-field textarea{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid #c4d6ee;background:#fff;padding:12px;font:inherit;font-size:16px;line-height:1.5;resize:vertical;color:#16395e}
+.fl-delivery-field small{font-size:11px;color:#536e93;font-weight:400}
+.fl-delivery .rp-primary:disabled{opacity:.5;cursor:default}
+.fl-delivery .fl-business-ok h3{display:flex;align-items:center;gap:8px;margin:0}
+.fl-delivery .fl-business-ok p{margin:8px 0;font-size:13px}
+.fl-delivery .fl-help svg{height:14px;width:14px;vertical-align:middle}
+.fl-delivery .fl-business-actions{display:flex;gap:8px;flex-wrap:wrap}
+.fl-delivery .fl-business-actions button{min-height:44px}
+@media(max-width:760px){
+.fl-visit-actions{padding:14px!important}
+.fl-hold-row{align-items:stretch;flex-direction:column}
+.fl-hold-row button{width:100%;justify-content:center}
+.fl-visit-buttons{display:grid;grid-template-columns:1fr}
+.fl-visit-buttons button{justify-content:center;min-height:48px}
+.fl-delivery-overview{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fl-delivery .fl-business-actions{display:grid;grid-template-columns:1fr}
+.fl-delivery .fl-business-actions button{justify-content:center;min-height:48px}
+.fl-delivery>.rp-primary{min-height:50px;scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
+}

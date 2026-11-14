@@ -15,6 +15,7 @@ import {
   type QuoteRef
 } from './flowBusiness'
 import { readWorkDocument } from '../informes/trabajos/trabajosSession'
+import { deliveryState, deliveryRequirements } from './flowClosure'
 export type FlowStage =
   | 'recepcion'
   | 'orden'
@@ -55,7 +56,7 @@ export const milestones = [
   },
   { id: 'cotizacion', label: 'Cotización y respuesta', detail: 'Presupuesto y revisión DEMO' },
   { id: 'ejecucion', label: 'Ejecución e informe de trabajo', detail: 'Solo trabajos realizados' },
-  { id: 'entrega', label: 'Entrega del vehículo', detail: 'Cierre guiado pendiente 01E' }
+  { id: 'entrega', label: 'Entrega del vehículo', detail: 'Revisión y cierre DEMO' }
 ] as const
 const cases = new Map<string, FlowCase>(),
   receptionKeys = new Map<string, string>()
@@ -248,7 +249,9 @@ export function caseProgress(id: string) {
   const inspection = visit.inspectionId ? readMultipunto(visit.inspectionId) : undefined,
     business = order ? businessState(visit) : undefined,
     quote = business?.quote,
-    work = business?.work
+    work = business?.work,
+    lifecycle = deliveryState(visit),
+    delivery = deliveryRequirements(visit)
   const states: Record<FlowStage, StageState> = {
     recepcion: 'completado',
     orden: order ? 'completado' : 'pendiente',
@@ -286,7 +289,7 @@ export function caseProgress(id: string) {
           ? 'en_curso'
           : 'pendiente',
     informe_final: work?.approval ? 'completado' : work ? 'en_curso' : 'bloqueado',
-    entrega: 'bloqueado'
+    entrega: lifecycle.status==='cerrada_demo' ? 'completado' : lifecycle.status==='cancelada' ? 'bloqueado' : delivery.eligible ? 'pendiente' : 'bloqueado'
   }
   let stage: FlowStage = !order
     ? 'orden'
@@ -303,7 +306,9 @@ export function caseProgress(id: string) {
               : work?.approval
                 ? 'informe_final'
                 : 'ejecucion'
-  if (visit.lastContext?.resource === 'inspection' && inspection && !inspection.finalized)
+  if (work?.approval && business?.authorized) stage = 'entrega'
+  if (lifecycle.status === 'cerrada_demo' || lifecycle.status === 'cancelada' || lifecycle.status === 'cierre_desactualizado') stage = 'entrega'
+  if (visit.lastContext?.resource === 'inspection' && inspection && !inspection.finalized && lifecycle.status === 'en_curso')
     stage = 'inspeccion'
   const actions: Record<FlowStage, string> = {
     recepcion: 'Revisar recepción',
@@ -314,9 +319,9 @@ export function caseProgress(id: string) {
     respuesta_cliente: 'Registrar respuesta DEMO',
     ejecucion: work ? 'Registrar trabajos realizados' : 'Preparar trabajo desde cotización',
     informe_final: 'Revisar informe final',
-    entrega: 'Cierre guiado pendiente 01E'
+    entrega: lifecycle.status === 'cerrada_demo' ? 'Ver entrega DEMO' : lifecycle.status === 'cancelada' ? 'Ver cancelación DEMO' : lifecycle.status === 'en_espera' ? 'Resolver espera DEMO' : 'Revisar y confirmar entrega DEMO'
   }
-  return { stage, states, action: actions[stage], inspection, quote, work, business }
+  return { stage, states, action: actions[stage], inspection, quote, work, business, lifecycle, delivery }
 }
 
 export function activeCaseId() {

@@ -82,7 +82,7 @@ export function FlowHome({
                   </small>
                 </div>
                 <span className="fl-state-tag">
-                  {p.stage === 'orden'
+                  {p.lifecycle.status === 'cerrada_demo' ? 'Entregada DEMO' : p.lifecycle.status === 'cancelada' ? 'Cancelada DEMO' : p.lifecycle.status === 'en_espera' ? 'En espera · DEMO' : p.stage === 'orden'
                     ? 'Recepción DEMO'
                     : p.stage === 'inspeccion'
                       ? 'Inspección pendiente'
@@ -97,7 +97,7 @@ export function FlowHome({
                   aria-label={`Continuar ${visit.orderId ?? visit.id}`}
                   onClick={() => choose(visit.id)}
                 >
-                  Continuar
+                  {p.lifecycle.status === 'cerrada_demo' || p.lifecycle.status === 'cancelada' ? 'Ver expediente' : 'Continuar'}
                   <ArrowRight />
                 </button>
               </article>

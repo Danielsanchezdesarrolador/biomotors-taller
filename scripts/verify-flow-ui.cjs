@@ -201,12 +201,9 @@ const { chromium } = require('playwright'),
       await back().click()
       await p.locator('.fl-milestones button').nth(6).click()
       assert.equal(
-        await p
-          .getByRole('button', { name: 'Cierre guiado pendiente 01E', exact: true })
-          .isEnabled(),
-        false
+        await p.getByRole('button', { name: 'Revisar y confirmar entrega DEMO', exact: true }).isDisabled(), true
       )
-      assert.match(await p.locator('.fl-stage-content').innerText(), /no se ha finalizado/)
+      assert.match(await p.locator('.fl-stage-content').innerText(), /Confirma primero la orden|informe|Finaliza/i)
       await p.getByRole('button', { name: 'Volver al Inicio guiado', exact: true }).click()
       // Recurrent vehicle: same explicit IDs, distinct visit, unchanged prior reception.
       await p.getByRole('button', { name: 'Nuevo ingreso de vehículo', exact: true }).click()
