@@ -516,7 +516,8 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 **Cierre técnico BT-FLOW-01D:** 91/91 Vitest y TypeScript/build/PWA PASS; propuesta explícita sobre documento canónico, respuesta por revisión, caducidad sin borrar historial y precarga confirmada/idempotente con todos los trabajos sin realizar. Nueva aceptación de otra revisión conserva los informes anteriores. E2E y regresiones en cinco tamaños; BT-REG-02 escritorio/móvil. Cero escrituras de red y cero uso de almacenamiento de datos persistente en los recorridos. [Checkpoint D](docs/checkpoints/CHECKPOINT_BT_FLOW_01D_20261113.md).
 
-- [ ] Revisión visual del Director y Safari físico para D. Estado remoto de Actions no confirmado desde este entorno (Forbidden); comprobaciones locales documentadas.
+- [x] **CI remoto verificado posteriormente desde ChatGPT:** [Actions 43534790714](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534790714) SUCCESS sobre `ea96945`: TypeScript, **91/91 Vitest (14 archivos)**, Vite/PWA y Android Expo; [BT-FLOW 43534467132](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467132) y [BT-COT-01 43534467458](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467458) también SUCCESS sobre el commit funcional.
+- [ ] Revisión y aprobación visual del Director y prueba física Safari/iPhone. Las capturas de Chromium no equivalen a aprobación ni prueba de dispositivo real.
 - [ ] **BT-FLOW-01E no iniciada:** no hay entrega, cierre de expediente ni conexiones reales. Requiere una nueva autorización.
 
 - [x] Publicación D comprobada en el Render existente: HTML/JS/CSS idénticos al build de `d7ae7c1`; recorrido completo publicado en 1650/390 PASS y capturas reales versionadas. Sin nuevo Render ni rama.

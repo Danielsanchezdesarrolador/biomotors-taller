@@ -81,3 +81,12 @@ GitHub Actions remoto **no confirmado**: `gh run list` devolvió Forbidden en es
 ## Pendientes y punto de parada
 
 Revisión visual del Director y prueba física Safari/iPhone. **Detenerse aquí; no comenzar BT-FLOW-01E.** Cierre/entrega, excepciones completas, backend multitenant, persistencia, identidad/consentimiento, correos, firma, enlaces y Android requieren nuevas etapas y autorización.
+
+
+## Auditoría posterior de GitHub Actions y capturas (ChatGPT, 13/11/2026)
+
+La respuesta `Forbidden` de Codex no impidió consultar el CI desde otra conexión. [Workflow final 43534790714](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534790714) del commit `ea96945` **SUCCESS**: el job Web/iOS PWA registra **91/91 pruebas Vitest, 14 archivos, TypeScript, Vite build y PWA PASS**; el job Android React Native/Expo también SUCCESS (no se generó APK). Los workflows remotos específicos del commit funcional `d7ae7c1` para [BT-FLOW 43534467132](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467132) y [BT-COT 43534467458](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467458) terminaron SUCCESS.
+
+Se visualizaron las capturas versionadas `BT_FLOW_01D_RESPUESTA_1650.png`, `BT_FLOW_01D_RESPUESTA_390.png`, `BT_FLOW_01D_PROPUESTA_390.png` y `BT_FLOW_01D_TRABAJOS_390.png`. Revisión preliminar: identidad R2 y navegación por cinco paneles conservadas, propuesta editable, respuesta DEMO por revisión y separación de trabajos realizados visible, tarjetas de totales con CLP coherentes. En móvil el expediente y el informe son pantallas largas pero desplazables; la barra inferior fija aparece a media altura en capturas `fullPage`, lo que por sí solo no prueba solapamiento interactivo, pendiente de comprobación Safari físico. No se encontraron motivos para solicitar modificaciones de código basados solamente en estas imágenes.
+
+**Pendientes preservados:** aprobación visual/funcional del Director, Safari iPhone físico, BT-FLOW-01E y backend seguro independiente. No se modifica comportamiento de aplicación ni se ha autorizado iniciar 01E mediante esta auditoría.
