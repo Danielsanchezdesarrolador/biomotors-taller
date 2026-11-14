@@ -679,3 +679,13 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 
 **BT-BRAND-02 — Decisión final del Director (14/11/2026): APROBADO visualmente.** Identidad cerrada sin más cambios de marca solicitados. Queda pendiente repetir el caso Escape en «Opciones de visita» del workflow BT-FLOW-01, así como la comprobación física PWA; BT-CP02-D continúa reservado a su chat, y BT-AUTH-01B no está autorizado todavía.
+
+### BT-AUTH-01B-R1 — Login y sesiones reales (orden de implementación, 14/11/2026)
+
+- [x] **BT-CP02-D** aprobado: 25/25 pruebas reales entre dos talleres, limpieza confirmada y RLS estructural activo.
+- [x] Auditar el acceso visual actual y redactar [orden técnica BT-AUTH-01B-R1](docs/BT_AUTH_01B_R1_ORDEN_IMPLEMENTACION.md) y [checkpoint de inicio](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_INICIO_20261114.md).
+- [ ] **Codex R1:** añadir Supabase JS con `VITE_SUPABASE_URL`, publishable key y flag apagado por defecto; implementar login, recuperar sesión y logout sin habilitar signup público.
+- [ ] **Autorización:** validar email confirmado, membership `active` y taller real por RLS; separar roles `owner/admin/mechanic/reception` sin confiar en selector UI.
+- [ ] **Regresión:** conservar rutas de revisión DEMO, los cinco paneles premium R2, diseño/marca, IOS PWA y Android sin cambios; impedir flash privado y acciones sin backend.
+- [ ] **Validar:** pruebas unitarias, build, CI, capturas de cinco tamaños; después prueba controlada con cuentas Auth ficticias y aprobación explícita antes de activar en Render.
+- [ ] R2 posterior: recuperación de contraseña/correos transaccionales tras configurar SMTP seguro; invitaciones y cuotas por taller en etapas separadas.
