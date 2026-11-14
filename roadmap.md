@@ -671,3 +671,6 @@ No se inició Auth real, Supabase/RLS, backend, planes/pagos/correo ni adaptaci�
 - [ ] Revisión visual del Director de BT-BRAND-02 y prueba física. [Checkpoint, antes/después y evidencia](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
 
 No se inició BT-AUTH-01B, BT-CP02-D ni backend.
+
+
+**BT-BRAND-02 — Auditoría de CI independiente (14/11/2026):** [general 43630722991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630722991) **SUCCESS** sobre `ee9fe83`, 146/146 Vitest/21 archivos, PWA y Expo; [UI pública 43630723011](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630723011) SUCCESS. Visual preliminar login/sidebar/superficies oscuro/claro: cumple referencia sin placa blanca. **Pendiente investigar** fallo independiente de [BT-FLOW-01 43630084997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630084997) sobre `89c6355`, assert Escape de «Opciones de visita» (`scripts/verify-qa02-ui.cjs:220`); no reproducido en último HEAD. Aprobación visual Director y dispositivos físicos pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).

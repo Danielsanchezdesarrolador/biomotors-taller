@@ -63,3 +63,13 @@ El **antes** se capturó en Render con BRAND-01 aún publicado; el después usa 
 La consulta de GitHub Actions devuelve Forbidden en este entorno. No se afirma SUCCESS remoto de BRAND-02; sus comprobaciones se incorporan al workflow existente. Los SUCCESS anteriores de BRAND-01 documentados en `1b3978e` permanecen preservados y no se confunden con esta entrega.
 
 **Pendientes:** revisión visual del Director y comprobación física Safari/iPhone/Chrome Android. Las capturas Chromium no equivalen a uso físico ni APK. No se inicia BT-CP02-D, BT-AUTH-01B ni etapas posteriores.
+
+ 
+## Auditoría independiente posterior (ChatGPT, 14/11/2026)
+
+- HEAD de `main`: `ee9fe83e50b1b999dd7adebc912ccd142c1eeb88`, sin PR abiertas.
+- [Verificación ByteTorque 43630722991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630722991): **SUCCESS en HEAD final**. Web/iOS PWA y Android Expo PASS. Log remoto de Web: **146/146 Vitest en 21 archivos** y verificaciones de original, alfa, PWA y variante oscura PASS.
+- [Interfaz pública 43630723011](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630723011): **SUCCESS en HEAD final**.
+- Se inspeccionaron las capturas `BT_BRAND_02_ADMIN_390.png`, `BT_BRAND_02_SIDEBAR_390.png`, `BT_BRAND_02_ADMIN_1650.png`, `BT_BRAND_02_SUPERFICIES.png`. Los logos se integran sobre navy con tipografía clara, sin placa blanca ni recorte aparente y con contraste correcto. **Revisión visual preliminar satisfactoria; la aprobación final sigue siendo del Director y falta prueba física de Android/Safari.**
+- **Hallazgo CI externo acotado, pendiente de repetir:** [BT-FLOW-01 43630084997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630084997) falló sobre commit anterior `89c6355` en `scripts/verify-qa02-ui.cjs:220`: tras abrir «Opciones de visita», pulsar Escape dejó `aria-expanded='true'` cuando se esperaba `false`. Los pasos previos del flujo 1650/1440/768/390/375 y FLOW-01D pasaron. Este fallo NO se encuentra en los dos workflows generales SUCCESS del commit final y tampoco se ha repetido aún sobre `ee9fe83`. No confundirlo con un defecto visual de BRAND-02 confirmado; abrir investigación separada antes de dar por completamente resueltas todas las regresiones interactivas.
+- Esta verificación fue solo documental y de capturas/versionado: no cambia frontend ni Supabase.
