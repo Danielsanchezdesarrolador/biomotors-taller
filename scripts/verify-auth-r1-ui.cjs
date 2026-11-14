@@ -3,7 +3,7 @@ const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const out = process.env.OUTPUT_DIR || 'artifacts/bt-auth-01b-r1'
-const harness = 'http://127.0.0.1:5177'
+const harness = process.env.AUTH_R1_BASE_URL || 'http://127.0.0.1:5177'
 const publicUrl = process.env.PUBLIC_URL || 'http://127.0.0.1:5173'
 const api = 'https://suxcqqnmcjoezfxltoms.supabase.co'
 const userId = '00000000-0000-4000-8000-000000000001'
@@ -95,7 +95,7 @@ async function stubPage(browser, width, options = {}) {
       ])
     throw new Error('Unexpected endpoint: ' + url.pathname)
   })
-  await p.goto(harness + '/#/auth-r1-qa')
+  await p.goto(harness + '/#' + (process.env.AUTH_R1_ENTRY_PATH || '/auth-r1-qa'))
   await p.getByLabel('Correo electrónico', { exact: true }).waitFor()
   await p.waitForFunction(() => !document.querySelector('input[name=email]')?.disabled)
   return { p, state, requests, errors }
@@ -134,6 +134,26 @@ async function shot(p, name) {
       )
       await fits(p)
       await shot(p, `owner-mock-${width}`)
+      const nav = p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
+      assert.equal(await nav.count(), 5)
+      for (let panel = 0; panel < 5; panel++) {
+        await nav.nth(panel).click()
+        await p.locator('.official-panel').waitFor()
+        assert.equal(
+          await p
+            .locator(
+              '.official-panel input:enabled,.official-panel textarea:enabled,.official-panel select:enabled'
+            )
+            .count(),
+          0
+        )
+        assert.doesNotMatch(
+          await p.locator('body').innerText(),
+          /OT-1001|Camila Muñoz|Vista de revisión — sin autenticación real/
+        )
+        await fits(p)
+        if ([1650, 390].includes(width)) await shot(p, `owner-panel-${panel + 1}-mock-${width}`)
+      }
       await p.reload()
       await p.locator('.dashboard-main').waitFor()
       // Invalid workshop IDs in URL do not select or authorize another workshop.
@@ -174,7 +194,8 @@ async function shot(p, name) {
       results.push({
         width,
         sdkMock: 'PASS',
-        tests: 'login, RLS query shape, restore, URL denial, DEMO separation, revoke, logout'
+        tests:
+          'login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout'
       })
       await p.close()
     }
