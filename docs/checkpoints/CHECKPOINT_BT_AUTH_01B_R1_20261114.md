@@ -190,3 +190,10 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - El Director confirmó **«RECEPCIÓN RESTRINGIDA»** tras el login real de su cuenta ficticia con selector «Administrador». La interfaz negó el panel administrativo y presentó la restricción prevista.
 - Comprobación de solo lectura posterior en Supabase: `reception/active` solo en el Taller A; `owner/active` A/B y `mechanic/active` A sin cambios.
 - Próximo control: F5 y logout como recepcionista, sin cambios de SQL, RLS ni Render hasta finalizar pruebas.
+
+### Recepción — persistencia del rol y prueba API preparada (14/11/2026)
+
+- Director confirmó **«RECEPCIÓN RESTRINGIDA TRAS F5»**: sesión recuperada en Chrome, sin elevación a administrador ni acceso al panel privado. **PASS funcional**, no evidencia de escritura RLS.
+- Supabase consultado nuevamente: `reception/active` de Taller A, `mechanic/active` y `owner/active` de A, `owner/active` de B, todos conservados.
+- Preparado `scripts/security/bt-auth-r1-reception-readonly.mjs` y [procedimiento](../BT_AUTH_01B_R1_RECEPTION_RLS_RUNBOOK.md) para **13 comprobaciones reales de lectura API**, **todavía no ejecutadas**.
+- No se cambiaron RLS, tablas, roles, identidad visual, Render ni Android. Faltan las pruebas API, logout y rol `admin`.
