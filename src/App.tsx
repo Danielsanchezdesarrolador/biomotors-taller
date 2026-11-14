@@ -8,7 +8,7 @@ import './official/official.css'
 import { AccessScreens } from './access/AccessScreens'
 import { TechnicianReview } from './access/TechnicianReview'
 import { ReviewBanner } from './access/ReviewBanner'
-import { accessPaths, resolveAccessPath } from './access/accessContract'
+import { accessPaths, publicAccessPath, resolveAccessPath } from './access/accessContract'
 export function OfficialWorkspaceView({
   review = false,
   onReviewExit
@@ -34,15 +34,19 @@ export function OfficialWorkspaceView({
 
 export default function App() {
   const [path, setPath] = useState(() =>
-    typeof window === 'undefined' ? '/' : window.location.pathname
+    typeof window === 'undefined' ? '/' : publicAccessPath(window.location)
   )
   useEffect(() => {
-    const pop = () => setPath(window.location.pathname)
+    const pop = () => setPath(publicAccessPath(window.location))
     window.addEventListener('popstate', pop)
-    return () => window.removeEventListener('popstate', pop)
+    window.addEventListener('hashchange', pop)
+    return () => {
+      window.removeEventListener('popstate', pop)
+      window.removeEventListener('hashchange', pop)
+    }
   }, [])
   function navigate(path: string) {
-    window.history.pushState(null, '', path)
+    window.history.pushState(null, '', path === '/' ? '/' : '/#' + path)
     setPath(path)
     window.scrollTo({ top: 0 })
   }

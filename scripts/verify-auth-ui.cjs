@@ -47,6 +47,8 @@ const { chromium } = require('playwright'),
           writes.push(r.url())
       })
       const base = process.env.BASE_URL || 'http://127.0.0.1:5173'
+      const publicUrl = (route) => base + '/#' + route
+      const publicPath = () => new URL(p.url()).hash.slice(1) || new URL(p.url()).pathname
       const button = (name) => p.getByRole('button', { name, exact: true })
       const capture = async (name) => {
         assert.equal(
@@ -62,7 +64,7 @@ const { chromium } = require('playwright'),
         }
       }
       for (const [name, url, title] of pages) {
-        await p.goto(base + url)
+        await p.goto(publicUrl(url))
         await p.getByRole('heading', { name: title, exact: true }).waitFor()
         assert.match(
           await p.locator('.access-review-note').innerText(),
@@ -81,9 +83,15 @@ const { chromium } = require('playwright'),
         await capture(name)
       }
       await button('Ir a iniciar sesión').click()
-      assert.equal(new URL(p.url()).pathname, '/acceso')
+      assert.equal(publicPath(), '/acceso')
       await button('Mecánico').click()
-      assert.equal(new URL(p.url()).pathname, '/acceso/mecanico')
+      assert.equal(publicPath(), '/acceso/mecanico')
+      await p.reload()
+      assert.equal(publicPath(), '/acceso/mecanico')
+      await p.goBack()
+      assert.equal(publicPath(), '/acceso')
+      await p.goForward()
+      assert.equal(publicPath(), '/acceso/mecanico')
       assert.equal(await button('Ingresar').isDisabled(), true)
       await button('Mostrar contraseña').click()
       assert.equal(await p.getByLabel('Contraseña', { exact: true }).getAttribute('type'), 'text')
@@ -98,7 +106,7 @@ const { chromium } = require('playwright'),
         await p.locator('.access-positive').innerText(),
         /No se ha cambiado ninguna contraseña/
       )
-      await p.goto(base + '/acceso/registro')
+      await p.goto(publicUrl('/acceso/registro'))
       await button('Mecánico invitado').click()
       assert.match(await p.locator('.access-information').innerText(), /No hay autorregistro/)
       assert.equal(await p.locator('.access-form input').count(), 0)
@@ -107,7 +115,7 @@ const { chromium } = require('playwright'),
       await p.getByRole('dialog').waitFor()
       await p.keyboard.press('Escape')
       assert.equal(await p.getByRole('dialog').count(), 0)
-      await p.goto(base + '/revision/administrador')
+      await p.goto(publicUrl('/revision/administrador'))
       assert.match(await p.locator('.access-review-note').innerText(), /sin autenticación real/)
       const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
       assert.equal(await nav().count(), 5)
@@ -130,7 +138,7 @@ const { chromium } = require('playwright'),
       await p.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click()
       await button('Volver al acceso').click()
       await p.getByRole('heading', { name: 'Inicia sesión', exact: true }).waitFor()
-      await p.goto(base + '/revision/mecanico')
+      await p.goto(publicUrl('/revision/mecanico'))
       assert.doesNotMatch(
         await p.locator('body').innerText(),
         /Cotizaci[oó]n|IVA|CLP|\$|Facturaci[oó]n|Suscripci[oó]n|Configuración/
@@ -139,8 +147,8 @@ const { chromium } = require('playwright'),
       assert.equal(await p.locator('input:enabled,textarea:enabled,select:enabled').count(), 0)
       await capture('MECANICO')
       await button('Volver al acceso').click()
-      assert.equal(new URL(p.url()).pathname, '/acceso/mecanico')
-      await p.goto(base + '/acceso?role=admin&authenticated=true')
+      assert.equal(publicPath(), '/acceso/mecanico')
+      await p.goto(base + '/?role=admin&authenticated=true#/acceso')
       assert.equal(await button('Ingresar').isDisabled(), true)
       assert.match(await p.locator('.access-review-note').innerText(), /sin autenticación real/)
       if (!process.env.SKIP_HARNESS) {

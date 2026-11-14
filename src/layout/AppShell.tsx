@@ -231,7 +231,7 @@ export function AppShell({
               {showAccount && (
                 <div className="top-popover account-popover">
                   <strong>ByteTorque</strong>
-                  <a className="access-entry-link" href="/acceso">Ver pantalla de acceso</a>
+                  <a className="access-entry-link" href="/#/acceso">Ver pantalla de acceso</a>
                   <p>
                     La autenticación y gestión de talleres se habilitarán en una etapa posterior.
                   </p>

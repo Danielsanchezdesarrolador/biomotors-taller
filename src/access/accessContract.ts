@@ -70,3 +70,8 @@ export function passwordCriteria(value: string) {
     symbol: /[^A-Za-z0-9]/.test(value)
   }
 }
+
+// Static hosting does not require SPA rewrite rules for hash routes.
+export function publicAccessPath(location: { hash: string; pathname: string }) {
+  return location.hash.startsWith('#/') ? location.hash.slice(1) : location.pathname
+}

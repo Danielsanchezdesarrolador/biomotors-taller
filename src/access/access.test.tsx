@@ -7,6 +7,7 @@ import {
   accessPaths,
   mechanicLimits,
   passwordCriteria,
+  publicAccessPath,
   previewCapabilities,
   resolveAccessPath,
   type AccessPage
@@ -44,6 +45,8 @@ describe('BT-AUTH-01A visual access without authentication', () => {
     expect(resolveAccessPath(accessPaths.verify)?.page).toBe('verify')
     expect(resolveAccessPath('/?role=admin')).toBeUndefined()
     expect(resolveAccessPath('/auth/unknown')).toBeUndefined()
+    expect(publicAccessPath({ hash: '#/acceso', pathname: '/' })).toBe('/acceso')
+    expect(publicAccessPath({ hash: '', pathname: '/acceso' })).toBe('/acceso')
   })
   it('grants no capability in a visual preview, even when the administrator entry is selected', () => {
     expect(Object.values(previewCapabilities()).every((v) => v === false)).toBe(true)
