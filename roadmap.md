@@ -601,3 +601,16 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 
 **Auditoría independiente 14/11/2026:** [CI final 43553527817](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527817) y [UI pública 43553527881](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527881), ambos **SUCCESS** en `874b39a`. Revisión preliminar de Inicio/Clientes/Configuración móvil y escritorio sin hallazgos bloqueantes; aprobación del Director y Safari físico pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md).
+
+### BT-AUTH-01 — Acceso con correo verificado y dos entradas por rol (14/11/2026)
+
+**Solicitud del Director:** antes de activar la base operativa, incorporar inicio de sesión con verificación de correo, accesos visuales **«Administrador del taller»** y **«Mecánico»**. El administrador gestiona las operaciones autorizadas del taller; el mecánico ve sus OT asignadas, multipunto, observaciones y trabajos técnicos, sin información financiera, gestión completa de clientes ni configuración administrativa. El rol **no lo elige** el usuario; lo verifica el servidor por membresía activa. [Contrato BT-AUTH-01](docs/BT_AUTH_01_LOGIN_ROLES_CORREO.md).
+
+- [x] Revisar arquitectura Auth/RLS, matriz de roles, checkpoint CP02-D, runbook A/B y estado oficial BT-OFICIAL-01A; verificar documentación actual de Supabase.
+- [x] Diseñar dos entradas R2 y credenciales compartidas, correo verificado, recuperación, estados pendientes/desactivados, invitación exclusiva del mecánico y matriz de permisos por acción.
+- [ ] **BT-AUTH-01A:** Codex implementa solo la presentación y contratos testeables **sin fingir login funcional**. Conservar 111 pruebas, frontend vacío, cinco paneles R2 y bloqueo de registros reales. Capturas móvil/escritorio, checkpoint, CI, revisión del Director.
+- [ ] **PUERTA BT-CP02-D en chat reservado:** 25 pruebas A/B con JWT y Auth reales, Security Advisor y limpieza; no ejecutar en este módulo.
+- [ ] **BT-AUTH-01B:** tras A/B aprobado, habilitar Auth correo verificado, sesiones, recuperación, invitación/revocación de mecánicos, autorización RLS, permisos por OT y taller. No habilitar alta libre de administrador ni claves de servicio en cliente.
+- [ ] **BT-AUTH-01C:** módulos operativos por rol, panel de mecánico simplificado y gestión de personal autorizada. Probar acceso cruzado entre talleres, OT no asignada, URL forzada, sesiones inválidas y Safari iPhone. Android React Native posteriormente.
+
+**No autorizado todavía:** registro público real, habilitar `BYTETORQUE_ONBOARDING_ENABLED`, tocar Supabase/Auth/RLS, crear mecánicos reales, enviar correos, conectar datos personales ni activar pagos. Mantener BT-COM-01 separado: correos Auth de verificación del personal no son el correo consolidado al cliente.
