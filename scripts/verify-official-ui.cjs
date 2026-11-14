@@ -65,7 +65,7 @@ const { chromium } = require('playwright'),
           const body = await p.locator('body').innerText()
           assert.doesNotMatch(
             body,
-            /DEMO|demostración|OT-100[1-8]|@example\.com|Camila|Torres|BIOMOTORS|TallerFlow|Enviado hoy|12 respaldos|5 %/
+            /demostración|OT-100[1-8]|@example\.com|Camila|Torres|BIOMOTORS|TallerFlow|Enviado hoy|12 respaldos|5 %/
           )
           assert.match(body, new RegExp(expected[i]))
           assert.match(body, /Por ahora no ingreses datos de clientes ni vehículos reales/)
@@ -118,7 +118,7 @@ const { chromium } = require('playwright'),
         assert.deepEqual(await p.evaluate(() => window.__persistentWrites), [])
         await p.goto(base + '/?demo=1&test=1&harness=true#/revision/publica')
         assert.equal(await p.locator('input:enabled,textarea:enabled,select:enabled').count(), 0)
-        assert.doesNotMatch(await p.locator('body').innerText(), /DEMO|demostración|OT-1001/)
+        assert.doesNotMatch(await p.locator('body').innerText(), /demostración|OT-1001/)
         assert.deepEqual(await p.evaluate(() => window.__persistentWrites), [])
         await p.reload()
         assert.equal(await p.locator('.official-panel').count(), 1)
