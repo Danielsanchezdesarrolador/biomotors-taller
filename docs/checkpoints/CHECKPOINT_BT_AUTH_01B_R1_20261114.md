@@ -131,3 +131,16 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - Safari/iPhone físico y PWA instalada. Correo transaccional SMTP propio aún no configurado; correos de verificación/recuperación reales no comprobados.
 - No habilitar registro público, onboarding, persistencia operativa, planes/pagos ni correo externo todavía. **No activar Auth en Render sin aprobación expresa del Director.**
 - Mantener los dos talleres ficticios para completar pruebas; definir y verificar limpieza al cerrar todo R1.
+
+### Anexo: recuperación de conectividad y renovación explícita real (14/11/2026)
+
+**Evidencia:** usuario ejecutó las pruebas en Chrome y PowerShell y proporcionó resultados en la conversación.
+
+- **Pérdida de conexión:** tras forzar estado Offline en Chrome, ByteTorque bloqueó el acceso privado — **PASS reportado por el Director**.
+- **Reconexión sin F5:** restauró No throttling y ByteTorque volvió a verificar y permitir acceso del propietario — **PASS reportado**.
+- **Recarga Ctrl+Shift+R:** recuperó la sesión y taller correctamente — **PASS de persistencia**, **no** equivale a renovación de JWT.
+- **Prueba aislada `scripts/security/bt-auth-r1-refresh-check.mjs`: 9/9 PASS mostrados en captura de PowerShell.** El script inició sesión con el propietario ficticio A, llamó `auth.refreshSession()`, verificó token de acceso nuevo y rotación del refresh token, identidad idéntica, actualización de sesión SDK mediante `getSession`, identidad remota con `getUser` y lecturas RLS del taller y membresía autorizados. Finalmente cerró su sesión aislada. No imprimió tokens ni contraseñas.
+- **CI GitHub del commit `1286f0b`:** dos ejecuciones consultadas con estado `completed / success`. No se cambió frontend, Auth config, SQL, Render, RLS, Android ni cuentas durante esta entrega documental.
+- **Alcance:** esta es una renovación **explícita y forzada en un cliente de prueba**, no evidencia de renovación automática durante caducidad en Chrome, PWA ni Safari físico. Tampoco certifica logout sin conexión ni revocación inmediata de JWT ya expedidos.
+
+**Puertas abiertas para cerrar R1:** renovación automática real en navegador, prueba de logout sin red, roles `admin/mechanic/reception` con membresías controladas, Safari/iPhone/PWA físico, limpieza de usuarios/talleres de prueba y decisión explícita del Director sobre habilitar Auth en Render. Registro público, onboarding y SMTP todavía OFF.

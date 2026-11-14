@@ -714,3 +714,10 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] GitHub Actions: al menos un workflow `SUCCESS` para el commit de corrección `a2f7a3a`; otro estaba en curso al consultar.
 - [ ] **R1 pendiente de validación ampliada**: refresh real, pérdida de red/recuperación, logout sin red, roles mecánico/recepción, Safari/PWA física, decisión de limpieza de fixtures y aprobación formal de posible activación Render.
 - [ ] **Mantener apagado en Render** el flag de login real y cerrado el registro público hasta autorización posterior. No iniciar R2/correo/invitaciones ni persistencia operativa.
+
+### BT-AUTH-01B-R1 — Renovación de token y conectividad (14/11/2026)
+
+- [x] Pruebas con Chrome reportadas: pérdida de red bloquea el panel; reconexión permite revalidación sin F5; recarga de sesión conservada.
+- [x] **Renovación explícita `refreshSession()` — 9/9 PASS reales** sobre cuenta ficticia A con nuevo JWT, rotación de refresh token y validación RLS posterior; script cerró sesión aislada. Evidencia añadida a [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
+- [x] Dos workflows GitHub Actions del commit `1286f0b` completados con `SUCCESS`.
+- [ ] Renovación automática en navegador, logout sin conexión, permisos de roles adicionales y Safari/PWA física; **no habilitar Render ni registros públicos** todavía.
