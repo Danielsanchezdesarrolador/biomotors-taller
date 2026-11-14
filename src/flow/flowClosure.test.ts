@@ -38,6 +38,7 @@ function fixture() {
     fuel: 'Gasolina DEMO', start: '09:00', end: '10:15',
     technician: 'Operador DEMO'
   })
+  inspection.items = inspection.items.map(i=>({...i,state:'ok'}))
   rememberMultipunto(finalizeDemo(inspection, true))
   const q = beginProposal(readCase(visit.id))
   const linked = { ...readCase(visit.id), quoteId: q.id }

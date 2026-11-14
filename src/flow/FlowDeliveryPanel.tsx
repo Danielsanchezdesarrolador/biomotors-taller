@@ -140,8 +140,10 @@ export function FlowDeliveryPanel({
         <div><small>Informe de trabajo</small><strong>{req.work?.id??'Pendiente'}</strong></div>
         <div><small>Trabajos realizados</small><strong>{req.performed.length}</strong></div>
         <div><small>Trabajos no realizados</small><strong>{req.pending.length}</strong></div>
+        <div><small>Multipunto sin revisar</small><strong>{req.unreviewed.length}</strong></div>
         <div><small>Total informe</small><strong>{currency(req.amount)}</strong></div>
       </div>
+      {req.unreviewed.length>0&&<p className="fl-notice"><strong>{req.unreviewed.length} controles multipunto sin revisar.</strong> No se consideran aprobados ni correctos; deben quedar expresamente señalados al entregar.</p>}
       {req.pending.length>0&&<div className="fl-notice">
         <strong>Trabajos sin ejecutar (no se cobran en el informe)</strong>
         <ul>{req.pending.map(i=><li key={i.id}>{i.description}</li>)}</ul>
@@ -167,7 +169,7 @@ export function FlowDeliveryPanel({
           <input type="checkbox" checked={checklist[key]} onChange={e=>update(key,e.target.checked)}/>{label}
         </label>)}
       </div>
-      {(req.pending.length>0||Boolean(req.technicalPending))&&<label className="fl-delivery-field">
+      {(req.pending.length>0||req.unreviewed.length>0||Boolean(req.technicalPending))&&<label className="fl-delivery-field">
         Cómo se informarán los trabajos u observaciones pendientes
         <textarea rows={3} maxLength={500} value={pending} onChange={e=>setPending(e.target.value)} aria-label="Explicación de pendientes"/>
         <small>{pending.length} / 500 · Texto obligatorio para pendientes</small>
@@ -175,7 +177,7 @@ export function FlowDeliveryPanel({
       <label className="fl-delivery-field">Observación final de entrega DEMO
         <textarea rows={3} maxLength={500} value={note} onChange={e=>setNote(e.target.value)} aria-label="Observación final de entrega"/>
       </label>
-      <button className="rp-primary" type="button" disabled={!req.eligible||frozen||!Object.values(checklist).every(Boolean)||note.trim().length<8||((req.pending.length>0||Boolean(req.technicalPending))&&pending.trim().length<8)}
+      <button className="rp-primary" type="button" disabled={!req.eligible||frozen||!Object.values(checklist).every(Boolean)||note.trim().length<8||((req.pending.length>0||req.unreviewed.length>0||Boolean(req.technicalPending))&&pending.trim().length<8)}
         onClick={()=>{setError('');setConfirmed(false);setShowConfirm(true)}}>
         <CheckCircle2/> Revisar y confirmar entrega DEMO
       </button>

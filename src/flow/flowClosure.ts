@@ -59,6 +59,7 @@ export type DeliveryRecord = {
   workRevision: number
   performedCount: number
   pendingCount: number
+  unreviewedCount: number
   amount: number
   pendingNote: string
   finalNote: string
@@ -114,6 +115,7 @@ export function deliveryRequirements(visit: FlowCase) {
     reasons.push('Finaliza expresamente el informe de los trabajos realizados.')
   const performed = work?.items.filter(i => i.performed) ?? []
   const notPerformed = work?.items.filter(i => !i.performed) ?? []
+  const unreviewed = inspection?.items.filter(i => i.state === 'unreviewed') ?? []
   if (work && !performed.length) reasons.push('Marca al menos un trabajo realizado en el informe.')
   if (activeHolds(visit).length) reasons.push('Resuelve todas las pausas antes de cerrar la visita.')
   if (cancellationRecord(visit)) reasons.push('La visita está cancelada; no se puede entregar.')
@@ -126,6 +128,7 @@ export function deliveryRequirements(visit: FlowCase) {
     work,
     performed,
     pending: notPerformed,
+    unreviewed,
     technicalPending: quote?.recommendations.trim() || '',
     amount: work ? workTotals(work).total : 0
   }
@@ -140,6 +143,7 @@ function deliveryStillCurrent(visit: FlowCase, record: DeliveryRecord) {
     req.work.revision === record.workRevision &&
     req.performed.length === record.performedCount &&
     req.pending.length === record.pendingCount &&
+    req.unreviewed.length === record.unreviewedCount &&
     req.amount === record.amount
 }
 export function deliveryState(visit: FlowCase) {
@@ -217,7 +221,7 @@ export function completeDelivery(
   if (!req.eligible || !req.inspection || !req.quote || !req.response || !req.work)
     throw new Error('No se puede entregar: ' + req.reasons.join(' '))
   const final = clean(finalNote)
-  const pending = req.pending.length || req.technicalPending
+  const pending = req.pending.length || req.unreviewed.length || req.technicalPending
     ? clean(pendingNote)
     : pendingNote.trim().slice(0, 500)
   const previous = rawDelivery(visit)
@@ -231,6 +235,7 @@ export function completeDelivery(
     inspectionId: req.inspection.id, quoteId: req.quote.id, quoteRevision: req.quote.revision,
     responseId: req.response.id, workReportId: req.work.id, workRevision: req.work.revision,
     performedCount: req.performed.length, pendingCount: req.pending.length,
+    unreviewedCount: req.unreviewed.length,
     amount: req.amount, pendingNote: pending, finalNote: final,
     checklist: { ...checklist }, date: new Date().toISOString(),
     actor: 'Operador DEMO', simulated: true
