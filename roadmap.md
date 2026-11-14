@@ -724,3 +724,10 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 - [x] **R1: cierre local en modo Offline comprobado por el Director (14/11/2026):** desapareció panel privado; request `logout?scope=local` falló por ausencia de red. Estado de «Sesión cerrada» se interpreta solo como local; revocación remota NO confirmada. Evidencia en [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
 - [x] **R1: cierre local tras reconexión + F5 PASS (Director, 14/11/2026):** tras restaurar red se mantuvo login sin panel privado; revocación remota no comprobada. Recurso de logo en Offline pendiente de revisar en PWA.
+
+### BT-AUTH-01B-R1 — Prueba real de rol Mecánico (14/11/2026)
+
+- [x] Usuario Auth ficticio confirmado, perfil y membresía `mechanic/active` del Taller A, comprobados por SQL; propietarios A/B sin cambios.
+- [x] **Control real de rol en UI: PASS reportado por el Director**. Aunque seleccionó «Administrador» en el formulario, la aplicación mostró el espacio técnico restringido y no el panel administrativo.
+- [ ] Repetir F5 como mecánico y comprobar que el rol no cambia tras recuperar sesión; contrastar lecturas RLS directamente usando su identidad en etapa posterior.
+- [ ] No declarar completo el sistema de permisos operativos ni activar acceso público por superar una prueba de rol.

@@ -151,3 +151,11 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - Network registró petición `logout?scope=local` fallida por desconexión. La pantalla comunicó «Sesión cerrada». **No se ha demostrado revocación remota ni terminación de todos los JWT**: distinguir cierre local del servidor. Según `src/auth/supabaseGateway.ts`, la llamada es `auth.signOut({ scope: 'local' })`, y `src/auth/controller.ts` retira el contexto antes de pedir el cierre.
 - Con Offline, parte del recurso de marca/logo no cargó correctamente (síntoma visual secundario, probablemente recurso no disponible); revisar cache/offline PWA más adelante sin cambiar identidad visual.
 - **Prueba posterior completada por el Director:** tras seleccionar `No throttling` y recargar el Taller A con F5, la pantalla continuó en el login sin reabrir panel ni solicitar autorización falsa. **PASS del bloqueo local persistente tras reconexión**. Esto NO prueba revocación remota de todos los JWT emitidos, ni cierre global de sesiones.
+
+### Validación de rol mechanic con cuenta real — 14/11/2026
+
+- El Director creó en Supabase Auth la cuenta ficticia `bt-r1-mecanico-1411@example.com` (correo confirmado), inicialmente sin membresía.
+- Se creó un perfil ficticio y membresía **`role=mechanic`, `status=active`** exclusivamente para `Taller ByteTorque de Pruebas` (Taller A), sin modificar al propietario ni el Taller B. Verificación SQL posterior: Taller A tiene 1 propietario y 1 mecánico activos; Taller B tiene 1 propietario y 0 mecánicos.
+- Prueba manual del Director sobre localhost: el mecánico ingresó seleccionando intencionalmente **«Administrador»** y la app lo restringió al espacio de **Mecánico**. **PASS funcional de separación de rol en UI tras leer la membresía real**, no certificación completa de operaciones futuras.
+- Aún pendientes: revalidación tras F5, comprobaciones de datos mediante API RLS con esa identidad, roles adicionales (`admin`, `reception`), persistencia operativa, Safari/PWA y limpieza controlada de fixtures.
+- Supabase mantiene advertencia del Security Advisor: protección de contraseñas filtradas desactivada; no se modificó.
