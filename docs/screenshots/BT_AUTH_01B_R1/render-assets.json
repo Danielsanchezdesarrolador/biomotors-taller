@@ -1,0 +1,37 @@
+{
+  "checkedAtUTC": "2026-11-14T20:49:17.377185+00:00",
+  "codeCommit": "9d09404",
+  "authEnabled": false,
+  "files": [
+    {
+      "file": "index.html",
+      "sha256": "aede62cf7694d88e7e0e31ce888bfe760a075fe526db5e0f5cdcbb83fac9fa92",
+      "matchesBuild": true
+    },
+    {
+      "file": "assets/index-C5zLO445.js",
+      "sha256": "79d72cc69433cbf98df6e7beb74e5b2eff53f208a2a167090de58b07ee206a62",
+      "matchesBuild": true
+    },
+    {
+      "file": "assets/index-CS2vKy7X.css",
+      "sha256": "493d87ac552ae149c2c47dd8ebca4dd8a4db3dc5c52d2a6a292046945addee44",
+      "matchesBuild": true
+    },
+    {
+      "file": "assets/supabaseGateway-CZmBU0E0.js",
+      "sha256": "f2500fb2e5d1ccb620fa83f52e1d86a5058999117ac53a13598947904758c2d7",
+      "matchesBuild": true
+    },
+    {
+      "file": "manifest.webmanifest",
+      "sha256": "21b25839d42cfc2f8a1f6aee05809945f2ca7118c91f2649b99cbe1c5f6c0552",
+      "matchesBuild": true
+    },
+    {
+      "file": "sw.js",
+      "sha256": "9a09c2138e9bc07322d2268beb1a3b4b9a560e1472c0e8d9b54f63ea96f72bf0",
+      "matchesBuild": true
+    }
+  ]
+}

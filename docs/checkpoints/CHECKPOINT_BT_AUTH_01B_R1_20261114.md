@@ -66,11 +66,21 @@ No se cuentan las primeras ejecuciones interrumpidas por HMR como PASS: los reco
 - `9df5111` — integración R1, sesiones/roles/membresías y pruebas unitarias, flag apagado.
 - `45d9fa4` — navegador con SDK/HTTP simulado, entorno negativo, rutas y sincronización de test QA.
 - `cc8163f` — build local activado aislado, cinco paneles y ejecución reproducible en workflow existente.
-- El commit documental de este checkpoint incorpora capturas/resultados, roadmap y guía de configuración; el SHA final se entrega al Director.
+- `07ec9af` — checkpoint inicial, capturas/resultados, roadmap y guía de configuración.
+- `9d09404` — clasificación explícita de sesión ausente/refresh revocado como sesión vencida; 185 pruebas y build repetidos PASS.
+- El commit final de evidencia publicada se entrega al Director; no cambia el frontend.
 
 ## Render
 
-Publicación del código en el sitio existente solicitada con **Auth apagado**; comprobación de versión servida pendiente al crear este checkpoint. Se actualizará este apartado tras verificar assets y navegación. No se han establecido variables reales ni activado el login al público.
+**PUBLICADO y verificado** en https://biomotors-taller-demo.onrender.com, código `9d09404`, con **Auth apagado**. No se configuraron claves ni se cambió Environment del servicio; la ausencia del nuevo flag conserva el valor OFF.
+
+- HTTPS: `index.html`, `index-C5zLO445.js`, `index-CS2vKy7X.css`, `supabaseGateway-CZmBU0E0.js`, manifest y service worker **idénticos byte por byte** al build final. [Hashes y fecha de comprobación](../screenshots/BT_AUTH_01B_R1/render-assets.json).
+- Navegador publicado 1650/1440/768/390/375: raíz muestra login, formulario inactivo y aviso preciso de flag apagado; sin desborde, **cero tráfico externo y cero escrituras/almacenamiento**. [Resultado](../screenshots/BT_AUTH_01B_R1/render-runtime.json).
+- Siete pantallas, revisión, navegación inicial/back/forward/refresh/PWA en Chromium, cinco anchos sobre Render: PASS con `verify-auth-ui.cjs`. [Reporte](../screenshots/BT_AUTH_01B_R1/render-access-results.json).
+- Capturas reales del sitio publicado: [escritorio](../screenshots/BT_AUTH_01B_R1/render-login-1650.png) · [móvil](../screenshots/BT_AUTH_01B_R1/render-login-390.png). Las imágenes de integración activada están separadas y rotuladas `mock`; no se publicó el flag activado.
+- El navegador de pruebas toleró el certificado del proxy de este entorno; la comparación HTTPS independiente de archivos se hizo con validación TLS estándar. No se cambió seguridad del frontend ni del servicio.
+
+El commit documental final no modifica estos assets. No se declara CI remoto aprobado: Actions devolvió `Forbidden`. No se declara acceso Auth/RLS real aprobado: continúa pendiente del Director.
 
 ## Revisión pendiente
 

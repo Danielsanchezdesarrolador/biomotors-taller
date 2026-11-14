@@ -16,3 +16,8 @@ También se incluyen capturas de login a 1440/768/375 px y los resultados JSON d
 
 
 Los PNG de login y paneles se capturaron también contra el **build de producción local con flag activado**, clave de prueba y HTTP interceptado. [Resultado del build activado](production-sdk-mock-results.json). Los paneles `owner-panel-1..5-mock-1650/390.png` documentan las cinco vistas sin operaciones habilitadas; no representan talleres reales.
+
+
+## Render publicado, login real apagado
+
+[Escritorio](render-login-1650.png) · [Móvil](render-login-390.png) · [Hashes del build servido](render-assets.json) · [Cinco anchos, sin tráfico externo/Storage](render-runtime.json) · [Siete pantallas/navegación](render-access-results.json).

@@ -1,0 +1,37 @@
+[
+  {
+    "width": 1650,
+    "authEnabled": false,
+    "externalRequests": 0,
+    "storageWrites": 0,
+    "pass": true
+  },
+  {
+    "width": 1440,
+    "authEnabled": false,
+    "externalRequests": 0,
+    "storageWrites": 0,
+    "pass": true
+  },
+  {
+    "width": 768,
+    "authEnabled": false,
+    "externalRequests": 0,
+    "storageWrites": 0,
+    "pass": true
+  },
+  {
+    "width": 390,
+    "authEnabled": false,
+    "externalRequests": 0,
+    "storageWrites": 0,
+    "pass": true
+  },
+  {
+    "width": 375,
+    "authEnabled": false,
+    "externalRequests": 0,
+    "storageWrites": 0,
+    "pass": true
+  }
+]
