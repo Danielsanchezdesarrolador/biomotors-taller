@@ -86,6 +86,32 @@ const { chromium } = require('playwright'),
       }
       await p.goto(base + '/#/revision/mecanico')
       await ready(p.locator('header .bt-brand img'))
+      if (width === 1650) {
+        const differentChannels = await p.evaluate(async () => {
+          const load = async (src) => {
+            const image = new Image()
+            image.src = src
+            await image.decode()
+            return image
+          }
+          const images = await Promise.all([
+            load('/icon.svg?v=bt-brand-01'),
+            load('/icon-512.png?v=bt-brand-01')
+          ])
+          const pixels = images.map((image) => {
+            const canvas = document.createElement('canvas')
+            canvas.width = canvas.height = 512
+            const context = canvas.getContext('2d')
+            context.drawImage(image, 0, 0, 512, 512)
+            return context.getImageData(0, 0, 512, 512).data
+          })
+          return pixels[0].reduce(
+            (sum, value, index) => sum + Number(value !== pixels[1][index]),
+            0
+          )
+        })
+        assert.equal(differentChannels, 0, 'Legacy SVG must render the exact official PNG')
+      }
       if (!process.env.SKIP_HARNESS && [1650, 390].includes(width)) {
         for (const mode of ['Cotización', 'informe']) {
           await p.goto(harness)

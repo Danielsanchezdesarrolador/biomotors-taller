@@ -28,5 +28,5 @@ console.log('BT-BRAND-01: official versioned PWA artwork published')
 const icon = readFileSync('assets/brand/generated/icon-512.png').toString('base64')
 writeFileSync(
   'public/icon.svg',
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>ByteTorque</title><image width="512" height="512" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,${icon}"/></svg>\n`
+  `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><title>ByteTorque</title><image width="512" height="512" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,${icon}"/></svg>\n`
 )

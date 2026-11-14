@@ -18,6 +18,7 @@ assert.ok(
       readFileSync('assets/brand/generated/icon-512.png').toString('base64')
   )
 )
+assert.match(legacySvg, /^<svg[^>]*width="512"[^>]*height="512"/)
 assert.doesNotMatch(legacySvg, /<(?:path|circle|rect)\b/)
 for (const original of pack.originals) {
   assert.equal(
