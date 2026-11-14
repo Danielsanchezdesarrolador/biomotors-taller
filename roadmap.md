@@ -577,3 +577,18 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **Resultado BT-QA-02:** H001–H006 corregidos; resumen móvil de 4/8/12 partidas y estado vacío, edición completa, revisión/aceptación e informe preservados, espera/cancelación agrupadas con confirmaciones y foco. R005 investigado: cuatro trabajos producen 1 página A4, contenido largo 2 páginas no vacías en Chromium y emulación Android a 390/375; estilos print intactos al no reproducirse el defecto. Quedan prueba en dispositivos físicos y aprobación visual. [Checkpoint QA-02](docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md).
 
 - [x] BT-QA-02 publicada en el Render existente: frontend `2529494`, HTML/JS/CSS comparados byte a byte y recorrido completo publicado 1650/390 PASS. Sin nuevo servicio ni rama; sin BT-COM-01/backend.
+
+### BT-OFICIAL-01 — Transición del frontend DEMO a ByteTorque oficial (aprobación 14/11/2026)
+
+**Autorización del Director:** iniciar la preparación de la versión oficial y retirar de **las pantallas públicas** nombres, clientes, vehículos, OT, usuarios y estadísticas ficticias. **No** significa activar operaciones con datos reales sin persistencia y seguridad. [Especificación y puertas de lanzamiento](docs/BT_OFICIAL_01_TRANSICION_PRODUCTO.md).
+
+- [x] Auditoría inicial de código: fixtures `demoWorkOrders`, `demoClients`, `demoVehicles`, métricas del Inicio fijas, configuración/miembros y talleres ficticios; `flowSession` de memoria temporal. La interfaz actual NO es todavía apta para operar con clientes reales.
+- [ ] **01A — Codex, frontend oficial limpio:** conservar R2/cinco paneles; quitar información de muestra de ejecución pública; estados vacíos útiles para todas las secciones; cero estadísticas inventadas.
+- [ ] Separar fixtures para pruebas automáticas no expuestos por URL/flag pública; preservar las 103 pruebas y el flujo E2E dentro de un harness controlado.
+- [ ] Eliminar `DEMO` como branding público sin ocultar limitaciones: mientras no exista backend autorizado, mostrar «Acceso seguro y guardado permanente en preparación» y bloquear entradas que pudieran confundirse con registros reales.
+- [ ] TypeScript, Vitest, build/PWA, cinco tamaños, regresiones, capturas antes/después y checkpoint `BT-OFICIAL-01A`; no publicar una apariencia de producción que permita perder datos reales.
+- [ ] Revisión visual del Director y publicación controlada en el Render existente. La URL `biomotors-taller-demo.onrender.com` no se considera dominio comercial oficial; su cambio requiere decisión separada.
+- [ ] **01B (chat reservado BT-CP02-D):** validar Auth/RLS con usuarios A/B y aislamiento real; conectar backend seguro, registros/historial/respaldos en entregas incrementales, sin datos reales antes de autorización.
+- [ ] **01C:** correo consolidado BT-COM-01, solicitud previa de aprobación, enlace seguro de cliente, PDF versionado y piloto BIOMOTORS, tras puertas de seguridad.
+
+**No autorizado en 01A:** Supabase/Auth/RLS/migraciones, BT-CP02-D, `bt-owner-onboarding`, claves, pagos, firma, correos reales ni Android nativo. No crear otras ramas, Render o estudios.
