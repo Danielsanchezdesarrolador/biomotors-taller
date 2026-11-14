@@ -1,6 +1,7 @@
 [
   {
     "width": 1650,
+    "codeCommit": "d8ec46c",
     "authEnabled": false,
     "externalRequests": 0,
     "storageWrites": 0,
@@ -8,6 +9,7 @@
   },
   {
     "width": 1440,
+    "codeCommit": "d8ec46c",
     "authEnabled": false,
     "externalRequests": 0,
     "storageWrites": 0,
@@ -15,6 +17,7 @@
   },
   {
     "width": 768,
+    "codeCommit": "d8ec46c",
     "authEnabled": false,
     "externalRequests": 0,
     "storageWrites": 0,
@@ -22,6 +25,7 @@
   },
   {
     "width": 390,
+    "codeCommit": "d8ec46c",
     "authEnabled": false,
     "externalRequests": 0,
     "storageWrites": 0,
@@ -29,6 +33,7 @@
   },
   {
     "width": 375,
+    "codeCommit": "d8ec46c",
     "authEnabled": false,
     "externalRequests": 0,
     "storageWrites": 0,

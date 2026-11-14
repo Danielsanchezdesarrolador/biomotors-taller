@@ -698,10 +698,10 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] Restauración y eventos de sesión; revalidación al foco/visibilidad/reconexión; bloqueo inmediato del contexto durante verificación, offline/revocación/logout; protección frente a respuestas tardías. Logout local del SDK con aviso si no se confirma revocación en servidor.
 - [x] Taller múltiple con selección explícita y nueva validación. Owner/admin: cinco paneles vacíos. Mechanic: espacio técnico vacío. Reception: restringido. Selector/metadata/URL nunca conceden permisos.
 - [x] Revisión DEMO separada y read-only; siete pantallas premium y marca conservadas. Registro, recuperación, enlaces seguros, correo y operaciones de negocio deshabilitados.
-- [x] TypeScript, **185/185 Vitest** (146 anteriores +39), build/PWA/brand; pruebas de navegador con SDK real y HTTP **simulado**, cinco anchos (1650/1440/768/390/375), negativas de sesión/membresía/roles y build de claves prohibidas.
+- [x] TypeScript, **186/186 Vitest** (146 anteriores +40), build/PWA/brand; pruebas de navegador con SDK real y HTTP **simulado**, cinco anchos (1650/1440/768/390/375), negativas de sesión/membresía/roles y build de claves prohibidas.
 - [x] Regresiones locales de paneles, acceso, marca, BT-REG-02, flujo B/C/D, QA-02, cotización y A4. Carrera ya documentada del test Enter/Escape resuelta esperando el atributo antes de comprobarlo, sin cambios funcionales del flujo.
 - [ ] **Activación pública y E2E Auth/RLS real pendientes**: cuentas controladas del Director, revisión de sesiones/refresh/revocación real y Safari/iPhone/PWA físico. El PASS A/B anterior no sustituye esta validación.
-- [x] Render existente publicado y verificado: frontend `9d09404`, seis archivos idénticos al build, login apagado y cero tráfico externo/Storage en cinco anchos; siete pantallas/navegación publicadas PASS.
+- [x] Render existente publicado y verificado: frontend `d8ec46c`, seis archivos idénticos al build, login apagado y cero tráfico externo/Storage en cinco anchos; siete pantallas/navegación publicadas PASS.
 - [ ] CI remoto por confirmar; consulta de Actions denegada desde esta sesión. Estado y evidencias de Render en el [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
 
 [Variables y procedimiento de Render](docs/BT_AUTH_01B_R1_CONFIGURACION_RENDER.md). No se inicia R2, recuperación/correo, invitaciones ni backend operativo.

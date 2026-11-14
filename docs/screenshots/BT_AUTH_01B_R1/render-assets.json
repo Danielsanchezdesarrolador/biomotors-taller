@@ -1,16 +1,16 @@
 {
-  "checkedAtUTC": "2026-11-14T20:49:17.377185+00:00",
-  "codeCommit": "9d09404",
+  "checkedAtUTC": "2026-11-14T20:57:17.920589+00:00",
+  "codeCommit": "d8ec46c",
   "authEnabled": false,
   "files": [
     {
       "file": "index.html",
-      "sha256": "aede62cf7694d88e7e0e31ce888bfe760a075fe526db5e0f5cdcbb83fac9fa92",
+      "sha256": "4f10de656caef1e2ca3c851ef196e74a865946cba4704d4372293351e24d8260",
       "matchesBuild": true
     },
     {
-      "file": "assets/index-C5zLO445.js",
-      "sha256": "79d72cc69433cbf98df6e7beb74e5b2eff53f208a2a167090de58b07ee206a62",
+      "file": "assets/index-D96w8na3.js",
+      "sha256": "da422d7bcf225d1d9e011541b550da9c72733c0947e4ecb75c0f3e04e760b6dd",
       "matchesBuild": true
     },
     {
@@ -19,8 +19,8 @@
       "matchesBuild": true
     },
     {
-      "file": "assets/supabaseGateway-CZmBU0E0.js",
-      "sha256": "f2500fb2e5d1ccb620fa83f52e1d86a5058999117ac53a13598947904758c2d7",
+      "file": "assets/supabaseGateway-CmEdwRDk.js",
+      "sha256": "d88978a0ae0ea1c95893cbec9921971dd066eb5a74b580e1b49e038755db71c9",
       "matchesBuild": true
     },
     {

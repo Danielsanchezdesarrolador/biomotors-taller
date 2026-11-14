@@ -60,6 +60,10 @@
       "sdkMock": "PASS"
     },
     {
+      "scenario": "pending-navigation",
+      "sdkMock": "PASS"
+    },
+    {
       "width": 1650,
       "publicFlagOff": "PASS",
       "externalRequests": 0,

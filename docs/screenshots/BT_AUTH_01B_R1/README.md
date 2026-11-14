@@ -21,3 +21,6 @@ Los PNG de login y paneles se capturaron también contra el **build de producci�
 ## Render publicado, login real apagado
 
 [Escritorio](render-login-1650.png) · [Móvil](render-login-390.png) · [Hashes del build servido](render-assets.json) · [Cinco anchos, sin tráfico externo/Storage](render-runtime.json) · [Siete pantallas/navegación](render-access-results.json).
+
+
+Regresión final: [volver al acceso durante un login pendiente](negative-pending-navigation-390.png), resuelta con una nueva verificación de identidad/membresía; prueba con HTTP simulado.

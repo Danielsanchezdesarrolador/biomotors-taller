@@ -41,12 +41,12 @@ No se alteraron SQL, migraciones, RLS, Supabase Auth/configuración, Edge/onboar
 | Comprobación | Resultado y alcance |
 | --- | --- |
 | `npm run typecheck` | PASS |
-| `npm test` | **185/185 PASS, 25 archivos**; 146 anteriores intactas +39 nuevas. SDK/stubs, no cuentas reales |
+| `npm test` | **186/186 PASS, 25 archivos**; 146 anteriores intactas +40 nuevas. SDK/stubs, no cuentas reales |
 | `npm run build` | PASS Vite/PWA, fronteras de módulos públicos, exclusión de fixtures, hashes/transparencia y recursos de marca protegidos |
 | `verify-auth-r1-env.mjs` | 4/4 builds negativos rechazados, valores sintéticos no impresos |
 | `verify-auth-r1-ui.cjs` | PASS SDK oficial + HTTP interceptado, 1650/1440/768/390/375: login, cinco paneles vacíos, recarga, URL ajena, DEMO separado, revocación y logout |
 | Build **local** con flag `true` | PASS sobre `/tmp/bt-auth-enabled-dist`, clave sintética y servidor loopback 5178; mismos recorridos y negativas. No se publicó ni se contactó Supabase |
-| Negativas de navegador | Credenciales inválidas, ausencia/desactivación de membresía, correo sin confirmar, mecánico, recepción, varios talleres y pérdida/reconexión de red: PASS con respuestas simuladas |
+| Negativas de navegador | Credenciales inválidas, ausencia/desactivación de membresía, correo sin confirmar, mecánico, recepción, varios talleres, pérdida/reconexión de red y salir/volver durante login pendiente: PASS con respuestas simuladas |
 | `verify-auth-ui.cjs` | PASS siete pantallas, navegación inicial/back/forward/refresh/PWA en Chromium y revisión, cinco anchos; cero escrituras de red/Storage/cookies |
 | `verify-official-ui.cjs` | PASS cinco paneles y cinco anchos, sin registros ficticios, escrituras ni persistencia |
 | `verify-brand-ui.cjs`, `verify-brand-02-ui.cjs` | PASS cinco anchos, logo R2/transparencia sin cambios |
@@ -59,6 +59,8 @@ No se alteraron SQL, migraciones, RLS, Supabase Auth/configuración, Edge/onboar
 | Dispositivos físicos | Safari/iPhone/PWA instalada real **pendiente**. Emulación Chromium no certifica Safari físico |
 | CI remoto | Workflow ampliado para repetir mocks/guardas y subir capturas. Consulta `gh run list` denegada (`Forbidden`); **no se declara CI remoto PASS** |
 
+Se reprodujo además una carga indefinida al salir/volver durante un login pendiente; se añadió regresión unitaria y HTTP mock, y se resolvió mediante una nueva validación del servidor al remonte, sin restaurar la respuesta descartada.
+
 No se cuentan las primeras ejecuciones interrumpidas por HMR como PASS: los recorridos se repitieron sobre código estable. No se modificaron módulos de negocio para superar pruebas.
 
 ## Commits
@@ -68,13 +70,15 @@ No se cuentan las primeras ejecuciones interrumpidas por HMR como PASS: los reco
 - `cc8163f` — build local activado aislado, cinco paneles y ejecución reproducible en workflow existente.
 - `07ec9af` — checkpoint inicial, capturas/resultados, roadmap y guía de configuración.
 - `9d09404` — clasificación explícita de sesión ausente/refresh revocado como sesión vencida; 185 pruebas y build repetidos PASS.
+- `0cc0f8f` — primera confirmación de publicación con Auth apagado.
+- `d8ec46c` — regreso al acceso durante login pendiente: nueva validación tras remonte, 186 pruebas y recorridos SDK HTTP mock PASS.
 - El commit final de evidencia publicada se entrega al Director; no cambia el frontend.
 
 ## Render
 
-**PUBLICADO y verificado** en https://biomotors-taller-demo.onrender.com, código `9d09404`, con **Auth apagado**. No se configuraron claves ni se cambió Environment del servicio; la ausencia del nuevo flag conserva el valor OFF.
+**PUBLICADO y verificado** en https://biomotors-taller-demo.onrender.com, código `d8ec46c`, con **Auth apagado**. No se configuraron claves ni se cambió Environment del servicio; la ausencia del nuevo flag conserva el valor OFF.
 
-- HTTPS: `index.html`, `index-C5zLO445.js`, `index-CS2vKy7X.css`, `supabaseGateway-CZmBU0E0.js`, manifest y service worker **idénticos byte por byte** al build final. [Hashes y fecha de comprobación](../screenshots/BT_AUTH_01B_R1/render-assets.json).
+- HTTPS: `index.html`, `index-D96w8na3.js`, `index-CS2vKy7X.css`, `supabaseGateway-CmEdwRDk.js`, manifest y service worker **idénticos byte por byte** al build final. [Hashes y fecha de comprobación](../screenshots/BT_AUTH_01B_R1/render-assets.json).
 - Navegador publicado 1650/1440/768/390/375: raíz muestra login, formulario inactivo y aviso preciso de flag apagado; sin desborde, **cero tráfico externo y cero escrituras/almacenamiento**. [Resultado](../screenshots/BT_AUTH_01B_R1/render-runtime.json).
 - Siete pantallas, revisión, navegación inicial/back/forward/refresh/PWA en Chromium, cinco anchos sobre Render: PASS con `verify-auth-ui.cjs`. [Reporte](../screenshots/BT_AUTH_01B_R1/render-access-results.json).
 - Capturas reales del sitio publicado: [escritorio](../screenshots/BT_AUTH_01B_R1/render-login-1650.png) · [móvil](../screenshots/BT_AUTH_01B_R1/render-login-390.png). Las imágenes de integración activada están separadas y rotuladas `mock`; no se publicó el flag activado.
