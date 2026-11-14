@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowLeft,
   CalendarDays,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { documentContext } from '../documentosData'
 import { WorkApprovalCard, WorkDocumentPreview } from './WorkDocumentPreview'
+import { WorkQuoteSummary } from './WorkQuoteSummary'
 import { WorkItemForm, WorkItemsTable } from './WorkItemsEditor'
 import {
   approveWorkDemo,
@@ -70,6 +71,10 @@ export function WorkDocumentPanel({
     totals = workTotals(doc),
     errors = validateWorkDocument(doc),
     inspections = availableInspections(doc)
+  const [editorExpanded, setEditorExpanded] = useState(false)
+  const editor = useRef<HTMLDivElement>(null)
+  const compact = request.compactQuote && doc.mode === 'quote'
+  const editorId = 'wt-editor-' + doc.id
   const title = workModes[doc.mode]
   function update(patch: WorkPatch) {
     setDoc((d) => editWorkDocument(d, patch))
@@ -120,7 +125,15 @@ export function WorkDocumentPanel({
     }
   }
   return (
-    <div className="wt-panel">
+    <div className={'wt-panel' + (compact ? ' wt-guided-quote' : '') + (editorExpanded ? ' wt-editor-expanded' : '')}>
+      {compact && <WorkQuoteSummary document={doc} expanded={editorExpanded} editorId={editorId} onToggle={() => {
+        setEditorExpanded(!editorExpanded)
+        if (!editorExpanded) requestAnimationFrame(() => {
+          editor.current?.focus()
+          editor.current?.scrollIntoView({ block: 'start' })
+        })
+      }} />}
+      <div className="wt-editor-content" id={editorId} ref={editor} tabIndex={-1}>
       <header className="wt-heading">
         <button
           className="rp-secondary wt-back"
@@ -415,6 +428,7 @@ export function WorkDocumentPanel({
       <button className="rp-inline wt-discard" onClick={() => open({ type: 'discard' })}>
         Descartar borrador temporal
       </button>
+      </div>
       <div className="wt-print-only">
         <WorkDocumentPreview document={doc} />
       </div>

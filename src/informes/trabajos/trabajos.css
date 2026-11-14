@@ -1105,3 +1105,30 @@
     padding: 7px;
   }
 }
+
+/* QA02: only the quotation opened from the guided case uses this mobile summary. */
+.wt-quote-summary { display: none; }
+.wt-editor-content { display: contents; }
+@media screen and (max-width: 760px) {
+  .wt-guided-quote:not(.wt-editor-expanded) > .wt-editor-content { display: none; }
+  .wt-guided-quote.wt-editor-expanded > .wt-editor-content { display: block; scroll-margin-top: 90px; scroll-margin-bottom: 100px; }
+  .wt-quote-summary { display: block; padding: 16px !important; }
+  .wt-quote-summary > header { display: flex; align-items: flex-start; gap: 10px; }
+  .wt-quote-summary > header > svg { width: 27px; height: 27px; color: var(--bt-blue, #0469f6); flex-shrink: 0; }
+  .wt-quote-summary h1 { font-size: 22px; margin: 0 0 5px; }
+  .wt-quote-summary header p { margin: 0; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; color: #536e93; }
+  .wt-compact-help { font-size: 12px; line-height: 1.5; color: #536e93; margin: 12px 0; }
+  .wt-compact-lines { margin: 0; padding: 0; list-style: none; }
+  .wt-compact-lines li { padding: 10px 0; border-top: 1px solid #d7e3f7; }
+  .wt-compact-description { display: block; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+  .wt-compact-type { display: block; font-size: 12px; color: #536e93; margin: 3px 0 5px; }
+  .wt-compact-lines dl { display: grid; grid-template-columns: minmax(38px, .5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 5px; margin: 0; }
+  .wt-compact-lines dl > div:not(:first-child) { text-align: right; }
+  .wt-compact-lines dt { font-size: 11px; color: #536e93; }
+  .wt-compact-lines dd { margin: 2px 0 0; font-size: 13px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+  .wt-compact-totals { border-top: 2px solid #d7e3f7; padding: 10px 0 0; margin: 0 0 12px; }
+  .wt-compact-totals > div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 5px 0; font-size: 13px; }
+  .wt-compact-totals dd { font-weight: 700; margin: 0; text-align: right; }
+  .wt-compact-totals > div:last-child { color: #005ce7; font-size: 15px; background: #edf5ff; padding: 10px 7px; border-radius: 8px; }
+  .wt-quote-summary > button { min-height: 44px; width: 100%; justify-content: center; font-size: 14px; }
+}

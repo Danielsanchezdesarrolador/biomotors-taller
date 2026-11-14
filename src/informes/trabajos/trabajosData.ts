@@ -43,7 +43,7 @@ export type WorkDocument = {
     footer: string
   }
 }
-export type WorkRequest = { mode: WorkMode; orderId: string; draftId?: string }
+export type WorkRequest = { mode: WorkMode; orderId: string; draftId?: string; compactQuote?: boolean }
 export const workModes: Record<WorkMode, string> = {
   quote: 'Cotización',
   work: 'Informe de trabajo'

@@ -40,7 +40,7 @@ function App() {
   const [requestedInspectionReportId,setRequestedInspectionReportId]=useState<string|undefined>()
   const activeVisit=activeCaseId()?selectedCase():undefined
   const [screen, setScreen] = useState<Screen>('inicio')
-  const [requestedWorkRequest,setRequestedWorkRequest]=useState<{orderId:string;mode:'quote'|'work';draftId?:string}|undefined>()
+  const [requestedWorkRequest,setRequestedWorkRequest]=useState<{orderId:string;mode:'quote'|'work';draftId?:string;compactQuote?:boolean}|undefined>()
   const [requestedInspectionOrderId,setRequestedInspectionOrderId]=useState<string|undefined>()
   const [requestedOrderId, setRequestedOrderId] = useState<string | undefined>()
   const [requestedVehicleId, setRequestedVehicleId] = useState<string | undefined>()
@@ -78,7 +78,7 @@ function App() {
   }
   function openVisit(id:string){selectCase(id);setHomeView('case');window.scrollTo({top:0})}
   function returnToVisit(){navigate('inicio');setHomeView('case')}
-  function openResource(resource:FlowResource){if(!activeVisit)return;const target=openCaseResource(activeVisit.id,resource);if(resource==='order'){navigate('ordenes');setRequestedOrderId(target.orderId)}else{navigate('informes');if(resource==='inspection'){setRequestedInspectionOrderId(target.orderId);setRequestedInspectionReportId(target.resourceId)}else setRequestedWorkRequest({orderId:target.orderId,mode:resource==='quote'?'quote':'work',draftId:target.resourceId})}}
+  function openResource(resource:FlowResource){if(!activeVisit)return;const target=openCaseResource(activeVisit.id,resource);if(resource==='order'){navigate('ordenes');setRequestedOrderId(target.orderId)}else{navigate('informes');if(resource==='inspection'){setRequestedInspectionOrderId(target.orderId);setRequestedInspectionReportId(target.resourceId)}else setRequestedWorkRequest({orderId:target.orderId,mode:resource==='quote'?'quote':'work',draftId:target.resourceId,compactQuote:resource==='quote'})}}
   const formattedDate = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date())
 
   return (
