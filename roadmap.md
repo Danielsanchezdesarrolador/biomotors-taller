@@ -538,3 +538,18 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [ ] **Backend real, fuera de alcance:** persistencia multitenant, RLS A/B, consentimiento legal/firmas, correo transaccional, pagos, facturación, control de roles y paridad Android. Requieren autorización y auditoría separadas; mantener BT-CP02-D reservado a su chat.
 
 [Checkpoint de cierre BT-FLOW-01E](docs/checkpoints/CHECKPOINT_BT_FLOW_01E_20261113.md).
+
+### BT-QA-01 — Auditoría integral guiada del Director (inicio 13/11/2026)
+
+**Estado: EN EJECUCIÓN; no es aprobación final del producto.** Se auditó la línea base de `main` `4b82f8e`: CI remoto [43538846463](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43538846463) SUCCESS, 101 pruebas funcionales de la entrega E previamente verificadas, [E2E cinco tamaños 43538255549](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43538255549) SUCCESS. Ningún commit de aplicación/modificación R2 autorizado por el inicio de auditoría.
+
+- [x] Leer guía final A–E, checkpoint 01E, HEAD/CI actual y componentes de Inicio/recepción/expediente.
+- [x] Abrir matriz de casos Q01–Q16 y hallazgos clasificados en [BT-QA-01](docs/qa/BT_QA_01_MATRIZ_20261113.md).
+- [x] Detectar el primer hallazgo editorial verificable: el texto del Inicio `Flujo BT-FLOW-01D/E pendiente` sigue desactualizado (H001). No corregir hasta priorizar.
+- [ ] Verificar que Render esté sirviendo la revisión E (no pudo confirmarse desde el acceso actual).
+- [ ] Director: probar Inicio y registrar cliente/vehículo ficticio nuevo en navegador/teléfono. Continuar con OT y multipunto solo después del primer bloque.
+- [ ] Director: completar pruebas de cotización, respuesta, ejecución, pausa y entrega; reportar fricciones UI y errores con capturas.
+- [ ] Safari físico en iPhone: foco, teclado, safe-area, barra inferior, scroll horizontal de hitos; el Chromium CI no lo sustituye.
+- [ ] Consolidar matriz de hallazgos priorizados; después preparar BT-QA-02 de corrección (sin alterar backend protegido ni BT-CP02-D).
+
+**Regla:** no introducir clientes reales, envíos, pagos ni persistencia durante el QA. El Director revisa todo el proceso A–E, sin hacer cambios de pantallas durante la recopilación de evidencias.
