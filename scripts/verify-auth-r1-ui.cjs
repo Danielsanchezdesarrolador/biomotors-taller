@@ -55,6 +55,10 @@ async function stubPage(browser, width, options = {}) {
     const reply = (body, status = 200) =>
       route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
     if (url.pathname === '/auth/v1/token') {
+      if (state.holdLogin)
+        await new Promise((resolve) => {
+          state.finishLogin = resolve
+        })
       if (state.invalid)
         return reply({ code: 'invalid_credentials', msg: 'Invalid login credentials' }, 400)
       return reply({
@@ -207,25 +211,39 @@ async function shot(p, name) {
       'mechanic',
       'reception',
       'multiple',
-      'offline'
+      'offline',
+      'pending-navigation'
     ]) {
       const options =
-        scenario === 'invalid'
-          ? { invalid: true }
-          : scenario === 'disabled'
-            ? { member: 'disabled' }
-            : scenario === 'no-member'
-              ? { revoked: true }
-              : scenario === 'unconfirmed'
-                ? { confirmed: false }
-                : scenario === 'multiple'
-                  ? { multiple: true }
-                  : scenario === 'mechanic' || scenario === 'reception'
-                    ? { role: scenario }
-                    : {}
+        scenario === 'pending-navigation'
+          ? { holdLogin: true }
+          : scenario === 'invalid'
+            ? { invalid: true }
+            : scenario === 'disabled'
+              ? { member: 'disabled' }
+              : scenario === 'no-member'
+                ? { revoked: true }
+                : scenario === 'unconfirmed'
+                  ? { confirmed: false }
+                  : scenario === 'multiple'
+                    ? { multiple: true }
+                    : scenario === 'mechanic' || scenario === 'reception'
+                      ? { role: scenario }
+                      : {}
       const { p, state, errors } = await stubPage(browser, 390, options)
       await login(p)
-      if (scenario === 'invalid') {
+      if (scenario === 'pending-navigation') {
+        await p
+          .getByRole('button', { name: 'Abrir vista de revisión de administrador', exact: true })
+          .click()
+        await p.getByText('DEMO · Sin autenticación ni permisos reales').waitFor()
+        await p.getByRole('button', { name: 'Volver al acceso', exact: true }).click()
+        await p.getByText('Verificando sesión y autorización…', { exact: true }).waitFor()
+        assert.equal(typeof state.finishLogin, 'function')
+        state.finishLogin()
+        await p.getByText('Sesión y membresía verificadas', { exact: true }).waitFor()
+        await p.locator('.dashboard-main').waitFor()
+      } else if (scenario === 'invalid') {
         await p.getByText('No se pudo iniciar sesión.', { exact: false }).waitFor()
         assert.equal(await p.locator('input[name=password]').inputValue(), '')
       } else if (['no-member', 'disabled'].includes(scenario))
@@ -251,7 +269,7 @@ async function shot(p, name) {
       }
       if (scenario !== 'offline') await fits(p)
       await shot(p, `negative-${scenario}-390`)
-      if (!['mechanic', 'multiple', 'offline'].includes(scenario))
+      if (!['mechanic', 'multiple', 'offline', 'pending-navigation'].includes(scenario))
         assert.equal(await p.locator('.dashboard-main').count(), 0)
       assert.equal(errors.length, 0, errors.join('\n'))
       results.push({ scenario, sdkMock: 'PASS' })

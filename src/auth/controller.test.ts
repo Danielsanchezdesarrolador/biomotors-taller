@@ -221,6 +221,31 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     stop()
     vi.useRealTimers()
   })
+  it('revalidates after returning to access while password login is still pending', async () => {
+    const { controller: c, gateway: g } = fixture()
+    vi.mocked(g.hasSession).mockResolvedValue(false)
+    const leave = c.start()
+    await flush()
+    let finish!: () => void
+    vi.mocked(g.signIn).mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve
+        })
+    )
+    const pending = c.login('address', 'password')
+    leave()
+    const stop = c.start()
+    await flush()
+    expect(c.getSnapshot().context).toBeUndefined()
+    vi.mocked(g.hasSession).mockResolvedValue(true)
+    finish()
+    await pending
+    await flush()
+    expect(c.getSnapshot().phase).toBe('authorized')
+    expect(g.getUser).toHaveBeenCalledOnce()
+    stop()
+  })
   it('ignores stale validation on teardown and supports StrictMode remount', async () => {
     const { controller: c } = fixture()
     c.start()()

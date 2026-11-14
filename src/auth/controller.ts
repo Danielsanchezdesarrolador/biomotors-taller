@@ -206,6 +206,10 @@ export class AuthController {
       if (epoch === this.epoch) this.fail(error, true)
     } finally {
       this.signingIn = false
+      // Navigation can unmount/remount access while signIn still owns its request.
+      // Recover that loading screen through a fresh server check, never the stale result.
+      if (epoch !== this.epoch && this.cleanup && !this.blocked && this.state.phase === 'checking')
+        void this.validate()
     }
   }
   async logout() {
