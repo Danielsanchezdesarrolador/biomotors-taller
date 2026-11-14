@@ -186,10 +186,10 @@ export function AccessScreens({
         <div className="access-brand-content">
           <a
             className="access-brand"
-            href="/"
+            href="/#/acceso"
             onClick={(e) => {
               e.preventDefault()
-              navigate('/')
+              navigate(accessPaths.login)
             }}
           >
             <span className="access-brand-mark">
@@ -613,7 +613,11 @@ export function AccessScreens({
                       : page === 'verify'
                         ? previewLink('Volver al acceso', accessPaths.login)
                         : null}
-            <button type="button" className="access-public-home" onClick={() => navigate('/')}>
+            <button
+              type="button"
+              className="access-public-home"
+              onClick={() => navigate(accessPaths.publicPreview)}
+            >
               <ArrowLeft />
               Ver interfaz pública sin sesión
             </button>

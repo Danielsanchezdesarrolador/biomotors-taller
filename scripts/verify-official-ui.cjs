@@ -36,7 +36,7 @@ const { chromium } = require('playwright'),
         if (!['GET', 'HEAD'].includes(r.method())) writes.push(r.url())
       })
       const base = process.env.BASE_URL || 'http://127.0.0.1:5173'
-      await p.goto(base)
+      await p.goto(base + '/#/revision/publica')
       const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
       const labels = [
         'Inicio',
@@ -116,7 +116,7 @@ const { chromium } = require('playwright'),
           assert.doesNotMatch(text, /OT-1001|Camila Muñoz|export const orderFixtures|WorkflowApp/)
         }
         assert.deepEqual(await p.evaluate(() => window.__persistentWrites), [])
-        await p.goto(base + '/?demo=1&test=1&harness=true')
+        await p.goto(base + '/?demo=1&test=1&harness=true#/revision/publica')
         assert.equal(await p.locator('input:enabled,textarea:enabled,select:enabled').count(), 0)
         assert.doesNotMatch(await p.locator('body').innerText(), /DEMO|demostración|OT-1001/)
         assert.deepEqual(await p.evaluate(() => window.__persistentWrites), [])

@@ -8,7 +8,12 @@ import './official/official.css'
 import { AccessScreens } from './access/AccessScreens'
 import { TechnicianReview } from './access/TechnicianReview'
 import { ReviewBanner } from './access/ReviewBanner'
-import { accessPaths, publicAccessPath, resolveAccessPath } from './access/accessContract'
+import {
+  accessPaths,
+  publicAccessPath,
+  publicEntryPath,
+  resolveAccessPath
+} from './access/accessContract'
 export function OfficialWorkspaceView({
   review = false,
   onReviewExit
@@ -34,10 +39,20 @@ export function OfficialWorkspaceView({
 
 export default function App() {
   const [path, setPath] = useState(() =>
-    typeof window === 'undefined' ? '/' : publicAccessPath(window.location)
+    typeof window === 'undefined' ? accessPaths.login : publicEntryPath(window.location)
   )
   useEffect(() => {
-    const pop = () => setPath(publicAccessPath(window.location))
+    const pop = () => {
+      if (publicAccessPath(window.location) === '/') {
+        window.history.replaceState(
+          null,
+          '',
+          '/' + window.location.search + '#' + accessPaths.login
+        )
+      }
+      setPath(publicEntryPath(window.location))
+    }
+    pop()
     window.addEventListener('popstate', pop)
     window.addEventListener('hashchange', pop)
     return () => {
@@ -46,17 +61,14 @@ export default function App() {
     }
   }, [])
   function navigate(path: string) {
-    window.history.pushState(null, '', path === '/' ? '/' : '/#' + path)
+    window.history.pushState(null, '', '/#' + path)
     setPath(path)
     window.scrollTo({ top: 0 })
   }
   const route = resolveAccessPath(path)
   if (route) return <AccessScreens key={path} {...route} onNavigate={navigate} />
   if (path === accessPaths.mechanicReview) return <TechnicianReview onNavigate={navigate} />
-  return (
-    <OfficialWorkspaceView
-      review={path === accessPaths.administratorReview}
-      onReviewExit={() => navigate(accessPaths.administrator)}
-    />
-  )
+  if (path === accessPaths.administratorReview || path === accessPaths.publicPreview)
+    return <OfficialWorkspaceView review onReviewExit={() => navigate(accessPaths.login)} />
+  return <AccessScreens page="login" presentation="administrador" onNavigate={navigate} />
 }

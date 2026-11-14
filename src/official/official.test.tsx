@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import App from '../App'
+import { OfficialWorkspaceView } from '../App'
 import { OfficialPanel } from './OfficialPanels'
 import { officialWorkspace } from './officialWorkspace'
 import * as seeds from '../data/emptyTestRecords'
@@ -28,7 +28,7 @@ describe('official public preparation', () => {
     expect(() => seeds.settingsFixture('any-workshop')).toThrow('no está configurado')
   })
   it('preserves the R2 shell and warns before any real information could be entered', () => {
-    const html = renderToStaticMarkup(<App />)
+    const html = renderToStaticMarkup(<OfficialWorkspaceView />)
     expect(html).toContain('side-nav')
     expect(html).toContain('bottom-nav')
     expect(html).toContain('Por ahora no ingreses datos de clientes ni vehículos reales.')

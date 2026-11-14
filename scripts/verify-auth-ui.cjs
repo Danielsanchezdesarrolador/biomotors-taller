@@ -63,8 +63,53 @@ const { chromium } = require('playwright'),
           })
         }
       }
+      // Root bookmarks and existing installed PWAs must enter access, without an extra history step.
+      const login = () => p.getByRole('heading', { name: 'Inicia sesión', exact: true })
+      await p.goto(base + '/')
+      await login().waitFor()
+      assert.equal(new URL(p.url()).hash, '#/acceso')
+      assert.equal(await p.locator('.official-panel').count(), 0)
+      await capture('ENTRADA_RAIZ')
+      await p.reload()
+      await login().waitFor()
+      assert.equal(publicPath(), '/acceso')
+      await p.goto(publicUrl('/acceso/registro'))
+      await p.getByRole('heading', { name: 'Crea tu cuenta', exact: true }).waitFor()
+      await p.goto(base + '/')
+      await login().waitFor()
+      await p.goBack()
+      await p.getByRole('heading', { name: 'Crea tu cuenta', exact: true }).waitFor()
+      await p.goForward()
+      await login().waitFor()
+      assert.equal(publicPath(), '/acceso')
+      await button('Ver interfaz pública sin sesión').click()
+      await p.locator('.official-panel').waitFor()
+      assert.equal(publicPath(), '/revision/publica')
+      await p.reload()
+      await p.locator('.official-panel').waitFor()
+      assert.equal(publicPath(), '/revision/publica')
+      await p.goBack()
+      await login().waitFor()
+      await p.goForward()
+      await p.locator('.official-panel').waitFor()
+      await button('Volver al acceso').click()
+      await login().waitFor()
+      const manifest = await p.evaluate(async () => (await fetch('/manifest.webmanifest')).json())
+      assert.equal(manifest.id, '/')
+      assert.equal(manifest.display, 'standalone')
+      assert.equal(manifest.start_url, '/')
+      const worker = await p.evaluate(async () => {
+        const registration = await navigator.serviceWorker.ready
+        return registration.active?.scriptURL
+      })
+      assert.ok(worker.endsWith('/sw.js'))
+      await p.goto(new URL(manifest.start_url, base).href)
+      await login().waitFor()
+      assert.equal(publicPath(), '/acceso')
       for (const [name, url, title] of pages) {
         await p.goto(publicUrl(url))
+        await p.getByRole('heading', { name: title, exact: true }).waitFor()
+        await p.reload()
         await p.getByRole('heading', { name: title, exact: true }).waitFor()
         assert.match(
           await p.locator('.access-review-note').innerText(),
@@ -210,6 +255,9 @@ const { chromium } = require('playwright'),
         width,
         screens: 7,
         readOnlyReview: true,
+        rootRedirect: true,
+        previewHistory: true,
+        pwaStartUrl: manifest.start_url,
         harnessTested: !process.env.SKIP_HARNESS,
         realSessions: 0,
         networkWrites: 0,

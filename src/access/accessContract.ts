@@ -10,7 +10,8 @@ export const accessPaths = {
   newPassword: '/auth/nueva-contrasena',
   passwordUpdated: '/auth/contrasena-actualizada',
   administratorReview: '/revision/administrador',
-  mechanicReview: '/revision/mecanico'
+  mechanicReview: '/revision/mecanico',
+  publicPreview: '/revision/publica'
 } as const
 export type AccessPage =
   | 'login'
@@ -74,4 +75,10 @@ export function passwordCriteria(value: string) {
 // Static hosting does not require SPA rewrite rules for hash routes.
 export function publicAccessPath(location: { hash: string; pathname: string }) {
   return location.hash.startsWith('#/') ? location.hash.slice(1) : location.pathname
+}
+
+// The public entry opens access; the legacy private harness keeps its own root.
+export function publicEntryPath(location: { hash: string; pathname: string }) {
+  const path = publicAccessPath(location)
+  return path === '/' ? accessPaths.login : path
 }
