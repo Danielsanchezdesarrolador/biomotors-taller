@@ -26,7 +26,7 @@ const { chromium } = require('playwright'),
           : {})
       })
       const button = (name) => p.getByRole('button', { name, exact: true })
-      await p.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await p.goto(process.env.BASE_URL || 'http://localhost:5177')
       await p
         .locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
         .nth(3)

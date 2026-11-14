@@ -1,5 +1,5 @@
 // Browser acceptance checks. Uses Playwright supplied by the cloud runtime.
-// Start `npm run dev -- --port 5173 --strictPort` before executing this script.
+// Start `npm run dev -- --port 5177 --strictPort` before executing this script.
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 async function openSample(page) {
@@ -14,7 +14,7 @@ async function openSample(page) {
   for(const width of [1650,1440,768,390,375]) {
    const page=await browser.newPage({viewport:{width,height:941}}),errors=[]
    page.on('pageerror',error=>errors.push(error.message))
-   await page.goto(process.env.BASE_URL||'http://127.0.0.1:5173')
+   await page.goto(process.env.BASE_URL||'http://127.0.0.1:5177')
    await page.locator(width>760?'.side-nav button':'.bottom-nav button').nth(1).click()
    await openSample(page)
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`overflow at ${width}`)

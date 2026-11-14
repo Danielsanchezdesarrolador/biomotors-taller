@@ -1,4 +1,4 @@
-// Start Vite on 5173. Uses the cloud runtime's Playwright/Chromium.
+// Start Vite on 5177. Uses the cloud runtime's Playwright/Chromium.
 const{chromium}=require('playwright'),assert=require('node:assert/strict')
 ;(async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
 for(const width of [1650,1440,768,390,375]){
@@ -7,7 +7,7 @@ for(const width of [1650,1440,768,390,375]){
  const nav=()=>p.locator(width>760?'.side-nav button':'.bottom-nav button'),dialog=()=>p.getByRole('dialog')
  const close=async()=>{await dialog().getByRole('button',{name:'Cerrar / cancelar',exact:true}).click()}
  const area=async name=>{await p.getByRole('button',{name:'Abrir '+name,exact:true}).click()}
- await p.goto(process.env.BASE_URL||'http://127.0.0.1:5173');await nav().nth(4).click();await p.getByRole('heading',{name:'Configuración',exact:true}).waitFor()
+ await p.goto(process.env.BASE_URL||'http://127.0.0.1:5177');await nav().nth(4).click();await p.getByRole('heading',{name:'Configuración',exact:true}).waitFor()
  assert.equal(await p.locator('.st-tile').count(),9);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
  assert.match(await p.locator('.st-system').innerText(),/No configurado/);assert.match(await p.locator('.st-system').innerText(),/Sin medición ni cuota real/)
  const global=p.getByRole('textbox',{name:'Buscar en órdenes de muestra',exact:true});await global.fill('suscripción');assert.equal(await p.locator('.st-tile').count(),1);await global.fill('')

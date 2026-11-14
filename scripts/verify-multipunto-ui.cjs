@@ -1,4 +1,4 @@
-// npm run dev on 5173. Playwright is supplied by the cloud test environment.
+// npm run dev on 5177. Playwright is supplied by the cloud test environment.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
   fs = require('node:fs')
@@ -39,7 +39,7 @@ const { chromium } = require('playwright'),
         await page.getByRole('button', { name: 'Crear inspección multipunto', exact: true }).click()
         await sheet().waitFor()
       }
-      await page.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await page.goto(process.env.BASE_URL || 'http://localhost:5177')
       await open()
       assert.equal(await sheet().locator('.mp-row').count(), 34)
       assert.equal(

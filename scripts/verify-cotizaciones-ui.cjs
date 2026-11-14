@@ -1,4 +1,4 @@
-// Start Vite on 5173. Playwright is supplied by the test environment.
+// Start Vite on 5177. Playwright is supplied by the test environment.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
   fs = require('node:fs'),
@@ -60,7 +60,7 @@ const { chromium } = require('playwright'),
         await p.getByLabel('Precio del ítem', { exact: true }).fill(price)
         await p.getByRole('button', { name: 'Guardar ítem DEMO', exact: true }).click()
       }
-      await p.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await p.goto(process.env.BASE_URL || 'http://localhost:5177')
       await open()
       await noOverflow()
       assert.equal(await rows().count(), 3)

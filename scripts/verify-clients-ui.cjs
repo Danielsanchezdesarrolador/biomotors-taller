@@ -1,4 +1,4 @@
-// Start npm run dev -- --port 5173 --strictPort. Uses the cloud runtime's Playwright.
+// Start npm run dev -- --port 5177 --strictPort. Uses the cloud runtime's Playwright.
 const {chromium}=require('playwright')
 const assert=require('node:assert/strict')
 ;(async()=>{
@@ -8,7 +8,7 @@ const assert=require('node:assert/strict')
   p.on('pageerror',e=>errors.push(e.message))
   p.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url())})
   const nav=()=>p.locator(width>760?'.side-nav button':'.bottom-nav button')
-  await p.goto(process.env.BASE_URL||'http://127.0.0.1:5173');await nav().nth(2).click()
+  await p.goto(process.env.BASE_URL||'http://127.0.0.1:5177');await nav().nth(2).click()
   await p.getByRole('heading',{name:'Clientes y vehículos',exact:true}).waitFor()
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
   const globalSearch=p.getByRole('textbox',{name:'Buscar en órdenes de muestra',exact:true})

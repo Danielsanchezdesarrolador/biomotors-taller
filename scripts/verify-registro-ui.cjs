@@ -15,7 +15,7 @@ fs.mkdirSync(out,{recursive:true})
    const errors=[],writes=[]
    page.on('pageerror',e=>errors.push(e.message))
    page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push({method:r.method(),url:r.url()})})
-   await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'})
+   await page.goto('http://127.0.0.1:5177/',{waitUntil:'networkidle'})
    const nav=page.locator(width>760?'.side-nav button':'.bottom-nav button')
    assert.equal(await nav.count(),5)
    await nav.nth(2).click()

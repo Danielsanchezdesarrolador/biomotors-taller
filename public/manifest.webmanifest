@@ -1,14 +1,14 @@
 {
   "id": "/",
-  "name": "TallerFlow — Gestión de talleres",
-  "short_name": "TallerFlow",
+  "name": "ByteTorque — Gestión de talleres",
+  "short_name": "ByteTorque",
   "description": "Gestiona clientes, vehículos, inspecciones y cotizaciones de tu taller.",
   "lang": "es-CL",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f6f8f6",
-  "theme_color": "#123b32",
+  "background_color": "#f3f7ff",
+  "theme_color": "#061c39",
   "icons": [
     {
       "src": "/icon-192.png",

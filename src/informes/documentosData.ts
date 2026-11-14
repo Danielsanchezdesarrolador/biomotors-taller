@@ -1,3 +1,4 @@
+import { documentFixtures } from '#test-records'
 import { demoClients, demoVehicles, vehicleForOrder } from '../clientes/clientesData'
 import { baseOrderRevision, readOrderRevision, sessionOrders, type OrderRevision } from '../ordenes/orderSession'
 import { calculateTotals, type LineItem } from '../ordenes/detalleData'
@@ -22,7 +23,7 @@ export function createDocument(id:string,kind:DocumentKind,orderId:string,source
  return doc
 }
 export function initialDocuments():DemoDocument[] {
- return ([['INF-2048','Informe','OT-1001','Borrador','2026-11-11T17:26:00Z'],['COT-1083','Cotización','OT-1002','Pendiente','2026-11-11T16:48:00Z'],['INF-2047','Informe','OT-1003','Enviado','2026-11-11T15:31:00Z'],['COT-1082','Cotización','OT-1004','Enviado','2026-11-11T14:05:00Z'],['INF-2046','Informe','OT-1007','Error','2026-11-11T13:22:00Z'],['COT-1081','Cotización','OT-1002','Enviado','2026-11-10T19:47:00Z']] as const).map(([id,kind,orderId,status,date])=>({...createDocument(id,kind,orderId,'baseline'),status,date,historical:true,finalized:status==='Enviado'||status==='Error'}))
+ return documentFixtures.map(([id,kind,orderId,status,date])=>({...createDocument(id,kind,orderId,'baseline'),status,date,historical:true,finalized:status==='Enviado'||status==='Error'}))
 }
 export function historicalEvents(docs:DemoDocument[]):DeliveryEvent[] {return docs.filter(d=>d.status==='Enviado'||d.status==='Error').map(d=>({id:'fixture-'+d.id,documentId:d.id,workshopId:d.workshopId,orderId:d.orderId,clientId:d.clientId,vehicleId:d.vehicleId,recipient:documentContext(d).client.email,date:d.date,status:d.status,origin:'Histórico ficticio',result:d.status==='Error'?'Fallo ficticio del proveedor de ejemplo; no hubo conexión.':'Evento ilustrativo; no se envió correo real.',fileRef:null}))}
 export function filterDocuments(docs:DemoDocument[],query:string,status:DocumentStatus|'Todos',vehicleId='Todos') {

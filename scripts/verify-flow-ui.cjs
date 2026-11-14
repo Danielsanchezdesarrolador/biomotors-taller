@@ -1,4 +1,4 @@
-// Run Vite on 5173. All entities and checks are DEMO, with no backend.
+// Run Vite on 5177. All entities and checks are DEMO, with no backend.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
   fs = require('node:fs'),
@@ -66,7 +66,7 @@ const { chromium } = require('playwright'),
         await p.getByRole('button', { name: 'Iniciar inspección', exact: true }).waitFor()
         return p.locator('.fl-case-summary>div').nth(4).locator('strong').innerText()
       }
-      await p.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await p.goto(process.env.BASE_URL || 'http://localhost:5177')
       assert.equal(await p.locator('.fl-case-row').count(), 8)
       if (width <= 760) {
         assert.equal(await p.locator('.fl-case-row:visible').count(), 4)

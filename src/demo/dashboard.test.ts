@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { demoOrders, filterDemoOrders, getDashboardMetrics, orderStatuses } from './dashboard'
+import { demoOrders, filterDemoOrders, getDashboardMetrics, orderStatuses } from '../../tests/fixtures/dashboard'
 
 describe('dashboard de demostración', () => {
   it('muestra métricas coherentes con los estados', () => {

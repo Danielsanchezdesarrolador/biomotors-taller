@@ -104,7 +104,7 @@ const path = require('node:path')
         await button('Confirmar precarga DEMO').click()
         await p.locator('.wt-panel').waitFor()
       }
-      await p.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await p.goto(process.env.BASE_URL || 'http://localhost:5177')
       await button('Continuar OT-1002').click()
       await button('Iniciar inspección').click()
       await p.getByLabel('Hora de inicio', { exact: true }).fill('09:00')

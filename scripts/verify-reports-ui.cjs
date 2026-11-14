@@ -1,4 +1,4 @@
-// Start the Vite server on 5173; Playwright is provided by the cloud runtime.
+// Start the Vite server on 5177; Playwright is provided by the cloud runtime.
 const{chromium}=require('playwright'),assert=require('node:assert/strict')
 ;(async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']})
 try{for(const width of [1650,1440,768,390,375]){
@@ -7,7 +7,7 @@ try{for(const width of [1650,1440,768,390,375]){
  const nav=()=>p.locator(width>760?'.side-nav button':'.bottom-nav button')
  const preview=()=>p.locator('.rp-preview-frame .rp-paper')
  const dialog=()=>p.getByRole('dialog')
- await p.goto(process.env.BASE_URL||'http://127.0.0.1:5173');await nav().nth(3).click()
+ await p.goto(process.env.BASE_URL||'http://127.0.0.1:5177');await nav().nth(3).click()
  await p.getByRole('heading',{name:'Informes y cotizaciones',exact:true}).waitFor()
  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
  const globalSearch=p.getByRole('textbox',{name:'Buscar en órdenes de muestra',exact:true});await globalSearch.fill('COT-1083');assert.equal(await p.getByRole('button',{name:'Seleccionar COT-1083',exact:true}).count(),1);await globalSearch.fill('')

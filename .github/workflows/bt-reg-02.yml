@@ -6,6 +6,10 @@ on:
       - 'src/clientes/**'
       - 'scripts/verify-registro-ui.cjs'
       - '.github/workflows/bt-reg-02.yml'
+      - 'tests/**'
+      - 'src/layout/**'
+      - 'vite.harness.config.ts'
+      - 'vitest.config.ts'
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,9 +29,9 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Validar formulario, recepción, aislamiento DEMO y generar capturas
         run: |
-          npm run dev -- --port 5173 --strictPort > /tmp/bytetrq-vite.log 2>&1 &
+          npm run dev:harness -- --port 5177 --strictPort > /tmp/bytetrq-vite.log 2>&1 &
           for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:5177/ > /dev/null; then break; fi
             sleep 1
           done
           node scripts/verify-registro-ui.cjs

@@ -2,8 +2,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
 
-const colorBg = [18, 59, 50]
-const colorLime = [183, 237, 120]
+const colorBg = [6, 28, 57]
+const colorAccent = [9, 155, 255]
 const points = [[53,73],[96,48],[139,73],[139,119],[96,144],[53,119]]
 function dist(x,y,a,b) {
   const dx=b[0]-a[0], dy=b[1]-a[1]
@@ -13,9 +13,9 @@ function dist(x,y,a,b) {
 function rgbAt(x,y) {
   const radius=Math.hypot(x-96,y-96)
   if (radius<=8) return colorBg
-  if (radius<=20) return colorLime
+  if (radius<=20) return colorAccent
   for (let i=0;i<points.length;i++) {
-    if (dist(x,y,points[i],points[(i+1)%points.length])<=6) return colorLime
+    if (dist(x,y,points[i],points[(i+1)%points.length])<=6) return colorAccent
   }
   return colorBg
 }

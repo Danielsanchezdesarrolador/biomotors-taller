@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import App from './App'
+import App from '../tests/harness/WorkflowApp'
 
 describe('BT-FLOW-01C — Inicio premium guiado (DEMOSTRACIÓN)', () => {
   const output = renderToStaticMarkup(<App />)

@@ -85,7 +85,7 @@ const { chromium } = require('playwright'),
           .check()
         await button('Confirmar propuesta DEMO').click()
       }
-      await p.goto(process.env.BASE_URL || 'http://localhost:5173')
+      await p.goto(process.env.BASE_URL || 'http://localhost:5177')
       assert.equal(await nav().count(), 5)
       await button('Nuevo ingreso de vehículo').click()
       await button('Registrar cliente nuevo DEMO').click()

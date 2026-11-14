@@ -1,3 +1,4 @@
+import { requestFixtures } from '#test-records'
 // BT-REG-02 — datos sintéticos; sin conexión de red ni almacenamiento persistente.
 export type VisitaDraft = {
   name:string; email:string; phone:string; address:string; commune:string
@@ -22,10 +23,7 @@ export const visitaExamples = [
   'Quiero revisar la suspensión delantera.',
 ] as const
 
-export const solicitudesDemoIniciales:SolicitudIngresoDemo[] = [
-  {id:'sol-demo-01',name:'Cliente demo A',vehicle:'Toyota Yaris · 2020',mileage:68430,plate:'No indicada',clientReportedReason:'Necesito cambio de aceite y filtros.',date:'12 nov 2026',status:'Pendiente de revisión'},
-  {id:'sol-demo-02',name:'Cliente demo B',vehicle:'Suzuki Swift · 2019',mileage:52300,plate:'No indicada',clientReportedReason:'Escucho un ruido al pasar por baches.',date:'13 nov 2026',status:'Pendiente de revisión'},
-]
+export const solicitudesDemoIniciales: SolicitudIngresoDemo[] = structuredClone(requestFixtures)
 
 const emailFormat=/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const phoneFormat=/^(?:\+?56)?9\d{8}$/
