@@ -34,7 +34,7 @@ Después de seleccionar se abre el mismo componente de credenciales (correo elec
 
 ## 4. Alta y acceso de mecánicos
 
-1. Propietario o administrador **con permiso de gestionar equipo** invita desde Configuración → Usuarios, indicando correo y rol **mecánico** para su taller.
+1. Propietario o administrador del taller **autorizado** invita desde Configuración → Usuarios y permisos, indicando correo y rol **mecánico** para su taller. **La invitación de mecánicos está permitida para el administrador de su taller**; no puede elevar roles, invitar administradores/propietarios ni crear personal en talleres ajenos. Los cupos los impone BT-PLAN-03.
 2. El enlace de invitación es único, aleatorio, temporal, revocable y de uso limitado; la verificación de correo prueba que controla ese buzón, **no** que tenga acceso a otros talleres.
 3. El mecánico completa la invitación y confirma correo; al acceder, el servidor comprueba membresía activa `mechanic` en el taller correspondiente. No hay autoregistro de mecánico con acceso a datos.
 4. Si el mecánico elige visualmente «Administrador», se deniega con mensaje adecuado; no se concede rol ni se muestran datos administrativos.
@@ -55,7 +55,7 @@ Después de seleccionar se abre el mismo componente de credenciales (correo elec
 | Precios, partidas económicas, IVA, cotizaciones, respuestas y envío | Sí | Sí según facultad administrativa concedida | No |
 | Cierre/entrega documental de visita | Sí | Sí según facultad administrativa | No |
 | Taller: identidad, branding y preferencias | Sí | Según delegación | No |
-| Invitar/desactivar mecánicos | Sí | Solo delegación de gestión de usuarios | No |
+| Invitar/desactivar mecánicos dentro del cupo del taller | Sí | Sí, solo mecánicos de su taller; no administra roles superiores | No |
 | Suscripción, titularidad, transferencia/último owner | Titular, proceso seguro | No por mero rol | No |
 | Otro taller o consola SaaS global | Nunca por defecto | Nunca por defecto | Nunca por defecto |
 
@@ -101,3 +101,14 @@ Después de seleccionar se abre el mismo componente de credenciales (correo elec
 - Registrar en checkpoint si lo realizado es **diseño, UI, Auth real, permiso RLS, prueba A/B, despliegue y uso físico**, sin confundir fases.
 
 **Decisión pendiente para el Director:** confirmar si el administrador delegado también podrá gestionar usuarios y cerrar entregas, o si esas facultades se reservan al propietario. Hasta entonces aplicar principio de mínimo privilegio; nunca asumir facultades sensibles por nombre del rol.
+
+
+## BT-AUTH-01 — Cupos de mecánicos y permisos de gestión (decisión 14/11/2026)
+
+El Director fijó un máximo de **2 mecánicos en Básico**, **8 en Plus** y **8 en Full**, por taller, disponibles también durante una prueba Full efectiva autorizada. Ver `docs/PLANES_COMERCIALES_BT_PLAN_01.md` → BT-PLAN-03 y `docs/REGISTRO_IDEAS_PLANES.md` → BT-IDEA-013.
+
+- Configuración → **Usuarios y permisos** tendrá contador `Mecánicos N/2` o `Mecánicos N/8`, listado de invitaciones y miembros, botón `Invitar mecánico` y opción de desactivar/revocar. El administrador autorizado tendrá permiso solo para crear/revocar mecánicos de su propio taller; el propietario controla roles superiores.
+- Los cupos cuentan **mecánicos activos más invitaciones pendientes vigentes**, reservadas sin duplicación de cuenta. Propietario/administrador no descuentan cupos de mecánico; el número de administradores adicionales no se define por esta regla.
+- Comprobar cupo + plan vigente + membresía + rol del actor **en la operación de servidor y dentro de una transacción**, sin confiar en un contador React, un campo de rol del formulario ni una condición de frontend. La confirmación de correo sigue siendo obligatoria antes del primer acceso.
+- Si el taller baja de Plus/Full a Básico con más de 2 mecánicos, no destruir datos ni revocar accesos arbitrariamente; política de exceso pendiente de ratificación, sin nuevas invitaciones hasta regularizar.
+- **BT-AUTH-01A** solo puede mostrar/previsualizar el diseño sin aparentar invitaciones activas ni usar correo real. El backend BT-CP02-D continúa reservado para su chat.

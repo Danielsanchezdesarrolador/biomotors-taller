@@ -31,7 +31,7 @@ El Director irá aportando gradualmente nuevas funciones para **Básico**, **Plu
 | BT-IDEA-007 | 13/11/2026 | Subir, administrar y reutilizar formatos propios de informe (no conversión automática a interactivo) | No, usar predeterminados | Sí | Sí | Aprobada para diseño | Documentada · `BT-PLAN-02` |
 | BT-IDEA-008 | 11/11/2026 | Plantilla multipunto predeterminada y trabajo manual de inspección | Sí | Sí | Sí | Aprobada como objetivo funcional; calidad/implementación aún en desarrollo | Codex BT-INS-01 en curso |
 | BT-IDEA-009 | 11/11/2026 | Roles avanzados, reportes detallados y recordatorios de mantenciones | No definido | No definido | Candidato | Por evaluar: detalle funcional, alcance y coste | Solo propuesta · `BT-PLAN-01` |
-| BT-IDEA-010 | 11/11/2026 | Límites de usuarios, órdenes/mes, almacenamiento, envíos y enlaces por plan | Pendiente | Pendiente | Pendiente | Por evaluar | No se fijaron cuotas |
+| BT-IDEA-010 | 11/11/2026 | Límites de **otros roles**, órdenes/mes, almacenamiento, envíos y enlaces por plan (mecánicos definidos por BT-IDEA-013) | Pendiente | Pendiente | Pendiente | Por evaluar | No se fijaron las demás cuotas; ver BT-PLAN-03 para mecánicos |
 | BT-IDEA-011 | 11/11/2026 | Posible publicidad en Básico después del lanzamiento | Pendiente de nueva decisión | — | — | Por evaluar | **No autorizada actualmente** |
 | BT-IDEA-012 | 13/11/2026 | Tipos de archivo permitidos, cantidad y almacenamiento de plantillas importadas | Predeterminadas | Por definir | Por definir | Por evaluar | Seguridad, coste y formatos por especificar |
 

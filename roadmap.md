@@ -614,3 +614,14 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [ ] **BT-AUTH-01C:** módulos operativos por rol, panel de mecánico simplificado y gestión de personal autorizada. Probar acceso cruzado entre talleres, OT no asignada, URL forzada, sesiones inválidas y Safari iPhone. Android React Native posteriormente.
 
 **No autorizado todavía:** registro público real, habilitar `BYTETORQUE_ONBOARDING_ENABLED`, tocar Supabase/Auth/RLS, crear mecánicos reales, enviar correos, conectar datos personales ni activar pagos. Mantener BT-COM-01 separado: correos Auth de verificación del personal no son el correo consolidado al cliente.
+
+
+### BT-PLAN-03 / BT-IDEA-013 — Cupos de mecánicos por plan (14/11/2026)
+
+**Decisión comercial expresa del Director para `Configuración → Usuarios y permisos`:** el Administrador del taller puede invitar/desactivar mecánicos de su propio taller, con cuotas **Básico 2**, **Plus 8**, **Full 8** por taller. El propietario y los administradores no consumen cupos de mecánico; otros límites de cuentas no han sido fijados. En prueba Full autorizada se aplica temporalmente 8. [Contrato comercial](docs/PLANES_COMERCIALES_BT_PLAN_01.md) · [idea registrada BT-IDEA-013](docs/REGISTRO_IDEAS_PLANES.md) · [especificación Auth](docs/BT_AUTH_01_LOGIN_ROLES_CORREO.md).
+
+- [x] Registrar cupos en BT-PLAN-03, matriz de roles y BT-AUTH-01 como **Aprobada para diseño**.
+- [ ] Implementar contador `Mecánicos N/2` o `N/8` y acción `Invitar mecánico` en la futura UI autorizada; no afirmar que ya envía correos.
+- [ ] Backend debe comprobar cupos activos y reservas de invitación vigentes en operación atómica; impedir invitaciones excedentes y acceso a talleres ajenos, sin habilitar Auth ni RLS en la fase visual BT-AUTH-01A.
+- [ ] Antes de activar cambios reales de plan, acordar tratamiento de exceso de mecánicos al bajar a Básico **sin borrar historias ni desactivar usuarios silenciosamente**.
+- [ ] Pruebas del límite Básico 2→3 y Plus/Full 8→9, concurrencia, revocación de invitación, email confirmado y bloqueo de autoelevación. BT-CP02-D sigue en el otro chat.

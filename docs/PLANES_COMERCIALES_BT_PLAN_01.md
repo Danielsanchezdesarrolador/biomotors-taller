@@ -37,18 +37,18 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 - Impresión/descarga de documentos cuando la función PDF exista realmente; NO envío automatizado de PDF por correo.
 - NO generación de enlaces de registro del cliente: el taller captura sus antecedentes manualmente.
 - Gratis sin publicidad durante el lanzamiento.
-- Límites de usuarios, nuevas OT, almacenamiento y cuotas sin aprobar aún. Nunca bloquear acceso al historial propio ni su exportación por descenso de plan.
+- **Hasta 2 mecánicos por taller** (BT-PLAN-03). Los cupos de otros roles, nuevas OT, almacenamiento y demás cuotas siguen pendientes. Nunca bloquear acceso al historial propio ni su exportación por descenso de plan.
 
 **Plus — USD 5/mes:**
 - Básico completo.
 - Enlaces seguros de registro: datos del cliente, marca, modelo, año, kilometraje y motivo de visita; solicitud pendiente de revisión por taller.
 - Envío automatizado de informes PDF a clientes con dirección confirmada y seguimiento del estado del envío, al contar con backend seguro.
-- Personalización de documentos y múltiples usuarios, sujeto a límites aún no fijados.
+- Personalización de documentos y **hasta 8 mecánicos por taller** (BT-PLAN-03); otras cuotas aún por definir.
 
 **Full — USD 15/mes:**
 - Plus completo.
 - Roles avanzados, reportes y métricas detalladas, recordatorios de mantenciones, automatizaciones y controles superiores sujetos a implementación. No presentar funciones futuras como ya disponibles.
-- Capacidad y cupos superiores aún pendientes de decisión.
+- **Hasta 8 mecánicos por taller**, igual que Plus (BT-PLAN-03). Capacidades superiores de otro tipo, por ejemplo almacenamiento o funciones avanzadas, aún pendientes de definición.
 - Prueba Full de 3 días conforme a sección 2.
 
 **Innegociable para TODOS:** protección de datos, autorización por taller, RLS, acceso a su propia información, integridad de historial y posibilidad de exportar. Seguridad no es un beneficio exclusivo de Full.
@@ -66,7 +66,7 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 
 ## 5. Trabajo pendiente
 
-- Ratificar límites de usuarios/OT/correos/enlaces y el alcance exacto de Plus/Full.
+- **Cupo de mecánicos decidido en BT-PLAN-03** (2 Básico; 8 Plus/Full). Ratificar cupos de otros roles, límites de OT/correos/enlaces, gestión de reducciones de plan y alcance exacto de Plus/Full.
 - Definir IVA/impuestos, conversión CLP, pasarela elegible, términos, política de reembolsos y costos de operación.
 - Diseñar posteriormente el panel «Plan y suscripción» con fecha exacta del primer cobro, estado y botón de desactivar renovación.
 - Implementar posteriormente suscripción real solo con autorización específica del Director.
@@ -96,3 +96,23 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 **Cambio o vencimiento de plan:** al bajar a Básico, no eliminar silenciosamente formatos propios ni información histórica. El taller podrá consultar/exportar sus archivos existentes por medios autorizados, pero **crear, importar, editar o escoger plantillas premium para nuevos documentos quedará bloqueado** mientras esté en Básico. Los informes históricos ya emitidos mantendrán su versión de plantilla para consulta. En **prueba Full de 72 horas** la función estará disponible temporalmente, sujeta a controles de seguridad y elegibilidad; una vez expirada aplica el plan efectivo.
 
 **Estado de implementación:** **requisito aprobado y documentado, NO implementado**. No se ha habilitado subida real, conversión, storage ni políticas. Codex trabaja en la digitalización interactiva BT-INS-01: **no modificar código ni alcance de Codex en paralelo** sin nueva indicación.
+
+
+## BT-PLAN-03 — Cupos de mecánicos por taller (decisión aprobada 14/11/2026)
+
+**Decisión expresa del Director:** en `Configuración → Usuarios y permisos`, el administrador del taller podrá incorporar mecánicos hasta el cupo de su plan. El cupo se refiere a **mecánicos**, no al total combinado de usuarios. **No incluir al propietario ni al administrador de taller dentro de estos cupos.** Las cuotas de propietarios/administradores adicionales siguen sujetas a diseño específico y nunca se pueden crear mediante el botón de mecánicos.
+
+| Plan | Precio de catálogo | Mecánicos máximos por taller |
+|---|---:|---:|
+| Básico | Gratis | **2** |
+| Plus | USD 5/mes | **8** |
+| Full | USD 15/mes | **8** |
+| Prueba Full de 72 horas | Según términos de prueba Full autorizada | **8 mientras el plan efectivo sea Full** |
+
+**Experiencia propuesta:** contador `Mecánicos 0/2` o `Mecánicos 0/8`, listado de nombre/correo/estado, acciones `Invitar mecánico`, `Reenviar invitación` y `Desactivar acceso`, sujetas a permisos. Al alcanzar el máximo mostrar «Alcanzaste el límite de mecánicos de tu plan»; el plan Básico podrá sugerir Plus/Full, sin activar pagos desde React. El mecánico invitado necesita confirmar correo para acceder. El administrador **puede invitar/desactivar exclusivamente miembros con rol mechanic del mismo taller**, pero no dar roles `admin`/`owner`, modificar su propio rol ni gestionar planes/titularidad por esa facultad. El propietario conserva la facultad de delegación sensible.
+
+**Control transaccional en servidor:** el plan efectivo y la pertenencia se verifican en backend, no mediante estado React o metadatos editables. Para impedir crear más invitaciones que cupos, contabilizar mecánicos activos **y reservas vigentes de invitaciones pendientes** sin duplicar la misma identidad; asignación/aceptación y cambios de rol deben validar el cupo atómicamente, con límites antiabuso. Una invitación revocada o caducada libera su reserva. La condición de email verificado es independiente del cupo y obligatoria para usar el acceso.
+
+**Pendiente por política de cambios de plan:** definir qué sucede con el acceso operativo de los mecánicos que excedan 2 cuando Full/Plus pase a Básico, sin borrar cuentas, registros, inspecciones ni atribuciones históricas; **no desactivar personas ni eliminar datos silenciosamente**. Mientras la política definitiva no esté ratificada, presentar advertencia de ajuste de cupos y bloquear nuevas invitaciones; no afirmar que esa transición ya está implementada.
+
+**Estado técnico:** regla comercial documentada. **Sin** Auth real, invitaciones verdaderas, control de cupos de servidor, facturación ni migraciones aplicadas. Requiere BT-CP02-D aprobado y posterior fase BT-AUTH-01B/C.
