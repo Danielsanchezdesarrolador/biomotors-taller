@@ -81,8 +81,8 @@ export function AccessScreens({
     login: [
       'Inicia sesión',
       context === 'mecanico'
-        ? 'Acceso técnico a órdenes asignadas e inspecciones.'
-        : 'Accede a ByteTorque y gestiona tu taller.'
+        ? 'El acceso técnico requerirá correo verificado y asignación del taller.'
+        : 'El acceso al taller requerirá correo verificado y autorización.'
     ],
     register: ['Crea tu cuenta', 'Comienza a preparar el acceso a ByteTorque para tu taller.'],
     verify: [

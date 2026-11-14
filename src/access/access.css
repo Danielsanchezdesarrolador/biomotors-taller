@@ -23,7 +23,7 @@
   background: linear-gradient(#031b36 0%, #031b360d 38%, #0633651a), url('/hero-workshop.webp');
   background-size:
     100% 100%,
-    125% auto;
+    cover;
   background-position:
     center,
     calc(100% - 210px) top;

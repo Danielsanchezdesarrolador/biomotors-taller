@@ -28,6 +28,7 @@ describe('BT-AUTH-01A visual access without authentication', () => {
       <AccessScreens page={page} presentation="administrador" onNavigate={() => {}} />
     )
     expect(html).toContain('Vista de revisión — sin autenticación real')
+    if (page === 'login') expect(html).toContain('correo verificado')
     expect(html).not.toContain(authReviewAccount.email)
     expect(html).not.toContain(authReviewAccount.password)
     for (const input of html.match(/<input[^>]*>/g) ?? []) expect(input).toContain('disabled=""')
