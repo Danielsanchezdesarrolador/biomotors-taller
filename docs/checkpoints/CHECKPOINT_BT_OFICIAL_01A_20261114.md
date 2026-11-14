@@ -108,3 +108,12 @@ Altas/edición de clientes y vehículos, recepción, OT, inspecciones, propuesta
 Pendientes: **revisión visual del Director y pruebas físicas Safari/iPhone**. El dominio con `-demo` sigue siendo el existente, no un dominio comercial propio. Esta interfaz no equivale a SaaS operativo ni certificación de seguridad real.
 
 **Detenerse al completar 01A. No iniciar BT-OFICIAL-01B, BT-CP02-D, BT-COM-01 ni backend.**
+
+
+### Verificación remota independiente (ChatGPT, 14/11/2026)
+
+- GitHub Actions principal [43553527817](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527817): **SUCCESS** sobre `874b39a`; Web/iOS PWA PASS (17 archivos de pruebas, 111/111 casos según checkpoint y ejecución), build/PWA PASS y Android Expo validación técnica PASS (no APK).
+- [Verificación de interfaz pública 43553527881](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527881): **SUCCESS** sobre el mismo SHA.
+- Revisión visual preliminar de las capturas `BT_OFICIAL_01A_1_390.png`, `BT_OFICIAL_01A_3_390.png`, `BT_OFICIAL_01A_5_390.png`, `BT_OFICIAL_01A_1_1650.png`: cinco áreas R2 conservadas, vacíos de clientes/vehículos, cero indicadores de negocio ficticios, estado de Configuración no configurado, marca ByteTorque visible y advertencia persistente de que aún no se deben ingresar datos reales. No se identifican fallos visuales bloqueantes en estas imágenes. **Esto no es aprobación visual del Director ni prueba física Safari.**
+- Codex documentó la publicación byte a byte de HTML/JS/CSS/manifiesto en Render; la revisión independiente aquí se limitó a GitHub, checkpoints y capturas versionadas. La dirección del sitio conserva `-demo` hasta decisión de dominio separada.
+- Sin cambios funcionales o en Supabase; 01B/BT-CP02-D siguen sin iniciarse.

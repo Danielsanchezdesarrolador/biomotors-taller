@@ -598,3 +598,6 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 - [ ] Revisión visual del Director de 01A y pruebas físicas Safari/iPhone. No equivale a habilitar datos reales.
 - [ ] 01B / BT-CP02-D siguen reservados; no se inició Auth/RLS, persistencia, correo, cobros ni piloto real.
+
+
+**Auditoría independiente 14/11/2026:** [CI final 43553527817](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527817) y [UI pública 43553527881](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43553527881), ambos **SUCCESS** en `874b39a`. Revisión preliminar de Inicio/Clientes/Configuración móvil y escritorio sin hallazgos bloqueantes; aprobación del Director y Safari físico pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md).
