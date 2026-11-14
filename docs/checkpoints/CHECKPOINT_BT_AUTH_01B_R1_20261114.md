@@ -174,3 +174,12 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - GitHub Actions: al menos un workflow del commit `dcb6653` finalizó `SUCCESS`; otro estaba en ejecución al consultarlo, no declararlo aprobado hasta confirmar.
 - La advertencia de Security Advisor `auth_leaked_password_protection` permanece, no corresponde decir «0 advertencias». No habilitar login público, registro, correos ni operaciones reales.
 - Siguiente foco: rol `reception` y rol `admin` mediante cuentas ficticias controladas, selección de talleres y dispositivo físico. Los dos propietarios y el mecánico no se deben eliminar hasta concluir pruebas y definir limpieza.
+
+### Recepción: cuenta ficticia preparada, validación de pantalla pendiente (14/11/2026)
+
+- El Director creó `bt-r1-recepcion-1411@example.com` en Supabase Auth. SQL verificó email confirmado y 0 membresías antes de la vinculación.
+- Mediante operación administrativa de alcance estricto se creó perfil ficticio `Recepcion de Pruebas` y una membresía `reception/active` exclusivamente para `Taller ByteTorque de Pruebas` (Taller A).
+- Verificación posterior de solo lectura: propietario A `owner/active`, mecánico A `mechanic/active`, propietario B `owner/active` y recepcionista A `reception/active`. Taller B sin membresía de recepción.
+- Código existente `src/auth/controller.ts`: rol `reception` produce estado `restricted` y mensaje «Acceso restringido. Las funciones de recepción están pendientes de definición.»; `RealAccess.tsx` no renderiza panel privado para ese estado. **Prueba manual del Director en el navegador pendiente**.
+- Prueba planificada: iniciar sesión con recepción seleccionando «Administrador» y confirmar que se muestra aviso restringido sin panel administrativo; luego F5 y comprobar que no se elevan permisos.
+- No se modificaron tablas, RLS ni frontend; solo fixture de prueba autorizado. Render continúa con login real apagado.

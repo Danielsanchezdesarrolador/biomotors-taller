@@ -734,3 +734,9 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] No declarar completo el sistema de permisos operativos ni activar acceso público por superar una prueba de rol.
 
 - [ ] **R1 — Roles siguientes:** pruebas controladas `reception` y `admin` con cuentas ficticias, sin privilegios por selector de UI. La segregación de datos operativos futuros sigue fuera del alcance de esta suite de solo lectura.
+
+### BT-AUTH-01B-R1 — Recepción, preparación real (14/11/2026)
+
+- [x] Usuario de prueba confirmado y miembro `reception/active` exclusivamente en Taller A. SQL confirmó que los tres miembros anteriores siguen con sus roles intactos.
+- [ ] Probar login real de recepción seleccionando «Administrador»: debe mostrar «Acceso restringido. Las funciones de recepción están pendientes de definición.» sin panel administrativo; verificar F5 y logout después.
+- [ ] Definir permisos operativos de recepción en fase posterior y probarlos mediante API RLS cuando exista backend de negocio. Mantener Render/Auth público sin cambios.
