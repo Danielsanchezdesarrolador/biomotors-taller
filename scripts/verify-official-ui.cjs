@@ -109,8 +109,10 @@ const { chromium } = require('playwright'),
           '/tests/fixtures/records.ts',
           '/@fs/workspace/biomotors-taller/tests/fixtures/records.ts'
         ]) {
-          const response = await p.request.get(base + url)
-          const text = await response.text()
+          const text = await p.evaluate(async (url) => {
+            const response = await fetch(url, { signal: AbortSignal.timeout(15000) })
+            return response.text()
+          }, url)
           assert.doesNotMatch(text, /OT-1001|Camila Muñoz|export const orderFixtures|WorkflowApp/)
         }
         assert.deepEqual(await p.evaluate(() => window.__persistentWrites), [])
