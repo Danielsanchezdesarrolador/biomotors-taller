@@ -96,8 +96,15 @@ Recorrido completo **sobre la URL publicada a 1650 y 390 px: PASS**, incluidos r
 
 El contexto de prueba Chromium remoto usó `ignoreHTTPSErrors` por la CA del proxy del entorno, sin cambiar aplicación o despliegue; `curl`/Python mantuvieron validación TLS en la comparación de bytes. No sustituye Safari o Android físicos. El commit documental no modifica los bundles.
 
-Actions remoto **no confirmado**: `gh run list` devuelve Forbidden desde este entorno. Los PASS anteriores son ejecuciones locales comprobadas, sin atribuirles estado SUCCESS remoto. El workflow actualizado incluye los nuevos recorridos y análisis PDF para ejecución en GitHub.
+Actions remoto inicialmente **no confirmado desde Codex** por `Forbidden`; confirmado posteriormente desde ChatGPT: [workflow final 43547511794](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43547511794) **SUCCESS sobre `9495e05`**. Log del job Web/iOS PWA: **103/103 Vitest en 16 archivos**, build/PWA PASS. Android Expo CI también SUCCESS (sin generar APK). En el commit funcional `2529494`, [BT-FLOW-01 43546894985](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43546894985) SUCCESS, [BT-COT-01 43546894989](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43546894989) SUCCESS y [verificación general 43546895010](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43546895010) SUCCESS.
 
 ## Punto de parada
 
 BT-QA-02 completada técnicamente para revisión visual del Director. Safari/iPhone y visor Android físicos pendientes. **No iniciar BT-COM-01 ni backend**; no hay correo consolidado, adjuntos operativos, identidad/aceptación real o persistencia nueva.
+
+
+## Revisión visual preliminar independiente de las capturas (ChatGPT, 13/11/2026)
+
+Se inspeccionaron los PNG versionados `BT_QA_02_ANTES_COTIZACION_390.png`, `BT_QA_02_COTIZACION_4_390.png` y `BT_QA_02_COTIZACION_12_390.png`: antes, cuatro tarjetas grandes y repetitivas; después, filas compactas con descripción, cantidad, unitario y total, con subtotal/IVA/total al final y «Ver detalle / Editar ítems». Texto largo ajusta sin cortar precios. Se mantiene R2. El menú inferior fijo aparece entre segmentos de capturas `fullPage` de 12 ítems, lo cual no demuestra que tape controles en interacción; probar en Safari iPhone físico y en el Android real del Director antes de declarar aprobación definitiva.
+
+**Estado:** documentación actualizada, sin cambios funcionales nuevos. BT-COM-01 y backend siguen sin iniciar. La aprobación visual final pertenece al Director.
