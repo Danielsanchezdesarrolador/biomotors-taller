@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { AlertTriangle, CheckCircle2, Clock3, ClipboardCheck, FileText, PauseCircle, XCircle } from 'lucide-react'
+import { useId, useRef, useState } from 'react'
+import { AlertTriangle, CheckCircle2, Clock3, ClipboardCheck, FileText, PauseCircle, XCircle, MoreHorizontal } from 'lucide-react'
 import { readCase, type FlowCase } from './flowSession'
 import { FlowDialog } from './FlowQuotePanels'
 import { currency } from '../informes/trabajos/trabajosData'
@@ -18,6 +18,9 @@ const defaults: DeliveryChecklist = {
 
 export function FlowVisitActions({visit}:{visit:FlowCase}) {
   const state = deliveryState(visit)
+  const [optionsOpen,setOptionsOpen] = useState(false)
+  const optionsId = useId()
+  const optionsTrigger = useRef<HTMLButtonElement>(null)
   const [mode,setMode] = useState<'pause'|'cancel'|'resolve'|null>(null)
   const [target,setTarget] = useState('')
   const [reason,setReason] = useState<VisitHoldReason>('repuestos')
@@ -25,7 +28,7 @@ export function FlowVisitActions({visit}:{visit:FlowCase}) {
   const [accepted,setAccepted] = useState(false)
   const [error,setError] = useState('')
   const open = (kind:'pause'|'cancel'|'resolve', id='') => {
-    setMode(kind);setTarget(id);setNote('');setAccepted(false);setError('')
+    setOptionsOpen(false);setMode(kind);setTarget(id);setNote('');setAccepted(false);setError('')
   }
   const submit = () => {
     try {
@@ -36,7 +39,9 @@ export function FlowVisitActions({visit}:{visit:FlowCase}) {
       setMode(null)
     }catch(e){setError((e as Error).message)}
   }
-  return <section className="fl-visit-actions dashboard-card" aria-label="Estado y excepciones de la visita">
+  return <section className="fl-visit-actions dashboard-card" aria-label="Estado y excepciones de la visita" onKeyDown={e=>{
+    if(e.key==='Escape' && optionsOpen){e.preventDefault();setOptionsOpen(false);optionsTrigger.current?.focus()}
+  }}>
     <div className="fl-status-head">
       <strong>Estado de la visita</strong>
       <span className={'fl-lifecycle fl-life-'+state.status}>
@@ -58,9 +63,12 @@ export function FlowVisitActions({visit}:{visit:FlowCase}) {
       Entrega DEMO registrada el {date(state.delivery!.date)}. Sin envío, firma ni respaldo permanente.
     </p> : state.status==='cierre_desactualizado' ? <p className="fl-business-warning">
       Se modificaron antecedentes tras una entrega simulada. El registro anterior permanece visible, pero ya no constituye un cierre vigente.
-    </p> : <div className="fl-visit-buttons">
+    </p> : <div className="fl-visit-options">
+      <button ref={optionsTrigger} className="rp-secondary fl-options-toggle" type="button" aria-expanded={optionsOpen} aria-controls={optionsId} onClick={()=>setOptionsOpen(!optionsOpen)}><MoreHorizontal/> Opciones de visita</button>
+      <div className="fl-visit-buttons" id={optionsId} hidden={!optionsOpen} role="group" aria-label="Opciones del expediente completo">
       <button type="button" className="rp-secondary" onClick={()=>open('pause')}><PauseCircle/> Registrar espera DEMO</button>
       <button type="button" className="rp-secondary" onClick={()=>open('cancel')}><XCircle/> Cancelar visita DEMO</button>
+      </div>
     </div>}
     {state.holds.length>0 && <details className="fl-hold-history">
       <summary>Historial de pausas ({state.holds.length})</summary>
@@ -71,7 +79,7 @@ export function FlowVisitActions({visit}:{visit:FlowCase}) {
     {mode && <FlowDialog title={
         mode==='pause'?'Registrar espera de vehículo · DEMO':
         mode==='cancel'?'Cancelar la visita · DEMO':'Resolver una espera · DEMO'
-      } onClose={()=>setMode(null)}>
+      } onClose={()=>{setMode(null);requestAnimationFrame(()=>optionsTrigger.current?.focus())}}>
       <p>Esta operación solo modifica el expediente temporal de muestra, sin mensajes, pagos o acciones reales.</p>
       {mode==='pause' && <label>Causa de la espera
         <select aria-label="Causa de la espera" value={reason} onChange={e=>setReason(e.target.value as VisitHoldReason)}>

@@ -12,7 +12,7 @@ export function WorkItemsTable({
   onEdit: (item?: WorkItem) => void
   onDelete: (item: WorkItem) => void
   onPerformed: (id: string, value: boolean) => void
-  onTemplate: () => void
+  onTemplate?: () => void
 }) {
   return (
     <section className="dashboard-card wt-items wt-card">
@@ -23,9 +23,9 @@ export function WorkItemsTable({
             ? 'Detalle de los trabajos a realizar'
             : 'Detalle de trabajos · Confirmación del operador'}
         </h2>
-        <button className="rp-secondary" onClick={onTemplate}>
+        {onTemplate && <button className="rp-secondary" onClick={onTemplate}>
           Cargar plantilla
-        </button>
+        </button>}
       </header>
       {d.mode === 'work' && (
         <p className="wt-help">

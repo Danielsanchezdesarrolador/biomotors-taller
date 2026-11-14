@@ -1408,3 +1408,10 @@
 .fl-delivery .fl-business-actions button{justify-content:center;min-height:48px}
 .fl-delivery>.rp-primary{min-height:50px;scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
 }
+
+/* QA02: visit-wide actions remain distinct from the current milestone. */
+.fl-visit-options { margin-top: 9px; }
+.fl-options-toggle { min-height: 44px; font-size: 13px; }
+.fl-options-toggle svg { width: 18px; height: 18px; }
+.fl-visit-buttons[hidden] { display: none; }
+.fl-visit-options .fl-visit-buttons { margin-top: 8px; }

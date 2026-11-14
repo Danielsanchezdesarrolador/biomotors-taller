@@ -4,10 +4,8 @@ import { beginCaseProposal, readCase, type FlowCase } from './flowSession'
 import { businessState, confirmProposal } from './flowBusiness'
 import {
   editWorkDocument,
-  loadWorkTemplate,
   putWorkItem,
   validateWorkDocument,
-  workTemplates,
   type WorkItem,
   type WorkPatch
 } from '../informes/trabajos/trabajosData'
@@ -17,7 +15,6 @@ import { FlowDialog } from './FlowQuotePanels'
 type Modal =
   | { type: 'item'; item?: WorkItem; revision: number }
   | { type: 'delete'; id: string }
-  | { type: 'template' }
   | { type: 'confirm'; quoteId: string; revision: number }
 export function FlowProposalPanel({
   visit,
@@ -32,8 +29,7 @@ export function FlowProposalPanel({
 }) {
   const [modal, setModal] = useState<Modal | null>(null),
     [error, setError] = useState(''),
-    [ack, setAck] = useState(false),
-    [template, setTemplate] = useState(workTemplates[0].id)
+    [ack, setAck] = useState(false)
   const state = businessState(visit),
     quote = state.quote
   function edit(patch: WorkPatch) {
@@ -122,7 +118,6 @@ export function FlowProposalPanel({
           onEdit={(item) => open({ type: 'item', item, revision: quote.revision })}
           onDelete={(item) => open({ type: 'delete', id: item.id })}
           onPerformed={() => {}}
-          onTemplate={() => open({ type: 'template' })}
         />
       </div>
       <p className="fl-help">
@@ -169,9 +164,7 @@ export function FlowProposalPanel({
               ? 'Partida de la propuesta'
               : modal.type === 'delete'
                 ? 'Quitar partida'
-                : modal.type === 'template'
-                  ? 'Plantilla DEMO de propuesta'
-                  : 'Confirmación del mecánico · DEMO'
+                : 'Confirmación del mecánico · DEMO'
           }
           onClose={() => setModal(null)}
         >
@@ -199,36 +192,6 @@ export function FlowProposalPanel({
                 }}
               >
                 Confirmar eliminación
-              </button>
-            </>
-          ) : modal.type === 'template' ? (
-            <>
-              <label>
-                Plantilla DEMO
-                <select
-                  aria-label="Plantilla de propuesta DEMO"
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                >
-                  {workTemplates.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p>
-                Reemplaza las partidas con un ejemplo que debes revisar. No cambia el diagnóstico ni
-                confirma precios automáticamente.
-              </p>
-              <button
-                className="rp-primary"
-                onClick={() => {
-                  rememberWorkDocument(loadWorkTemplate(readWorkDocument(quote.id)!, template))
-                  setModal(null)
-                }}
-              >
-                Confirmar reemplazo de partidas
               </button>
             </>
           ) : (
