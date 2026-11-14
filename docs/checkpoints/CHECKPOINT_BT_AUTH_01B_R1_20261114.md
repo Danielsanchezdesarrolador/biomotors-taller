@@ -157,5 +157,11 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - El Director creó en Supabase Auth la cuenta ficticia `bt-r1-mecanico-1411@example.com` (correo confirmado), inicialmente sin membresía.
 - Se creó un perfil ficticio y membresía **`role=mechanic`, `status=active`** exclusivamente para `Taller ByteTorque de Pruebas` (Taller A), sin modificar al propietario ni el Taller B. Verificación SQL posterior: Taller A tiene 1 propietario y 1 mecánico activos; Taller B tiene 1 propietario y 0 mecánicos.
 - Prueba manual del Director sobre localhost: el mecánico ingresó seleccionando intencionalmente **«Administrador»** y la app lo restringió al espacio de **Mecánico**. **PASS funcional de separación de rol en UI tras leer la membresía real**, no certificación completa de operaciones futuras.
-- Aún pendientes: revalidación tras F5, comprobaciones de datos mediante API RLS con esa identidad, roles adicionales (`admin`, `reception`), persistencia operativa, Safari/PWA y limpieza controlada de fixtures.
+- **Persistencia del rol tras F5: PASS reportado por el Director**. La interfaz conservó la vista Mecánico restringida. Pendientes: prueba API RLS con esa identidad, roles adicionales (`admin`, `reception`), Safari/PWA, persistencia y limpieza controlada de fixtures.
 - Supabase mantiene advertencia del Security Advisor: protección de contraseñas filtradas desactivada; no se modificó.
+
+### Prueba API real del mecánico preparada (14/11/2026)
+
+- Comprobación SQL: cuenta `mechanic/active` del Taller A; propietario A y propietario B mantienen su `owner/active` sin cambios.
+- Añadido script [RLS mecánico](../../scripts/security/bt-auth-r1-mechanic-readonly.mjs) y [runbook](../BT_AUTH_01B_R1_MECHANIC_RLS_RUNBOOK.md), con **11 comprobaciones esperadas aún no ejecutadas**.
+- Sin cambios en políticas Supabase, esquema, Android ni flags de Render. No afirmar certificación de permisos de escritura de módulos futuros.

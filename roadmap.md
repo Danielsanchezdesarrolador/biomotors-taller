@@ -729,5 +729,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 - [x] Usuario Auth ficticio confirmado, perfil y membresía `mechanic/active` del Taller A, comprobados por SQL; propietarios A/B sin cambios.
 - [x] **Control real de rol en UI: PASS reportado por el Director**. Aunque seleccionó «Administrador» en el formulario, la aplicación mostró el espacio técnico restringido y no el panel administrativo.
-- [ ] Repetir F5 como mecánico y comprobar que el rol no cambia tras recuperar sesión; contrastar lecturas RLS directamente usando su identidad en etapa posterior.
+- [x] **F5 real del mecánico PASS**, reportado por el Director: rol y espacio técnico restringido conservados.
+- [ ] Ejecutar **11 comprobaciones API RLS de lectura con identidad Mecánico**, siguiendo [runbook](docs/BT_AUTH_01B_R1_MECHANIC_RLS_RUNBOOK.md). Script preparado; aún sin ejecución real.
 - [ ] No declarar completo el sistema de permisos operativos ni activar acceso público por superar una prueba de rol.
