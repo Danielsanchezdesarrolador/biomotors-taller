@@ -6,6 +6,7 @@ export type WorkMode = 'quote' | 'work'
 export type WorkItem = Omit<LineItem, 'type'> & {
   type: LineItem['type'] | 'Insumo'
   performed: boolean
+  origin?: 'OT confirmada' | 'Definición manual' | 'Plantilla DEMO' | 'Cotización aceptada DEMO'
 }
 export type WorkState = 'Borrador' | 'Pendiente de revisión' | 'Aprobado DEMO' | 'Finalizado DEMO'
 export type WorkDocument = {
@@ -24,6 +25,8 @@ export type WorkDocument = {
   items: WorkItem[]
   status: WorkState
   revision: number
+  proposalRevision?: number
+  sourceQuote?: { visitId: string; quoteId: string; revision: number }
   saved: boolean
   approval: null | { name: string; date: string; total: number; revision: number; simulation: true }
   inspection: null | {
@@ -66,9 +69,15 @@ export function createWorkDocument(orderId: string, mode: WorkMode): WorkDocumen
     comments: '',
     diagnosis: order.diagnosis,
     recommendations: order.recommendation,
-    items: source.items.map((i) => ({ ...i, id: crypto.randomUUID(), performed: false })),
+    items: source.items.map((i) => ({
+      ...i,
+      id: crypto.randomUUID(),
+      performed: false,
+      origin: 'OT confirmada'
+    })),
     status: 'Borrador',
     revision: 0,
+    proposalRevision: 0,
     saved: false,
     approval: null,
     inspection: null,
@@ -121,6 +130,13 @@ export function editWorkDocument(doc: WorkDocument, patch: WorkPatch): WorkDocum
     ...doc,
     ...structuredClone(patch),
     revision: doc.revision + 1,
+    proposalRevision:
+      (doc.proposalRevision ?? 0) +
+      Number(
+        (['items', 'diagnosis', 'recommendations', 'comments'] as const).some(
+          (key) => key in patch && JSON.stringify(patch[key]) !== JSON.stringify(doc[key])
+        )
+      ),
     status: 'Borrador',
     approval: null,
     saved: false
@@ -141,6 +157,16 @@ export function putWorkItem(doc: WorkDocument, item: WorkItem): WorkDocument {
     throw new Error(
       'Este ítem ya existe. Edita su cantidad para evitar una duplicación accidental.'
     )
+  const previous = doc.items.find((i) => i.id === item.id)
+  const unchanged =
+    previous &&
+    (['description', 'type', 'quantity', 'price'] as const).every(
+      (key) => previous[key] === item[key]
+    )
+  item = {
+    ...item,
+    origin: unchanged ? (previous.origin ?? 'Definición manual') : 'Definición manual'
+  }
   const items = doc.items.some((i) => i.id === item.id)
     ? doc.items.map((i) =>
         i.id === item.id ? { ...item, description: item.description.trim() } : i
@@ -221,7 +247,12 @@ export function loadWorkTemplate(doc: WorkDocument, id: string): WorkDocument {
   const template = workTemplates.find((t) => t.id === id)
   if (!template) throw new Error('Plantilla DEMO inexistente.')
   return editWorkDocument(doc, {
-    items: template.items.map((i) => ({ ...i, id: crypto.randomUUID(), performed: false }))
+    items: template.items.map((i) => ({
+      ...i,
+      id: crypto.randomUUID(),
+      performed: false,
+      origin: 'Plantilla DEMO'
+    }))
   })
 }
 export function availableInspections(doc: WorkDocument) {
