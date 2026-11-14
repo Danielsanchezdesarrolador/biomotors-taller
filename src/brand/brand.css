@@ -1,0 +1,74 @@
+.bt-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+  vertical-align: middle;
+}
+.bt-brand > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: none;
+}
+.bt-brand-horizontal {
+  width: 300px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #d6e5fa;
+  background: #fff;
+}
+.bt-brand-icon {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+}
+.access-brand > .bt-brand-horizontal {
+  width: 322px;
+}
+.brand > .bt-brand-horizontal {
+  width: 216px;
+  padding: 6px 8px;
+  border-radius: 9px;
+}
+.shell-mobile-brand {
+  display: none;
+}
+.bt-software {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.bt-software img {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+@media (max-width: 760px) {
+  .shell-mobile-brand {
+    display: flex;
+    flex-shrink: 0;
+  }
+  .shell-mobile-brand .bt-brand-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .brand > .bt-brand-horizontal {
+    width: min(200px, calc(100vw - 130px));
+  }
+  .access-brand > .bt-brand-horizontal {
+    width: 228px;
+  }
+}
+@media print {
+  .bt-software {
+    break-inside: avoid;
+  }
+}

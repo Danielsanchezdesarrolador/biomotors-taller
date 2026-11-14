@@ -1,3 +1,4 @@
+import { BrandLogo } from '../brand/BrandLogo'
 import { useState, type ReactNode } from 'react'
 import {
   ArrowLeft,
@@ -192,13 +193,7 @@ export function AccessScreens({
               navigate(accessPaths.login)
             }}
           >
-            <span className="access-brand-mark">
-              <Wrench />
-            </span>
-            <span>
-              Byte<b>Torque</b>
-              <small>Gestión de Talleres</small>
-            </span>
+            <BrandLogo />
           </a>
           <div className="access-marketing">
             <h2>

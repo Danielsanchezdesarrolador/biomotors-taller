@@ -2,7 +2,7 @@ name: BT-OFICIAL-01A — Interfaz pública y exclusión de fixtures
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'tests/**', 'vite*.ts', 'vitest.config.ts', 'scripts/**', 'public/**', 'package.json', '.github/workflows/bt-oficial-01.yml']
+    paths: ['src/**', 'assets/**', 'tests/**', 'vite*.ts', 'vitest.config.ts', 'scripts/**', 'public/**', 'package.json', '.github/workflows/bt-oficial-01.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -39,6 +39,7 @@ jobs:
           done
           node scripts/verify-official-ui.cjs
           node scripts/verify-auth-ui.cjs
+          node scripts/verify-brand-ui.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -46,5 +47,6 @@ jobs:
           path: |
             artifacts/bt-oficial-01a/
             artifacts/bt-auth-01a/
+            artifacts/bt-brand-01/
           if-no-files-found: warn
           retention-days: 30

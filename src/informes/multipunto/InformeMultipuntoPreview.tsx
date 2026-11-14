@@ -1,3 +1,4 @@
+import { SoftwareAttribution } from '../../brand/BrandLogo'
 import { Wrench } from 'lucide-react'
 import { MultipuntoTable } from './MultipuntoTable'
 import { counts, type MultipuntoReport, type Result } from './multipuntoData'
@@ -115,7 +116,7 @@ export function InformeMultipuntoPreview({
         <br />
         {r.photos.length} fotografías temporales (no incorporadas en esta hoja). {r.workshop.footer}
         <br />
-        Preparado con ByteTorque · Datos ficticios · Sin envío real.
+        <SoftwareAttribution /> · Datos ficticios · Sin envío real.
       </footer>
     </article>
   )

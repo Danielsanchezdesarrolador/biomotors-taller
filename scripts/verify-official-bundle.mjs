@@ -5,7 +5,7 @@ assert.ok(modules.length > 0)
 assert.ok(
   modules.every(
     (id) =>
-      id.endsWith('.css') || /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/)/.test(id)
+      id.endsWith('.css') || /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/)/.test(id)
   )
 )
 for (const name of readdirSync('dist/assets')) {

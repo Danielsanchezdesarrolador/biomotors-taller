@@ -16,7 +16,7 @@ export default defineConfig({
           (id) =>
             /\.test\./.test(id) ||
             (!id.endsWith('.css') &&
-              !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/)/.test(id))
+              !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/)/.test(id))
         )
         if (forbidden.length)
           this.error('Public build imported non-public modules: ' + forbidden.join(', '))

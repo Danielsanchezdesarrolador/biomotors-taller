@@ -1,3 +1,4 @@
+import { SoftwareAttribution } from '../../brand/BrandLogo'
 import { FileText, UserRound, Wrench } from 'lucide-react'
 import { documentContext } from '../documentosData'
 import { currency, includedItems, workModes, workTotals, type WorkDocument } from './trabajosData'
@@ -194,7 +195,7 @@ export function WorkDocumentPreview({ document: d }: { document: WorkDocument })
         <WorkApproval document={d} />
       </section>
       <footer>
-        <FileText /> Preparado con ByteTorque · {d.workshop.footer}
+        <FileText /> <SoftwareAttribution /> · {d.workshop.footer}
         <br />
         Muestra sin valor tributario. Sin envío externo ni autorización legal.
       </footer>

@@ -1,3 +1,4 @@
+import { BrandLogo } from '../brand/BrandLogo'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowRight,
@@ -97,13 +98,7 @@ export function AppShell({
             onClick={() => navigate('inicio')}
             aria-label="ByteTorque, ir al inicio"
           >
-            <span className="brand-mark">
-              <Wrench size={23} strokeWidth={2.8} />
-            </span>
-            <span className="brand-name">
-              Byte<span>Torque</span>
-              <small>Gestión de Talleres</small>
-            </span>
+            <BrandLogo decorative />
           </button>
           <button
             type="button"
@@ -154,6 +149,9 @@ export function AppShell({
           >
             <Menu size={23} />
           </button>
+          <span className="shell-mobile-brand">
+            <BrandLogo variant="icon" />
+          </span>
           <div className="topbar-search">
             <Search size={18} aria-hidden="true" />
             <input
@@ -231,7 +229,9 @@ export function AppShell({
               {showAccount && (
                 <div className="top-popover account-popover">
                   <strong>ByteTorque</strong>
-                  <a className="access-entry-link" href="/#/acceso">Ver pantalla de acceso</a>
+                  <a className="access-entry-link" href="/#/acceso">
+                    Ver pantalla de acceso
+                  </a>
                   <p>
                     La autenticación y gestión de talleres se habilitarán en una etapa posterior.
                   </p>

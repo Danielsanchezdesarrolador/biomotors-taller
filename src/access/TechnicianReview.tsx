@@ -1,3 +1,4 @@
+import { BrandLogo } from '../brand/BrandLogo'
 import { ArrowLeft, Camera, ClipboardCheck, Wrench } from 'lucide-react'
 import { EmptyCard, UnavailableAction } from '../official/OfficialPanels'
 import { ReviewBanner } from './ReviewBanner'
@@ -6,9 +7,7 @@ export function TechnicianReview({ onNavigate }: { onNavigate: (path: string) =>
   return (
     <main className="technician-review">
       <header>
-        <span className="access-brand-mark">
-          <Wrench />
-        </span>
+        <BrandLogo variant="icon" decorative />
         <div>
           <strong>ByteTorque</strong>
           <small>Área técnica · Revisión visual</small>
