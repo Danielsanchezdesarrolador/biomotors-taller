@@ -7,3 +7,11 @@ dist/
 *.log
 .DS_Store
 coverage/
+
+# BT-BRAND-01: copied from versioned assets/brand/generated at every build.
+/public/icon-192.png
+/public/icon-512.png
+/public/apple-touch-icon.png
+/public/icon-maskable-512.png
+/public/favicon-32.png
+/public/favicon-48.png

@@ -1,0 +1,141 @@
+{
+  "edition": "BT-BRAND-01",
+  "pillow": "13.0.0",
+  "originals": [
+    {
+      "path": "assets/brand/originals/bytetorque_icono_oficial_original.png",
+      "sha256": "1322fdbc00c4dccad0d7c7e8fe69a5a6533414236168165165390843d8c8f04c",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "transparentPixels": 401591,
+      "semitransparentPixels": 1168648
+    },
+    {
+      "path": "assets/brand/originals/bytetorque_logo_horizontal_oficial_original.png",
+      "sha256": "fb8c59ec252194ef03240c0be53200d628cb0d416a7dc8e390ca0bf05560a693",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "transparentPixels": 1301785,
+      "semitransparentPixels": 268109
+    }
+  ],
+  "derivatives": [
+    {
+      "path": "assets/brand/generated/icon-192.png",
+      "source": "icon",
+      "width": 192,
+      "height": 192,
+      "sha256": "1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67",
+      "bytes": 41142
+    },
+    {
+      "path": "assets/brand/generated/icon-512.png",
+      "source": "icon",
+      "width": 512,
+      "height": 512,
+      "sha256": "7096ba46f51d4402771c2421e0ad848dc9416a3fd2d660ba9e50f96afd62f3c0",
+      "bytes": 245179
+    },
+    {
+      "path": "assets/brand/generated/apple-touch-icon.png",
+      "source": "icon",
+      "width": 180,
+      "height": 180,
+      "sha256": "bebade7bc7f0a888680b9982020fae2c1cb0c9943c8247d744372468f51117fa",
+      "bytes": 32253
+    },
+    {
+      "path": "assets/brand/generated/icon-maskable-512.png",
+      "source": "icon",
+      "width": 512,
+      "height": 512,
+      "sha256": "6eb1ab1b8db86c03a4d28cbd755ba8c40f8f9db3b12c19faaefe619a95101d43",
+      "bytes": 86938,
+      "protectedBounds": [
+        112,
+        112,
+        399,
+        399
+      ]
+    },
+    {
+      "path": "assets/brand/generated/favicon-32.png",
+      "source": "icon",
+      "width": 32,
+      "height": 32,
+      "sha256": "4cbabd3cc4b8d96e4d2a8ae708d53496d678affb0671e66d3d52611ad1e53146",
+      "bytes": 2374
+    },
+    {
+      "path": "assets/brand/generated/favicon-48.png",
+      "source": "icon",
+      "width": 48,
+      "height": 48,
+      "sha256": "5ff44b463665d5b8e462d727842b7d2c35bdf867cd28dd42a3188262ae851f2e",
+      "bytes": 4444
+    },
+    {
+      "path": "public/brand/icon.webp",
+      "source": "icon",
+      "width": 384,
+      "height": 384,
+      "sha256": "4925700b4196f87c1c60a2b2caeaaa45c1975f4bb797220000a3a27d9b8b39be",
+      "bytes": 99922
+    },
+    {
+      "path": "public/brand/logo-horizontal.webp",
+      "source": "horizontal",
+      "width": 1000,
+      "height": 251,
+      "sha256": "4581e38165d28161346013a5160135126fd1ad2bfdbd9921ce2d90d92bc2e99d",
+      "bytes": 116256
+    },
+    {
+      "path": "apps/android/assets/brand/icon.png",
+      "source": "icon",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "075021bbb6880fb6a397cce42bdcba65512da48b3d3b5ea8b88cbf257628f7b1",
+      "bytes": 813331
+    },
+    {
+      "path": "apps/android/assets/brand/adaptive-foreground.png",
+      "source": "icon",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "4ecfa079c7f24fa2793d43383e45a466e6555feb90911cfb085ae1cc80d3d980",
+      "bytes": 329074,
+      "protectedBounds": [
+        225,
+        225,
+        798,
+        798
+      ]
+    },
+    {
+      "path": "apps/android/assets/brand/logo-horizontal.png",
+      "source": "horizontal",
+      "width": 800,
+      "height": 201,
+      "sha256": "d47484d31979089e12019893fd1632eda980dbc7bddc100a9f40f1d6da3395f4",
+      "bytes": 108036
+    }
+  ],
+  "crops": {
+    "icon": [
+      48,
+      56,
+      1200,
+      1208
+    ],
+    "horizontal": [
+      24,
+      265,
+      1648,
+      673
+    ],
+    "note": "All original pixels with alpha >16 are retained. No recoloring or interior alpha edits."
+  }
+}

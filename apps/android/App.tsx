@@ -1,7 +1,7 @@
 import { useMemo, useState, type ComponentProps } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import {
-  Alert, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
+  Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native'
 
 type IconName = ComponentProps<typeof Ionicons>['name']
@@ -87,7 +87,7 @@ export default function App() {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.navy} />
       <View style={styles.topBar}>
         <TouchableOpacity accessibilityLabel="Abrir menú" accessibilityRole="button" style={styles.topAction} onPress={() => setMenuOpen(!menuOpen)}><Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={27} color="white" /></TouchableOpacity>
-        <View style={styles.topBrand}><View style={styles.topBrandMark}><Ionicons name="construct" size={22} color="#fff" /></View><Text style={styles.topBrandText}>Byte<Text style={styles.topBrandAccent}>Torque</Text></Text></View>
+        <View style={styles.topBrand}><Image source={require('./assets/brand/logo-horizontal.png')} accessibilityLabel="ByteTorque — Gestión de Talleres" accessible resizeMode="contain" style={{width:156,height:44,backgroundColor:'#fff',borderRadius:8}} /></View>
         <TouchableOpacity accessibilityLabel="Ver notificaciones" accessibilityRole="button" style={styles.topAction} onPress={() => Alert.alert('Notificaciones', 'Aún no existen notificaciones reales. Estás viendo la demostración.')}><Ionicons name="notifications-outline" size={22} color="white" /><View style={styles.notificationDot} /></TouchableOpacity>
         <TouchableOpacity accessibilityLabel="Cuenta de demostración" accessibilityRole="button" style={styles.topAvatar} onPress={() => go('configuracion')}><Text style={styles.avatarText}>BT</Text></TouchableOpacity>
       </View>

@@ -11,13 +11,23 @@
     ],
     "android": {
       "package": "cl.bytetorque.demo",
-      "versionCode": 1
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/adaptive-foreground.png",
+        "backgroundColor": "#061c39"
+      }
     },
     "experiments": {
       "tsconfigPaths": true
     },
     "extra": {
       "environment": "demo"
+    },
+    "icon": "./assets/brand/icon.png",
+    "splash": {
+      "image": "./assets/brand/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#061c39"
     }
   }
 }
