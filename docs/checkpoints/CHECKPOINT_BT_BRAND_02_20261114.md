@@ -73,3 +73,10 @@ La consulta de GitHub Actions devuelve Forbidden en este entorno. No se afirma S
 - Se inspeccionaron las capturas `BT_BRAND_02_ADMIN_390.png`, `BT_BRAND_02_SIDEBAR_390.png`, `BT_BRAND_02_ADMIN_1650.png`, `BT_BRAND_02_SUPERFICIES.png`. Los logos se integran sobre navy con tipografía clara, sin placa blanca ni recorte aparente y con contraste correcto. **Revisión visual preliminar satisfactoria; la aprobación final sigue siendo del Director y falta prueba física de Android/Safari.**
 - **Hallazgo CI externo acotado, pendiente de repetir:** [BT-FLOW-01 43630084997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630084997) falló sobre commit anterior `89c6355` en `scripts/verify-qa02-ui.cjs:220`: tras abrir «Opciones de visita», pulsar Escape dejó `aria-expanded='true'` cuando se esperaba `false`. Los pasos previos del flujo 1650/1440/768/390/375 y FLOW-01D pasaron. Este fallo NO se encuentra en los dos workflows generales SUCCESS del commit final y tampoco se ha repetido aún sobre `ee9fe83`. No confundirlo con un defecto visual de BRAND-02 confirmado; abrir investigación separada antes de dar por completamente resueltas todas las regresiones interactivas.
 - Esta verificación fue solo documental y de capturas/versionado: no cambia frontend ni Supabase.
+
+
+## Decisión del Director — 14/11/2026
+
+**BT-BRAND-02 APROBADO VISUALMENTE.** El Director confirmó expresamente «APROBADO» tras revisar las capturas de login móvil, sidebar móvil y acceso escritorio con logotipo transparente sobre navy. No se requieren correcciones visuales adicionales a esta etapa. La decisión cierra la **aprobación estética**, no certifica funcionamiento de PWA instalada físicamente, seguridad Auth/RLS ni experiencia Safari real.
+
+**Pendientes separados:** repetir/verificar posible fallo de Escape de «Opciones de visita» en regresión BT-FLOW-01 sobre HEAD actual; instalación PWA/icono físico Android e iPhone Safari; BT-CP02-D aislado en su chat antes de Auth real. No se han modificado componentes ni servicios de la aplicación con este registro.

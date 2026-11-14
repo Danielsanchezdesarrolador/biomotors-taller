@@ -668,9 +668,13 @@ No se inició Auth real, Supabase/RLS, backend, planes/pagos/correo ni adaptaci�
 - [x] Corregir ancho de marca en tablet 768; validar menú/cierre, ocho entradas de acceso y sidebar en 1650/1440/768/390/375. Navegación y formularios R2 preservados.
 - [x] 146/146 Vitest, TypeScript, build/PWA y generador/recursos protegidos PASS; seis PDFs A4 sin páginas en blanco. Encabezado nativo gráfico actualizado, iconos/configuración sin cambios; bundle Expo verificado sin APK.
 - [x] Publicación en el Render existente: frontend `89c6355`, recursos comparados con el build y recorrido publicado 1650/390 PASS; capturas reales antes/después.
-- [ ] Revisión visual del Director de BT-BRAND-02 y prueba física. [Checkpoint, antes/después y evidencia](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
+- [x] **Revisión visual del Director APROBADA el 14/11/2026** para BT-BRAND-02 (logo transparente sobre azul marino en acceso y menú). [Checkpoint y capturas](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
+- [ ] Prueba física pendiente de iconos instalados/PWA en Android y Safari iPhone; no equivale a aprobación técnica de autenticación.
 
 No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 
 **BT-BRAND-02 — Auditoría de CI independiente (14/11/2026):** [general 43630722991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630722991) **SUCCESS** sobre `ee9fe83`, 146/146 Vitest/21 archivos, PWA y Expo; [UI pública 43630723011](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630723011) SUCCESS. Visual preliminar login/sidebar/superficies oscuro/claro: cumple referencia sin placa blanca. **Pendiente investigar** fallo independiente de [BT-FLOW-01 43630084997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43630084997) sobre `89c6355`, assert Escape de «Opciones de visita» (`scripts/verify-qa02-ui.cjs:220`); no reproducido en último HEAD. Aprobación visual Director y dispositivos físicos pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_BRAND_02_20261114.md).
+
+
+**BT-BRAND-02 — Decisión final del Director (14/11/2026): APROBADO visualmente.** Identidad cerrada sin más cambios de marca solicitados. Queda pendiente repetir el caso Escape en «Opciones de visita» del workflow BT-FLOW-01, así como la comprobación física PWA; BT-CP02-D continúa reservado a su chat, y BT-AUTH-01B no está autorizado todavía.
