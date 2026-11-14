@@ -721,3 +721,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] **Renovación explícita `refreshSession()` — 9/9 PASS reales** sobre cuenta ficticia A con nuevo JWT, rotación de refresh token y validación RLS posterior; script cerró sesión aislada. Evidencia añadida a [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
 - [x] Dos workflows GitHub Actions del commit `1286f0b` completados con `SUCCESS`.
 - [ ] Renovación automática en navegador, logout sin conexión, permisos de roles adicionales y Safari/PWA física; **no habilitar Render ni registros públicos** todavía.
+
+- [x] **R1: cierre local en modo Offline comprobado por el Director (14/11/2026):** desapareció panel privado; request `logout?scope=local` falló por ausencia de red. Estado de «Sesión cerrada» se interpreta solo como local; revocación remota NO confirmada. Evidencia en [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
+- [ ] **R1: verificar logout tras reconexión + recarga**, sin recuperar panel. Anotar recurso de logo temporalmente roto en modo Offline para revisión de cache PWA.

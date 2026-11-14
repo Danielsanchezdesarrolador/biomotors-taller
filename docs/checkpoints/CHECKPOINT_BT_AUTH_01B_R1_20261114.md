@@ -144,3 +144,10 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - **Alcance:** esta es una renovación **explícita y forzada en un cliente de prueba**, no evidencia de renovación automática durante caducidad en Chrome, PWA ni Safari físico. Tampoco certifica logout sin conexión ni revocación inmediata de JWT ya expedidos.
 
 **Puertas abiertas para cerrar R1:** renovación automática real en navegador, prueba de logout sin red, roles `admin/mechanic/reception` con membresías controladas, Safari/iPhone/PWA físico, limpieza de usuarios/talleres de prueba y decisión explícita del Director sobre habilitar Auth en Render. Registro público, onboarding y SMTP todavía OFF.
+
+### Prueba de cierre de sesión con conexión interrumpida — evidencia del Director (14/11/2026)
+
+- Chrome DevTools tenía `Network > Offline`. Tras pulsar `Cerrar sesión`, la interfaz retiró el panel privado y mostró el formulario de inicio de sesión. **PASS del bloqueo visual/local** según captura aportada.
+- Network registró petición `logout?scope=local` fallida por desconexión. La pantalla comunicó «Sesión cerrada». **No se ha demostrado revocación remota ni terminación de todos los JWT**: distinguir cierre local del servidor. Según `src/auth/supabaseGateway.ts`, la llamada es `auth.signOut({ scope: 'local' })`, y `src/auth/controller.ts` retira el contexto antes de pedir el cierre.
+- Con Offline, parte del recurso de marca/logo no cargó correctamente (síntoma visual secundario, probablemente recurso no disponible); revisar cache/offline PWA más adelante sin cambiar identidad visual.
+- **Prueba pendiente inmediatamente posterior:** volver a `No throttling`, recargar pestaña del Taller A y confirmar que permanece en login sin restauración de panel, sin ingresar credenciales. Solo si eso pasa, considerar validado cierre local persistente tras reconexión.
