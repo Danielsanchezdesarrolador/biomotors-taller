@@ -1,0 +1,60 @@
+{
+  "edition": "BT-BRAND-02",
+  "source": "assets/brand/originals/bytetorque_logo_horizontal_oficial_original.png",
+  "sourceSha256": "fb8c59ec252194ef03240c0be53200d628cb0d416a7dc8e390ca0bf05560a693",
+  "textRegions": [
+    {
+      "label": "Byte",
+      "box": [
+        475,
+        350,
+        945,
+        580
+      ],
+      "rgb": [
+        245,
+        249,
+        255
+      ]
+    },
+    {
+      "label": "Gesti\u00f3n de Talleres",
+      "box": [
+        665,
+        580,
+        1450,
+        652
+      ],
+      "rgb": [
+        245,
+        249,
+        255
+      ]
+    }
+  ],
+  "changedPixels": 73494,
+  "alphaIdentical": true,
+  "symbolIdentical": true,
+  "optimizedVisibleSymbolIdentical": true,
+  "onlyTextRgbChanged": true,
+  "outputs": [
+    {
+      "path": "assets/brand/derived/bytetorque_logo_horizontal_fondo_oscuro.png",
+      "sha256": "aeb7f50302d6d641eeadca83373f103feaa177b557ee7680ec95030b2db37e34",
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "path": "public/brand/logo-horizontal-dark.webp",
+      "sha256": "a36205c818836426ef26e97414e6cf3871268e9ae33f78f65933f176ca1f49be",
+      "width": 1000,
+      "height": 251
+    },
+    {
+      "path": "apps/android/assets/brand/logo-horizontal-dark.png",
+      "sha256": "fe66f89b0799864fecfbc4939e896f9e41da85e414d1dc6bd2656fe5c3123e8d",
+      "width": 800,
+      "height": 201
+    }
+  ]
+}

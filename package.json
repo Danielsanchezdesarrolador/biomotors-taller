@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "prebuild": "node scripts/generate-pwa-icons.mjs",
-    "postbuild": "node scripts/verify-pwa.mjs && node scripts/verify-official-bundle.mjs",
+    "postbuild": "node scripts/verify-pwa.mjs && node scripts/verify-official-bundle.mjs && node scripts/verify-dark-brand.mjs",
     "predev": "node scripts/generate-pwa-icons.mjs",
     "dev:harness": "vite --config vite.harness.config.ts"
   },
