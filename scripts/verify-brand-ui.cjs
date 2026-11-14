@@ -94,10 +94,13 @@ const { chromium } = require('playwright'),
             await image.decode()
             return image
           }
-          const images = await Promise.all([
-            load('/icon.svg?v=bt-brand-01'),
-            load('/icon-512.png?v=bt-brand-01')
-          ])
+          // Render's CDN may negotiate a lossy WebP for image requests. Compare canonical PNG bytes.
+          const response = await fetch('/icon-512.png?v=bt-brand-01', {
+            headers: { Accept: 'image/png' },
+            cache: 'no-store'
+          })
+          const originalUrl = URL.createObjectURL(await response.blob())
+          const images = await Promise.all([load('/icon.svg'), load(originalUrl)])
           const pixels = images.map((image) => {
             const canvas = document.createElement('canvas')
             canvas.width = canvas.height = 512
@@ -105,6 +108,7 @@ const { chromium } = require('playwright'),
             context.drawImage(image, 0, 0, 512, 512)
             return context.getImageData(0, 0, 512, 512).data
           })
+          URL.revokeObjectURL(originalUrl)
           return pixels[0].reduce(
             (sum, value, index) => sum + Number(value !== pixels[1][index]),
             0

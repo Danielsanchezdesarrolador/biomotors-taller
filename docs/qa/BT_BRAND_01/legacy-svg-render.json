@@ -1,0 +1,13 @@
+{
+  "svg": [
+    512,
+    512
+  ],
+  "png": [
+    512,
+    512
+  ],
+  "differentChannels": 0,
+  "maxError": 0,
+  "meanError": 0
+}

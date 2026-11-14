@@ -1,0 +1,17 @@
+Starting Metro Bundler
+
+| (node:33112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android Bundled 5624ms index.js (602 modules)
+
+› Assets (2):
+assets/brand/logo-horizontal.png (108KB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (390KB)
+
+› android bundles (1):
+_expo/static/js/android/index-b40b756fde35fa2e71c3f96e762bac69.hbc (1.5MB)
+
+› Files (1):
+metadata.json (275B)
+
+Exported: /tmp/bt-brand-expo-export

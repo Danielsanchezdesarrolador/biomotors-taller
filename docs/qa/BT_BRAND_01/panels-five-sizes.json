@@ -1,0 +1,37 @@
+[
+  {
+    "width": 1650,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  },
+  {
+    "width": 768,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  },
+  {
+    "width": 375,
+    "panels": 5,
+    "status": "PASS",
+    "networkWrites": 0,
+    "errors": []
+  }
+]

@@ -641,3 +641,17 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] 135/135 pruebas (125 preservadas + 10 nuevas), TypeScript/build/PWA y recorridos de acceso/paneles en cinco tamaños. Inicio del manifiesto `/` y service worker verificados.
 - [x] Publicación R1 en el Render existente: frontend `6ab5de0`, HTML/JS/CSS/recursos comparados byte a byte y entrada por raíz/recarga/historial/enlaces/previsualización verificados en Render 1650/390.
 - [ ] Revisión del Director y apertura desde PWA instalada física: instalación automatizada no disponible en este Chromium (`kWebAppDisabled`). [Checkpoint R1](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md#bt-auth-01a-r1--entrada-inicial-y-previsualización-explícita-14112026).
+
+
+### BT-BRAND-01 — Identidad gráfica definitiva (14/11/2026)
+
+- [x] Director aprueba los dos PNG oficiales. Originales RGBA intactos, transparencia comprobada y hashes del ZIP versionados en `assets/brand/originals/` y catálogo de procedencia.
+- [x] Reemplazar marca provisional de siete pantallas, cinco paneles/navegación y área técnica; horizontal con soporte claro y dimensiones responsive, iconos funcionales conservados.
+- [x] Mantener identidad comercial del taller en cotizaciones, informe y multipunto; atribución discreta «Software ByteTorque», logo del taller configurable y BIOMOTORS sin asignación automática.
+- [x] PWA/favicon/Apple Touch/maskable oficiales; generador Node por copia de derivados versionados con hashes. Alias SVG histórico contiene el PNG oficial, sin redibujarlo. Conservar `id`, `start_url`, scope y entrada R1; versión de URL/iconos y revisión SW, sin caché de datos.
+- [x] Recursos Expo (icono, adaptativo, splash y header) preparados, TypeScript/configuración/bundle Android verificados; sin APK ni adaptación funcional.
+- [x] 141/141 pruebas (135 preservadas + 6 de marca), TypeScript/build/PWA, acceso/paneles/marca en cinco tamaños, regresiones A–E/INS/COT/Informes y A4 sin páginas en blanco. [Checkpoint y capturas](docs/checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md).
+- [x] Publicar en el Render existente: frontend `9b87866`, HTML/JS/CSS/recursos y alias histórico comparados con el build; siete pantallas, cinco paneles y marca verificados en Render 1650/390.
+- [ ] Revisión visual del Director y prueba física de iconos PWA/Safari/iPhone/Android. Algunos navegadores pueden requerir quitar y volver a añadir el acceso para actualizar el icono; no cambia la identidad de la aplicación.
+
+No se inició Auth real, Supabase/RLS, backend, planes/pagos/correo ni adaptación funcional Android.

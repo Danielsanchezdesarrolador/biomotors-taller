@@ -1,0 +1,5 @@
+BT-INS-01 1650: PASS — selection, keyboard, counts, preview/print, photos, drafts, finalization, OT, no writes/storage
+BT-INS-01 1440: PASS — selection, keyboard, counts, preview/print, photos, drafts, finalization, OT, no writes/storage
+BT-INS-01 768: PASS — selection, keyboard, counts, preview/print, photos, drafts, finalization, OT, no writes/storage
+BT-INS-01 390: PASS — selection, keyboard, counts, preview/print, photos, drafts, finalization, OT, no writes/storage
+BT-INS-01 375: PASS — selection, keyboard, counts, preview/print, photos, drafts, finalization, OT, no writes/storage

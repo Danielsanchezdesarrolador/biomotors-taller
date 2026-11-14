@@ -1,0 +1,5 @@
+BT-FLOW-01B/C 1650: PASS — reception, recurring visits, requests, IDs/OT, continuity, exact resources, five panels, no writes/storage
+BT-FLOW-01B/C 1440: PASS — reception, recurring visits, requests, IDs/OT, continuity, exact resources, five panels, no writes/storage
+BT-FLOW-01B/C 768: PASS — reception, recurring visits, requests, IDs/OT, continuity, exact resources, five panels, no writes/storage
+BT-FLOW-01B/C 390: PASS — reception, recurring visits, requests, IDs/OT, continuity, exact resources, five panels, no writes/storage
+BT-FLOW-01B/C 375: PASS — reception, recurring visits, requests, IDs/OT, continuity, exact resources, five panels, no writes/storage

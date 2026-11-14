@@ -1,0 +1,67 @@
+[
+  {
+    "width": 1650,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": true,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 1440,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": true,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 768,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": true,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": true,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  },
+  {
+    "width": 375,
+    "screens": 7,
+    "readOnlyReview": true,
+    "rootRedirect": true,
+    "previewHistory": true,
+    "pwaStartUrl": "/",
+    "harnessTested": true,
+    "realSessions": 0,
+    "networkWrites": 0,
+    "persistentWrites": 0,
+    "pageErrors": 0
+  }
+]

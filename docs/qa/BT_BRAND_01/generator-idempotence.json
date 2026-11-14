@@ -1,0 +1,12 @@
+{
+  "idempotent": true,
+  "officialHashes": {
+    "icon-192.png": "1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67",
+    "icon-512.png": "7096ba46f51d4402771c2421e0ad848dc9416a3fd2d660ba9e50f96afd62f3c0",
+    "apple-touch-icon.png": "bebade7bc7f0a888680b9982020fae2c1cb0c9943c8247d744372468f51117fa",
+    "icon-maskable-512.png": "6eb1ab1b8db86c03a4d28cbd755ba8c40f8f9db3b12c19faaefe619a95101d43",
+    "favicon-32.png": "4cbabd3cc4b8d96e4d2a8ae708d53496d678affb0671e66d3d52611ad1e53146",
+    "favicon-48.png": "5ff44b463665d5b8e462d727842b7d2c35bdf867cd28dd42a3188262ae851f2e",
+    "icon.svg": "9916dd56bd1e46f8ac5790e7334cad56b71d485094cca311d6800f81a2d7469c"
+  }
+}

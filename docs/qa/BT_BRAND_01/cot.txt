@@ -1,0 +1,5 @@
+BT-COT-01 1650: PASS — items/validation, totals, OT, terms/comments, modes, approval invalidation, draft, template, print, local share, zero writes/storage
+BT-COT-01 1440: PASS — items/validation, totals, OT, terms/comments, modes, approval invalidation, draft, template, print, local share, zero writes/storage
+BT-COT-01 768: PASS — items/validation, totals, OT, terms/comments, modes, approval invalidation, draft, template, print, local share, zero writes/storage
+BT-COT-01 390: PASS — items/validation, totals, OT, terms/comments, modes, approval invalidation, draft, template, print, local share, zero writes/storage
+BT-COT-01 375: PASS — items/validation, totals, OT, terms/comments, modes, approval invalidation, draft, template, print, local share, zero writes/storage
