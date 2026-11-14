@@ -40,6 +40,7 @@ jobs:
           node scripts/verify-official-ui.cjs
           node scripts/verify-auth-ui.cjs
           node scripts/verify-brand-ui.cjs
+          node scripts/verify-brand-02-ui.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -48,5 +49,6 @@ jobs:
             artifacts/bt-oficial-01a/
             artifacts/bt-auth-01a/
             artifacts/bt-brand-01/
+            artifacts/bt-brand-02/
           if-no-files-found: warn
           retention-days: 30

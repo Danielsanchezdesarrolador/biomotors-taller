@@ -98,7 +98,7 @@ export function AppShell({
             onClick={() => navigate('inicio')}
             aria-label="ByteTorque, ir al inicio"
           >
-            <BrandLogo decorative />
+            <BrandLogo surface="dark" decorative />
           </button>
           <button
             type="button"

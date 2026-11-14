@@ -16,10 +16,11 @@
 .bt-brand-horizontal {
   width: 300px;
   max-width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid #d6e5fa;
-  background: #fff;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .bt-brand-icon {
   width: 44px;
@@ -29,10 +30,15 @@
 .access-brand > .bt-brand-horizontal {
   width: 322px;
 }
+.brand {
+  min-width: 0;
+  max-width: 100%;
+}
 .brand > .bt-brand-horizontal {
   width: 216px;
-  padding: 6px 8px;
-  border-radius: 9px;
+  flex-shrink: 1;
+  padding: 0;
+  border-radius: 0;
 }
 .shell-mobile-brand {
   display: none;

@@ -33,5 +33,5 @@ assert.equal(app.android.adaptiveIcon.foregroundImage, './assets/brand/adaptive-
 assert.equal(app.android.adaptiveIcon.backgroundColor, '#061c39')
 assert.equal(app.splash.image, app.icon)
 assert.equal(app.splash.resizeMode, 'contain')
-assert.ok(code.includes('./assets/brand/logo-horizontal.png'))
+assert.ok(code.includes('./assets/brand/logo-horizontal-dark.png'))
 console.log('BT-BRAND-01: native icon, adaptive foreground, splash and horizontal artwork PASS')

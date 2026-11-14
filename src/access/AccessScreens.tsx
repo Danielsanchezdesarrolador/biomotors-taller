@@ -193,7 +193,7 @@ export function AccessScreens({
               navigate(accessPaths.login)
             }}
           >
-            <BrandLogo />
+            <BrandLogo surface="dark" />
           </a>
           <div className="access-marketing">
             <h2>

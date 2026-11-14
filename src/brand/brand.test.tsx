@@ -7,7 +7,7 @@ import { createDocument } from '../informes/documentosData'
 import { DocumentoPreview } from '../informes/DocumentoPreview'
 
 describe('BT-BRAND-01 approved product identity', () => {
-  it('uses the official horizontal image, with a light support and no SVG substitute', () => {
+  it('uses the official horizontal image, on a light surface without an SVG substitute', () => {
     const html = renderToStaticMarkup(<BrandLogo />)
     expect(html).toContain('bt-brand-horizontal')
     expect(html).toContain('/brand/logo-horizontal.webp')

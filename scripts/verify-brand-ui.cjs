@@ -42,11 +42,11 @@ const { chromium } = require('playwright'),
         await p.goto(base + '/#' + route)
         const logo = p.locator('.access-brand .bt-brand-horizontal>img')
         await ready(logo)
-        assert.equal(await logo.getAttribute('src'), '/brand/logo-horizontal.webp')
+        assert.equal(await logo.getAttribute('src'), '/brand/logo-horizontal-dark.webp')
         assert.equal(await p.locator('.access-brand svg,.access-brand-mark').count(), 0)
         assert.equal(
           await logo.locator('..').evaluate((e) => getComputedStyle(e).backgroundColor),
-          'rgb(255, 255, 255)'
+          'rgba(0, 0, 0, 0)'
         )
         if (route === '/acceso' && [1650, 390].includes(width))
           await p.screenshot({
@@ -73,6 +73,9 @@ const { chromium } = require('playwright'),
       }
       if (width <= 760) {
         await p.getByRole('button', { name: 'Abrir menú', exact: true }).click()
+        await p.waitForFunction(
+          () => Math.abs(document.querySelector('.sidebar').getBoundingClientRect().left) < 0.5
+        )
         const logo = p.locator('.brand .bt-brand')
         await ready(logo.locator('img'))
         const [box, aside] = await Promise.all([

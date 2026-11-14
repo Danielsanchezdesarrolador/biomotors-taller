@@ -1,17 +1,25 @@
 import './brand.css'
 
-/** Approved artwork only. Horizontal artwork always keeps its own light support. */
+/** Approved original artwork, with a text-only contrast derivative for dark surfaces. */
 export function BrandLogo({
   variant = 'horizontal',
-  decorative = false
+  decorative = false,
+  surface = 'light'
 }: {
   variant?: 'horizontal' | 'icon'
   decorative?: boolean
+  surface?: 'dark' | 'light'
 }) {
   return (
-    <span className={'bt-brand bt-brand-' + variant}>
+    <span className={'bt-brand bt-brand-' + variant + ' bt-brand-surface-' + surface}>
       <img
-        src={variant === 'horizontal' ? '/brand/logo-horizontal.webp' : '/brand/icon.webp'}
+        src={
+          variant === 'horizontal'
+            ? surface === 'dark'
+              ? '/brand/logo-horizontal-dark.webp'
+              : '/brand/logo-horizontal.webp'
+            : '/brand/icon.webp'
+        }
         alt={decorative ? '' : 'ByteTorque — Gestión de Talleres'}
         width={variant === 'horizontal' ? 1000 : 384}
         height={variant === 'horizontal' ? 251 : 384}
