@@ -4,7 +4,7 @@
 
 ## Script reproducible
 
-`scripts/security/bt-cp02-ab.mjs` usa Node.js 22 y `fetch`, sin dependencias nuevas. Hace 25 pruebas con dos cuentas sintéticas, creadas mediante la **API oficial de Supabase Auth** con confirmación administrativa (no INSERT manual en `auth.users`). El JWT de cada cuenta se utiliza para todas las consultas de acceso. El rol de servicio solamente crea fixtures y los elimina en `finally`.
+`scripts/security/bt-cp02-ab.mjs` usa Node.js 22 y `fetch`, sin dependencias nuevas. Hace 25 pruebas con dos cuentas sintéticas, creadas mediante la **API oficial de Supabase Auth** con confirmación administrativa (no INSERT manual en `auth.users`). El JWT de cada cuenta se utiliza para todas las consultas de acceso. La clave secreta del backend solamente crea fixtures y los elimina en `finally`. Las claves `sb_secret_...` se envían exclusivamente por el encabezado `apikey`, nunca como JWT `Authorization: Bearer`.
 
 Las cuentas usan emails `@example.com` autoconfirmados; no se envían mensajes reales. No modifica UI, Auth pública, la Edge Function ni el esquema.
 
@@ -15,7 +15,7 @@ El conector Supabase disponible **no tiene** creación de usuarios por Auth Admi
 Para ejecución por operador en entorno seguro, definir variables de entorno (no guardarlas en GitHub ni enviarlas al chat):
 - `SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co`
 - `SUPABASE_PUBLISHABLE_KEY` (clave pública de ByteTorque)
-- `SUPABASE_SERVICE_ROLE_KEY` (clave administrativa, **nunca en frontend ni en archivos versionados**)
+- `SUPABASE_SECRET_KEY` (`sb_secret_...`, clave administrativa moderna, **nunca en frontend ni en archivos versionados**). Alternativa temporal compatible: `SUPABASE_SERVICE_ROLE_KEY` heredada.
 - `BT_CP02_AB_TEST=YES_CREATE_AND_DELETE_TEST_USERS`
 
 Luego correr `node scripts/security/bt-cp02-ab.mjs`.
@@ -29,3 +29,9 @@ Todos los controles deberán mostrar PASS; guardar solamente las líneas de resu
 **No habilitar `BYTETORQUE_ONBOARDING_ENABLED` aún.** Los cinco paneles de ByteTorque siguen en DEMO.
 
 Nota: la suite no puede probar funcionalidades inexistentes (invitaciones de trabajadores, cancelación de suscripciones, documentos privados, tablas de clientes); se cubrirán en sus propias etapas.
+
+## Compatibilidad de claves actualizada — 14/11/2026
+
+Supabase presenta **Publishable Keys** y **Secret Keys**. Utilizar `SUPABASE_PUBLISHABLE_KEY=sb_publishable_...` y `SUPABASE_SECRET_KEY=sb_secret_...` exclusivamente como variables de entorno de la sesión local de PowerShell. El script ya soporta esa combinación; también mantiene compatibilidad transitoria con la clave `service_role` JWT heredada si existe. Nunca pegar valores de las claves en chat, capturas, archivos del proyecto, comandos literales o terminal grabada. La clave moderna debe ir en el encabezado `apikey`, no como Bearer JWT.
+
+Antes de ejecutar, validar que solo existan fixtures de prueba y confirmar el control de ejecución `BT_CP02_AB_TEST`. Ejecutar una sola vez, sin compartir sus secretos. El acceso a Auth Admin debe realizarse desde una máquina de confianza.

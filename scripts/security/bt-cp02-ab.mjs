@@ -7,11 +7,13 @@ import { randomBytes } from "node:crypto";
 const project = "suxcqqnmcjoezfxltoms";
 const url = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
-const admin = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const admin = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Las nuevas sb_secret_* son API keys, no JWT; enviarlas solo en apikey.
+const adminIsModern = typeof admin === "string" && admin.startsWith("sb_secret_");
 if (url !== "https://" + project + ".supabase.co" ||
     process.env.BT_CP02_AB_TEST !== "YES_CREATE_AND_DELETE_TEST_USERS" ||
     !key || !admin) {
-  console.error("BLOQUEADO: revisa las variables SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SERVICE_ROLE_KEY y BT_CP02_AB_TEST. No guardes claves en GitHub.");
+  console.error("BLOQUEADO: revisa las variables SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY (o SUPABASE_SERVICE_ROLE_KEY heredada) y BT_CP02_AB_TEST. No guardes claves en GitHub.");
   process.exit(2);
 }
 
@@ -24,7 +26,9 @@ function check(label, ok) {
 async function api(path, { method = "GET", body, jwt, service = false, returning = false } = {}) {
   const credential = service ? admin : key;
   const headers = { "apikey": credential, "Content-Type": "application/json" };
-  if (jwt || service) headers.Authorization = "Bearer " + (jwt || admin);
+  // JWT real para usuarios; claves sb_secret_* nunca como Bearer.
+  if (jwt) headers.Authorization = "Bearer " + jwt;
+  else if (service && !adminIsModern) headers.Authorization = "Bearer " + admin;
   if (returning) headers.Prefer = "return=representation";
   const result = await fetch(url + path, {
     method, headers, body: body === undefined ? undefined : JSON.stringify(body),
