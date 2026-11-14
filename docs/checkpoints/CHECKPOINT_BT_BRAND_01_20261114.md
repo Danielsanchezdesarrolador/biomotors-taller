@@ -75,3 +75,12 @@ El CDN negocia WebP para algunas peticiones de imagen de Chrome. Las comparacion
 GitHub Actions remoto de esta entrega no pudo consultarse: `gh run list` devuelve Forbidden en este entorno. No se afirma SUCCESS remoto; los resultados locales, bundle Expo y publicación sí están verificados. El workflow existente incorpora las nuevas comprobaciones y capturas de marca.
 
 **Punto de parada:** revisión visual del Director. No iniciar Auth real, BT-CP02-D ni adaptación funcional Android.
+
+ 
+## Verificación remota independiente y revisión de capturas (ChatGPT, 14/11/2026)
+
+- HEAD verificado: `1430cead7cefbc1f8f058b6c9f0d1f791c7a3295`.
+- [GitHub Actions principal 43615950760](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950760): **SUCCESS** sobre `1430cea`; Web/iOS PWA y Android Expo PASS (sin APK). Log Web: **20 archivos y 141/141 pruebas**; hashes/transparencia, iconos oficiales, manifiesto, máscara PWA y exclusión de fixtures PASS.
+- [Interfaz oficial 43615950713](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950713): **SUCCESS** sobre `1430cea`.
+- Se inspeccionaron las capturas `BT_BRAND_01_LOGIN_390.png`, `BT_BRAND_01_LOGIN_1650.png`, `BT_BRAND_01_ICONOS.png` y `BT_BRAND_01_DOCUMENTO_COTIZACION_1650.png`. El logotipo horizontal se visualiza en soporte blanco legible en login móvil/escritorio, iconos derivados aparecen en formatos web/maskable, y el documento A4 mantiene la identidad del taller con atribución pequeña del software. **Sin hallazgo visual bloqueante en estas capturas.** El documento A4 utiliza únicamente fixtures de pruebas; no implica datos reales en producción.
+- Esta revisión **no sustituye la aprobación visual del Director** ni prueba iconos instalados físicamente en Android/iPhone. Sin cambios funcionales o de seguridad.

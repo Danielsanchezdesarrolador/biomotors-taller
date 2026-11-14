@@ -655,3 +655,6 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [ ] Revisión visual del Director y prueba física de iconos PWA/Safari/iPhone/Android. Algunos navegadores pueden requerir quitar y volver a añadir el acceso para actualizar el icono; no cambia la identidad de la aplicación.
 
 No se inició Auth real, Supabase/RLS, backend, planes/pagos/correo ni adaptación funcional Android.
+
+
+**BT-BRAND-01 — CI remoto verificado posteriormente (14/11/2026):** [workflow 43615950760](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950760) **SUCCESS** en `1430cea`, 141/141 Vitest (20 archivos), PWA/recursos de marca y Android Expo PASS sin APK. [Verificación de interfaz oficial 43615950713](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43615950713) SUCCESS. Capturas de login/iconos/A4 revisadas preliminarmente; aprobación del Director e instalación física pendientes. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_BRAND_01_20261114.md).
