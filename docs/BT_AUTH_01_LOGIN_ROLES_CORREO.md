@@ -112,3 +112,10 @@ El Director fijó un máximo de **2 mecánicos en Básico**, **8 en Plus** y **8
 - Comprobar cupo + plan vigente + membresía + rol del actor **en la operación de servidor y dentro de una transacción**, sin confiar en un contador React, un campo de rol del formulario ni una condición de frontend. La confirmación de correo sigue siendo obligatoria antes del primer acceso.
 - Si el taller baja de Plus/Full a Básico con más de 2 mecánicos, no destruir datos ni revocar accesos arbitrariamente; política de exceso pendiente de ratificación, sin nuevas invitaciones hasta regularizar.
 - **BT-AUTH-01A** solo puede mostrar/previsualizar el diseño sin aparentar invitaciones activas ni usar correo real. El backend BT-CP02-D continúa reservado para su chat.
+
+
+## Implementación BT-AUTH-01A — 14/11/2026
+
+La orden posterior del Director autoriza publicar una **vista de revisión explícita y de solo lectura** como alternativa al login simulado en un sitio estático. Se implementa esta alternativa: `/#/acceso` presenta las siete pantallas, pero sus campos y operaciones de cuenta están bloqueados. La cuenta ficticia existe únicamente en el harness privado de QA; no constituye autorización. `/#/revision/administrador` y `/#/revision/mecanico` son presentaciones públicas sin sesión y sin datos privados. No existe control de acceso ficticio mediante contraseña incrustada, selector de rol o query string.
+
+Los mensajes de correo/contraseña de referencia indican que no ocurrió un envío ni cambio real; no se inventa una expiración de enlaces. Las siete imágenes no autorizan copiar identidades personales ni simular confirmación de correo. Las invitaciones y cupos son de presentación, sin plan activo, y siguen requiriendo conteo/transacción de servidor en fase posterior. [Checkpoint, alcance, capturas y pruebas](checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md). Auth real, permisos RLS y BT-CP02-D permanecen pendientes en su chat reservado.

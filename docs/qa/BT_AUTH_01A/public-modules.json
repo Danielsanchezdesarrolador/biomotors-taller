@@ -1,0 +1,17 @@
+[
+  "src/access/TechnicianReview.tsx",
+  "src/official/official.css",
+  "src/App.tsx",
+  "src/access/UsersPreparation.tsx",
+  "src/main.tsx",
+  "src/informes/informes.css",
+  "src/access/ReviewBanner.tsx",
+  "src/styles.css",
+  "src/access/accessContract.ts",
+  "src/official/OfficialPanels.tsx",
+  "src/premium.css",
+  "src/access/access.css",
+  "src/access/AccessScreens.tsx",
+  "src/layout/AppShell.tsx",
+  "src/official/officialWorkspace.ts"
+]

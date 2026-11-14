@@ -3,6 +3,13 @@
 **Estado actual — 14/11/2026:** BT-OFICIAL-01A presenta ByteTorque R2 con los cinco paneles vacíos y sin registros ficticios. Es una interfaz de preparación: **no hay acceso autenticado, guardado permanente ni operaciones habilitadas para clientes reales**. Las funciones y datos de prueba se conservan exclusivamente en el harness local. [Checkpoint 01A](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md).
 
 
+**BT-AUTH-01A — acceso visual de revisión:** las siete pantallas están en `/#/acceso`, `/#/acceso/registro`, `/#/auth/confirmacion`, `/#/auth/recuperacion`, `/#/auth/revisa-correo`, `/#/auth/nueva-contrasena` y `/#/auth/contrasena-actualizada`. Son presentaciones de solo lectura; no aceptan credenciales reales ni envían correos. Desde `/#/acceso`, elegir Administrador o Mecánico y pulsar **Abrir vista de revisión**. `/#/revision/administrador` conserva los cinco paneles vacíos; `/#/revision/mecanico` muestra únicamente áreas técnicas. Elegir una entrada no concede permisos. [Checkpoint y capturas](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md).
+
+La única cuenta ficticia se mantiene **exclusivamente en el harness privado**, ligado a loopback: `npm run dev:harness -- --port 5177 --strictPort`, abrir `http://127.0.0.1:5177/acceso`. Credenciales de QA (públicas, sin valor de seguridad): `revision.admin@bytetorque.test` / `VistaBT-2026!`. Solo cambia la presentación hacia los paneles vacíos; nunca crea una sesión. No funciona como login de Render. El flujo histórico con fixtures sigue en `/` del harness. No publicar ni exponer el harness a la red.
+
+Verificación adicional con preview de producción en 5173 y harness privado en 5177: `node scripts/verify-auth-ui.cjs`. Comprueba siete pantallas, dos entradas, errores de la cuenta ficticia, contratos sin privilegios, cupos de referencia 2/8/8, ausencia de red de escritura y de almacenamiento, en cinco tamaños.
+
+
 **ByteTorque** es una aplicación independiente para gestionar talleres mecánicos, iniciando con el taller de Ignacio y con arquitectura preparada para convertirse en un **SaaS de suscripción mensual para otros talleres**.
 
 **Estado (11-11-2026):** Inicio web/iOS PWA **BT-UI-02-R2 visualmente APROBADO como identidad oficial premium** para todo ByteTorque. Proyecto Android nativo BT-UI-01 en `apps/android/`, sin backend ni APK real. CI de ambas plataformas PASS: 7 tests web, build web, TypeScript Android y bundle Expo Android.

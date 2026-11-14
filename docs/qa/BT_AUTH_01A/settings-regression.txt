@@ -1,0 +1,5 @@
+1650px PASS — nine cards, forms/branding, members/invitation, templates, email, complete intake, preferences, subscription, backups, cross-panel scope and reload; zero network writes/storage
+1440px PASS — nine cards, forms/branding, members/invitation, templates, email, complete intake, preferences, subscription, backups, cross-panel scope and reload; zero network writes/storage
+768px PASS — nine cards, forms/branding, members/invitation, templates, email, complete intake, preferences, subscription, backups, cross-panel scope and reload; zero network writes/storage
+390px PASS — nine cards, forms/branding, members/invitation, templates, email, complete intake, preferences, subscription, backups, cross-panel scope and reload; zero network writes/storage
+375px PASS — nine cards, forms/branding, members/invitation, templates, email, complete intake, preferences, subscription, backups, cross-panel scope and reload; zero network writes/storage

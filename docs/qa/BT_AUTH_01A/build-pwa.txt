@@ -1,0 +1,26 @@
+
+> biomotors-taller@0.1.0 prebuild
+> node scripts/generate-pwa-icons.mjs
+
+
+> biomotors-taller@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 1674 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/.vite/manifest.json          0.18 kB │ gzip:  0.14 kB
+dist/.vite/public-modules.json    0.44 kB │ gzip:  0.19 kB
+dist/index.html                   0.96 kB │ gzip:  0.49 kB
+dist/assets/index-CduF0wul.css   83.93 kB │ gzip: 17.76 kB
+dist/assets/index-D08LwzdS.js   264.55 kB │ gzip: 81.40 kB
+
+✓ built in 607ms
+
+> biomotors-taller@0.1.0 postbuild
+> node scripts/verify-pwa.mjs && node scripts/verify-official-bundle.mjs
+
+PWA assets: PASS
+Public module graph, fixture exclusion and ByteTorque PWA identity: PASS

@@ -1,0 +1,1 @@
+BT-REG-02 E2E PASS: [{"width":1650,"steps":3,"requests_after_submit":3,"requests_after_reload":2,"network_writes":0,"storage_items":0,"errors":[]},{"width":390,"steps":3,"requests_after_submit":3,"requests_after_reload":2,"network_writes":0,"storage_items":0,"errors":[]}]

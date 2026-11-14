@@ -1,0 +1,5 @@
+1650px PASS — documents/identity, filters, preview/print, retry/cancel/simulation, report and quote editor, totals/tax, session OT recovery, reset; zero network writes/storage
+1440px PASS — documents/identity, filters, preview/print, retry/cancel/simulation, report and quote editor, totals/tax, session OT recovery, reset; zero network writes/storage
+768px PASS — documents/identity, filters, preview/print, retry/cancel/simulation, report and quote editor, totals/tax, session OT recovery, reset; zero network writes/storage
+390px PASS — documents/identity, filters, preview/print, retry/cancel/simulation, report and quote editor, totals/tax, session OT recovery, reset; zero network writes/storage
+375px PASS — documents/identity, filters, preview/print, retry/cancel/simulation, report and quote editor, totals/tax, session OT recovery, reset; zero network writes/storage

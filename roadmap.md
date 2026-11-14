@@ -608,7 +608,9 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 - [x] Revisar arquitectura Auth/RLS, matriz de roles, checkpoint CP02-D, runbook A/B y estado oficial BT-OFICIAL-01A; verificar documentación actual de Supabase.
 - [x] Diseñar dos entradas R2 y credenciales compartidas, correo verificado, recuperación, estados pendientes/desactivados, invitación exclusiva del mecánico y matriz de permisos por acción.
-- [ ] **BT-AUTH-01A:** Codex implementa solo la presentación y contratos testeables **sin fingir login funcional**. Conservar 111 pruebas, frontend vacío, cinco paneles R2 y bloqueo de registros reales. Capturas móvil/escritorio, checkpoint, CI, revisión del Director.
+- [x] **BT-AUTH-01A — implementación visual:** siete pantallas R2, dos entradas, revisión explícita sin sesión, cinco paneles vacíos y vista técnica de mecánico; cuenta ficticia solo en harness privado. **125/125 pruebas (111 preservadas + 14 nuevas)**, TypeScript/build/PWA y cinco tamaños. [Checkpoint y evidencia](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md).
+- [x] Publicar BT-AUTH-01A en el Render existente: frontend `0fc21ad`, archivos comparados byte a byte y recorrido publicado de siete pantallas a 1650/390 PASS. Rutas hash `/#/acceso`, sin cambios de infraestructura ni Auth.
+- [ ] Aprobar visualmente BT-AUTH-01A por el Director y probar Safari/iPhone y Android físicos; verificar CI remoto de esta entrega. No equivale a Auth real.
 - [ ] **PUERTA BT-CP02-D en chat reservado:** 25 pruebas A/B con JWT y Auth reales, Security Advisor y limpieza; no ejecutar en este módulo.
 - [ ] **BT-AUTH-01B:** tras A/B aprobado, habilitar Auth correo verificado, sesiones, recuperación, invitación/revocación de mecánicos, autorización RLS, permisos por OT y taller. No habilitar alta libre de administrador ni claves de servicio en cliente.
 - [ ] **BT-AUTH-01C:** módulos operativos por rol, panel de mecánico simplificado y gestión de personal autorizada. Probar acceso cruzado entre talleres, OT no asignada, URL forzada, sesiones inválidas y Safari iPhone. Android React Native posteriormente.
@@ -621,7 +623,8 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 **Decisión comercial expresa del Director para `Configuración → Usuarios y permisos`:** el Administrador del taller puede invitar/desactivar mecánicos de su propio taller, con cuotas **Básico 2**, **Plus 8**, **Full 8** por taller. El propietario y los administradores no consumen cupos de mecánico; otros límites de cuentas no han sido fijados. En prueba Full autorizada se aplica temporalmente 8. [Contrato comercial](docs/PLANES_COMERCIALES_BT_PLAN_01.md) · [idea registrada BT-IDEA-013](docs/REGISTRO_IDEAS_PLANES.md) · [especificación Auth](docs/BT_AUTH_01_LOGIN_ROLES_CORREO.md).
 
 - [x] Registrar cupos en BT-PLAN-03, matriz de roles y BT-AUTH-01 como **Aprobada para diseño**.
-- [ ] Implementar contador `Mecánicos N/2` o `N/8` y acción `Invitar mecánico` en la futura UI autorizada; no afirmar que ya envía correos.
+- [x] **BT-AUTH-01A, solo presentación:** Usuarios y permisos muestra listado vacío, invitaciones pendientes 0, plan Sin configurar y referencias Mecánicos 0/2, 0/8 y 0/8; Invitar mecánico deshabilitado. Ningún plan activo ni invitación real.
+- [ ] Conectar contador al plan/membresías autorizados del servidor cuando se apruebe la fase real; las referencias visuales no aplican cupos ni conceden acceso.
 - [ ] Backend debe comprobar cupos activos y reservas de invitación vigentes en operación atómica; impedir invitaciones excedentes y acceso a talleres ajenos, sin habilitar Auth ni RLS en la fase visual BT-AUTH-01A.
 - [ ] Antes de activar cambios reales de plan, acordar tratamiento de exceso de mecánicos al bajar a Básico **sin borrar historias ni desactivar usuarios silenciosamente**.
 - [ ] Pruebas del límite Básico 2→3 y Plus/Full 8→9, concurrencia, revocación de invitación, email confirmado y bloqueo de autoelevación. BT-CP02-D sigue en el otro chat.

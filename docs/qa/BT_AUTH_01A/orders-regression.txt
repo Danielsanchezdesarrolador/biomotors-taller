@@ -1,0 +1,5 @@
+1650px: PASS — navigation, overflow, inspection, items, totals, preview, print invocation, cancel, finalize, progress and reset
+1440px: PASS — navigation, overflow, inspection, items, totals, preview, print invocation, cancel, finalize, progress and reset
+768px: PASS — navigation, overflow, inspection, items, totals, preview, print invocation, cancel, finalize, progress and reset
+390px: PASS — navigation, overflow, inspection, items, totals, preview, print invocation, cancel, finalize, progress and reset
+375px: PASS — navigation, overflow, inspection, items, totals, preview, print invocation, cancel, finalize, progress and reset

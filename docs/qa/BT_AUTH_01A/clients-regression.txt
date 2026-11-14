@@ -1,0 +1,5 @@
+1650px PASS — search/filter, selection, ownership, history, observations, linked OT, three-step link DEMO, validation, review/correction, local intake, new client, reset; zero network writes/storage
+1440px PASS — search/filter, selection, ownership, history, observations, linked OT, three-step link DEMO, validation, review/correction, local intake, new client, reset; zero network writes/storage
+768px PASS — search/filter, selection, ownership, history, observations, linked OT, three-step link DEMO, validation, review/correction, local intake, new client, reset; zero network writes/storage
+390px PASS — search/filter, selection, ownership, history, observations, linked OT, three-step link DEMO, validation, review/correction, local intake, new client, reset; zero network writes/storage
+375px PASS — search/filter, selection, ownership, history, observations, linked OT, three-step link DEMO, validation, review/correction, local intake, new client, reset; zero network writes/storage
