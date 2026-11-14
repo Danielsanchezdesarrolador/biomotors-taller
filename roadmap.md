@@ -157,7 +157,7 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - [ ] **Aprobar explícitamente la candidata** [SQL](docs/sql/BT_CP02_C_SCHEMA_CANDIDATE.sql) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_CP02_C_BORRADOR_20261111.md) antes de aplicar migraciones. No se ha probado aún en PostgreSQL.
 - [x] **Autorización y aplicación efectiva de BT-CP02-C, 12/11/2026:** Supabase registró las migraciones `20261112144646_bt_cp02_c_core_tenants_rls` y `20261112145011_bt_cp02_c_backend_service_grants`; tres tablas creadas, cuatro políticas RLS, permisos mínimos; Security Advisor **0 avisos**.
 - [x] **Verificación SQL posterior:** sin datos ni usuarios, `ensure_rls` activo, `rls_auto_enable()` no ejecutable por `anon`/`authenticated`, `service_role` con grants administrables, navegador sin permisos de escritura para talleres o membresías.
-- [ ] **Pruebas reales de aislamiento A/B pendientes:** crear identidades con Auth oficial y dos talleres ficticios mediante flujo autorizado y probar JWT de usuarios distintos, incluidas membresías desactivadas y autoelevación, sin usar service_role para simular un usuario.
+- [x] **BT-CP02-D — AISLAMIENTO A/B APROBADO (14/11/2026):** 25/25 pruebas con dos usuarios reales de Supabase Auth de ensayo, dos talleres sintéticos y JWT independientes PASS, según ejecución en PowerShell supervisada por el Director. Incluye lectura cruzada denegada, prohibición de autoelevación y desactivación efectiva de membresía. Ver [checkpoint de cierre](docs/checkpoints/CHECKPOINT_BT_CP02_D_AB_PASS_20261114.md).
 - [x] **BT-CP02-D backend (12/11/2026):** migración `20261112150019_bt_cp02_d_atomic_owner_onboarding` aplicada; Edge Function `bt-owner-onboarding` desplegada con JWT obligatorio, **desactivada por defecto** y con permisos solo de backend. 0 avisos de seguridad.
 - [x] Código y checkpoint versionados: [BT-CP02-D](docs/checkpoints/CHECKPOINT_BT_CP02_D_20261112.md).
 - [x] **Prevalidación estructural: 22/22 PASS** en PostgreSQL (RLS, GRANT, permisos públicos y funciones de alta).
@@ -588,7 +588,8 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] Eliminar `DEMO` como branding público sin ocultar limitaciones: mientras no exista backend autorizado, mostrar «Acceso seguro y guardado permanente en preparación» y bloquear entradas que pudieran confundirse con registros reales.
 - [x] TypeScript, Vitest, build/PWA, cinco tamaños, regresiones, capturas antes/después y checkpoint `BT-OFICIAL-01A`; no publicar una apariencia de producción que permita perder datos reales.
 - [x] Publicación controlada y verificación de HTML/JS/CSS/manifiesto en el Render existente. Revisión visual del Director pendiente. La URL `biomotors-taller-demo.onrender.com` no se considera dominio comercial oficial; su cambio requiere decisión separada.
-- [ ] **01B (chat reservado BT-CP02-D):** validar Auth/RLS con usuarios A/B y aislamiento real; conectar backend seguro, registros/historial/respaldos en entregas incrementales, sin datos reales antes de autorización.
+- [x] **01B — puerta de validación Auth/RLS A/B superada (14/11/2026)** con 25/25 pruebas reales y limpieza comprobada.
+- [ ] **01B — implementación pendiente:** conectar backend seguro, registros, historial y respaldos en entregas incrementales, sin datos reales antes de autorización.
 - [ ] **01C:** correo consolidado BT-COM-01, solicitud previa de aprobación, enlace seguro de cliente, PDF versionado y piloto BIOMOTORS, tras puertas de seguridad.
 
 **No autorizado en 01A:** Supabase/Auth/RLS/migraciones, BT-CP02-D, `bt-owner-onboarding`, claves, pagos, firma, correos reales ni Android nativo. No crear otras ramas, Render o estudios.
@@ -611,7 +612,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] **BT-AUTH-01A — implementación visual:** siete pantallas R2, dos entradas, revisión explícita sin sesión, cinco paneles vacíos y vista técnica de mecánico; cuenta ficticia solo en harness privado. **125/125 pruebas (111 preservadas + 14 nuevas)**, TypeScript/build/PWA y cinco tamaños. [Checkpoint y evidencia](docs/checkpoints/CHECKPOINT_BT_AUTH_01A_20261114.md).
 - [x] Publicar BT-AUTH-01A en el Render existente: frontend `0fc21ad`, archivos comparados byte a byte y recorrido publicado de siete pantallas a 1650/390 PASS. Rutas hash `/#/acceso`, sin cambios de infraestructura ni Auth.
 - [ ] Aprobar visualmente BT-AUTH-01A por el Director y probar Safari/iPhone y Android físicos; verificar CI remoto de esta entrega. No equivale a Auth real.
-- [ ] **PUERTA BT-CP02-D en chat reservado:** 25 pruebas A/B con JWT y Auth reales, Security Advisor y limpieza; no ejecutar en este módulo.
+- [x] **Puerta BT-CP02-D completada en el chat reservado (14/11/2026):** 25/25 PASS, comprobación remota de limpieza (0 usuarios, talleres, perfiles, membresías y sesiones), RLS activo y asesor de seguridad con 0 alertas. No equivale a habilitar el registro público ni a permisos de módulos futuros.
 - [ ] **BT-AUTH-01B:** tras A/B aprobado, habilitar Auth correo verificado, sesiones, recuperación, invitación/revocación de mecánicos, autorización RLS, permisos por OT y taller. No habilitar alta libre de administrador ni claves de servicio en cliente.
 - [ ] **BT-AUTH-01C:** módulos operativos por rol, panel de mecánico simplificado y gestión de personal autorizada. Probar acceso cruzado entre talleres, OT no asignada, URL forzada, sesiones inválidas y Safari iPhone. Android React Native posteriormente.
 

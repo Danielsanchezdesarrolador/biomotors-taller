@@ -35,3 +35,13 @@ Nota: la suite no puede probar funcionalidades inexistentes (invitaciones de tra
 Supabase presenta **Publishable Keys** y **Secret Keys**. Utilizar `SUPABASE_PUBLISHABLE_KEY=sb_publishable_...` y `SUPABASE_SECRET_KEY=sb_secret_...` exclusivamente como variables de entorno de la sesión local de PowerShell. El script ya soporta esa combinación; también mantiene compatibilidad transitoria con la clave `service_role` JWT heredada si existe. Nunca pegar valores de las claves en chat, capturas, archivos del proyecto, comandos literales o terminal grabada. La clave moderna debe ir en el encabezado `apikey`, no como Bearer JWT.
 
 Antes de ejecutar, validar que solo existan fixtures de prueba y confirmar el control de ejecución `BT_CP02_AB_TEST`. Ejecutar una sola vez, sin compartir sus secretos. El acceso a Auth Admin debe realizarse desde una máquina de confianza.
+
+## Resultado de ejecución real — 14/11/2026 (Chile)
+
+El Director ejecutó desde PowerShell en su PC `scripts/security/bt-cp02-ab.mjs` utilizando dos cuentas **ficticias** creadas mediante Supabase Auth Admin y tokens JWT de cada usuario. La captura suministrada en la conversación muestra **PASS 1 a PASS 25** y el mensaje `RESULTADO: 25 pruebas A/B PASS`, seguido de la solicitud de limpieza.
+
+La auditoría independiente posterior mediante Supabase confirmó **0 registros** en `auth.users`, `auth.sessions`, `public.workshops`, `public.profiles` y `public.workshop_memberships`; RLS habilitado en las tres tablas y Security Advisor con **0 hallazgos**. No se copiaron ni almacenaron claves, tokens o información personal en este repositorio.
+
+**Pruebas del núcleo A/B cerradas.** La función Edge de onboarding público continúa sujeta a autorización y controles específicos (email, antiabuso, cupos, invitaciones, sesiones y recuperación). Las nuevas tablas operativas y Storage necesitarán políticas y pruebas multitenant propias; no derivar seguridad de su creación solo por este resultado.
+
+Ver `docs/checkpoints/CHECKPOINT_BT_CP02_D_AB_PASS_20261114.md`.
