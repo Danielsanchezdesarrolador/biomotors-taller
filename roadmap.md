@@ -459,7 +459,7 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 - [x] **BT-FLOW-01B — Recepción y expediente DEMO:** integrado en `645e2e3`, entidades compartidas en memoria, visitas recurrentes, solicitud confirmada y OT idempotente con vínculos por ID. TypeScript, 74 pruebas y build/PWA comprobados antes de C.
 - [x] **BT-FLOW-01C — Inicio y Continuar trabajo:** integrado en `9c12f97`, recepción, expediente y retorno a recursos por ID. Validación final: 76 pruebas, TypeScript/build/PWA y recorridos responsive PASS; aprobación visual y Safari físico pendientes.
 - [x] **BT-FLOW-01D — Multipunto, trabajos y cotización (DEMO implementada):** reutilizar BT-INS-01 y BT-COT-01; preparar documentos desde ítems expresamente definidos y valorizados por el mecánico, nunca por deducción del motivo. Respetar aprobación de versión, `performed`, revisiones y pendientes técnicos. Nada se envía ni se aprueba realmente en DEMO.
-- [ ] **BT-FLOW-01E — Entrega y QA:** proceso completo con correcciones, excepciones, rechazos, repuestos pendientes y finalización explícita; tests de integridad/reanudación, TypeScript, Vitest, build/PWA, E2E 1650/1440/768/390/375, regresión de paneles e informes, capturas y checkpoint.
+- [x] **BT-FLOW-01E — Entrega DEMO y QA:** estados de espera/repuestos, negativa, trabajo adicional, cancelación, revisión final y entrega con checklist; cierre vinculado a revisión vigente y trabajos realizados; pruebas unitarias, TypeScript/build/PWA y E2E en cinco tamaños ejecutadas sobre la implementación de E. Revisión visual integral del Director y Safari físico aún pendientes.
 - [ ] **Solo fase futura autorizada:** backend seguro multitenant, RLS A/B, historial persistente, enlaces/correos, firma y facturación/planes. Mantener BT-CP02-D reservado a otro chat y sin cambios en Supabase/Auth, secretos, migraciones, pagos ni Android en esta etapa.
 
 **Puerta de arranque:** completar la aprobación visual de BT-COT-01 y validar el diseño de BT-FLOW-01A antes de programar cambios en los módulos aprobados. No se crea sexta sección de navegación ni se modifica código por esta actualización de roadmap.
@@ -518,6 +518,23 @@ Referencias: [BT-REQ-REG-VEH-01](docs/BT_REGISTRO_CLIENTE_VEHICULO_VISITA.md), [
 
 - [x] **CI remoto verificado posteriormente desde ChatGPT:** [Actions 43534790714](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534790714) SUCCESS sobre `ea96945`: TypeScript, **91/91 Vitest (14 archivos)**, Vite/PWA y Android Expo; [BT-FLOW 43534467132](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467132) y [BT-COT-01 43534467458](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43534467458) también SUCCESS sobre el commit funcional.
 - [ ] Revisión y aprobación visual del Director y prueba física Safari/iPhone. Las capturas de Chromium no equivalen a aprobación ni prueba de dispositivo real.
-- [ ] **BT-FLOW-01E no iniciada:** no hay entrega, cierre de expediente ni conexiones reales. Requiere una nueva autorización.
+- [x] **BT-FLOW-01E implementada solo en DEMO**, tras autorización del Director: pausas y motivos, resolución con confirmación, cancelación, entrega condicionada, pendientes multipunto y trabajos no ejecutados explícitos, registro temporal auditable por ID y caducidad si cambian documentos. No hay entrega física, correo ni persistencia.
 
 - [x] Publicación D comprobada en el Render existente: HTML/JS/CSS idénticos al build de `d7ae7c1`; recorrido completo publicado en 1650/390 PASS y capturas reales versionadas. Sin nuevo Render ni rama.
+
+
+### BT-FLOW-01E — Cierre guiado de visita y excepciones (13/11/2026)
+
+**Estado:** código integrado exclusivamente DEMO; revisión visual y funcional global de las etapas A–E solicitada **al final del desarrollo**, sin nuevas aprobaciones intermedias. [Contrato y decisiones de la etapa E](docs/BT_FLOW_01E_CIERRE_Y_ENTREGA_DEMO.md).
+
+- [x] Pausar visita por repuestos, cliente que no autoriza, revisión técnica, vehículo pendiente, trabajo adicional u otro motivo. Exigir nota y confirmación; resolver con nota y segunda confirmación. Historial temporal de espera.
+- [x] Cancelar visita DEMO con motivo y confirmación, sin borrar orden ni documentos, sin presentar cancelación como entrega.
+- [x] Entrega con puertas verificables: misma OT, inspección finalizada, propuesta y cotización revisadas, aceptación DEMO vigente por versión, informe Finalizado DEMO con al menos un `performed:true`, ausencia de pausas y cancelación.
+- [x] Checklist y dos confirmaciones; identificar repuestos/trabajos sin ejecutar, observaciones técnicas y componentes multipunto sin revisar; exigir explicación expresa al entregar.
+- [x] Registro temporal de cierre referenciado por `visitId`, cotización/revisión, respuesta, informe/revisión, totales y fecha; cierre idempotente, y marcado desactualizado cuando cambian antecedentes. No se fabrican diagnósticos ni autorizaciones.
+- [x] Diez nuevas pruebas de dominio E, TypeScript, build/PWA y regresiones anteriores: [CI web completo de 101 pruebas](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43537500957) SUCCESS en `b46e074`. [Recorrido E 5 tamaños](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43537784904) SUCCESS en `2cf78d6` antes del último refinamiento de pendientes multipunto.
+- [x] **CI/E2E final de `73091cf` verificados:** [GitHub Actions 43538255482](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43538255482) SUCCESS con 101/101 Vitest, TypeScript/build/PWA/Android Expo; [flujo de navegador 43538255549](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43538255549) SUCCESS en 1650/1440/768/390/375, incluidos pausa, solución, entrega, cierre desactualizado y cancelación. Capturas del artefacto 14090382860 disponibles para revisión final.
+- [ ] Revisar aplicación completa con el Director y realizar prueba física Safari iPhone; la barra inferior fija y el flujo de cierre deben verificarse en dispositivo.
+- [ ] **Backend real, fuera de alcance:** persistencia multitenant, RLS A/B, consentimiento legal/firmas, correo transaccional, pagos, facturación, control de roles y paridad Android. Requieren autorización y auditoría separadas; mantener BT-CP02-D reservado a su chat.
+
+[Checkpoint de cierre BT-FLOW-01E](docs/checkpoints/CHECKPOINT_BT_FLOW_01E_20261113.md).
