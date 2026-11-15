@@ -1,0 +1,40 @@
+name: ByteTorque CP03 — Clientes/vehiculos PostgreSQL aislado
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql'
+      - 'scripts/security/bt-cp03-**'
+      - '.github/workflows/bt-cp03-postgres-lab.yml'
+permissions:
+  contents: read
+jobs:
+  cp03-postgres:
+    name: Clientes/vehiculos, RLS y duplicados (SOLO lab)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bytetorque
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-lab-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bytetorque"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap sintético de Auth, sin red ni datos reales
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-cp03-lab-bootstrap.sql
+      - name: Aplicar esquema CP02 ya aprobado SOLO al contenedor temporal
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/applied/20261112144646_bt_cp02_c_core_tenants_rls.sql
+      - name: Aplicar candidato CP03 SOLO al contenedor temporal
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql
+      - name: Verificar aislamiento, roles, patentes y claves compuestas
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-cp03-lab-assertions.sql
+      - name: Confirmar ausencia de cambios en Supabase real
+        run: echo 'PASS — PostgreSQL 17 efimero; NO deploy, NO real users or secrets'
