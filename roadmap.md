@@ -945,3 +945,14 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Siguiente puerta:** preparar integración de futuro navegador/PWA (pagehide, logout, sesión Auth validada) y ensayo Safari físico solo cuando tenga sentido; **sin activar** Edge, correos, registros, secretos, SQL hospedado ni aceptación de invitaciones sin aprobación expresa.
 
 [Checkpoint R2-A6-8](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_8_SESSION_OFFLINE_20261115.md). Única rama `main`, Supabase alojado sin cambios.
+
+
+### BT-AUTH-R2-A6-9 — Navegación Safari/PWA en laboratorio, sin activar (15/11/2026)
+
+- [x] **Enlaces sin secretos en query HTTP:** el handoff candidato rechaza token en pathname/search aunque se limpie la URL; conserva solo el formato del email en fragmento #, que no viaja en la solicitud HTTP inicial. Se actualizó la prueba de la ruta profunda.
+- [x] **Ciclo de vida seguro, módulo no publicado:** inviteBrowserLifecycleCandidate.ts maneja en tests hashchange/popstate, pagehide, beforeunload, offline, visibilitychange hidden, BFCache y eventos Auth inyectados; conserva brevemente solo entre pantalla de invitación limpia e inicio de sesión. 19 pruebas nuevas; salida/cambio de app/logout limpia. Tres módulos candidatos protegidos contra publicación accidental en el bundle.
+- [x] **CI web/Android PASS:** [#43723432561](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43723432561), 44 archivos / **441/441 Vitest**, TypeScript, build PWA, exclusión de candidatos y export Expo Android sin APK.
+- [x] **Navegador real automatizado (Chromium, NO Safari):** [UI pública #43723432536](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43723432536) **SUCCESS**; 375/390/768/1440, táctil móvil simulado, reload, back, forward, token redaccionado, cero Storage/IndexedDB/HTTP Auth o email operacionales desde enlace canónico. No se declaran ensayos físicos.
+- [ ] **Puertas pendientes:** verificar Safari en iPhone y contenedor PWA instalado según [guía QA](docs/BT_AUTH_R2_A6_9_SAFARI_QA.md); antes de habilitar aceptación real, autorizar expresamente SQL/RLS privados, secretos y Edge service-only, dominio y envío Resend de prueba y plan de rollback. **Sin cambios alojados ni activación pública.**
+
+[Checkpoint R2-A6-9](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_9_BROWSER_OFFLINE_20261115.md). Solo main; Supabase hospedado: 2 talleres, 4 Auth, 4 membresías, 0 tablas privadas.

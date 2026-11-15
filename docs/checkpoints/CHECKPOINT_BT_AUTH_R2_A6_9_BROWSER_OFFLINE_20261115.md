@@ -1,0 +1,28 @@
+# ByteTorque — Checkpoint R2-A6-9 · Ciclo de navegación de invitaciones y QA de navegador
+
+**Fecha:** 15/11/2026, Chile. **Rama:** main, única. **Base:** R2-A6-8 en 5eceabf1e632503212078bf55916f8ae4d0e1d63. **Estado:** implementación de laboratorio + prueba automatizada de navegador, SIN ACTIVAR invitaciones ni aceptación.
+
+## Qué se implementó
+
+1. **Protección contra tokens en queries HTTP:** en src/auth/inviteHandoffCandidate.ts, el futuro handoff de memoria ya **NO acepta** tokens desde pathname/search, ni siquiera desde una ruta profunda que parezca válida. Solo reconoce el formato canónico root + hash con token de 64 hex y búsqueda HTTP externa vacía. Los enlaces no válidos siguen siendo limpiados por scrubInviteLocation, pero no se retienen ni se utilizan. La plantilla de correo existente emite un hash de URL, por lo que no cambia el contrato del emisor. Commit [841ae89](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/841ae8932f479ff66eba5a11f0d90ffce1fffeb0). Test anterior de ruta profunda corregido para exigir rechazo.
+2. **Adaptador offline del ciclo de vida:** src/auth/inviteBrowserLifecycleCandidate.ts, completamente inyectado y no importado por la app pública. Detecta en simulación hashchange/popstate, pagehide/beforeunload, offline, visibilitychange hidden, pageshow persistido de BFCache y eventos Auth vía suscripción inyectada. Permite solo la ruta de invitación limpia y el login general o mecánico en la misma pestaña. Descarta ante otras rutas, nueva URL con token, logout, errores de URL, background o desmontaje. Un nuevo token recibido durante navegación se limpia de la URL pero jamás se reanuda por accidente.
+3. **Pruebas de lifecycle** src/auth/inviteBrowserLifecycleCandidate.test.ts: 19 Vitest nuevos con EventTarget sintético; incluyen navegación a login sin invalidación, rutas externas, back/forward, signout, token refresh, BFCache, errores y cleanup de listeners. **No se atribuyen estos eventos simulados a WebKit real.** Commit [7c12219](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/7c122192047a2f1e2c6815e748ad226b8357a543).
+4. **Protección del bundle:** scripts/verify-official-bundle.mjs ahora rechaza si alguno de inviteHandoffCandidate, inviteSessionCandidate o inviteBrowserLifecycleCandidate entra al build público. Commit [ca54524](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/ca54524b77287e8cb3e58ff3559df34c795e26ba).
+5. **Prueba REAL de navegador, sin invitación real:** scripts/verify-r2-invite-ui.cjs se amplió para usar Chromium en cuatro tamaños (375/390 móviles con tacto y escala 3x; 768/1440 escritorio/tablet), verificar hash limpiado, no token en texto/URL tras reload/back/forward, salida segura al acceso mecánico, ausencia de Storage.setItem e IndexedDB.open, ningún POST ni llamadas a Auth/Resend desde el enlace canónico, sin overflow. Un caso de query externa con token **ficticio** solo en loopback verifica que el frontend limpia esa URL; no prueba ni promete que el GET de query no haya llegado al servidor (por eso el handoff la rechaza). Commit [0fb2437](https://github.com/Danielsanchezdesarrolador/biomotors-taller/commit/0fb2437323f04529d44e91582f2283d6ba9a5b02).
+6. Guía manual de iPhone/Safari disponible en docs/BT_AUTH_R2_A6_9_SAFARI_QA.md. Está pendiente de ejecutarse en dispositivo físico; sin resultados inventados.
+
+## Evidencia CI
+
+- [GitHub Actions principal #43723432561](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43723432561): **SUCCESS**, TypeScript, **44 archivos y 441/441 Vitest PASS**, PWA/build, verificación de bundle y Android React Native/Expo. Ninguna APK.
+- [GitHub Actions UI pública #43723432536](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43723432536): **SUCCESS**; pasa la batería existente de paneles, acceso, marcas y la prueba ampliada de Chromium de invitación. Las capturas CI viven en el artifact de la acción, con retención de 30 días.
+- PostgreSQL real temporal de R2-A6-6 sigue cubierto por [#43714833785](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43714833785), sin necesidad de reejecutar porque no hubo cambios SQL/Edge.
+- Supabase alojado verificado SOLO lectura: **2 talleres, 4 usuarios Auth, 4 membresías, 0 tablas bt_private**; única Edge pública activa bt-owner-onboarding con verify_jwt=true. Sin cambios de secretos, roles, despliegues, registro, tablas ni correos. Worker y acceptance siguen cerrados (503 en código local, sin deploy).
+
+## Riesgos y siguiente puerta
+
+- Ni el adaptador de ciclo de vida ni el handoff ni la continuación Auth están conectados a App/main. La PWA pública actual **descarta todos los tokens inmediatamente** y muestra aviso informativo de invitaciones no disponibles. No tiene aceptación operativa.
+- Los eventos de iOS Safari, la interacción real Safari/PWA instalada y los comportamientos de WebKit/BFCache **no están aprobados físicamente**. La guía manual especifica verificación futura.
+- Una prueba automatizada en Chromium con tacto emulado **no es una prueba de Safari**. El token en query HTTP puede haber llegado a logs de un servidor: nunca emitir enlaces así.
+- Antes de habilitar cualquier invitación real, el Director debe autorizar expresamente migraciones candidatas, seguridad/secret backend, configuración Edge y una prueba limitada de envío de correo con dominio verificado. La futura UI debe preservar autorización exclusivamente en backend y SQL, protección antiabuso e integridad de identidad/correo.
+
+**Cierre:** R2-A6-9 validado en código y Chromium, puerta de activación y Safari físico aún cerradas.
