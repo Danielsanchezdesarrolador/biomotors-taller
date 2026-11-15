@@ -44,6 +44,9 @@ jobs:
       - name: Verificar transacciones concurrentes para el último cupo
         shell: bash
         run: bash scripts/security/bt-r2-lab-concurrency.sh "${{ job.services.postgres.id }}"
+      - name: Verificar aceptación de un solo uso bajo concurrencia
+        shell: bash
+        run: bash scripts/security/bt-r2-lab-accept-concurrency.sh "${{ job.services.postgres.id }}"
       - name: Confirmar que el laboratorio no creó conexión a Supabase hospedado
         run: |
           echo "PASS: docker postgres:17 service only; no Supabase project credentials"
