@@ -832,3 +832,19 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **R2-A6:** diseño de outbox, límite de envíos, SMTP y aceptación verdadera con token de un solo uso. Migración y despliegue solo tras revisión y autorización expresa; sin datos reales ni registro público.
 
 [Checkpoint BT-AUTH-R2-A5](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A5_20261114.md). R1/R2-A4 anteriores conservados. Única rama `main`, Supabase alojado sin cambios.
+
+
+### BT-AUTH-R2-A6 — Outbox cifrado y entrega segura (14/11/2026)
+
+- [x] **A6-1: reserva + outbox atómicos** en SQL candidato, privado y con RLS. Se crea invitación y cola cifrada en una sola transacción (cualquier fallo de cola revierte la reserva).
+- [x] **A6-2: AES-256-GCM / nonce** en módulo compartido, AAD vinculado al taller, verificación del email y digest SHA-256 del token; pruebas de alteración y separación entre talleres. Se guarda sobre cifrado, nunca token original en texto claro.
+- [x] **A6-3: leases de worker**, acuse único, cinco reintentos máximos, limpieza de material cifrado tras aceptación del proveedor y revocación tras fallo terminal, en SQL candidato.
+- [x] **PostgreSQL 17 real aislado PASS:** [GitHub Actions 43665924248](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43665924248): RLS/grants, reversión de cola, ack idempotente, reintentos, agotamiento y control de cupos anteriores.
+- [x] **Criptografía web validada:** [GitHub Actions 43666030049](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43666030049), web/PWA SUCCESS con pruebas del sobre cifrado y rechazo de tampering.
+- [x] **A6-4: adaptador abstracto de correo** preparado: solo inyección de proveedor autorizado, idempotency key estable por outbox y errores genéricos; sin SMTP/HTTP real ni configuración secreta.
+- [ ] **Comprobar CI ampliado** de adaptador y `deno check` después del commit final; no declarar tests verdes hasta evidencia.
+- [ ] **A6-5: integración real pendiente:** worker seguro, SMTP/proveedor aprobado, domain sender, reintentos ante outage, idempotencia soportada por proveedor, cancelación de outbox y políticas de retención.
+- [ ] **A6-6: aceptación real pendiente:** UI Safari PWA token temporal en memoria, Auth email confirmado, permisos por taller/RLS en servidor y pruebas end-to-end. No activar envíos ni registro público.
+- [ ] **Decisión de implementación:** usar Codex solo para tareas extensas (worker + integración SMTP) con alcance acotado por checkpoint y sin escrituras a proyecto alojado hasta permiso del Director.
+
+[Checkpoint BT-AUTH-R2-A6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_20261114.md). Supabase alojado y Render público sin cambios; única rama `main`, independientemente de BIOMOTORS Academia.
