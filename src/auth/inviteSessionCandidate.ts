@@ -72,6 +72,9 @@ export function createInviteSessionCandidate(
       identity.id === identity.id.toLowerCase()
   }
   async function verifySession(): Promise<InviteResumeStage> {
+    // A pending final Auth recheck owns this token until success or abort.
+    // Do not let concurrent checks supersede an in-flight consume.
+    if (consuming) return current()
     if (!['awaiting-login', 'checking', 'ready'].includes(current()))
       return current()
     const check = ++epoch
@@ -116,6 +119,7 @@ export function createInviteSessionCandidate(
     }
     if (authTransitions.has(event)) {
       epoch++ // invalidate any in-flight verification
+      consuming = false // a stale pending consume cannot lock a later refresh
       stage = 'awaiting-login'
       return stage
     }

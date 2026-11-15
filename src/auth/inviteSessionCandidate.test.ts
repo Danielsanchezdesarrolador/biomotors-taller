@@ -174,6 +174,24 @@ describe('BT-AUTH-R2-A6-8 · continuidad segura de sesión, candidata no públic
     expect(await flow.consumeAfterRecheck()).toBeNull()
     // The third getUser call has no test result; failure must remain closed.
   })
+  it('token refresh durante consume cancela petición vieja y permite nueva revalidación', async () => {
+    let resolveOld!: (value: Identity | null) => void
+    const old = new Promise<Identity | null>(r => { resolveOld = r })
+    const getUser = vi.fn().mockResolvedValueOnce(CONFIRMED)
+      .mockImplementationOnce(() => old)
+      .mockResolvedValueOnce(CONFIRMED)
+      .mockResolvedValueOnce(CONFIRMED)
+    const flow = create(getUser)
+    expect(await flow.verifySession()).toBe('ready')
+    const inFlight = flow.consumeAfterRecheck()
+    expect(await flow.verifySession()).toBe('checking')
+    expect(flow.onAuthEvent('TOKEN_REFRESHED')).toBe('awaiting-login')
+    resolveOld(CONFIRMED)
+    expect(await inFlight).toBeNull()
+    expect(await flow.verifySession()).toBe('ready')
+    expect(await flow.consumeAfterRecheck()).toBe(TOKEN)
+    expect(await flow.consumeAfterRecheck()).toBeNull()
+  })
   it('el vencimiento mientras Auth verifica no entrega el token', async () => {
     let clock = 0
     let resolve!: (value: Identity | null) => void
