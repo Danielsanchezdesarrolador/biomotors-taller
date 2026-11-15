@@ -845,6 +845,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] **CI ampliado PASS:** [web/iOS + Android #43666289991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43666289991) SUCCESS, **34 archivos / 300 pruebas Vitest PASS**, TypeScript/build/PWA; [Deno Edge #43666289997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43666289997) SUCCESS en endpoints y módulos compartidos. Esto acredita pruebas y preparación, no envío real.
 - [ ] **A6-5: integración real pendiente:** worker seguro, SMTP/proveedor aprobado, domain sender, reintentos ante outage, idempotencia soportada por proveedor, cancelación de outbox y políticas de retención.
 - [ ] **A6-6: aceptación real pendiente:** UI Safari PWA token temporal en memoria, Auth email confirmado, permisos por taller/RLS en servidor y pruebas end-to-end. No activar envíos ni registro público.
-- [ ] **Decisión de implementación:** usar Codex solo para tareas extensas (worker + integración SMTP) con alcance acotado por checkpoint y sin escrituras a proyecto alojado hasta permiso del Director.
+- [x] **Encargo Codex preparado**, aún NO ejecutado: [worker seguro R2-A6, solo código/pruebas](docs/CODEX_BT_AUTH_R2_A6_WORKER_HANDOFF.md), usando el checkpoint actual. No habilitar envíos, SMTP ni migraciones reales sin nueva autorización.
 
 [Checkpoint BT-AUTH-R2-A6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_20261114.md). Supabase alojado y Render público sin cambios; única rama `main`, independientemente de BIOMOTORS Academia.
