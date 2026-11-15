@@ -749,6 +749,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 - [x] Fixture reversible: recepción A y admin B en una cuenta ficticia, sin tocar propietarios. [Runbook](docs/BT_AUTH_01B_R1_FAST_AB_RUNBOOK.md).
 - [ ] Ronda Chrome: selector A/B, B admin, F5, cambio a A restringido, logout.
-- [ ] Ronda PowerShell: **12 comprobaciones API RLS y refresh forzado**, script \`scripts/security/bt-auth-r1-fast-ab.mjs\`.
+- [ ] Ronda PowerShell: **12 comprobaciones API RLS y refresh forzado**, script `scripts/security/bt-auth-r1-fast-ab.mjs`.
 - [ ] Verificación de renovación automática real en navegador, Safari/iPhone/PWA físico, auditoría y reversión estricta del fixture antes de cierre de R1.
 - [ ] Mantener login público y registro cerrados, sin modificar planes/pagos ni operaciones reales.
