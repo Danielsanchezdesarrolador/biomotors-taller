@@ -206,3 +206,10 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - Supabase consultado luego en lectura administrativa: cuatro cuentas ficticias mantienen roles y membresías `active` asignadas correctamente, sin alteraciones.
 - GitHub Actions del commit de preparación `eda61ce`: dos workflows `completed/success`.
 - La validación certifica estas consultas de lectura RLS, no autorizaciones de escritura futuras, renovación automática, Safari/PWA, logout de recepción ni integridad de una configuración de administrador secundario. Render permanece con Auth real apagado.
+
+### Recepción — cierre de sesión y persistencia del bloqueo (14/11/2026)
+
+- El Director reportó **«recepción desconectada»** tras seguir el procedimiento: `Cerrar sesión` y luego `F5`, sin volver a acceder al taller. **PASS de logout local y no recuperación de panel en navegador**, según confirmación del Director.
+- Completa para el rol `reception` los pasos manuales de login restringido, persistencia del estado restricted tras F5, 13/13 lecturas RLS con identidad real y logout.
+- Limitación: no equivale a revocación de todos los JWT emitidos en otros dispositivos ni a verificar operaciones de negocio futuras.
+- Pendiente R1: rol `admin` secundario, escenarios multitenant para una misma identidad, renovación automática en navegador, Safari/PWA física, limpieza segura de fixtures y decisión sobre activar Auth público. Sin activación de Render, onboarding, correos ni pagos.
