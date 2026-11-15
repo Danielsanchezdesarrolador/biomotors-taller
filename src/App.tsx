@@ -7,6 +7,7 @@ import { ShieldCheck } from 'lucide-react'
 import { AppShell, type Screen } from './layout/AppShell'
 import { OfficialPanel } from './official/OfficialPanels'
 import { preparationNotice } from './official/officialWorkspace'
+import { readPrivateScreen, rememberPrivateScreen } from './official/privateScreen'
 import './informes/informes.css'
 import './official/official.css'
 import { TechnicianReview } from './access/TechnicianReview'
@@ -42,11 +43,19 @@ export function OfficialWorkspaceView({
   review?: boolean
   onReviewExit?: () => void
 }) {
-  const [screen, setScreen] = useState<Screen>('inicio')
+  // Auth revalidates on focus and temporarily unmounts the workspace. Restore
+  // the selected section only; never persist private records or form drafts.
+  const [screen, setScreen] = useState<Screen>(() =>
+    session && !review ? readPrivateScreen() : 'inicio'
+  )
+  const navigateScreen = (next: Screen) => {
+    setScreen(next)
+    if (session && !review) rememberPrivateScreen(next)
+  }
   return (
     <AppShell
       screen={screen}
-      onNavigate={setScreen}
+      onNavigate={navigateScreen}
       copy={
         session
           ? {
@@ -84,7 +93,7 @@ export function OfficialWorkspaceView({
       {screen === 'clientes' && session?.directoryController &&
        import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ?
         <PrivateClientDirectory controller={session.directoryController} /> :
-        <OfficialPanel screen={screen} onNavigate={setScreen} />}
+        <OfficialPanel screen={screen} onNavigate={navigateScreen} />}
     </AppShell>
   )
 }

@@ -219,6 +219,7 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 - [ ] **Cierre CP03:** con el panel privado ya publicado, ensayar acceso real y flujo de creación de cliente ficticio → vehículo ficticio → logout → login → búsqueda por patente → edición → recarga; comparar registro en Supabase. Verificar aislamiento de taller y acceso desde iPhone/escritorio. La casilla de P3 NO es registro legal de consentimiento para datos personales.
 - [ ] Integrar la fuente PostgreSQL en formularios y búsqueda web/PWA oficial con Auth, roles y consentimiento aprobados; no mostrar un guardado verdadero hasta que exista. Mantener Android nativo separado.
 - [ ] Completar la prueba funcional real de crear, editar, buscar por patente/nombre, distinguir retornos y conservar fichas tras recarga. Confirmar con Ignacio los campos definitivos y manejo de duplicados de clientes.
+- [x] **UX navegación privada:** conservar solo la sección seleccionada (p. ej. Clientes y vehículos) en el navegador al volver desde otra pestaña, recargar o reabrir la URL, incluso cuando Auth R1 revalida al recuperar el foco. Nunca persistir fichas, formularios ni credenciales; reiniciar a Inicio al cerrar sesión o cambiar de taller. Pruebas unitarias de almacenamiento bloqueado, secciones inválidas y SSR público.
 
 [Checkpoint BT-CP03-P1](docs/checkpoints/CHECKPOINT_BT_CP03_P1_20261115.md) · [SQL candidato](docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql) · [Laboratorio CP03](.github/workflows/bt-cp03-postgres-lab.yml).
 

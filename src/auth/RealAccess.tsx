@@ -6,6 +6,7 @@ import { OfficialWorkspaceView } from '../App'
 import { authConfig } from './config'
 import { AuthController, type AuthState, type Role } from './controller'
 import { lazyGateway } from './lazyGateway'
+import { clearPrivateScreen } from '../official/privateScreen'
 import './auth.css'
 const roleNames: Record<Role, string> = {
   owner: 'Propietario',
@@ -66,7 +67,13 @@ export function RealAccess({
       document.removeEventListener('visibilitychange', visibility)
     }
   }, [controller])
+  // Never restore a previous operator's section after an explicit sign-out.
+  useEffect(() => {
+    if (state.phase === 'anonymous' || state.phase === 'no-membership' ||
+        state.phase === 'disabled') clearPrivateScreen()
+  }, [state.phase])
   const logout = () => {
+    clearPrivateScreen()
     void controller.logout()
   }
   const controls = (
@@ -75,7 +82,10 @@ export function RealAccess({
         Cerrar sesión
       </button>
       {(state.choices?.length || 0) > 1 && (
-        <button type="button" onClick={() => void controller.changeWorkshop()}>
+        <button type="button" onClick={() => {
+          clearPrivateScreen()
+          void controller.changeWorkshop()
+        }}>
           Cambiar taller
         </button>
       )}
