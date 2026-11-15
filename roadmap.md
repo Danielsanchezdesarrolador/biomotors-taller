@@ -862,3 +862,17 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Siguiente puerta antes de usarlo:** proveedor SMTP/API autorizado con idempotencia garantizada, dominio remitente verificado, credenciales fuera del código, worker real protegido, expiración/cancelación bajo carreras y QA E2E. NO habilitar emails, migraciones hospedadas, cron ni aceptación pública sin nueva autorización.
 
 [Checkpoint BT-AUTH-R2-A6-WORKER](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_WORKER_20261114.md). El código está preparado en `main` sin necesidad de ejecutar Codex en este bloque; respetar `AGENTS.md`. Supabase/Render reales sin nuevos permisos.
+
+
+### BT-AUTH-R2-A6-P — Candidato Resend y límite de idempotencia (14/11/2026)
+
+- [x] Comparar proveedores por capacidad de idempotencia; **Resend** es candidato técnico porque `POST /emails` acepta `Idempotency-Key` con retención **24 h**, distinguendo conflicto 409 concurrente y 409 cuerpo incompatible. No se ha contratado ni activado.
+- [x] `supabase/functions/_shared/resendInviteCandidate.ts`: contrato HTTP de envío con remitente/único destinatario y `bt-r2-invite:<outbox-id>` estable; validación de encabezados, clasificación de errores, **sin fetch ni API real**.
+- [x] `src/auth/resendInviteCandidate.test.ts`: tests de Idempotency-Key, encabezados, errores temporales/definitivos, 409 y respuestas sanitizadas.
+- [x] **Cupo de reintentos seguro:** `first_attempt_at` registrado desde el primer lease, no reiniciado; `bt_r2_claim_invitation_email` bloquea reintentos pasadas **23 h**. Reconciliación revoca invitación antigua y destruye ciphertext si caducó esa ventana.
+- [x] **PostgreSQL 17 aislado PASS:** [workflow 43668340193](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43668340193), incluye `PASS: provider 24h key protected by 23h claim cutoff and cleanup`.
+- [x] **Web/PWA y Android PASS:** [workflow 43668343805](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43668343805); 36 archivos Vitest PASS. **Deno PASS:** [workflow 43668285621](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43668285621).
+- [ ] **R2-A6-P2:** congelar remitente y cuerpo por invitación para preservar EXACTAMENTE el mismo payload entre reintentos; prueba de proveedor HTTP inyectado sin red real; validar respuesta tardía, borrado de datos, reintentos 409 y revocación.
+- [ ] **Puerta del Director:** seleccionar/configurar cuenta Resend, dominio remitente verificado, límites y secreto backend; autorizar envío SOLO de prueba a dirección propia en entorno aislado. **No instalar SQL ni habilitar emails, Auth público o worker en Supabase real antes de la aprobación.**
+
+[Checkpoint BT-AUTH-R2-A6-P](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_PROVIDER_20261114.md). Permanecen 2 talleres, 4 cuentas Auth, 4 membresías y 0 tablas de outbox en Supabase real; código únicamente en `main`.
