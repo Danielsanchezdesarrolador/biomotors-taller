@@ -88,7 +88,7 @@ export async function openInviteEnvelope(
       throw new TypeError('Invalid expected context')
     const plain = await crypto.subtle.decrypt({
       name: 'AES-GCM',
-      iv: iv.buffer,
+      iv: iv.buffer as ArrayBuffer,
       additionalData: bindContext(expected.workshopId)
     }, key, encrypted.buffer)
     const raw: unknown = JSON.parse(new TextDecoder().decode(plain))
