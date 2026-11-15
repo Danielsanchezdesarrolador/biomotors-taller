@@ -9,6 +9,39 @@
 - Evidencia sintética: [PG17 RLS #43732118545](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43732118545) PASS con bloqueo de taller suspendido, duplicado y aislamiento; [Web + Android #43732118518](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43732118518) PASS con **483/483 Vitest**. No equivale a un registro persistente en Supabase.
 - Advertencia read-only de Security Advisor: **Leaked Password Protection Disabled**. Revisar en [Seguridad de contraseñas de Supabase](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No se modificó Auth.
 
+## Estado de la autorización A — preflight del 15/11/2026
+
+**Autorización del Director recibida** para instalar **únicamente** SQL CP03 alojado, una vez verificados los resguardos. La autorización **no incluye** fichas personales, despliegue público, invitaciones, correo, secretos ni pagos.
+
+**INSPECCIÓN PREVIA VERIFICADA (solo lectura; NO se aplicó DDL):**
+
+| Comprobación | Estado |
+|---|---|
+| Proyecto | `biomotors-taller` — `suxcqqnmcjoezfxltoms` |
+| Supabase / PostgreSQL | `ACTIVE_HEALTHY` / 17.11 |
+| Plan de la organización | `free` |
+| Tablas CP02 | `workshops`: 2 registros; `profiles`: 4; `workshop_memberships`: 4 |
+| RLS CP02 | Habilitada en las tres tablas |
+| Tablas `customers` / `vehicles` | Inexistentes (0) |
+| Función `bt_cp03_touch_updated_at` | Inexistente |
+| SQL CP03 candidato | Archivo en `main` validado en PostgreSQL 17 efímero [#43732118545](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43732118545) |
+| Respaldo alojado recuperable | **No disponible/verificado** por las herramientas actuales |
+| Migración alojada CP03 | **NO EJECUTADA** |
+
+**Motivo de bloqueo:** la [documentación oficial de Supabase sobre respaldos](https://supabase.com/docs/guides/platform/backups) confirma que el plan Free no incluye respaldo automático y recomienda exportaciones manuales mediante CLI. Tampoco incluye recuperación point-in-time. Nuestro método aprobado exige detener la instalación si no se puede comprobar una vía suficiente de recuperación. Una transacción SQL aditiva reduce riesgo, pero **no se debe presentar como respaldo**.
+
+### Alternativa sin contratar un plan de pago
+
+El Director puede preparar un respaldo local protegido usando la [CLI oficial de Supabase](https://supabase.com/docs/reference/cli/introduction) y Docker, desde su propio equipo, sin compartir claves por chat. La CLI v3 exige especificar `--remote` para la base alojada; la ejecución sin esa bandera apunta al entorno local.
+
+1. Instalar CLI y Docker Desktop siguiendo el manual oficial. Desde un directorio **fuera del repositorio** ejecutar `supabase login` y `supabase link --project-ref suxcqqnmcjoezfxltoms`, autenticándose interactivamente.
+2. Verificar que el destino mostrado sea exactamente `suxcqqnmcjoezfxltoms`. No copiar contraseñas, conexión o datos del respaldo a GitHub, ChatGPT ni a carpetas públicas.
+3. Ejecutar `supabase db dump --remote --schema public -f schema_pre_cp03.sql` y `supabase db dump --remote --schema public --data-only -f data_pre_cp03.sql`. Guardar ambos archivos en ubicación privada protegida. La CLI requiere Docker; comprobar versión, sintaxis con `supabase db dump --help` y el destino **antes** de exportar.
+4. Verificar que ambos archivos existen y son legibles, que el segundo refleja las tres tablas CP02, y mantener copia cifrada fuera del equipo. El comando de la CLI excluye `auth` y otros esquemas administrados: este respaldo es **parcial**. No afirmar restauración total de Auth ni usarlo como sustituto de una restauración probada.
+5. Acordar explícitamente la suficiencia de la recuperación para el cambio **estrictamente aditivo**. Si el Director requiere recuperación integral de Auth o PITR, utilizar una alternativa de respaldo integral antes de proceder. El asistente no debe ejecutar migración alojada hasta que la protección acordada exista o el Director autorice expresamente operar sin ella.
+
+**Al desbloquear:** consultar HEAD `main`, comprobar esquema y plan, ejecutar una sola vez la migración CP03 con `apply_migration` y nombre identificable, validar en SQL alojado RLS/GRANT/FK, que las tablas sigan vacías y que CP02 conserve sus datos. Ante fallo, dejar UI inactiva y no borrar ni restaurar sin autorización adicional.
+
 ## Primera autorización específica requerida: estructura de CP03, sin datos personales
 
 El Director puede aprobar solamente la aplicación revisada de `docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql` al proyecto indicado. Esta aprobación **no autoriza** abrir formularios para clientes auténticos, desplegar Edge, enviar correos o crear usuarios.
