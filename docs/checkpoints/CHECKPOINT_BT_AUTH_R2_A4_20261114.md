@@ -53,3 +53,11 @@
 6. Resolver advertencia de contraseñas filtradas desactivada antes de onboarding público.
 
 **Resultado:** R2-A4 **en preparación verificada local/CI**, aún no operativo. La base de clientes y mecánicos está intacta. No crear roles ni talleres nuevos, ni ejecutar SQL de invitaciones contra Supabase hospedado.
+
+
+## Verificación CI ejecutada (14/11/2026)
+
+- **GitHub Actions general:** [workflow 43664201657](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664201657) sobre `8b1c65a` — **SUCCESS** en Web/iOS PWA y Android Expo, **31 archivos / 280 pruebas Vitest PASS**, TypeScript y build oficiales PASS. Se trata del código R2-A4 con identidad, template, endpoints y tests; la suite fue ejecutada, no solo agregada.
+- **Chequeo Deno Edge:** [workflow 43664289778](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664289778) sobre `1f68806` — **SUCCESS**, `deno check` de los tres endpoints y sus imports locales; sin deploy/SMTP/RPC.
+- El workflow Deno inicial `3a19cd6` tuvo una definición YAML inválida (un `run:` con dos puntos internos); fue reparado en `1f68806`. La siguiente ejecución pasó. No se atribuye ese error a código de autenticación.
+- La comprobación general del HEAD final continúa siendo independiente: consultar su estado si hubo commits posteriores al chequeo citado. Ninguna prueba CI sustituye el E2E de Auth+SMTP y RLS en servicio hospedado antes del lanzamiento.
