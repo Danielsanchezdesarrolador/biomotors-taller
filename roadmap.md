@@ -828,7 +828,7 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] Prueba Chromium añadida en 375/390/768/1440 para verificar URL limpia, sin desbordes/escrituras ni retención, con capturas en GitHub Actions. Resultado completo del nuevo job pendiente de revisión.
 - [x] Propuesta SQL privada con límites de intentos: invitar 5/hora por actor/taller; aceptar 10/15 min por actor; revocar 10/hora por actor/taller. No aplicada a Supabase; falta integrar en API y añadir rate limit IP/WAF.
 - [x] SQL rate limit corregido y probado en PostgreSQL 17 aislado [43664903467](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664903467) SUCCESS, incluyendo permisos y cuotas.
-- [ ] Confirmar PASS de carrera simultánea por último intento en nuevo workflow antes de certificar esa subprueba.
+- [x] **Cupo antiabuso concurrente aprobado:** [workflow 43664975994](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664975994) SUCCESS — quinta solicitud admitida y sexta simultánea rechazada, verificado sobre PostgreSQL 17 real de ensayo.
 - [ ] **R2-A6:** diseño de outbox, límite de envíos, SMTP y aceptación verdadera con token de un solo uso. Migración y despliegue solo tras revisión y autorización expresa; sin datos reales ni registro público.
 
 [Checkpoint BT-AUTH-R2-A5](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A5_20261114.md). R1/R2-A4 anteriores conservados. Única rama `main`, Supabase alojado sin cambios.
