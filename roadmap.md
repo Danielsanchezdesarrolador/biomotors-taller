@@ -934,3 +934,14 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Continuación:** preparar integración futura de Auth confirmado/continuación del enlace y pruebas móviles; no habilitar aceptación pública, correo Resend, RPC SQL hospedada, workers, secretos ni registro sin aprobación expresa.
 
 [Checkpoint R2-A6-7](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_7_INVITE_UX_OFFLINE_20261115.md). Única rama `main`, Supabase alojado sin cambios.
+
+
+### BT-AUTH-R2-A6-8 — Continuidad Auth y descarte de invitaciones (15/11/2026)
+
+- [x] **Candidato aislado y sin permisos:** `src/auth/inviteSessionCandidate.ts` combina el handoff A6-7 (URL limpiada, secreto en memoria máximo 5 min) con `getUser()` inyectado para distinguir cuenta confirmada de membresía todavía inexistente. **No concede permisos ni se conecta a la app pública.**
+- [x] **Seguridad de cambios de sesión:** el token se elimina ante logout, correo no confirmado, identidad cambiada, desconexión/error, abandono de la ruta o vencimiento; durante refresh se obliga a comprobar de nuevo la misma identidad y una carrera async no puede reactivar ni entregar token. Estado público de la prueba no contiene token/correo/JWT/ID.
+- [x] **Exclusión del frontend público:** el comprobador `verify-official-bundle.mjs` rechaza si se incluye accidentalmente `inviteHandoffCandidate` o `inviteSessionCandidate`. La PWA actual **sigue descartando todos los tokens** antes de renderizar.
+- [x] **Pruebas y CI finales:** [#43721109326](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43721109326) **SUCCESS** Web/iOS PWA + Android Expo, TypeScript, build PWA, 43 archivos y **422/422 Vitest**. Se corrigieron fallo inicial de `undefined` Auth y casting TS, más regresión de token refresh concurrente. Postgres y servicio hospedado no se tocaron.
+- [ ] **Siguiente puerta:** preparar integración de futuro navegador/PWA (pagehide, logout, sesión Auth validada) y ensayo Safari físico solo cuando tenga sentido; **sin activar** Edge, correos, registros, secretos, SQL hospedado ni aceptación de invitaciones sin aprobación expresa.
+
+[Checkpoint R2-A6-8](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_8_SESSION_OFFLINE_20261115.md). Única rama `main`, Supabase alojado sin cambios.
