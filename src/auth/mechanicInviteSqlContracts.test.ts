@@ -41,6 +41,6 @@ describe('BT-AUTH-R2-A2 · guardarraíles estáticos, NO pruebas de RLS real', (
     expect(config).toContain('[functions.bt-mechanic-invites]\nverify_jwt = true')
     expect(config).toContain('[functions.bt-mechanic-accept]\nverify_jwt = true')
     expect(edgeRevoke).toContain("return fail(503, 'El proceso de revocación todavía no está habilitado.'")
-    expect(config).toContain('[functions.bt-mechanic-revoke]\\nverify_jwt = true')
+    expect(config).toContain('[functions.bt-mechanic-revoke]\nverify_jwt = true')
   })
 })
