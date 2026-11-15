@@ -90,7 +90,7 @@ export async function openInviteEnvelope(
       name: 'AES-GCM',
       iv: iv.buffer as ArrayBuffer,
       additionalData: bindContext(expected.workshopId)
-    }, key, encrypted.buffer)
+    }, key, encrypted.buffer as ArrayBuffer)
     const raw: unknown = JSON.parse(new TextDecoder().decode(plain))
     if (!raw || typeof raw !== 'object' || Array.isArray(raw))
       throw new TypeError('Invalid payload')
