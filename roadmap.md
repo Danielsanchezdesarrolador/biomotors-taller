@@ -905,3 +905,13 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Siguiente puerta:** implementar y validar autenticación servicio a servicio (según documentación vigente de Supabase) sin habilitar todavía worker. Requiere aprobación explícita antes de tocar `supabase/config.toml`, crear secretos, desplegar y enviar correo; R2-A6-6 aceptación real y Resend siguen pendientes.
 
 [Checkpoint R2-A6-P5](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P5_20261115.md) · [Puerta de seguridad M2M](docs/BT_AUTH_R2_A6_P5_SERVICE_AUTH_GATE.md). Supabase alojado sin cambios (2 talleres, 4 usuarios Auth, 4 membresías, 0 tablas privadas). Única rama `main`.
+
+### BT-AUTH-R2-A6-P6 — Autenticación M2M con SDK real, inactiva (15/11/2026)
+
+- [x] **Candidato de autenticación con clave nominativa:** `bt-invite-worker/serviceAuthCandidate.ts` compila con `npm:@supabase/server@1.9.2` y `auth:'secret:bytetorque-worker'`. No es entrypoint ni despliegue, no recibe base de datos ni secretos reales y, incluso con clave válida, responde **503**.
+- [x] **Política interna estricta:** `serviceAuthPolicy.ts` exige POST sin cuerpo, Origin ni Authorization; deniega otros métodos, payload de tenant/outbox y navegador, nunca sustituye autenticación de SDK. `src/auth/workerServiceAuthPolicy.test.ts` agrega 16 pruebas sobre el cierre.
+- [x] **SDK real probado offline:** 4/4 Deno con claves sintéticas, sin permiso de red; aceptó solo clave nombrada del worker y llegó al 503, rechazó default/otras claves/publicable/JWT, payload y browser Origin. [Edge CI #43713431842](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43713431842) SUCCESS; además `deno check` del SDK fijado y de todos los endpoints.
+- [x] **Interruptor preventivo CI:** `bt-r2-worker-fail-closed.mjs` comprueba `verify_jwt=true`, entrypoint original 503 y ausencia de despliegue implícito del candidato. Corrigidos ajustes de instalación npm Deno y falso positivo del primer checker. [CI web/iOS y Android #43713431820](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43713431820) SUCCESS, 40 archivos / **381/381 Vitest**, builds y verificaciones.
+- [ ] **Puerta del Director sigue CERRADA:** autorizar clave Supabase nominativa y wrapper obligatorio; cambiar `verify_jwt=false` únicamente en un despliegue futuro protegido y probado; conectar RPCs reales, Resend verificado y envío a email propio bajo aprobaciones distintas. R2-A6-6 aceptación real sigue pendiente.
+
+[Checkpoint R2-A6-P6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P6_20261115.md) · [Runbook de activación P6](docs/BT_AUTH_R2_A6_P6_ACTIVATION_GATE.md). Solo `main`; Supabase hospedado no modificado.
