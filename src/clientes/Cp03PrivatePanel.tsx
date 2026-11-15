@@ -17,7 +17,8 @@ function BoundDirectory({ binding }: { binding: Binding }) {
   if (!access) return <p role="status">Verificando el acceso al directorio privado…</p>
   const { context, repository } = access
   return <Cp03PilotDirectoryView key={context.userId+'-'+context.workshop.id+'-'+context.role}
-    repository={repository} role={context.role} workshopName={context.workshop.name}/>
+    repository={repository} role={context.role} workshopName={context.workshop.name}
+    draftScope={{userId:context.userId,workshopId:context.workshop.id}}/>
 }
 function AuthClientDirectory({ controller, client }: {
   controller: AuthController; client: SupabaseClient

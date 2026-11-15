@@ -1,9 +1,9 @@
 /**
  * BT-CP03-P3 · Pilot directory view. Reuses official visual vocabulary.
- * NOT mounted from App, RealAccess, OfficialPanels, Render or Android.
+ * Mounted only from the verified private R1 CP03 route; not public preview.
  * The caller MUST create the repository from verified Auth context and dispose
- * it on sign-out, tenant change or loss of authorization. No persistence in
- * browser storage, no demo fixture, no network except through injected repo.
+ * it on sign-out, tenant change or loss of authorization. Only temporary,
+ * scoped, expiring tab drafts are retained (NOT a server-side save).
  */
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CarFront, Search, Plus, Pencil, UsersRound, ArrowLeft, RefreshCw } from 'lucide-react'
@@ -13,6 +13,8 @@ import {
   type CustomerInput, type CustomerRecord, type VehicleRecord
 } from './cp03PilotContracts'
 import type { cp03PilotRepository } from './cp03PilotRepository'
+import { clearCp03Draft, DRAFT_TTL_HOURS, readCp03Draft, writeCp03Draft,
+  type DraftScope, type Cp03Draft } from '../official/privateDraft'
 import './cp03PilotDirectory.css'
 
 export type PilotDirectoryPort = Pick<ReturnType<typeof cp03PilotRepository>,
@@ -44,13 +46,18 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName
+  repository, role, workshopName, draftScope
 }: {
   repository: PilotDirectoryPort
   role: Role
   workshopName: string
+  draftScope?: DraftScope
 }) {
   const writable = role === 'owner' || role === 'admin' || role === 'reception'
+  const [initialDraft] = useState(() => writable && draftScope ? readCp03Draft(draftScope) : null)
+  const editorRef = useRef<HTMLElement>(null)
+  const [draftAvailable, setDraftAvailable] = useState(!!initialDraft)
+  const [draftRestored, setDraftRestored] = useState(!!initialDraft)
   const requestId = useRef(0)
   const savingLock = useRef(false)
   const active = useRef(true)
@@ -62,33 +69,116 @@ export function Cp03PilotDirectoryView({
   const [customer, setCustomer] = useState<CustomerRecord | null>(null)
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
   const [vehicle, setVehicle] = useState<VehicleRecord | null>(null)
-  const [editor, setEditor] = useState<Editor>(null)
-  const [customerDraft, setCustomerDraft] = useState<CustomerInput>(emptyCustomer)
-  const [vehicleDraft, setVehicleDraft] = useState<VehicleDraft>(emptyVehicle)
+  const [editor, setEditor] = useState<Editor>(initialDraft?.editor === 'new-customer' ? 'new-customer' : null)
+  const [customerDraft, setCustomerDraft] = useState<CustomerInput>(() => initialDraft?.customerDraft ?? {...emptyCustomer})
+  const [vehicleDraft, setVehicleDraft] = useState<VehicleDraft>(() => initialDraft?.vehicleDraft ?? {...emptyVehicle})
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [notice, setNotice] = useState('')
 
+  // Save each form change to the same-tab temporary draft, not Supabase.
+  // React flushes these updates on input changes, before focus can trigger R1
+  // revalidation and temporarily unmount this component.
+  useEffect(() => {
+    if (!draftScope || !writable || !editor) return
+    if (editor !== 'new-customer' && !customer) return
+    const payload:Cp03Draft={
+      editor,
+      customerId:editor === 'new-customer' ? null : customer?.id ?? null,
+      vehicleId:editor === 'edit-vehicle' ? vehicle?.id ?? null : null,
+      expectedUpdatedAt:editor === 'edit-customer' ? customer?.updated_at ?? null :
+        editor === 'edit-vehicle' ? vehicle?.updated_at ?? null : null,
+      customerDraft:{
+        full_name:customerDraft.full_name,
+        email:customerDraft.email ?? '',
+        mobile_e164:customerDraft.mobile_e164 ?? '',
+        notes:customerDraft.notes ?? ''
+      },
+      vehicleDraft:{...vehicleDraft}
+    }
+    if (writeCp03Draft(draftScope,payload)) setDraftAvailable(true)
+  },[draftScope?.userId,draftScope?.workshopId,writable,editor,
+    customer?.id,customer?.updated_at,vehicle?.id,vehicle?.updated_at,
+    customerDraft,vehicleDraft])
+
   useEffect(() => {
     active.current = true
+    let cancelled = false
     const index = ++requestId.current
     setLoading(true)
     void repository.recentCustomers().then((rows) => {
-      if (active.current && requestId.current === index) setRecent(rows)
+      if (!cancelled && active.current && requestId.current === index) setRecent(rows)
     }).catch(error => {
-      if (active.current && requestId.current === index) setMessage(cp03Message(error))
+      if (!cancelled && active.current && requestId.current === index)
+        setMessage(cp03Message(error))
     }).finally(() => {
-      if (active.current && requestId.current === index) setLoading(false)
+      if (!cancelled && active.current && requestId.current === index) {
+        setLoading(false)
+        if (initialDraft && initialDraft.editor !== 'new-customer')
+          void reopenDraft(initialDraft)
+      }
     })
     return () => {
+      cancelled = true
       active.current = false
       requestId.current++
-      // Repository lifetime belongs to the future Auth-boundary. This view
-      // cancels UI updates; its owner must call repository.dispose() on logout.
+      // The Auth owner disposes the repository on session changes. Only the
+      // scoped draft remains, never results or customer objects.
     }
   }, [repository])
+
+  useEffect(() => {
+    if (draftRestored && editor) editorRef.current?.scrollIntoView({block:'nearest'})
+  }, [draftRestored,editor])
+
+  async function reopenDraft(draft:Cp03Draft) {
+    if (!draftScope || !writable) return
+    if (draft.editor === 'new-customer') {
+      setCustomerDraft(draft.customerDraft)
+      setVehicleDraft(draft.vehicleDraft)
+      setConfirmed(false)
+      setEditor(draft.editor)
+      setDraftRestored(true)
+      return
+    }
+    if (!draft.customerId) return
+    const index=++requestId.current
+    setLoading(true)
+    setMessage('')
+    try {
+      const owner=await repository.getCustomer(draft.customerId)
+      if (!owner) throw new DirectoryFailure('unavailable')
+      const list=await repository.vehiclesForCustomer(owner.id)
+      const selected=draft.editor === 'edit-vehicle'
+        ? await repository.getVehicle(draft.vehicleId ?? '') : null
+      if (draft.editor === 'edit-vehicle' &&
+          (!selected || selected.customer_id !== owner.id))
+        throw new DirectoryFailure('unavailable')
+      if ((draft.editor === 'edit-customer' && owner.updated_at !== draft.expectedUpdatedAt) ||
+          (draft.editor === 'edit-vehicle' && selected?.updated_at !== draft.expectedUpdatedAt))
+        throw new DirectoryFailure('conflict')
+      if (!active.current || index!==requestId.current) return
+      setCustomer(owner)
+      setVehicles(list)
+      setVehicle(selected)
+      setMatches(null)
+      setCustomerDraft(draft.customerDraft)
+      setVehicleDraft(draft.vehicleDraft)
+      setConfirmed(false)
+      setEditor(draft.editor)
+      setDraftRestored(true)
+    } catch(error) {
+      if (active.current && index===requestId.current) {
+        setMessage(error instanceof DirectoryFailure && error.kind === 'conflict'
+          ? 'La ficha cambió mientras estabas fuera. El borrador sigue disponible; revisa los cambios antes de continuar.'
+          : 'No pudimos recuperar todavía la ficha asociada al borrador. El borrador no se ha borrado.')
+      }
+    } finally {
+      if (active.current && index===requestId.current) setLoading(false)
+    }
+  }
 
   async function loadCustomer(id: string) {
     const index = ++requestId.current
@@ -156,6 +246,11 @@ export function Cp03PilotDirectoryView({
     }
   }
   function startCustomer(edit: boolean) {
+    if (draftScope && draftAvailable && !window.confirm(
+      'Hay un borrador pendiente. ¿Quieres descartarlo y abrir otro formulario?')) return
+    if (draftScope && draftAvailable) clearCp03Draft()
+    setDraftAvailable(false)
+    setDraftRestored(false)
     setMessage(''); setNotice('')
     if (edit && !customer) return
     setEditor(edit ? 'edit-customer' : 'new-customer')
@@ -166,6 +261,11 @@ export function Cp03PilotDirectoryView({
       : {...emptyCustomer})
   }
   function startVehicle(edit: boolean) {
+    if (draftScope && draftAvailable && !window.confirm(
+      'Hay un borrador pendiente. ¿Quieres descartarlo y abrir otro formulario?')) return
+    if (draftScope && draftAvailable) clearCp03Draft()
+    setDraftAvailable(false)
+    setDraftRestored(false)
     setMessage(''); setNotice('')
     if (!customer || (edit && !vehicle)) return
     setEditor(edit ? 'edit-vehicle' : 'new-vehicle')
@@ -199,6 +299,9 @@ export function Cp03PilotDirectoryView({
       const saved = editor === 'edit-customer' && customer
         ? await repository.updateCustomer(customer.id,customer.updated_at,input)
         : await repository.createCustomer(input)
+      // A successful server response is the authoritative commit. A later
+      // list-refresh failure must never offer to re-submit the same draft.
+      clearCp03Draft(); setDraftAvailable(false); setDraftRestored(false)
       if (!active.current) return
       const list = await repository.vehiclesForCustomer(saved.id)
       if (!active.current) return
@@ -236,6 +339,7 @@ export function Cp03PilotDirectoryView({
       const saved = editor === 'edit-vehicle' && vehicle
         ? await repository.updateVehicle(vehicle.id,vehicle.updated_at,input)
         : await repository.createVehicle(input)
+      clearCp03Draft(); setDraftAvailable(false); setDraftRestored(false)
       if (!active.current) return
       const list = await repository.vehiclesForCustomer(customer.id)
       if (!active.current) return
@@ -276,6 +380,14 @@ export function Cp03PilotDirectoryView({
         </form>
         {writable && <button type="button" className="cp03-secondary" disabled={loading || saving}
           onClick={()=>startCustomer(false)}><Plus size={18}/> Nuevo cliente</button>}
+        {writable && draftAvailable && !editor && draftScope && <>
+          <button type="button" className="cp03-secondary" disabled={loading || saving}
+            onClick={()=>{const draft=readCp03Draft(draftScope); if(draft) void reopenDraft(draft)
+              else setDraftAvailable(false)}}>Retomar borrador pendiente</button>
+          <button type="button" className="cp03-secondary" disabled={saving}
+            onClick={()=>{clearCp03Draft(); setDraftAvailable(false);setDraftRestored(false);
+              setNotice('Borrador descartado.')}}>Descartar borrador</button>
+        </>}
       </section>
       <p className="cp03-status" role="status" aria-live="polite">
         {loading ? 'Consultando las fichas autorizadas…' : notice || (matches ? 'Búsqueda completada.' : 'Selecciona una ficha para continuar.')}
@@ -338,13 +450,19 @@ export function Cp03PilotDirectoryView({
           </div>}
         </section>
       </div>
-      {writable && editor && <section className="dashboard-card cp03-panel cp03-editor" aria-label="Editar ficha">
+      {writable && editor && <section ref={editorRef} className="dashboard-card cp03-panel cp03-editor" aria-label="Editar ficha">
+        <p className="cp03-wide cp03-draft-note" role="status">
+          {draftRestored ? 'Borrador recuperado. ' : ''}
+          Borrador temporal en esta pestaña (hasta ${DRAFT_TTL_HOURS} horas).
+          Aún no está guardado en Supabase; al guardar la ficha se eliminará el borrador.
+        </p>
         <div className="cp03-inline cp03-heading">
           <h2>{editor === 'new-customer' ? 'Registrar cliente' :
             editor === 'edit-customer' ? 'Editar cliente' :
             editor === 'new-vehicle' ? 'Registrar vehículo' : 'Editar vehículo'}</h2>
           <button type="button" className="cp03-secondary" disabled={saving}
-            onClick={()=>setEditor(null)}><ArrowLeft size={17}/> Volver a la ficha</button>
+            onClick={()=>{setEditor(null);setNotice('Borrador conservado; podrás retomarlo desde esta sección.')}}
+            ><ArrowLeft size={17}/> Cerrar formulario</button>
         </div>
         {editor.endsWith('customer') ? (
           <form onSubmit={saveCustomer} className="cp03-form">
