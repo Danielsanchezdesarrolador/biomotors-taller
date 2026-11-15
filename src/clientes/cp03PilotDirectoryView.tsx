@@ -10,7 +10,7 @@ import { CarFront, Search, Plus, Pencil, UsersRound, ArrowLeft, RefreshCw } from
 import type { Role } from '../auth/controller'
 import {
   DirectoryFailure, customerPayload, vehiclePayload,
-  type CustomerInput, type CustomerRecord, type VehicleInput, type VehicleRecord
+  type CustomerInput, type CustomerRecord, type VehicleRecord
 } from './cp03PilotContracts'
 import type { cp03PilotRepository } from './cp03PilotRepository'
 import './cp03PilotDirectory.css'
@@ -23,8 +23,9 @@ type Editor = 'new-customer' | 'edit-customer' | 'new-vehicle' | 'edit-vehicle' 
 const emptyCustomer: CustomerInput = {
   full_name: '', email: '', mobile_e164: '', notes: ''
 }
-const emptyVehicle: Omit<VehicleInput, 'customer_id'> = {
-  plate: '', make: '', model: '', model_year: null, odometer_km: null
+type VehicleDraft = {plate: string;make: string;model: string;model_year: string;odometer_km: string}
+const emptyVehicle: VehicleDraft = {
+  plate: '', make: '', model: '', model_year: '', odometer_km: ''
 }
 export function cp03Message(error: unknown) {
   const kind = error instanceof DirectoryFailure ? error.kind : 'unavailable'
@@ -63,7 +64,7 @@ export function Cp03PilotDirectoryView({
   const [vehicle, setVehicle] = useState<VehicleRecord | null>(null)
   const [editor, setEditor] = useState<Editor>(null)
   const [customerDraft, setCustomerDraft] = useState<CustomerInput>(emptyCustomer)
-  const [vehicleDraft, setVehicleDraft] = useState<Omit<VehicleInput,'customer_id'>>(emptyVehicle)
+  const [vehicleDraft, setVehicleDraft] = useState<VehicleDraft>(emptyVehicle)
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -169,8 +170,9 @@ export function Cp03PilotDirectoryView({
     if (!customer || (edit && !vehicle)) return
     setEditor(edit ? 'edit-vehicle' : 'new-vehicle')
     setVehicleDraft(edit && vehicle
-      ? {plate:vehicle.plate,make:vehicle.make,model:vehicle.model,
-        model_year:vehicle.model_year,odometer_km:vehicle.odometer_km}
+      ? {plate:vehicle.plate ?? '',make:vehicle.make,model:vehicle.model,
+        model_year:vehicle.model_year === null ? '' : String(vehicle.model_year),
+        odometer_km:vehicle.odometer_km === null ? '' : String(vehicle.odometer_km)}
       : {...emptyVehicle})
   }
   async function saveCustomer(event: FormEvent) {
@@ -228,7 +230,9 @@ export function Cp03PilotDirectoryView({
     setMessage('')
     setNotice('')
     try {
-      const input = vehiclePayload({...vehicleDraft,customer_id:customer.id})
+      const input = vehiclePayload({...vehicleDraft,customer_id:customer.id,
+        model_year:formNumber(vehicleDraft.model_year),
+        odometer_km:formNumber(vehicleDraft.odometer_km)})
       const saved = editor === 'edit-vehicle' && vehicle
         ? await repository.updateVehicle(vehicle.id,vehicle.updated_at,input)
         : await repository.createVehicle(input)
@@ -377,10 +381,10 @@ export function Cp03PilotDirectoryView({
             <label>Modelo *<input required maxLength={80} value={vehicleDraft.model}
               onChange={e=>setVehicleDraft(d=>({...d,model:e.target.value}))}/></label>
             <label>Año<input type="number" min={1900} max={2100} value={vehicleDraft.model_year ?? ''}
-              onChange={e=>setVehicleDraft(d=>({...d,model_year:formNumber(e.target.value)}))}/></label>
+              onChange={e=>setVehicleDraft(d=>({...d,model_year:e.target.value}))}/></label>
             <label>Kilometraje<input type="number" min={0} max={3000000}
               value={vehicleDraft.odometer_km ?? ''}
-              onChange={e=>setVehicleDraft(d=>({...d,odometer_km:formNumber(e.target.value)}))}/></label>
+              onChange={e=>setVehicleDraft(d=>({...d,odometer_km:e.target.value}))}/></label>
             <button className="cp03-primary" type="submit" disabled={saving}>
               {saving ? <RefreshCw size={17}/> : <Plus size={17}/>}
               {saving ? 'Guardando…' : 'Guardar ficha del vehículo'}
