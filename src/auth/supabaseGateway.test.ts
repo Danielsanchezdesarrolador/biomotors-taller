@@ -37,11 +37,12 @@ describe('Official Supabase SDK adapter · mocked client only', () => {
   it('enables SDK-only session persistence, refresh and disables URL session consumption', () => {
     const { client } = fixture()
     vi.mocked(createClient).mockReturnValue(client as never)
-    createGateway({
+    const gateway = createGateway({
       enabled: true,
       url: 'https://suxcqqnmcjoezfxltoms.supabase.co',
       key: 'sb_publishable_mock'
     })
+    expect(await gateway.getDataClient?.()).toBe(client)
     expect(createClient).toHaveBeenCalledWith(
       'https://suxcqqnmcjoezfxltoms.supabase.co',
       'sb_publishable_mock',

@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
     if (/SECRET|SERVICE_ROLE|PASSWORD/i.test(name) || value.startsWith('sb_secret_'))
       throw new Error('Unsafe public environment configuration; no build was generated.')
   }
+  if (env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
+    throw new Error('CP03 private access requires R1 authentication; refusing build.')
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')
@@ -28,6 +30,8 @@ export default defineConfig(({ mode }) => {
             (id) =>
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
+                !(env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(id)) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
                   id
                 ))

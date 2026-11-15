@@ -6,6 +6,7 @@ export function lazyGateway(config: Extract<AuthConfig, { enabled: true }>): Aut
   const get = () =>
     (pending ??= import('./supabaseGateway').then((module) => module.createGateway(config)))
   return {
+    getDataClient: async () => (await get()).getDataClient?.() ?? null,
     hasSession: async () => (await get()).hasSession(),
     getUser: async () => (await get()).getUser(),
     signIn: async (email, password) => (await get()).signIn(email, password),

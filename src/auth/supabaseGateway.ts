@@ -27,6 +27,7 @@ function check(error: unknown): void {
 }
 export function supabaseGateway(client: SupabaseClient): AuthGateway {
   return {
+    getDataClient: async () => client,
     async hasSession() {
       const { data, error } = await client.auth.getSession()
       check(error)

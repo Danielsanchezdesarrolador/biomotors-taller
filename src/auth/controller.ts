@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 export const roles = ['owner', 'admin', 'mechanic', 'reception'] as const
 export type Role = (typeof roles)[number]
 export type Identity = { id: string; confirmed: boolean }
@@ -6,6 +8,8 @@ export type Workshop = { id: string; name: string; status: string }
 export type Choice = { workshop: Workshop; role: Role }
 export type Context = Choice & { userId: string }
 export interface AuthGateway {
+  /** Obtain the same SDK instance used for login, not a second browser session. */
+  getDataClient?(): Promise<SupabaseClient | null>
   hasSession(): Promise<boolean>
   getUser(): Promise<Identity | null>
   signIn(email: string, password: string): Promise<void>
@@ -54,6 +58,11 @@ export class AuthController {
     this.state = gateway
       ? { phase: 'checking', message: 'Verificando sesión y autorización…' }
       : { phase: 'disabled', message: disabledReason }
+  }
+  async directoryClient(): Promise<SupabaseClient | null> {
+    if (!this.gateway?.getDataClient ||
+        !['authorized', 'restricted'].includes(this.state.phase)) return null
+    return this.gateway.getDataClient()
   }
   getSnapshot = () => this.state
   subscribe = (listener: () => void) => {

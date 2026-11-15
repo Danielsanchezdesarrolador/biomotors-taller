@@ -106,7 +106,9 @@ export function RealAccess({
     if (role === 'owner' || role === 'admin')
       return (
         <OfficialWorkspaceView
-          session={{ workshop: workshop.name, role: roleNames[role], controls }}
+          session={{ workshop: workshop.name, role: roleNames[role], controls,
+            directoryController: import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
+              ? controller : undefined }}
         />
       )
   }

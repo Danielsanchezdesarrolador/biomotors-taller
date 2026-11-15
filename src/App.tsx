@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import { RealAccess } from './auth/RealAccess'
 import { InviteAcceptancePreview } from './auth/InviteAcceptancePreview'
 import { inviteAcceptancePath, scrubInviteLocation } from './auth/inviteLinkRouting'
@@ -17,12 +17,28 @@ import {
   publicEntryPath,
   resolveAccessPath
 } from './access/accessContract'
+/** A separately approved private R1 rollout. No public-review route can mount it. */
+function PrivateClientDirectory({ controller }: { controller: AuthController }) {
+  const [Panel, setPanel] = useState<ComponentType<{ controller: AuthController }> | null>(null)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    if (import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED !== 'true') return
+    let active = true
+    void import('./clientes/Cp03PrivatePanel').then(mod => {
+      if (active) setPanel(() => mod.Cp03PrivatePanel)
+    }).catch(() => { if (active) setFailed(true) })
+    return () => { active = false }
+  }, [controller])
+  if (failed) return <p role="alert">No se pudo cargar el directorio privado. Reintenta el acceso.</p>
+  return Panel ? <Panel controller={controller} /> :
+    <p role="status">Preparando clientes y vehículos del taller autorizado…</p>
+}
 export function OfficialWorkspaceView({
   review = false,
   onReviewExit,
   session
 }: {
-  session?: { workshop: string; role: string; controls: ReactNode }
+  session?: { workshop: string; role: string; controls: ReactNode; directoryController?: AuthController }
   review?: boolean
   onReviewExit?: () => void
 }) {
@@ -57,13 +73,18 @@ export function OfficialWorkspaceView({
           </strong>
           <p>
             {session
-              ? 'Las operaciones de negocio y el guardado permanente aún no están habilitados. No ingreses datos de clientes ni vehículos reales.'
+              ? session.directoryController && screen === 'clientes'
+                ? 'Directorio privado conectado al taller autorizado. En las pruebas utiliza únicamente fichas ficticias.'
+                : 'Las demás operaciones de negocio aún no están habilitadas. No ingreses datos reales sin autorización.'
               : preparationNotice}
           </p>
           {session?.controls}
         </div>
       </div>
-      <OfficialPanel screen={screen} onNavigate={setScreen} />
+      {screen === 'clientes' && session?.directoryController &&
+       import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ?
+        <PrivateClientDirectory controller={session.directoryController} /> :
+        <OfficialPanel screen={screen} onNavigate={setScreen} />}
     </AppShell>
   )
 }

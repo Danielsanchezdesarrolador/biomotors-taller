@@ -18,19 +18,26 @@ assert.ok(
   modules.every((id) => !/inviteBrowserLifecycleCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
+const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
+if (cp03PrivateEnabled)
+  assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED, 'true',
+    'Private CP03 requires R1 authenticated build')
 // CP03 is an unapproved data-access candidate: no customers may be loaded
 // or written by the deployed official presentation until the Director gates it.
-assert.ok(
-  modules.every((id) =>
-    !/cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding)\.(?:ts|tsx|js)/.test(id)
-  ),
-  'Unapproved CP03 customer/vehicle repository in public PWA'
-)
+if (!cp03PrivateEnabled) {
+  assert.ok(
+    modules.every((id) =>
+      !/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id)
+    ),
+    'Unapproved CP03 customer/vehicle repository in public PWA'
+  )
+}
 assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
-      /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id)
+      /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
+      (cp03PrivateEnabled && /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id))
   )
 )
 for (const name of readdirSync('dist/assets')) {
