@@ -136,7 +136,7 @@ BEGIN
   END LOOP;
 END $$;
 ROLLBACK;
-\\echo PASS: Plus/Full 8/8 occupied; 9th denied
+\echo PASS: Plus/Full 8/8 occupied; 9th denied
 
 -- Downgrade blocks acceptance above the Basic quota; history not erased.
 BEGIN;
