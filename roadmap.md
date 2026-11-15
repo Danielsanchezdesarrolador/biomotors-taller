@@ -887,3 +887,12 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Puerta de activación sigue cerrada:** verificar dominio/remitente con proveedor, autorizar cuenta/secret backend y una prueba controlada, terminar autorización service-to-service, probar aceptación real R2-A6-6 y revisar E2E de revocación, rebotes y duplicados. Sin activar registro público ni correos externos ni funciones de invitación.
 
 [Checkpoint BT-AUTH-R2-A6-P3](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P3_20261115.md) · [Runbook de preparación](docs/BT_AUTH_R2_A6_P3_RESEND_PREPARACION.md).
+
+### BT-AUTH-R2-A6-P4 — Creador cifrado y reserva atómica inyectada (15/11/2026)
+
+- [x] **Creador backend candidato:** `invitationIssueCandidate.ts` enlaza actor Auth previamente verificado, consulta de taller confiable, token criptográfico, sobre V3 y la única RPC candidata de reserva + cola atómica. La reserva real NO se realiza; dependencias completamente inyectadas y simuladas. Nada de roles, planes, tokens, remitentes o nombres del taller desde UI.
+- [x] **Sin secretos ni reintentos inseguros:** confirma integridad del sobre antes del RPC, no retorna token/PII; si falla la respuesta de DB tras posible commit devuelve `unknown` para reconciliación, sin reintentar automáticamente. Permisos/cupos/rate limit siguen bajo autoridad SQL. Se documentó y corrigió fallo de UUID del primer CI.
+- [x] **CI de implementación PASS:** [web/PWA + Android #43672523385](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43672523385) con 39 archivos y **365/365 Vitest**, TypeScript y builds; [PostgreSQL 17 aislado #43672523397](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43672523397) concurrencia/RLS/outbox SUCCESS; [Deno #43672523398](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43672523398) SUCCESS.
+- [ ] **Próximas puertas:** prueba integrada backend+DB real solo en laboratorio aislado, autorización de servicio máquina-a-máquina, dominio/remitente/cuenta Resend y primera prueba E2E aprobada expresamente. R2-A6-6 aceptación real pendiente; endpoints, envíos, migraciones y pagos públicos siguen desactivados.
+
+[Checkpoint R2-A6-P4](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P4_20261115.md). Mantener única rama `main`, sin datos de clientes y con Supabase hospedado sin cambios.
