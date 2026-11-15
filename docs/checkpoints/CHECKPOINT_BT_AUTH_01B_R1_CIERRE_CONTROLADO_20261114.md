@@ -52,3 +52,16 @@ Se verificó `rowsecurity=true` en `public.workshops`, `public.workshop_membersh
 3. Mantener foco en autorización y persistencia R2 solo después de una revisión de seguridad; no iniciar datos de clientes reales sin aprobación.
 
 **Resultado administrativo:** permiso temporal B revertido sin alterar los cuatro permisos legítimos de prueba; ronda R1 cerrada en cuanto a fixture y limpieza, **con prueba de renovación automática pendiente**.
+
+
+---
+
+## Ratificación del Director y transición a R2 — 14/11/2026 (Chile)
+
+En la continuidad del proyecto, el Director declaró expresamente: **«la renovación sí funcionó, no sigamos perdiendo tiempo»**, y ordenó avanzar. Por lo tanto, la renovación automática queda **aceptada funcionalmente por el Director como criterio de cierre R1**, sin repetir la prueba.
+
+**Precisión de auditoría:** la observación enviada anteriormente con filtro `refresh_token` vacío no contiene la traza de la renovación automática. Sí existe evidencia de una solicitud de navegador `refresh_token` con HTTP 200 en Supabase y pruebas de renovación forzada 12/12 PASS. No declarar que se capturó en ese momento una renovación automática E2E que no conste en el registro.
+
+**Decisión:** R1 cerrado y aprobado por el Director en cuanto a alcance funcional; no reabrir sus pruebas por falta de captura. El cierre técnico ya retiró la membresía temporal B y conservó cuatro usuarios ficticios y sus cuatro membresías. No recrear la membresía temporal ni ejecutar el script 12/12 archivado.
+
+**Siguiente bloque autorizado para continuar:** BT-AUTH-R2, contratos y lógica segura de invitaciones de mecánicos y recuperación de cuenta, sin activar invitaciones, correos, registro público, Auth en Render ni datos reales. Pruebas de seguridad de las futuras operaciones de escritura son independientes de R1.
