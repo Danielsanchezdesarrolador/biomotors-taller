@@ -86,8 +86,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.customers, public.vehicles
 CREATE POLICY customers_read_active_member ON public.customers
   FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.workshop_memberships m
+      JOIN public.workshops w ON w.id = m.workshop_id
       WHERE m.workshop_id = customers.workshop_id
-        AND m.user_id = (SELECT auth.uid()) AND m.status = 'active')
+        AND m.user_id = (SELECT auth.uid()) AND m.status = 'active'
+        AND w.status = 'active')
   );
 CREATE POLICY customers_insert_staff ON public.customers
   FOR INSERT TO authenticated WITH CHECK (
@@ -115,8 +117,10 @@ CREATE POLICY customers_update_staff ON public.customers
 CREATE POLICY vehicles_read_active_member ON public.vehicles
   FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.workshop_memberships m
+      JOIN public.workshops w ON w.id = m.workshop_id
       WHERE m.workshop_id = vehicles.workshop_id
-        AND m.user_id = (SELECT auth.uid()) AND m.status = 'active')
+        AND m.user_id = (SELECT auth.uid()) AND m.status = 'active'
+        AND w.status = 'active')
   );
 CREATE POLICY vehicles_insert_staff ON public.vehicles
   FOR INSERT TO authenticated WITH CHECK (

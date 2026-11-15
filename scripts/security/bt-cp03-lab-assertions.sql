@@ -148,4 +148,35 @@ DO $$ BEGIN
  END IF;
 END $$;
 RESET ROLE;
-SELECT 'PASS: CP03 customer/vehicle RLS, cross-FK, plate dedup, roles and disabled membership' AS result;
+
+-- Suspended workshops MUST hide directory records in RLS, even if member
+-- remains active. UI guards alone do not protect direct Data API requests.
+UPDATE public.workshops SET status='suspended'
+WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+DO $ BEGIN
+ IF (SELECT count(*) FROM public.customers) <> 0
+    OR (SELECT count(*) FROM public.vehicles) <> 0 THEN
+   RAISE EXCEPTION 'SUSPENDED_WORKSHOP_DIRECTORY_READ_BYPASS';
+ END IF;
+ BEGIN
+  INSERT INTO public.customers(workshop_id,full_name)
+  VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Suspended must fail');
+  RAISE EXCEPTION 'SUSPENDED_WORKSHOP_WRITE_BYPASS';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+END $;
+RESET ROLE;
+UPDATE public.workshops SET status='active'
+WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+DO $ BEGIN
+ IF (SELECT count(*) FROM public.customers) <> 4
+    OR (SELECT count(*) FROM public.vehicles) <> 2 THEN
+   RAISE EXCEPTION 'REACTIVATED_WORKSHOP_MISSING_DIRECTORY';
+ END IF;
+END $;
+RESET ROLE;
+SELECT 'PASS: CP03 directory tenant RLS, suspended workshop denial, roles and plate duplicates' AS result;

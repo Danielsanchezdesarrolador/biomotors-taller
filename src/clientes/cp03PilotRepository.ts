@@ -11,7 +11,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context, Role } from '../auth/controller'
 import {
-  DirectoryFailure, UUID, customerPayload, vehiclePayload, normalizedPlate,
+  DirectoryFailure, UUID, customerPayload, vehiclePayload, normalizedPlate, normalizedPhoneSearch,
   validSearch, escapeLike, type CustomerInput, type VehicleInput,
   type CustomerRecord, type VehicleRecord
 } from './cp03PilotContracts'
@@ -101,9 +101,10 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
     const version = await guard(false)
     const foundCustomer = client.from('customers').select(customerColumns)
       .eq('workshop_id', tenant).is('archived_at', null)
+    const phone = normalizedPhoneSearch(value)
     const customerQuery = value.includes('@')
       ? foundCustomer.eq('email', value.toLowerCase())
-      : value.startsWith('+') ? foundCustomer.eq('mobile_e164', value)
+      : phone ? foundCustomer.eq('mobile_e164', phone)
       : foundCustomer.ilike('full_name', '%' + escapeLike(value) + '%')
     const customerResult = await customerQuery.limit(25)
     if (customerResult.error) failure(customerResult.error)

@@ -46,6 +46,17 @@ export function normalizedPlate(value: string): string {
   // Not a vehicle identity. A unique plate is scoped to the SAME workshop.
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '')
 }
+/** Chilean mobile search accepts 9XXXXXXXX, 569XXXXXXXX or +56 9XXXXXXXX. */
+export function normalizedPhoneSearch(value: string): string | null {
+  const candidate = value.trim()
+  if (!/^[+()0-9\\s-]+$/.test(candidate)) return null
+  const compact = candidate.replace(/[()\\s-]/g, '')
+  const phone = compact.startsWith('+56') ? compact
+    : compact.startsWith('56') ? '+' + compact
+    : compact.startsWith('9') ? '+56' + compact
+    : ''
+  return /^\\+569[0-9]{8}$/.test(phone) ? phone : null
+}
 function optionalText(input: unknown, max: number): string | null {
   if (input == null || input === '') return null
   if (typeof input !== 'string' || input.trim().length > max) throw invalid()

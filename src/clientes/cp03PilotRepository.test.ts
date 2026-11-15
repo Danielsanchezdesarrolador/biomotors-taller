@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context, Role } from '../auth/controller'
 import {
   DirectoryFailure, customerPayload, vehiclePayload, normalizedPlate,
-  validSearch, escapeLike
+  validSearch, escapeLike, normalizedPhoneSearch
 } from './cp03PilotContracts'
 import { cp03PilotRepository } from './cp03PilotRepository'
 
@@ -187,6 +187,22 @@ describe('CP03-P2 · datos y validaciones, sin acceso a Supabase hospedado', () 
     await expectFailure(r.getCustomer('bad'),'invalid')
     await expectFailure(r.getVehicle('bad'),'invalid')
     expect(f.user).not.toHaveBeenCalled()
+  })
+  it.each(['912345678','56 9 1234 5678','+56 (9) 1234-5678'])(
+    'encuentra teléfono chileno ingresado como %s', async input => {
+      const f=fixture()
+      expect(normalizedPhoneSearch(input)).toBe('+56912345678')
+      await cp03PilotRepository(f.client,context()).search(input)
+      expect(f.ops).toContainEqual({
+        table:'customers',kind:'eq',args:['mobile_e164','+56912345678']
+      })
+    }
+  )
+  it('no transforma patentes ni texto en teléfonos', () => {
+    expect(normalizedPhoneSearch('AB-1234')).toBeNull()
+    expect(normalizedPhoneSearch('123456789')).toBeNull()
+    expect(normalizedPhoneSearch('+56-9 1234x5678')).toBeNull()
+    expect(normalizedPhoneSearch('')).toBeNull()
   })
   it('consulta correo exacto sin inyectar condiciones OR PostgREST', async () => {
     const f=fixture()
