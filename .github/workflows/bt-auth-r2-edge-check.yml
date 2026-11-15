@@ -25,4 +25,5 @@ jobs:
           deno check supabase/functions/bt-mechanic-accept/index.ts
           deno check supabase/functions/bt-mechanic-revoke/index.ts
       - name: Confirmar que no se desplegó ni envió correo
-        run: echo "PASS: offline typecheck only. No Supabase deploy, RPC or SMTP"
+        run: |
+          echo 'PASS: offline typecheck only. No Supabase deploy, RPC or SMTP'
