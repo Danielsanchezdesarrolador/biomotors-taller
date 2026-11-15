@@ -6,6 +6,7 @@
  */
 import { hashMechanicInviteToken } from './mechanicInviteToken.ts'
 import { renderMechanicInviteEmail } from './mechanicInviteEmail.ts'
+import { serializeResendInviteWireV1, wireMatchesResendInviteV1 } from './resendInviteWireV1.ts'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -118,8 +119,8 @@ export async function openInviteEnvelope(
 
 /**
  * R2-A6-P2: freeze the complete email BEFORE enqueue; NEVER re-render on retry.
- * Version 1 is retained for historical preview tests, NOT accepted by the worker.
- * All sender, recipient, subject, HTML, text and token bytes are encrypted.
+ * Versions 1/2 are retained only for historical reference. Worker accepts V3.
+ * All sender, recipient, subject, HTML, text, wire body and token are encrypted.
  */
 export type ImmutableInviteInput = InvitePayload & Readonly<{
   workshopName: string
@@ -131,6 +132,7 @@ export type ImmutableInviteMail = Readonly<{
   subject: string
   text: string
   html: string
+  wireBody: string
 }>
 const strictSender = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
 const mailControls = /[\r\n\x00-\x1f\x7f]/
@@ -151,10 +153,15 @@ export async function sealImmutableInviteEnvelope(
     workshopName: input.workshopName, token: p.token,
     expiresAt: p.expiresAt, nowIso
   })
+  const wireBody = serializeResendInviteWireV1({
+    from: input.fromEmail, to: p.recipientEmail,
+    subject: letter.subject, text: letter.text, html: letter.html
+  })
   const body = JSON.stringify({
-    version: 2, workshopId: p.workshopId, recipientEmail: p.recipientEmail,
+    version: 3, workshopId: p.workshopId, recipientEmail: p.recipientEmail,
     expiresAt: p.expiresAt, token: p.token, from: input.fromEmail,
-    to: p.recipientEmail, subject: letter.subject, text: letter.text, html: letter.html
+    to: p.recipientEmail, subject: letter.subject, text: letter.text,
+    html: letter.html, wireBody
   })
   const encoded = new TextEncoder().encode(body)
   // Existing SQL column CHECK: ciphertext max 8192 bytes incl. 16-byte tag.
@@ -195,7 +202,8 @@ export async function openImmutableInviteEnvelope(
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
       throw new TypeError('Invalid frozen body')
     const p = parsed as Record<string, unknown>
-    if (p.version !== 2 || typeof p.workshopId !== 'string' ||
+    if (p.version !== 3 || typeof p.wireBody !== 'string' ||
+        typeof p.workshopId !== 'string' ||
         typeof p.recipientEmail !== 'string' || typeof p.expiresAt !== 'string' ||
         typeof p.token !== 'string' || typeof p.to !== 'string' ||
         !validSender(p.from) || typeof p.subject !== 'string' ||
@@ -211,9 +219,16 @@ export async function openImmutableInviteEnvelope(
         (await hashMechanicInviteToken(verified.token)) !== expected.token_sha256_hex ||
         p.subject.length < 1 || p.subject.length > 250 || mailControls.test(p.subject) ||
         p.text.length < 1 || p.text.length > 15000 ||
-        p.html.length < 1 || p.html.length > 60000)
+        p.html.length < 1 || p.html.length > 60000 ||
+        !wireMatchesResendInviteV1({
+          from: p.from, to: p.to, subject: p.subject,
+          text: p.text, html: p.html
+        }, p.wireBody))
       throw new TypeError('Frozen context mismatch')
-    return { from: p.from, to: p.to, subject: p.subject, text: p.text, html: p.html }
+    return {
+      from: p.from, to: p.to, subject: p.subject, text: p.text,
+      html: p.html, wireBody: p.wireBody
+    }
   } catch {
     throw new Error('Immutable invitation envelope could not be verified')
   }

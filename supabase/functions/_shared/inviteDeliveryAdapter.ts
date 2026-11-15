@@ -86,8 +86,8 @@ export async function dispatchPreparedInvite(
   }
 }
 
-/** R2-A6-P2: worker accepts only the sealed v2 email, never re-renders it. */
-export type ImmutableDeliveryRequest = DeliveryRequest & Readonly<{ from: string }>
+/** R2-A6-P3: worker accepts only encrypted V3 with a frozen HTTP wire body. */
+export type ImmutableDeliveryRequest = DeliveryRequest & Readonly<{ from: string; wireBody: string }>
 export async function prepareImmutableInviteDelivery(
   job: ClaimedInvitationEmail, key: Uint8Array, nowIso: string
 ): Promise<ImmutableDeliveryRequest> {

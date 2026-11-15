@@ -5,10 +5,11 @@
  * Provider reference: https://resend.com/docs/dashboard/emails/idempotency-keys
  * Provider remembers a key for ONLY 24 hours. Database enforces a shorter
  * 23-hour recovery window from the very first claim, not from invitation time.
- * A future sender MUST keep the from/to/subject/html/text body identical for
+ * A future sender MUST keep the frozen wireBody unchanged for
  * every retry, and use the same stable key from the outbox ID.
  */
 import type { DeliveryReceipt, ImmutableDeliveryRequest } from './inviteDeliveryAdapter.ts'
+import { wireMatchesResendInviteV1 } from './resendInviteWireV1.ts'
 
 const email = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -46,7 +47,8 @@ export function buildResendInviteRequest(
       !request.subject || control.test(request.subject) ||
       request.subject.length > 250 ||
       request.text.length < 1 || request.text.length > 15_000 ||
-      request.html.length < 1 || request.html.length > 60_000)
+      request.html.length < 1 || request.html.length > 60_000 ||
+      !wireMatchesResendInviteV1(request, request.wireBody))
     throw new TypeError('Invalid Resend invitation request')
 
   // Explicitly one recipient; do not allow client-injected CC/BCC, attachments,
@@ -59,13 +61,7 @@ export function buildResendInviteRequest(
       'Content-Type': 'application/json',
       'Idempotency-Key': key
     },
-    body: JSON.stringify({
-      from: request.from,
-      to: [request.to],
-      subject: request.subject,
-      text: request.text,
-      html: request.html
-    })
+    body: request.wireBody
   }
 }
 

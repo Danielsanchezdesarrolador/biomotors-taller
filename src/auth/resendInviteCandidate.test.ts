@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import { buildResendInviteRequest, classifyResendReply } from '../../supabase/functions/_shared/resendInviteCandidate'
 import type { ImmutableDeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
+import { serializeResendInviteWireV1 } from '../../supabase/functions/_shared/resendInviteWireV1'
 
 const id = '12121212-1212-4121-8121-121212121212'
-const content: ImmutableDeliveryRequest = {
+const fields = {
   from: 'invitaciones@bytetorque.example',
   to: 'mechanic@example.com',
   subject: 'Invitación a ByteTorque',
   text: 'Invitación mecánico para acceder a un taller (token sintético).',
-  html: '<p>Invitación a ByteTorque</p>',
+  html: '<p>Invitación a ByteTorque</p>'
+}
+const content: ImmutableDeliveryRequest = {
+  ...fields,
+  wireBody: serializeResendInviteWireV1(fields),
   idempotencyKey: 'bt-r2-invite:' + id
 }
 const cfg = { apiKey: 're_EXAMPLE_FAKE_API_KEY_NOT_VALID', fromEmail: 'invitaciones@bytetorque.example' }
@@ -36,6 +41,8 @@ describe('BT-AUTH-R2-A6-P · Resend candidato sin peticiones HTTP', () => {
     { ...content, to: 'a@example.com,b@example.com' },
     { ...content, to: 'attacker\r\nCc: victim@example.com' },
     { ...content, from: 'other@bytetorque.example' },
+    { ...content, wireBody: content.wireBody + ' ' },
+    { ...content, wireBody: '{"from":"attacker@example.com"}' },
     { ...content, html: '' },
     { ...content, text: '' }
   ])('rechaza intento de alterar key, destinatario o cabeceras %#', invalid => {

@@ -55,9 +55,13 @@ describe('BT-AUTH-R2-A6-P2 · sobre inmutable y HTTP exclusivamente simulado', (
     expect(retry).toEqual(mail)
     const firstHttp = buildResendInviteRequest(mail, config)
     const retryHttp = buildResendInviteRequest(retry, config)
+    expect(mail.wireBody).toBe(firstHttp.body)
+    expect(mail.wireBody).toBe(retry.wireBody)
     expect(firstHttp.body).toBe(retryHttp.body)
     expect(firstHttp.headers['Idempotency-Key']).toBe(retryHttp.headers['Idempotency-Key'])
     expect(JSON.parse(firstHttp.body).from).toBe(mail.from)
+    expect(() => buildResendInviteRequest({...mail, subject:'Asunto nuevo'}, config)).toThrow()
+    expect(() => buildResendInviteRequest({...mail, wireBody: mail.wireBody.replace('from', 'sender')}, config)).toThrow()
   })
   it('rechaza v1 en el worker y cualquier corrupción o cruce de taller', async () => {
     const { job, key } = await fixture()
