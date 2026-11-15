@@ -2,6 +2,12 @@ import { readFileSync, readdirSync } from 'node:fs'
 import assert from 'node:assert/strict'
 const modules = JSON.parse(readFileSync('dist/.vite/public-modules.json', 'utf8'))
 assert.ok(modules.length > 0)
+// The offline handoff cannot enter the publicly deployed PWA until a separate
+// authenticated, server-backed invitation rollout is explicitly authorized.
+assert.ok(
+  modules.every((id) => !/inviteHandoffCandidate\.(?:ts|tsx|js)/.test(id)),
+  'Forbidden dormant invite handoff was bundled into public PWA'
+)
 assert.ok(
   modules.every(
     (id) =>
