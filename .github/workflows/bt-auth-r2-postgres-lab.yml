@@ -79,6 +79,13 @@ jobs:
       - name: Dos workers compiten por el mismo correo sin doble claim
         shell: bash
         run: bash scripts/security/bt-r2-lab-worker-claims.sh "${{ job.services.postgres.id }}"
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Probar creador V3 a SQL + worker/ACK REAL en Docker, proveedor SOLO mock
+        shell: bash
+        run: |
+          deno run --allow-run=docker scripts/security/bt-r2-lab-creator-worker-e2e.ts "${{ job.services.postgres.id }}"
       - name: Confirmar que el laboratorio no creó conexión a Supabase hospedado
         run: |
           echo "PASS: docker postgres:17 service only; no Supabase project credentials"
