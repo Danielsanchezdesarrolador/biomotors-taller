@@ -8,6 +8,11 @@ assert.ok(
   modules.every((id) => !/inviteHandoffCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden dormant invite handoff was bundled into public PWA'
 )
+// The session-aware flow remains an offline candidate, not production UI.
+assert.ok(
+  modules.every((id) => !/inviteSessionCandidate\.(?:ts|tsx|js)/.test(id)),
+  'Forbidden invite session candidate was bundled into public PWA'
+)
 assert.ok(
   modules.every(
     (id) =>
