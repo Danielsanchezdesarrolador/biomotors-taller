@@ -134,7 +134,7 @@ BEGIN
            lease_id=pg_catalog.gen_random_uuid(),
            leased_until=v_now+interval '2 minutes',
            last_attempt_at=v_now,
-           first_attempt_at=pg_catalog.coalesce(o.first_attempt_at,v_now)
+           first_attempt_at=COALESCE(o.first_attempt_at,v_now)
       FROM candidate c WHERE o.id=c.id
     RETURNING o.id, o.invitation_id, o.workshop_id, o.ciphertext, o.nonce,
               o.lease_id, o.attempts
