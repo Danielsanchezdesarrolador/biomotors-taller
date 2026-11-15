@@ -915,3 +915,12 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Puerta del Director sigue CERRADA:** autorizar clave Supabase nominativa y wrapper obligatorio; cambiar `verify_jwt=false` únicamente en un despliegue futuro protegido y probado; conectar RPCs reales, Resend verificado y envío a email propio bajo aprobaciones distintas. R2-A6-6 aceptación real sigue pendiente.
 
 [Checkpoint R2-A6-P6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P6_20261115.md) · [Runbook de activación P6](docs/BT_AUTH_R2_A6_P6_ACTIVATION_GATE.md). Solo `main`; Supabase hospedado no modificado.
+
+### BT-AUTH-R2-A6-6 — Aceptación de invitación, backend integrado SOLO en laboratorio (15/11/2026)
+
+- [x] **Coordinador sin privilegios del navegador:** `mechanicInviteAcceptCandidate.ts`, request `{token}` únicamente, identidad usuario/correo confirmado procedente del backend, SHA-256 de token 32 bytes, y una única RPC service-only inyectada. Estados genéricos `accepted/denied/unknown` sin exponer secretos ni reintentar DB ambiguo.
+- [x] **Pruebas completas de aceptación:** 7 nuevas Vitest; el laboratorio P5 se amplió hasta usar `verifyInviteActor` con Auth HTTP localmente simulado y la **RPC real PostgreSQL 17**: usuario verificado correcto aceptado, correo distinto denegado, hash de token incorrecto denegado, replay denegado, una membresía mecánico y un evento auditado. Las pruebas SQL anteriores mantienen vencimiento, revocación, cuotas y concurrencia.
+- [x] **CI PASS:** [Web/PWA y Android #43714925123](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43714925123) **388/388 tests (41 archivos)**, TypeScript y bundles; [PostgreSQL 17 efímero #43714833785](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43714833785) **SUCCESS**; [Deno #43714833814](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43714833814) **SUCCESS**. Corregidos dos fallos intermedios de fixture/patrón UUID, documentados.
+- [ ] **Activación y UX aún NO AUTORIZADAS:** endpoint `bt-mechanic-accept/index.ts` y worker siguen 503; no se desplegó ni envió correo, no hay invitación real ni pantalla de aceptación funcional PWA/Android. Próximo bloque: preparar UX segura del enlace y pruebas de reanudación de sesión sin persistir token ni abrir el backend; luego autorización explícita para SQL/secret/Resend/ensayo real.
+
+[Checkpoint R2-A6-6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_6_OFFLINE_20261115.md). Supabase alojado intacto (2 talleres, 4 usuarios, 4 membresías, 0 tablas privadas). Solo rama `main`.
