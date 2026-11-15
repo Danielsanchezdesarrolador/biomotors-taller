@@ -764,3 +764,16 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **R2-C — interfaz personal:** conectar `Configuración → Usuarios y permisos` únicamente tras backend seguro. Sin cuentas reales, suscripciones ni registro público por superar R1.
 
 **Continuidad:** [Checkpoint inicial BT-AUTH-R2](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_INICIO_20261114.md). Mantener Render con Auth público OFF, una sola rama `main` y ningún cambio al servicio de BIOMOTORS Academia.
+
+
+### BT-AUTH-R2-A — Preparación del backend de invitaciones de mecánicos (14/11/2026)
+
+- [x] Auditoría de esquema Supabase: solo `workshops`, `profiles` y `workshop_memberships`, con RLS; sin tabla de invitaciones ni suscripción operativa.
+- [x] Candidata SQL `docs/sql/BT_AUTH_R2_A_INVITATIONS_CANDIDATE.sql`: esquema privado, grants restringidos, entitlements backend, tokens hasheados, auditoría, rol autorizado owner/admin, cupos 2/8/8 y serialización por taller. **NO APLICADA**.
+- [x] Validador estricto de solicitud de invitación y tests en `src/auth/mechanicInviteRequest.test.ts`: no acepta elección de rol/plan/actor en cliente.
+- [x] Código del endpoint `bt-mechanic-invites` incorporado pero fail-closed: **siempre deniega invitaciones (503)**, incluso si se altera el flag, hasta implementar correo, aceptación segura y pruebas. `verify_jwt=true` declarado. **NO DESPLEGADO**.
+- [ ] Realizar revisión del SQL, migración en ensayo mediante CLI y prueba real RLS/concurrencia antes de tocar base operativa.
+- [ ] Implementar correo transaccional aprobado, enlaces con expiración y aceptación atómica; después conectar UI Usuarios y permisos.
+- [ ] Verificar CI de todos los commits y ejecución real de tests. Un PASS de CI no equivale a seguridad de escritura en Supabase.
+
+[Checkpoint detallado BT-AUTH-R2-A](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A_20261114.md). Mantener una sola rama `main`, mismo Render y seguridad pública sin cambios.
