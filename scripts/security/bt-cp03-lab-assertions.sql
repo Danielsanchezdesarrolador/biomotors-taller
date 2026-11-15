@@ -112,14 +112,14 @@ INSERT INTO public.customers(workshop_id,full_name)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Recepcion Test');
 INSERT INTO public.customers(workshop_id,full_name,mobile_e164)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Movil Valido','+56912345678');
-DO $ BEGIN
+DO $$ BEGIN
  BEGIN
   INSERT INTO public.customers(workshop_id,full_name,mobile_e164)
   VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Movil Invalido','+569123');
   RAISE EXCEPTION 'INVALID_CHILEAN_MOBILE_ACCEPTED';
  EXCEPTION WHEN check_violation THEN NULL;
  END;
-END $;
+END $$;
 DO $$ BEGIN
  IF (SELECT count(*) FROM public.customers) <> 4 THEN
    RAISE EXCEPTION 'RECEPTION WRITE FAILED';
