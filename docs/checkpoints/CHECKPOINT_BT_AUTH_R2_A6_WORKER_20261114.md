@@ -46,7 +46,7 @@
 - Deno [GitHub Actions 43667597419](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667597419) **SUCCESS**.
 - **Concurrencia dos workers PASS:** [GitHub Actions 43667670454](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667670454), PostgreSQL 17 SUCCESS; log exacto: `PASS: SKIP LOCKED single claim, second worker skipped, active lease preserved`. También se confirmó `PASS: composite foreign key denies wrong-tenant outbox` y fallo terminal que borra ciphertext.
 - **CI PWA/Android PASS:** [GitHub Actions 43667670460](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667670460), ambos trabajos SUCCESS; 35 archivos Vitest aprobados.
-- `bt_r2_invitation_email_lease_valid` declara ahora `VOLATILE` por usar `clock_timestamp()`; ejecutar nuevamente el laboratorio de PostgreSQL tras esa corrección antes de certificar el HEAD de SQL.
+- `bt_r2_invitation_email_lease_valid` declara ahora `VOLATILE` por usar `clock_timestamp()`; **reejecución de PostgreSQL 17 PASS:** [GitHub Actions 43667825968](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667825968), todos los pasos SUCCESS. No se aplicó ningún SQL a Supabase alojado.
 - Los commits documentales posteriores tienen su propio CI. No equiparar la prueba aislada con entregas reales.
 - Estas pruebas acreditan PostgreSQL efímero y mocks, **NO entrega o idempotencia real de ningún proveedor SMTP/API**, ni un sistema accesible para Ignacio.
 
