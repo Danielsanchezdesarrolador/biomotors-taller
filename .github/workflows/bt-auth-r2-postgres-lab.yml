@@ -1,0 +1,49 @@
+name: ByteTorque R2 — PostgreSQL aislado (sin Supabase real)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/sql/BT_AUTH_R2_*.sql'
+      - 'scripts/security/bt-r2-lab-**'
+      - '.github/workflows/bt-auth-r2-postgres-lab.yml'
+permissions:
+  contents: read
+jobs:
+  r2-postgres-lab:
+    name: Aislamiento, cuotas, revocación y concurrencia
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bytetorque
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-test-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bytetorque"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar esquema aislado con identidades ficticias
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-bootstrap.sql
+      - name: Aplicar SQL candidato R2-A SOLO al contenedor efímero
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A_INVITATIONS_CANDIDATE.sql
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A2_ACCEPT_REVOKE_CANDIDATE.sql
+      - name: Ejecutar pruebas PostgreSQL reales sobre fixtures sintéticos
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-assertions.sql
+      - name: Verificar transacciones concurrentes para el último cupo
+        shell: bash
+        run: bash scripts/security/bt-r2-lab-concurrency.sh "${{ job.services.postgres.id }}"
+      - name: Confirmar que el laboratorio no creó conexión a Supabase hospedado
+        run: |
+          echo "PASS: docker postgres:17 service only; no Supabase project credentials"
