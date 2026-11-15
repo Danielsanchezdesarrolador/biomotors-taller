@@ -44,7 +44,7 @@ describe('BT-AUTH-R2-A6-8 · continuidad segura de sesión, candidata no públic
       undefined, [], {}, {confirmed:true}, {confirmed:true,id:null},
       {confirmed:'true',id:UUID_A}, 'not-user'
     ]) {
-      const flow = create(async () => identity as Identity)
+      const flow = create(async () => identity as unknown as Identity)
       expect(await flow.verifySession()).not.toBe('ready')
       expect(await flow.consumeAfterRecheck()).toBeNull()
     }
