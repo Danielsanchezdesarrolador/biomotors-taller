@@ -3,6 +3,7 @@
 // verificación Auth getUser, email confirmado, limitación de intentos y RPC.
 // Ningún endpoint debe recibir el correo, rol ni identidad del cliente.
 import { parseAcceptMechanicInviteRequest } from '../_shared/mechanicInviteToken.ts'
+import { verifyInviteActor } from '../_shared/verifiedInviteActor.ts'
 
 const origins = new Set([
   'https://biomotors-taller-demo.onrender.com',
@@ -46,6 +47,14 @@ Deno.serve(async (request) => {
   }
   if (!parseAcceptMechanicInviteRequest(input))
     return json(422, 'Formato de invitación inválido.', headers)
+
+  // Server confirms email ownership before future one-time acceptance.
+  // The caller never supplies verified email or user ID.
+  const identity = await verifyInviteActor(request.headers.get('authorization'), {
+    baseUrl: Deno.env.get('SUPABASE_URL'),
+    publicKey: Deno.env.get('SUPABASE_ANON_KEY')
+  })
+  if (!identity.ok) return json(identity.status, identity.message, headers)
 
   // BLOQUEO INCONDICIONAL, incluso con bandera true. La RPC candidata
   // no está aplicada. En la implementación futura: verificar JWT contra
