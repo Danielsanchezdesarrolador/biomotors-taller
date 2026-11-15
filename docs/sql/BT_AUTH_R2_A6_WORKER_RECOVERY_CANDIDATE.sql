@@ -130,7 +130,7 @@ GRANT EXECUTE ON FUNCTION public.bt_r2_mark_invitation_email_terminal_failed(uui
 CREATE FUNCTION public.bt_r2_invitation_email_lease_valid(
   p_outbox_id uuid,p_lease_id uuid
 ) RETURNS boolean
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path=''
+LANGUAGE sql VOLATILE SECURITY INVOKER SET search_path=''
 AS $$
   SELECT EXISTS(
     SELECT 1 FROM bt_private.workshop_invitation_outbox o
