@@ -878,3 +878,12 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 [Checkpoint BT-AUTH-R2-A6-P](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_PROVIDER_20261114.md). Permanecen 2 talleres, 4 cuentas Auth, 4 membresías y 0 tablas de outbox en Supabase real; código únicamente en `main`.
 
 [Checkpoint R2-A6-P2](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P2_20261115.md). **Siguiente puerta:** cuenta/remitente Resend verificados y pruebas E2E aisladas con aprobación expresa del Director; después R2-A6-6 aceptación real. No desplegar, enviar ni abrir acceso público aún.
+
+### BT-AUTH-R2-A6-P3 — Snapshot HTTP exacto y puerta de Resend (15/11/2026)
+
+- [x] **Cuerpo HTTP congelado en sobre cifrado V3:** al crear la invitación, `sealImmutableInviteEnvelope` genera el JSON exacto de Resend y lo cifra junto al token/contexto. El worker descifra el mismo `wireBody` sin volver a serializarlo; comprobación estricta de identidad entre campos y snapshot. Los sobres legacy V1/V2 no se transmiten (fallo cerrado), y el límite existente de ciphertext 8192 bytes se valida antes de reservar.
+- [x] **Serializer fijo `resendInviteWireV1.ts` + pruebas de bytes:** orden y nombres de las cinco propiedades congelados; si un despliegue altera la serialización, el snapshot antiguo se rechaza en vez de enviar un body distinto con la misma key. Contrato de Resend con remitente de backend; cero solicitudes reales.
+- [x] **CI verificado:** [Web/PWA y Android #43671864663](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43671864663) **SUCCESS** con 38 archivos / 355 Vitest, TypeScript web, build PWA, typecheck y export Expo Android; [Deno #43671864675](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43671864675) **SUCCESS**; [PostgreSQL 17 #43671864670](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43671864670) **SUCCESS** (RLS, concurrencia, SKIP LOCKED y ventana 23 h). Todo candidato, ninguna migración en Supabase alojado.
+- [ ] **Puerta de activación sigue cerrada:** verificar dominio/remitente con proveedor, autorizar cuenta/secret backend y una prueba controlada, terminar autorización service-to-service, probar aceptación real R2-A6-6 y revisar E2E de revocación, rebotes y duplicados. Sin activar registro público ni correos externos ni funciones de invitación.
+
+[Checkpoint BT-AUTH-R2-A6-P3](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P3_20261115.md) · [Runbook de preparación](docs/BT_AUTH_R2_A6_P3_RESEND_PREPARACION.md).
