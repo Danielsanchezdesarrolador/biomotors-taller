@@ -140,3 +140,51 @@ BEGIN
 END $$;
 ROLLBACK;
 \echo PASS: terminal failure revokes invite and erases encrypted token
+
+
+-- Resend remembers an idempotency key only 24h; ByteTorque blocks claims
+-- at 23h since first attempt, and reconciles remaining ambiguous invites.
+BEGIN;
+SET LOCAL ROLE service_role;
+DO $$
+DECLARE
+ w uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ owner_a uuid := '11111111-1111-4111-8111-111111111111';
+ invitation uuid;
+ j record;
+ old_first timestamptz;
+BEGIN
+ invitation := public.bt_r2_reserve_and_queue_mechanic_invite(
+   owner_a,w,'newmech1@example.com',repeat('a',64),
+   now()+interval '47 hours',repeat('c',128),repeat('8',24));
+ SELECT * INTO j FROM public.bt_r2_claim_invitation_email();
+ IF j.invitation_id<>invitation THEN RAISE EXCEPTION 'FAIL first claim missing'; END IF;
+ SELECT first_attempt_at INTO old_first FROM bt_private.workshop_invitation_outbox
+ WHERE id=j.outbox_id;
+ IF old_first IS NULL THEN RAISE EXCEPTION 'FAIL first_attempt_at not captured'; END IF;
+
+ -- Emulate an interrupted worker from over 23h ago (provider result unknown).
+ UPDATE bt_private.workshop_invitation_outbox SET
+   status='retry',attempts=1,lease_id=NULL,leased_until=NULL,
+   first_attempt_at=now()-interval '23 hours 2 minutes',
+   next_attempt_at=now()-interval '1 minute'
+ WHERE id=j.outbox_id;
+
+ SELECT * INTO j FROM public.bt_r2_claim_invitation_email();
+ IF j.outbox_id IS NOT NULL
+ THEN RAISE EXCEPTION 'FAIL stale idempotency key reclaimed'; END IF;
+
+ IF public.bt_r2_reconcile_invitation_outbox(w)<>1
+ THEN RAISE EXCEPTION 'FAIL stale idempotency row not reconciled'; END IF;
+
+ IF (SELECT count(*) FROM bt_private.workshop_invitation_outbox
+     WHERE invitation_id=invitation AND status='cancelled'
+       AND ciphertext IS NULL AND nonce IS NULL) <> 1
+ THEN RAISE EXCEPTION 'FAIL stale ciphertext not erased'; END IF;
+
+ IF (SELECT count(*) FROM bt_private.workshop_mechanic_invitations
+     WHERE id=invitation AND status='revoked') <> 1
+ THEN RAISE EXCEPTION 'FAIL stale ambiguous invite still active'; END IF;
+END $$;
+ROLLBACK;
+\echo PASS: provider 24h key protected by 23h claim cutoff and cleanup
