@@ -213,3 +213,11 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 - Completa para el rol `reception` los pasos manuales de login restringido, persistencia del estado restricted tras F5, 13/13 lecturas RLS con identidad real y logout.
 - Limitación: no equivale a revocación de todos los JWT emitidos en otros dispositivos ni a verificar operaciones de negocio futuras.
 - Pendiente R1: rol `admin` secundario, escenarios multitenant para una misma identidad, renovación automática en navegador, Safari/PWA física, limpieza segura de fixtures y decisión sobre activar Auth público. Sin activación de Render, onboarding, correos ni pagos.
+
+### Aceleración R1 — fixture dual-role reversible (14/11/2026)
+
+- Por solicitud del Director para reducir pruebas manuales, se añadió una membresía ficticia **admin/active en Taller B** a la cuenta de recepción que **conserva reception/active en Taller A**; UUID nuevo \`005d0348-fda0-4dc7-ba16-3b5708200e5b\`. Propietarios A/B y mecánico A no cambiaron.
+- Esta elevación para test **debe retirarse al cierre** mediante filtro estricto por ID/usuario/taller/rol, después de validar. [Runbook acelerado](../BT_AUTH_01B_R1_FAST_AB_RUNBOOK.md) incluye SQL de reversión que **NO se ha ejecutado**.
+- Script añadido \`scripts/security/bt-auth-r1-fast-ab.mjs\` para **12 comprobaciones reales de lectura RLS y refresh explícito, aún pendientes de ejecutar**.
+- Prueba guiada de Chrome aún pendiente: login con recepción, selector A/B, elegir B admin y refrescar, cambiar a A restringido y cerrar sesión.
+- Renovación automática en el navegador, Safari/PWA física, cierre formal y limpieza siguen pendientes. No se ha habilitado Auth real en Render.

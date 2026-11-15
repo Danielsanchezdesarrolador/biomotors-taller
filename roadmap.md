@@ -744,3 +744,11 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] **Logout de recepción + F5 PASS**, confirmado por el Director: al cerrar sesión, continuó en login y no se restauró panel privado.
 - [ ] Continuar con el rol **admin** de pruebas y validaciones pendientes de R1. Mantener acceso público apagado.
 - [ ] Definir permisos operativos de recepción en fase posterior y probarlos mediante API RLS cuando exista backend de negocio. Mantener Render/Auth público sin cambios.
+
+### R1 acelerado — administrador B y multi-taller en una sesión (14/11/2026)
+
+- [x] Fixture reversible: recepción A y admin B en una cuenta ficticia, sin tocar propietarios. [Runbook](docs/BT_AUTH_01B_R1_FAST_AB_RUNBOOK.md).
+- [ ] Ronda Chrome: selector A/B, B admin, F5, cambio a A restringido, logout.
+- [ ] Ronda PowerShell: **12 comprobaciones API RLS y refresh forzado**, script \`scripts/security/bt-auth-r1-fast-ab.mjs\`.
+- [ ] Verificación de renovación automática real en navegador, Safari/iPhone/PWA físico, auditoría y reversión estricta del fixture antes de cierre de R1.
+- [ ] Mantener login público y registro cerrados, sin modificar planes/pagos ni operaciones reales.
