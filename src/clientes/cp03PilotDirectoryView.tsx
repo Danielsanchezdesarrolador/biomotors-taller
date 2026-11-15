@@ -453,7 +453,7 @@ export function Cp03PilotDirectoryView({
       {writable && editor && <section ref={editorRef} className="dashboard-card cp03-panel cp03-editor" aria-label="Editar ficha">
         <p className="cp03-wide cp03-draft-note" role="status">
           {draftRestored ? 'Borrador recuperado. ' : ''}
-          Borrador temporal en esta pestaña (hasta ${DRAFT_TTL_HOURS} horas).
+          Borrador temporal en esta pestaña (hasta {DRAFT_TTL_HOURS} horas).
           Aún no está guardado en Supabase; al guardar la ficha se eliminará el borrador.
         </p>
         <div className="cp03-inline cp03-heading">
