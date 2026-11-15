@@ -15,11 +15,36 @@ const fakeToken = 'a'.repeat(64)
   })
   try {
     for (const width of [390, 375, 768, 1440]) {
-      const page = await browser.newPage({ viewport: { width, height: 844 } })
+      // Chromium mobile viewport is a browser regression, NOT Safari hardware QA.
+      const page = await browser.newPage({
+        viewport: { width, height: 844 },
+        isMobile: width <= 390,
+        hasTouch: width <= 390,
+        deviceScaleFactor: width <= 390 ? 3 : 1
+      })
       const errors = []
       const writes = []
+      const unsafeRequests = []
+      await page.addInitScript(() => {
+        window.__invitePersistentWrites = []
+        const set = Storage.prototype.setItem
+        Storage.prototype.setItem = function (...args) {
+          window.__invitePersistentWrites.push('Storage')
+          return set.apply(this, args)
+        }
+        const open = indexedDB.open.bind(indexedDB)
+        indexedDB.open = (...args) => {
+          window.__invitePersistentWrites.push('IndexedDB')
+          return open(...args)
+        }
+      })
       page.on('pageerror', (e) => errors.push(e.message))
-      page.on('request', (r) => { if (!['GET', 'HEAD'].includes(r.method())) writes.push(r.url()) })
+      page.on('request', (r) => {
+        if (!['GET', 'HEAD'].includes(r.method())) writes.push(r.method())
+        const url = new URL(r.url())
+        if (url.searchParams.has('token') || /supabase\.(co|in)$|api\.resend\.com$/.test(url.hostname))
+          unsafeRequests.push(url.hostname)
+      })
       await page.goto(base + '/#/auth/aceptar-invitacion?token=' + fakeToken)
       await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
       assert.equal(new URL(page.url()).hash, '#/auth/aceptar-invitacion')
@@ -31,6 +56,8 @@ const fakeToken = 'a'.repeat(64)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         'Horizontal overflow at ' + width)
       assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0])
+      assert.deepEqual(await page.evaluate(() => window.__invitePersistentWrites), [])
+      assert.deepEqual(unsafeRequests, [], 'Canonical hash link leaked into network query/Auth')
       if (width === 390 || width === 1440) await page.screenshot({
         path: path.join(out, 'INVITACION_PREPARACION_' + width + '.png'), fullPage: true
       })
@@ -39,9 +66,40 @@ const fakeToken = 'a'.repeat(64)
         location.hash = '/auth/aceptar-invitacion?token=' + token
       }, fakeToken)
       await page.waitForFunction(() => location.hash === '#/auth/aceptar-invitacion')
+      // iOS PWA-like reload and BFCache-style browser history: the URL
+      // remains clean after reload, back, and forward, never reusing the token.
+      await page.reload()
+      await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
+      assert.equal(new URL(page.url()).hash, '#/auth/aceptar-invitacion')
+      await page.goBack()
+      await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
+      assert.doesNotMatch(page.url(), /token=/)
+      await page.goForward()
+      await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
+      assert.doesNotMatch(page.url(), /token=/)
       await page.getByRole('button', { name: 'Volver al acceso de mecánicos' }).click()
       await page.getByRole('heading', { name: 'Inicia sesión' }).waitFor()
       assert.equal(new URL(page.url()).hash, '#/acceso/mecanico')
+      await page.goBack()
+      await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
+      assert.doesNotMatch(page.url(), /token=/)
+      await page.goForward()
+      await page.getByRole('heading', { name: 'Inicia sesión' }).waitFor()
+      assert.equal(new URL(page.url()).hash, '#/acceso/mecanico')
+      assert.deepEqual(await page.evaluate(() => window.__invitePersistentWrites), [])
+      assert.deepEqual(unsafeRequests, [], 'Canonical link caused unexpected HTTP Auth/token request')
+      assert.deepEqual(errors, [])
+      assert.deepEqual(writes, [])
+      // Loading with a token in the outer query IS unsafe for a real invite:
+      // the hosting server receives it in the initial HTTP request. Test uses
+      // only a synthetic value on loopback, verifying that the UI still strips
+      // the query immediately and never offers acceptance.
+      await page.goto(base + '/?token=' + fakeToken + '#/auth/aceptar-invitacion')
+      await page.getByRole('heading', { name: 'Tu acceso como mecánico' }).waitFor()
+      assert.equal(new URL(page.url()).search, '')
+      assert.equal(new URL(page.url()).hash, '#/auth/aceptar-invitacion')
+      assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0])
+      assert.equal(await page.getByRole('button', { name: 'Aceptar invitación' }).count(), 0)
       assert.deepEqual(errors, [])
       assert.deepEqual(writes, [])
       await page.close()
