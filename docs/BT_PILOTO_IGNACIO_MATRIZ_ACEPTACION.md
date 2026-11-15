@@ -8,10 +8,10 @@
 | Clientes | **Directorio privado operativo en web con Auth real** | **Ficha ficticia creada y persistente en Supabase alojado**; RLS FORCE activa | Director confirmó alta, logout/login, recuperación y edición; prueba iPhone pendiente | Pendiente |
 | Vehículos | **Alta y edición reales en directorio privado CP03** | **`QA1234` persistente**; marca/modelo ficticios, año 2020, kilometraje almacenado 123456 | Director confirmó recuperación por patente tras nueva sesión; SQL alojado comprobó datos editados | Pendiente |
 | Identificación de retornos | **Búsqueda real por patente y ficha vinculada** | Cliente y vehículo recuperados en Supabase alojado tras cerrar sesión | Flujo ficticio `QA1234` confirmado en escritorio; retorno meses después pendiente | Pendiente |
-| Recepción | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
-| Orden de trabajo | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
-| Inspección multipunto | Flujo DEMO | No conectado | Demo QA; hoja real por contrastar | Pendiente |
-| Diagnósticos/observaciones | Flujo DEMO | No conectado | Persistencia histórica pendiente | Pendiente |
+| Recepción | Formulario CP04 privado preparado, búsqueda de patente real CP03 | SQL candidato, **NO instalado** en alojado | PostgreSQL 17 aislado / UI candidata; QA alojado pendiente | Pendiente |
+| Orden de trabajo | Lista, apertura, estados y cierre en CP04 candidato, flag OFF | SQL candidato con RLS FORCE / cierre histórico; **NO instalado** | Lab RLS/roles/duplicados y CI; persistencia alojada pendiente | Pendiente |
+| Inspección multipunto | Formulario CP04 con estado por punto y notas técnicas, flag OFF | SQL candidato en inspecciones vinculadas por taller y orden; **NO instalado** | Lab PG17 y UI, hoja definitiva de Ignacio por contrastar | Pendiente |
+| Diagnósticos/observaciones | Vista de problemas pendientes de visitas anteriores y acción «resuelto», flag OFF | SQL candidato con resolución fechada y diagnóstico original histórico | Pruebas aisladas; QA alojado/visita posterior pendiente | Pendiente |
 | Reparaciones/seguimiento/entrega | Flujo DEMO | No conectado | Recorrido real pendiente | Pendiente |
 | Cotización | Flujo DEMO | No conectado | Datos de precios reales pendientes | Pendiente |
 | PDF | Impresión preliminar DEMO | Sin emisión archivada ni vinculación real | Diseño A4 previo; producción pendiente | Pendiente |

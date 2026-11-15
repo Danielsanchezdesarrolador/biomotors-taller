@@ -232,7 +232,17 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Salida:** Ignacio puede registrar un cliente y reconocerlo cuando regresa con su vehículo.
 
-### BT-CP04 — Inspección multipunto y observaciones — PENDIENTE
+### BT-CP04 — Recepción, inspección multipunto, órdenes y observaciones — CÓDIGO LISTO / ALOJADO PENDIENTE
+
+**Entrega funcional CP04 (15/11/2026):** se reutilizó el diseño oficial y el directorio CP03, sin generar un segundo sitio ni una DEMO nueva. Implementación candidata en `main`:
+- [x] **Modelo SQL candidato, NO instalado en Supabase alojado:** `docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql`: órdenes por vehículo, recepción, kilometraje, estado y cierre; puntos de revisión multipunto, diagnóstico original, fecha y observaciones pendientes que acompañan al vehículo entre visitas. FK compuesta por taller, una orden abierta por vehículo, no DELETE de usuarios y RLS FORCE por membresía/taller activos. Las órdenes cerradas no pueden reabrirse; el diagnóstico de una visita cerrada no se altera, solo se puede marcar resuelto el problema pendiente con sello de servidor.
+- [x] **Laboratorio PostgreSQL 17 aislado:** `.github/workflows/bt-cp04-postgres-lab.yml` aplica CP02, CP03 y CP04 **solo en contenedor efímero** y comprueba aislamiento A/B, roles owner/recepción/mecánico, duplicados, cierre, problemas pendientes, revocación de membresía y suspensión del taller. [Historial del laboratorio](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/workflows/bt-cp04-postgres-lab.yml).
+- [x] **Repositorio y formularios enlazados a Auth R1:** `src/ordenes/cp04Contracts.ts`, `cp04Repository.ts`, `Cp04OrdersView.tsx`, `Cp04PrivatePanel.tsx`, `cp04Draft.ts`; usa el mismo Supabase client de CP03 y comprueba `auth.getUser`, membresía y taller en cada operación. Buscar vehículo por patente, registrar ingreso, consultar órdenes, inspección (correcto/atención/no revisado), marcar observación resuelta, cambiar estado y cerrar conservando historial. Borradores en `sessionStorage` por usuario/taller y máximo 8 h; nunca equivalen a guardado.
+- [x] **Integración segura apagada por defecto:** `VITE_BT_CP04_PRIVATE_ENABLED=false` y comprobaciones de bundle impiden incorporar CP04 a la web oficial mientras no exista permiso para instalar SQL y habilitar el módulo. El build de candidato privado se ejecuta solo en CI con variables sintéticas, **no en Render**.
+- [ ] **Única puerta alojada pendiente CP04:** autorización expresa para aplicar **solo** migración SQL CP04 en `suxcqqnmcjoezfxltoms`, verificar RLS/estado previo y activar CP04 exclusivamente para cuentas autorizadas y pruebas con fichas totalmente ficticias. Mantener clientes reales, invitaciones, correo, pagos, CP05 y comercialización fuera de este permiso.
+- [ ] **Cierre operativo CP04:** realizar ingreso `QA1234`, inspección, observación pendiente, cerrar, abrir segunda orden, recuperar y resolver observación; reiniciar sesión y probar desde iPhone real. El resultado de CI aislado **no sustituye** la persistencia alojada y aprobación de Ignacio.
+
+### BT-CP04 — Inspección multipunto y observaciones — REFERENCIA HISTÓRICA
 
 - [ ] Digitalizar la hoja real de revisión multipunto.
 - [ ] Guardar fecha, técnico, resultados, problemas y recomendaciones.
