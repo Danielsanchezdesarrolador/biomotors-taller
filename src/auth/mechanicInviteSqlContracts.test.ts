@@ -35,12 +35,19 @@ describe('BT-AUTH-R2-A2 · guardarraíles estáticos, NO pruebas de RLS real', (
     expect(accept).toContain("'mechanic', 'active'")
     expect(accept).toContain('v_mechanics + v_pending > v_limit')
   })
-  it('ambos endpoints continuan bloqueados incluso al habilitar el flag', () => {
+  it('los tres endpoints continúan bloqueados incluso al habilitar el flag', () => {
     expect(edgeIssue).toContain("return response(503, 'La entrega y aceptación seguras aún están en preparación.'")
     expect(edgeAccept).toContain("return json(503, 'El proceso de validación todavía no está habilitado.'")
     expect(config).toContain('[functions.bt-mechanic-invites]\nverify_jwt = true')
     expect(config).toContain('[functions.bt-mechanic-accept]\nverify_jwt = true')
     expect(edgeRevoke).toContain("return fail(503, 'El proceso de revocación todavía no está habilitado.'")
     expect(config).toContain('[functions.bt-mechanic-revoke]\nverify_jwt = true')
+    for (const endpoint of [edgeIssue, edgeAccept, edgeRevoke]) {
+      expect(endpoint).toContain('verifyInviteActor(request.headers.get(\'authorization\')')
+      expect(endpoint).toContain('if (!identity.ok)')
+      expect(endpoint).toContain("Deno.env.get('SUPABASE_ANON_KEY')")
+      expect(endpoint).not.toMatch(/Deno\\.env\\.get\\(['"]SUPABASE_SERVICE_ROLE_KEY/)
+    }
+
   })
 })
