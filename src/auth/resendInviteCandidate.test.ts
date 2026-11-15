@@ -30,7 +30,7 @@ describe('BT-AUTH-R2-A6-P · Resend candidato sin peticiones HTTP', () => {
   it.each([
     { ...content, idempotencyKey: 'welcome-'+id },
     { ...content, idempotencyKey: 'bt-r2-invite:INVALID' },
-    { ...content, idempotencyKey: 'bt-r2-invite:' + id.toUpperCase() },
+    { ...content, idempotencyKey: content.idempotencyKey.toUpperCase() },
     { ...content, subject: 'Hola\nBcc: atacante@example.com' },
     { ...content, to: 'a@example.com,b@example.com' },
     { ...content, to: 'attacker\r\nCc: victim@example.com' },
