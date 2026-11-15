@@ -99,7 +99,7 @@ DO $$ BEGIN
 END $$;
 
 -- Reception can add customers; must not see B.
-SELECT set_config('request.jwt.claim.sub','44444444-4444-4444-4444-444444444444',false);
+SELECT set_config('request.jwt.claim.sub','44444444-4444-4444-8444-444444444444',false);
 SELECT current_user, auth.uid() AS uid,
  (SELECT count(*) FROM public.workshop_memberships) AS memberships_visible,
  (SELECT count(*) FROM public.workshops) AS workshops_visible,
@@ -110,8 +110,18 @@ SELECT current_user, auth.uid() AS uid,
      AND m.role IN ('owner','admin','reception') AND w.status='active') AS allowed_write;
 INSERT INTO public.customers(workshop_id,full_name)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Recepcion Test');
+INSERT INTO public.customers(workshop_id,full_name,mobile_e164)
+VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Movil Valido','+56912345678');
+DO $ BEGIN
+ BEGIN
+  INSERT INTO public.customers(workshop_id,full_name,mobile_e164)
+  VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Movil Invalido','+569123');
+  RAISE EXCEPTION 'INVALID_CHILEAN_MOBILE_ACCEPTED';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+END $;
 DO $$ BEGIN
- IF (SELECT count(*) FROM public.customers) <> 3 THEN
+ IF (SELECT count(*) FROM public.customers) <> 4 THEN
    RAISE EXCEPTION 'RECEPTION WRITE FAILED';
  END IF;
 END $$;

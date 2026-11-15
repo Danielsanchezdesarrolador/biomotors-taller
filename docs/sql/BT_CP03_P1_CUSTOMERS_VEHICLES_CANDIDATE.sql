@@ -13,7 +13,7 @@ CREATE TABLE public.customers (
     (char_length(email) BETWEEN 5 AND 254 AND email = lower(btrim(email)) AND
       email ~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$')
   ),
-  mobile_e164 text CHECK (mobile_e164 IS NULL OR mobile_e164 ~ '^\\+569[0-9]{8}$'),
+  mobile_e164 text CHECK (mobile_e164 IS NULL OR mobile_e164 ~ '^\+569[0-9]{8}$'),
   notes text CHECK (notes IS NULL OR char_length(notes) <= 1000),
   archived_at timestamptz,
   created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE RESTRICT,
