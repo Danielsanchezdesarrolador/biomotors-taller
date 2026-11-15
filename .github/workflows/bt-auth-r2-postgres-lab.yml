@@ -56,6 +56,14 @@ jobs:
         shell: bash
         run: |
           docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-outbox-assertions.sql
+      - name: Aplicar recuperación del worker SOLO en PostgreSQL efímero
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A6_WORKER_RECOVERY_CANDIDATE.sql
+      - name: Verificar revocación, fallos terminales y limpieza por taller
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-worker-assertions.sql
       - name: Ejecutar pruebas PostgreSQL reales sobre fixtures sintéticos
         shell: bash
         run: |
