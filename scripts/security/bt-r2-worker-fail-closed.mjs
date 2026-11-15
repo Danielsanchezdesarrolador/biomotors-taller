@@ -31,6 +31,9 @@ assert.match(candidate, /auth:\s*WORKER_NAMED_AUTH/,
   'candidate must retain explicit SDK auth')
 assert.match(candidate, /npm:@supabase\/server@1\.9\.2/,
   'SDK version must remain pinned')
-assert.doesNotMatch(candidate, /Deno\.serve|export\s+default|auth:\s*['"]none['"]/,
+const executableCandidate = candidate
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/^\s*\/\/.*$/gm, '')
+assert.doesNotMatch(executableCandidate, /Deno\.serve|export\s+default|auth:\s*['"]none['"]/,
   'candidate must not become a callable entrypoint')
 console.log('PASS: P6 worker remains unconditional 503, config verify_jwt=true, named-key candidate not deployed')
