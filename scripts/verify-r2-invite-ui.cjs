@@ -1,18 +1,22 @@
 // BT-AUTH-R2-A5 — offline browser proof, synthetic tokens, no Supabase calls.
-const { chromium } = require('playwright')
+const { chromium, webkit } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const base = process.env.BASE_URL || 'http://127.0.0.1:5173'
 const out = process.env.OUTPUT_DIR || 'artifacts/bt-r2-a5'
 const fakeToken = 'a'.repeat(64)
+const browserKind = process.env.BT_INVITE_BROWSER || 'chromium'
+if (!['chromium', 'webkit'].includes(browserKind))
+  throw new Error('Unsupported BT_INVITE_BROWSER')
+const browserType = browserKind === 'webkit' ? webkit : chromium
 
 ;(async () => {
   fs.mkdirSync(out, { recursive: true })
-  const browser = await chromium.launch({
+  const browser = await browserType.launch(browserKind === 'chromium' ? {
     executablePath: fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined,
     args: ['--no-sandbox']
-  })
+  } : {})
   try {
     for (const width of [390, 375, 768, 1440]) {
       // Chromium mobile viewport is a browser regression, NOT Safari hardware QA.
@@ -103,7 +107,8 @@ const fakeToken = 'a'.repeat(64)
       assert.deepEqual(errors, [])
       assert.deepEqual(writes, [])
       await page.close()
-      console.log('BT-R2-A5 BROWSER PASS ' + width + 'px — URL scrubbed, no writes')
+      console.log('BT-R2-A10 ' + browserKind.toUpperCase() +
+        ' BROWSER PASS ' + width + 'px — URL scrubbed, no writes')
     }
   } finally {
     await browser.close()

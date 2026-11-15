@@ -79,6 +79,23 @@ describe('BT-AUTH-R2-A6-9 · navegador Safari/PWA: contrato OFFLINE', () => {
     t.document.dispatchEvent(new Event('visibilitychange'))
     expect(t.flow.snapshot()).toEqual({stage: 'discarded'})
   })
+  it('attach desde una pestaña ya oculta descarta el token sin esperar eventos Safari', async () => {
+    const t = setup()
+    t.document.visibilityState = 'hidden'
+    t.adapter.attach()
+    expect(t.flow.snapshot()).toEqual({ stage: 'discarded' })
+    expect(await t.flow.consumeAfterRecheck()).toBeNull()
+    t.adapter.detach()
+  })
+  it('pageshow normal con página ya oculta falla cerrado', async () => {
+    const t = setup()
+    t.adapter.attach()
+    await t.flow.verifySession()
+    t.document.visibilityState = 'hidden'
+    t.browser.dispatchEvent(new Event('pageshow'))
+    expect(t.flow.snapshot()).toEqual({ stage: 'discarded' })
+    expect(await t.flow.consumeAfterRecheck()).toBeNull()
+  })
   it('pageshow desde bfcache descarta el token y no confía en antigua sesión', async () => {
     const t = setup()
     t.adapter.attach()

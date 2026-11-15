@@ -68,6 +68,7 @@ export function createInviteBrowserLifecycleCandidate(
     // Browser back/forward cache may restore a JS heap with stale Auth.
     if ((event as Event & { persisted?: boolean }).persisted === true)
       session.onLeave()
+    else onVisibility() // page can already be hidden when pageshow runs
   }
 
   const leave = () => { session.onLeave() }
@@ -104,6 +105,9 @@ export function createInviteBrowserLifecycleCandidate(
       return detach
     }
     onNavigation()
+    // iOS may attach/restore a page already in the background without a
+    // subsequent visibilitychange event. Reject retained tokens immediately.
+    onVisibility()
     return detach
   }
 
