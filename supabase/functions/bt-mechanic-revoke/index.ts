@@ -1,6 +1,7 @@
 // ByteTorque R2-A2 — Endpoint de revocación, NO DESPLEGADO.
 // Código de preparación: no escribe en Supabase aunque se active el flag.
 import { parseRevokeMechanicInviteRequest } from '../_shared/mechanicInviteRequest.ts'
+import { verifyInviteActor } from '../_shared/verifiedInviteActor.ts'
 const allowedOrigins = new Set([
   'https://biomotors-taller-demo.onrender.com',
   'http://localhost:5173'
@@ -40,6 +41,14 @@ Deno.serve(async (request) => {
   }
   if (!parseRevokeMechanicInviteRequest(payload))
     return fail(422, 'Datos de revocación inválidos.', headers)
+
+  // Identify the actor via Auth, never by a caller-supplied actor_id.
+  // Future SQL RPC is responsible for owner/admin membership for the workshop.
+  const identity = await verifyInviteActor(request.headers.get('authorization'), {
+    baseUrl: Deno.env.get('SUPABASE_URL'),
+    publicKey: Deno.env.get('SUPABASE_ANON_KEY')
+  })
+  if (!identity.ok) return fail(identity.status, identity.message, headers)
 
   // FAIL-CLOSED even when flag=true. Futuro backend: verificar Auth getUser
   // y rol owner/admin activo del mismo taller; usar RPC con service_role
