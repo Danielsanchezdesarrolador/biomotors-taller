@@ -17,3 +17,19 @@ export function parseMechanicInviteRequest(value: unknown): MechanicInviteReques
     return null
   return { workshop_id: input.workshop_id.toLowerCase(), email: normalized }
 }
+
+export type RevokeMechanicInviteRequest = { workshop_id: string; invitation_id: string }
+export function parseRevokeMechanicInviteRequest(input: unknown):
+  RevokeMechanicInviteRequest | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null
+  const record = input as Record<string, unknown>
+  if (Object.keys(record).length !== 2 ||
+      !Object.prototype.hasOwnProperty.call(record, 'workshop_id') ||
+      !Object.prototype.hasOwnProperty.call(record, 'invitation_id')) return null
+  if (typeof record.workshop_id !== 'string' || !uuid.test(record.workshop_id) ||
+      typeof record.invitation_id !== 'string' || !uuid.test(record.invitation_id))
+    return null
+  // Actor is NEVER selected from payload: JWT/Auth + membership in server.
+  return { workshop_id: record.workshop_id.toLowerCase(),
+    invitation_id: record.invitation_id.toLowerCase() }
+}
