@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { RealAccess } from './auth/RealAccess'
+import { InviteAcceptancePreview } from './auth/InviteAcceptancePreview'
+import { inviteAcceptancePath, scrubInviteLocation } from './auth/inviteLinkRouting'
 import type { AuthController } from './auth/controller'
 import { ShieldCheck } from 'lucide-react'
 import { AppShell, type Screen } from './layout/AppShell'
@@ -66,9 +68,16 @@ export function OfficialWorkspaceView({
   )
 }
 
+function currentSafeEntryPath() {
+  // Also process links opened by hashchange after the initial page mount.
+  const scrubbed = scrubInviteLocation(window.location, (url) => {
+    window.history.replaceState(window.history.state, '', url)
+  })
+  return scrubbed ?? publicEntryPath(window.location)
+}
 export default function App({ authController }: { authController?: AuthController } = {}) {
   const [path, setPath] = useState(() =>
-    typeof window === 'undefined' ? accessPaths.login : publicEntryPath(window.location)
+    typeof window === 'undefined' ? accessPaths.login : currentSafeEntryPath()
   )
   useEffect(() => {
     const pop = () => {
@@ -79,7 +88,7 @@ export default function App({ authController }: { authController?: AuthControlle
           '/' + window.location.search + '#' + accessPaths.login
         )
       }
-      setPath(publicEntryPath(window.location))
+      setPath(currentSafeEntryPath())
     }
     pop()
     window.addEventListener('popstate', pop)
@@ -97,6 +106,7 @@ export default function App({ authController }: { authController?: AuthControlle
   const route = resolveAccessPath(path)
   if (route)
     return <RealAccess key={path} {...route} onNavigate={navigate} controller={authController} />
+  if (path === inviteAcceptancePath) return <InviteAcceptancePreview onNavigate={navigate} />
   if (path === accessPaths.mechanicReview) return <TechnicianReview onNavigate={navigate} />
   if (path === accessPaths.administratorReview || path === accessPaths.publicPreview)
     return <OfficialWorkspaceView review onReviewExit={() => navigate(accessPaths.login)} />
