@@ -35,6 +35,9 @@ jobs:
           deno check supabase/functions/bt-invite-worker/index.ts
           deno check supabase/functions/bt-invite-worker/serviceAuthPolicy.ts
           deno check --node-modules-dir=auto supabase/functions/bt-invite-worker/serviceAuthCandidate.ts
+      - name: Autenticación M2M con SDK real y claves sintéticas (sin red)
+        run: |
+          deno test --node-modules-dir=auto --allow-env scripts/security/bt-r2-service-auth-offline.test.ts
       - name: Confirmar que no se desplegó ni envió correo
         run: |
           echo 'PASS: offline typecheck only. No Supabase deploy, RPC or SMTP'
