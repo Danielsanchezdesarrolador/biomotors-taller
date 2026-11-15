@@ -104,7 +104,8 @@ RETURNS TABLE (
   lease_id uuid,
   attempt_number integer,
   recipient_email text,
-  expires_at timestamptz
+  expires_at timestamptz,
+  token_sha256_hex text
 )
 LANGUAGE plpgsql SECURITY INVOKER SET search_path=''
 AS $$
@@ -134,7 +135,8 @@ BEGIN
   )
   SELECT a.id, a.invitation_id, a.workshop_id,
          pg_catalog.encode(a.ciphertext,'hex'),pg_catalog.encode(a.nonce,'hex'),
-         a.lease_id, a.attempts, i.invited_email, i.expires_at
+         a.lease_id, a.attempts, i.invited_email, i.expires_at,
+         pg_catalog.encode(i.token_sha256,'hex')
     FROM acquired a
     JOIN bt_private.workshop_mechanic_invitations i ON i.id=a.invitation_id;
 END;
