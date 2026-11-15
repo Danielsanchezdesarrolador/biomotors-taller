@@ -1,5 +1,8 @@
 # ByteTorque
 
+**Avance de piloto (15/11/2026, BT-CP03-P3):** panel de Clientes y vehículos preparado como **candidato aislado**, con fichas recientes, búsqueda, asociación, altas y edición, respaldado por repositorio Supabase tipado pero **NO conectado a Render**. SQL alojado y captura de datos personales requieren aprobación independiente. [Checkpoint P3](docs/checkpoints/CHECKPOINT_BT_CP03_P3_20261115.md) · [Matriz de aceptación Ignacio](docs/BT_PILOTO_IGNACIO_MATRIZ_ACEPTACION.md).
+
+
 **Estado actual — 14/11/2026:** BT-OFICIAL-01A presenta ByteTorque R2 con los cinco paneles vacíos y sin registros ficticios. Es una interfaz de preparación: **no hay acceso autenticado, guardado permanente ni operaciones habilitadas para clientes reales**. Las funciones y datos de prueba se conservan exclusivamente en el harness local. [Checkpoint 01A](docs/checkpoints/CHECKPOINT_BT_OFICIAL_01A_20261114.md).
 
 
