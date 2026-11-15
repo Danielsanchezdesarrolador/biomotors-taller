@@ -896,3 +896,12 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Próximas puertas:** prueba integrada backend+DB real solo en laboratorio aislado, autorización de servicio máquina-a-máquina, dominio/remitente/cuenta Resend y primera prueba E2E aprobada expresamente. R2-A6-6 aceptación real pendiente; endpoints, envíos, migraciones y pagos públicos siguen desactivados.
 
 [Checkpoint R2-A6-P4](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P4_20261115.md). Mantener única rama `main`, sin datos de clientes y con Supabase hospedado sin cambios.
+
+### BT-AUTH-R2-A6-P5 — Integración real en PostgreSQL aislado (15/11/2026)
+
+- [x] **Regresión de expiración V3 reparada:** comparar el instante `timestamptz` de PostgreSQL, no la cadena literal ISO, para evitar rechazo incorrecto de una invitación válida. Cambios de fecha real siguen bloqueados.
+- [x] **Primer laboratorio integral PostgreSQL 17:** `scripts/security/bt-r2-lab-creator-worker-e2e.ts` enlaza creador P4 + sobre AES-GCM V3 + SQL de reserva/cola reales + claim/lease/ACK reales + HTTP Resend **mock**, todo con datos sintéticos y SIN red externa. Taller ajeno rechazado, ciphertext borrado tras ACK, sin doble claim ni datos cruzados. Se ejecuta por `deno check` y `deno run` con permisos limitados a Docker.
+- [x] **Evidencia CI:** [PostgreSQL #43708017370](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43708017370) **SUCCESS** para el flujo integral y regresiones de RLS/concurrencia; [web/PWA y Android #43708017350](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43708017350) **SUCCESS**, 39 archivos, **365/365 Vitest**, TypeScript/build/Expo. Se corrigió fallo intermedio de lectura de booleanos de PSQL (`true` vs `t`), documentado en checkpoint.
+- [ ] **Siguiente puerta:** implementar y validar autenticación servicio a servicio (según documentación vigente de Supabase) sin habilitar todavía worker. Requiere aprobación explícita antes de tocar `supabase/config.toml`, crear secretos, desplegar y enviar correo; R2-A6-6 aceptación real y Resend siguen pendientes.
+
+[Checkpoint R2-A6-P5](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_P5_20261115.md) · [Puerta de seguridad M2M](docs/BT_AUTH_R2_A6_P5_SERVICE_AUTH_GATE.md). Supabase alojado sin cambios (2 talleres, 4 usuarios Auth, 4 membresías, 0 tablas privadas). Única rama `main`.
