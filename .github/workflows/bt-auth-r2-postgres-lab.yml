@@ -74,6 +74,9 @@ jobs:
       - name: Verificar aceptación de un solo uso bajo concurrencia
         shell: bash
         run: bash scripts/security/bt-r2-lab-accept-concurrency.sh "${{ job.services.postgres.id }}"
+      - name: Dos workers compiten por el mismo correo sin doble claim
+        shell: bash
+        run: bash scripts/security/bt-r2-lab-worker-claims.sh "${{ job.services.postgres.id }}"
       - name: Confirmar que el laboratorio no creó conexión a Supabase hospedado
         run: |
           echo "PASS: docker postgres:17 service only; no Supabase project credentials"
