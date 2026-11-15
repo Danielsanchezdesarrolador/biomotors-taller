@@ -45,6 +45,9 @@ jobs:
         shell: bash
         run: |
           docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-rate-assertions.sql
+      - name: Probar concurrencia del último intento permitido
+        shell: bash
+        run: bash scripts/security/bt-r2-lab-rate-concurrency.sh "${{ job.services.postgres.id }}"
       - name: Ejecutar pruebas PostgreSQL reales sobre fixtures sintéticos
         shell: bash
         run: |
