@@ -1,0 +1,28 @@
+name: ByteTorque R2 — Deno Edge sin despliegue
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/_shared/**'
+      - 'supabase/functions/bt-mechanic-*/**'
+      - '.github/workflows/bt-auth-r2-edge-check.yml'
+permissions:
+  contents: read
+jobs:
+  deno-offline:
+    name: Comprobar tipos Edge y ruta de importación
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Verificar TypeScript Deno de los tres endpoints cerrados
+        run: |
+          deno check supabase/functions/bt-mechanic-invites/index.ts
+          deno check supabase/functions/bt-mechanic-accept/index.ts
+          deno check supabase/functions/bt-mechanic-revoke/index.ts
+      - name: Confirmar que no se desplegó ni envió correo
+        run: echo "PASS: offline typecheck only. No Supabase deploy, RPC or SMTP"
