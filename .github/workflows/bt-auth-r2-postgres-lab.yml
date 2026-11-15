@@ -37,6 +37,14 @@ jobs:
         run: |
           docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A_INVITATIONS_CANDIDATE.sql
           docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A2_ACCEPT_REVOKE_CANDIDATE.sql
+      - name: Crear contadores de protección antiabuso SOLO en PostgreSQL efímero
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_AUTH_R2_A5_RATE_LIMIT_CANDIDATE.sql
+      - name: Probar límites de frecuencia reales sin Supabase alojado
+        shell: bash
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-r2-lab-rate-assertions.sql
       - name: Ejecutar pruebas PostgreSQL reales sobre fixtures sintéticos
         shell: bash
         run: |
