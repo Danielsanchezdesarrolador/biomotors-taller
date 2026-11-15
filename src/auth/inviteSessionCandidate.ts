@@ -63,10 +63,13 @@ export function createInviteSessionCandidate(
     else if (result === 'rejected') stage = 'discarded'
     return stage
   }
-  function isVerifiedUser(user: Identity | null): user is Identity {
-    return user !== null && user.confirmed === true &&
-      typeof user.id === 'string' && uuid.test(user.id) &&
-      user.id === user.id.toLowerCase()
+  function isVerifiedUser(user: unknown): user is Identity {
+    if (!user || typeof user !== 'object' || Array.isArray(user))
+      return false
+    const identity = user as Record<string, unknown>
+    return identity.confirmed === true &&
+      typeof identity.id === 'string' && uuid.test(identity.id) &&
+      identity.id === identity.id.toLowerCase()
   }
   async function verifySession(): Promise<InviteResumeStage> {
     if (!['awaiting-login', 'checking', 'ready'].includes(current()))

@@ -39,6 +39,16 @@ describe('BT-AUTH-R2-A6-8 · continuidad segura de sesión, candidata no públic
     expect(await flow.verifySession()).toBe('ready')
     expect(await flow.consumeAfterRecheck()).toBe(TOKEN)
   })
+  it('Auth con respuesta malformada falla cerrado, nunca rompe el flujo', async () => {
+    for (const identity of [
+      undefined, [], {}, {confirmed:true}, {confirmed:true,id:null},
+      {confirmed:'true',id:UUID_A}, 'not-user'
+    ]) {
+      const flow = create(async () => identity as Identity)
+      expect(await flow.verifySession()).not.toBe('ready')
+      expect(await flow.consumeAfterRecheck()).toBeNull()
+    }
+  })
   it('correo no confirmado invalida el token, sin aceptar o reusar', async () => {
     const flow = create(async () => ({...CONFIRMED, confirmed: false}))
     expect(await flow.verifySession()).toBe('discarded')
