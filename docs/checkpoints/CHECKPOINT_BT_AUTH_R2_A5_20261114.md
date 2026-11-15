@@ -39,7 +39,7 @@
 
 - Vitest de saneamiento de enlace y pantalla de revisión: [workflow 43664695428](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664695428) SUCCESS.
 - PostgreSQL 17 + SQL de throttling y concurrencia: [workflow 43664975994](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664975994) SUCCESS; 5/h invite, 10/15m accept, 10/h revoke y carrera 5º/6º PASS.
-- CI navegador Chromium: verificar el workflow del HEAD actual y añadir resultados cuando corresponda, no suponer PASS de la batería visual hasta obtener evidencia.
+- **CI navegador Chromium:** el paso «Cinco paneles y acceso visual en cinco tamaños» del [workflow 43664873758](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664873758) terminó con `conclusion=success`, incluyendo `node scripts/verify-r2-invite-ui.cjs` para 375/390/768/1440, URL sin token, cero escrituras y sin desbordes. El workflow completo incluye luego otra prueba histórica de R1 y aún estaba en ejecución al registrarse este dato.
 
 ## Cierre del perímetro
 
@@ -51,7 +51,7 @@
 
 ## Próxima fase: R2-A6
 
-1. Certificar visualmente con screenshots que la ruta de invitación no tiene desbordes y elimina token en Chromium; luego QA Safari físico, sin usar tokens reales.
+1. **Chromium CI aprobado:** limpieza de token y diseño adaptable verificados en el paso de navegación del workflow 43664873758. Sigue pendiente QA Safari físico antes del lanzamiento real, sin usar tokens reales.
 2. Revisar/autorizar diseño de API real con Auth, cuota y rate limit transaccionales, y **outbox de email** para no reservar invitaciones inutilizables ante falla SMTP.
 3. Integrar un proveedor de correo transaccional aprobado y ruta de aceptación con token en memoria (no persistente), con configuración y pruebas antiabuso. 
 4. Solo después solicitar autorización explícita para migrar tablas y desplegar funciones a Supabase hospedado.
