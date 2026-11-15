@@ -1,14 +1,16 @@
 # ByteTorque — R1 · Ronda acelerada A/B y administrador secundario
 
-**Fecha:** 14/11/2026. **Estado:** fixture temporal preparado, pruebas de navegador/API pendientes.
+**Fecha:** 14/11/2026. **Estado:** guía histórica, pruebas A/B y 12/12 aprobadas por el Director; la membresía temporal de Administrador B **YA FUE RETIRADA Y VERIFICADA**. **NO REEJECUTAR el script 12/12 con el fixture actual.** Renovación automática en Chrome sigue sin certificar.
+
+[Cierre controlado, evidencia y reversión](checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md). Este documento se conserva para auditoría; no es una orden de reconstruir roles de prueba.
 
 ## Fixture y reversión segura
 
-Para evitar crear nuevos usuarios, la cuenta ficticia `bt-r1-recepcion-1411@example.com` mantiene **Recepción en Taller A** y, **temporalmente**, tiene **Administrador en Taller B**. Los propietarios de A/B y el mecánico de A no se modificaron.
+Durante la ronda acelerada se reutilizó la cuenta ficticia `bt-r1-recepcion-1411@example.com` con **Recepción en Taller A** y **Administrador temporal en Taller B**. El permiso temporal B se retiró tras las pruebas; Recepción A y los demás roles se verificaron intactos.
 
-Membresía temporal a eliminar al terminar todas las pruebas: `005d0348-fda0-4dc7-ba16-3b5708200e5b` (usuario `f1b1ee14-7f89-4352-b7cd-263979a2f6f0`, taller B `e7b4fc0c-6966-4039-b33c-84545119e36d`).
+Membresía temporal ya eliminada y verificada (referencia histórica): `005d0348-fda0-4dc7-ba16-3b5708200e5b` (usuario `f1b1ee14-7f89-4352-b7cd-263979a2f6f0`, taller B `e7b4fc0c-6966-4039-b33c-84545119e36d`).
 
-**Reversión propuesta, NO ejecutada** (usar solo al cierre, tras verificar sesión de prueba cerrada):
+**Reversión histórica, YA EJECUTADA** tras confirmación de cierre de sesión (no repetir):
 ```sql
 delete from public.workshop_memberships
 where id = '005d0348-fda0-4dc7-ba16-3b5708200e5b'
@@ -17,9 +19,9 @@ where id = '005d0348-fda0-4dc7-ba16-3b5708200e5b'
   and role = 'admin' and status = 'active'
 returning id,role;
 ```
-Tras revertir, confirmar que **Recepción A**, **owner A**, **owner B** y **mecánico A** siguen intactos. No eliminar el resto de cuentas de prueba hasta decisión de cierre R1.
+La comprobación posterior confirmó que **Recepción A**, **owner A**, **owner B** y **mecánico A** siguen intactos: 4 membresías, 2 talleres, 4 usuarios Auth. No se eliminaron las demás cuentas de prueba.
 
-## Una sola ronda de Chrome
+## Una sola ronda de Chrome — ARCHIVADA Y CONFIRMADA
 
 1. Entrar en `http://localhost:5173/#/acceso` con la cuenta ficticia de recepción, sin sesión previa.
 2. Deben aparecer **dos talleres** a elegir; elegir **Taller B**, con rol **Administrador**. No debe mostrarse información administrativa del Taller A.
@@ -27,7 +29,7 @@ Tras revertir, confirmar que **Recepción A**, **owner A**, **owner B** y **mec�
 4. Pulsar **Cambiar taller** y elegir **A**. Debe decir **«Acceso restringido»**, porque la membresía A sigue siendo **Recepción**.
 5. Cerrar sesión y F5. Ningún panel privado debe recuperarse sin credenciales.
 
-## Una sola ronda PowerShell: 12 comprobaciones API RLS
+## Una sola ronda PowerShell: 12 comprobaciones API RLS — ARCHIVADA, NO REEJECUTAR
 
 ```powershell
 git pull origin main
@@ -55,6 +57,6 @@ finally {
 }
 ```
 
-Esperado **12/12 PASS**, aún no ejecutado. Login Auth, SELECT RLS, `refreshSession()` forzado y cierre local aislado; no cambia los datos operativos. No repetir si falla sin revisión previa. No imprimir contraseñas, JWT o claves.
+**Resultado histórico confirmado por el Director: 12/12 PASS**, antes de retirar el permiso temporal; el script ya no coincide con las membresías actuales. Login Auth, SELECT RLS, `refreshSession()` forzado y cierre local aislado, sin escrituras operativas. **No reejecutar este bloque ni restaurar permisos para hacerlo.** No imprimir contraseñas, JWT o claves.
 
 **No demuestra** renovación *automática* en Chrome ni permisos de escritura de futuras OT/clientes/informes. Esas pruebas y Safari/PWA física continúan pendientes. Render con Auth real desactivado; ningún pago, email ni registro abierto.
