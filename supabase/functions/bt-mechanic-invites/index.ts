@@ -4,6 +4,7 @@
 // plan, target role or token. When later implementing, verify user with Auth,
 // then perform the quota/membership check ATOMICALLY in the database.
 import { parseMechanicInviteRequest } from '../_shared/mechanicInviteRequest.ts'
+import { verifyInviteActor } from '../_shared/verifiedInviteActor.ts'
 
 const origins = new Set([
   'https://biomotors-taller-demo.onrender.com',
@@ -49,6 +50,14 @@ Deno.serve(async (request) => {
   }
   if (!parseMechanicInviteRequest(payload))
     return response(422, 'Datos de invitación inválidos.', headers)
+
+  // Authenticate against live Supabase Auth, never trust submitted user/role.
+  // This preflight is not the SQL membership/plan authorization boundary.
+  const identity = await verifyInviteActor(request.headers.get('authorization'), {
+    baseUrl: Deno.env.get('SUPABASE_URL'),
+    publicKey: Deno.env.get('SUPABASE_ANON_KEY')
+  })
+  if (!identity.ok) return response(identity.status, identity.message, headers)
 
   // FAIL CLOSED even if someone flips the flag: do not reserve unusable tokens
   // before a one-time acceptance flow, verified email delivery, rate limits
