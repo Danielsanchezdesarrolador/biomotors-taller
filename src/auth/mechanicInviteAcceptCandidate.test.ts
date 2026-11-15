@@ -61,7 +61,7 @@ describe('BT-AUTH-R2-A6-6 · aceptación segura backend, RPC inyectada',()=>{
       null,{...actor,userId:'not-uuid'},{...actor,userId:actor.userId.toUpperCase()},
       {...actor,confirmedEmail:''},{...actor,confirmedEmail:'UNVERIFIED@example.com'},
       {...actor,confirmedEmail:' mech@example.com '},
-      {...actor,confirmedEmail:'evil\\r\\n@example.com'},
+      {...actor,confirmedEmail:'evil\r\n@example.com'},
       {...actor,confirmedEmail:'invalid'},
     ]){
       const f=fixture()

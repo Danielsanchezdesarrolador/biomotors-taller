@@ -13,7 +13,7 @@ import {
 } from './mechanicInviteToken.ts'
 import type { VerifiedInviteActor } from './verifiedInviteActor.ts'
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const email = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
 
 export type AcceptMechanicInviteArgs = Readonly<{
