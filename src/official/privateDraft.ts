@@ -94,7 +94,14 @@ export function readCp03Draft(scope:DraftScope,store:StoragePort|null=tabStorage
     if(volatile && validEnvelope(volatile,scope,now))return volatile.draft
     volatile=null
     return null
-  } catch { // Storage may be blocked; preserve data in memory until refresh.
+  } catch { // Malformed JSON must be discarded. A blocked store falls back to memory.
+    try {
+      const raw=store?.getItem(KEY)
+      if(raw!==null && raw!==undefined){
+        clearCp03Draft(store)
+        return null
+      }
+    } catch { /* storage itself is unavailable; memory-only recovery */ }
     if(volatile && validEnvelope(volatile,scope,now))return volatile.draft
     return null
   }
