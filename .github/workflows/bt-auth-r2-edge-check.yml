@@ -31,6 +31,7 @@ jobs:
           deno check supabase/functions/_shared/inviteDeliveryAdapter.ts
           deno check supabase/functions/_shared/invitationEmailWorker.ts
           deno check supabase/functions/_shared/invitationIssueCandidate.ts
+          deno check supabase/functions/_shared/mechanicInviteAcceptCandidate.ts
           deno check supabase/functions/_shared/resendInviteWireV1.ts
           deno check supabase/functions/_shared/resendInviteCandidate.ts
           deno check supabase/functions/_shared/resendInviteTransportCandidate.ts
