@@ -1,5 +1,8 @@
 # ByteTorque
 
+**CP03 — infraestructura alojada lista; pantalla privada pendiente de activación (15/11/2026).** Tras exportar cinco archivos de respaldo y restaurar en PostgreSQL 17 local 4 usuarios Auth, 2 talleres, 4 perfiles y 4 membresías (sin huérfanos, RLS activa), se aplicó al proyecto `suxcqqnmcjoezfxltoms` la migración `20261115205812_bt_cp03_customers_vehicles_tenant_rls`. **Las tablas reales `customers` y `vehicles` ya existen, vacías, con RLS FORCE y seis políticas.** El panel existente se enlazó al Auth R1 y al repositorio Supabase sin cliente SDK duplicado; sigue deshabilitado por defecto (`VITE_BT_CP03_PRIVATE_ENABLED=false`). [CI con build privado #43762126353](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43762126353): **485/485 Vitest, TS, PWA y Android bundle PASS; build privado PASS (no publicado)**. No se ingresaron datos de clientes ni se modificó Render Environment. Próximo único paso: autorización para habilitar acceso privado y QA remoto con fichas completamente sintéticas, sin registro público ni datos personales reales. No declarar CP03 completado hasta demostrar persistencia y aprobación de Ignacio.
+
+
 **Avance de piloto (15/11/2026, BT-CP03-P3):** panel de Clientes y vehículos preparado como **candidato aislado**, con fichas recientes, búsqueda, asociación, altas y edición, respaldado por repositorio Supabase tipado pero **NO conectado a Render**. SQL alojado y captura de datos personales requieren aprobación independiente. [Checkpoint P3](docs/checkpoints/CHECKPOINT_BT_CP03_P3_20261115.md) · [Matriz de aceptación Ignacio](docs/BT_PILOTO_IGNACIO_MATRIZ_ACEPTACION.md).
 
 

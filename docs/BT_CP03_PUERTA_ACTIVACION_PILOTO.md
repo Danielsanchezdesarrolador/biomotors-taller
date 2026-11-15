@@ -2,7 +2,16 @@
 
 **Fecha de preparación:** 15/11/2026. **Responsable de aprobar:** Director del proyecto. **Prioridad:** que Ignacio pueda crear, encontrar y corregir clientes/vehículos con persistencia auténtica. **No es un checkpoint de capacidad concluida.**
 
-## Estado verificado
+## Estado posterior al respaldo y migración
+
+**Migración instalada y verificada.** El 15/11/2026, después de restauración local comprobada de Auth y public (4 usuarios, 2 talleres, 4 perfiles, 4 membresías, 0 relaciones huérfanas, RLS activa), se instaló una sola migración autorizada en Supabase: `20261115205812_bt_cp03_customers_vehicles_tenant_rls`. `public.customers` y `public.vehicles` existen y tienen cero registros, RLS FORCE, seis políticas y FK por taller. El esquema y los registros CP02 se conservaron. Se creó y probó un 7-Zip de cinco archivos sin errores, pero **no se ha confirmado copia externa redundante**; mantenerlo cifrado y privado.
+
+**Integración funcional en código, todavía sin activación:** Auth R1 y el directorio real comparten el mismo cliente Supabase JS; el panel se conecta solo tras sesión autorizada de owner/admin y está protegido por `VITE_BT_CP03_PRIVATE_ENABLED` (OFF de fábrica). La compilación pública sin flag excluye ese código. [CI web + Android + build privado](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43762126353): PASS, 485 pruebas. Ni Render ni las cuentas de usuarios fueron modificadas por este paso.
+
+**Próximo permiso:** aprobar **solo** la activación privada del directorio para cuentas existentes del taller y una prueba con cliente/vehículo completamente ficticios en Supabase alojado; cerrar sesión, reingresar, buscar, editar y recargar; comprobar que la información persista. No se autoriza registro público, uso de datos reales de clientes, invitaciones, correos ni pagos. Aún falta QA físico y la conformidad de Ignacio para declarar CP03 completado.
+
+## Estado anterior documentado (evidencia de preflight; ya superado)
+
 
 - Supabase `biomotors-taller`, proyecto `suxcqqnmcjoezfxltoms`, está `ACTIVE_HEALTHY` en PostgreSQL 17.11. En `public` existen únicamente `workshops`, `profiles` y `workshop_memberships`, todas con RLS. **No existen aún `customers` ni `vehicles` alojadas**.
 - En `main` hay SQL candidata, repositorio Supabase JS, panel React y binding de ciclo Auth, pero **la app oficial todavía no los utiliza**. Las invitaciones de R2, correos y cobros continúan bloqueados.
@@ -60,4 +69,4 @@ Aprobar la misma sesión Auth ya verificada para la vista CP03; montar su bindin
 
 Con fichas **sintéticas expresamente autorizadas** en el backend: crear cliente, agregar vehículo, buscar por patente con/sin guion, teléfono y nombre, editar contacto, regresar desde otra sesión y recuperar ambos IDs. Repetir en iPhone Safari/PWA y escritorio, verificar sesiones cambiadas, datos cruzados A/B denegados, rol mecánico solo lectura, conflicto de edición y RLS en taller suspendido. Comprobar errores de conexión sin ocultar una escritura posiblemente aceptada; nunca repetir automáticamente una creación que puede duplicarse. Registrar evidencia de respuestas reales y conformidad de Ignacio/Director; **solo entonces** marcar CP03 completado y producir checkpoint de capacidad.
 
-**Autorización pendiente hoy:** sin permiso específico para SQL alojado ni datos reales. Se preserva `main`, PWA iOS/web y Android nativo separado. No avanzar comercialización CP07–CP09.
+**Autorización pendiente ahora:** el SQL ya se instaló bajo la autorización recibida; falta permiso para activar el panel privado y hacer un recorrido persistente con datos exclusivamente ficticios. Los datos personales reales siguen sin autorización. Se preserva `main`, PWA iOS/web y Android nativo separado. No avanzar comercialización CP07–CP09.
