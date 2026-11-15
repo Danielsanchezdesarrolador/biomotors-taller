@@ -798,7 +798,7 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 
 - [x] Crear laboratorio efímero en GitHub Actions, con talleres/identidades sintéticos y propuestas SQL originales R2-A/R2-A2 (sin tocar Supabase hospedado).
 - [x] **Primera prueba SQL real PASS**: [workflow 43663351089](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43663351089): grants/RLS, BOLA, roles, cupos Básico/Plus/Full, aceptación única, email, caducidad, revocación, downgrade y carrera de reservas para el último cupo.
-- [x] Incorporada carrera de aceptación simultánea del mismo token, con conteo final de una membresía; confirmar PASS de la ejecución actualizada de Actions antes de marcar esta subprueba aprobada.
+- [x] **Doble aceptación concurrente PASS:** [workflow 43663461102](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43663461102), contenedor PostgreSQL 17 con todos los pasos SUCCESS; una sola membresía creada, segundo intento rechazado. También aprobadas carrera de reserva, cuotas y aislamiento.
 - [x] Estado Supabase real consultado sin escritura: 2 talleres, 4 membresías, 4 usuarios Auth, 0 tablas privadas de invitación nuevas.
 - [ ] **R2-A4:** revisión de resultados completos, integración de identidad confirmada con Supabase Auth, protección de abuso y entrega de invitaciones con SMTP autorizado; no migrar ni desplegar funciones sin puerta de aprobación.
 - [ ] Confirmar configuración previa a lanzamiento: protección de contraseñas filtradas y estrategia definitiva de planes/cupo atómico por taller.
