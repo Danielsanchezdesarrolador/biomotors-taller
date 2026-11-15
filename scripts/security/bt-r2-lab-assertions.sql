@@ -96,38 +96,47 @@ END $$;
 ROLLBACK;
 \echo PASS: revoke and expiry controls
 
--- Plus and Full permit seven invites after one active, but never the ninth.
+-- Plus and Full each fill their own synthetic workshop; never the ninth seat.
 BEGIN;
 SET LOCAL ROLE service_role;
 DO $$
 DECLARE
-  w uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-  o uuid := '11111111-1111-4111-8111-111111111111';
+  w uuid;
+  o uuid;
   plan text;
   i int;
+  count_to int;
+  prefix text;
 BEGIN
   FOREACH plan IN ARRAY ARRAY['plus','full'] LOOP
+    w := CASE WHEN plan='plus'
+      THEN 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid
+      ELSE 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'::uuid END;
+    o := CASE WHEN plan='plus'
+      THEN '11111111-1111-4111-8111-111111111111'::uuid
+      ELSE '55555555-5555-4555-8555-555555555555'::uuid END;
+    count_to := CASE WHEN plan='plus' THEN 7 ELSE 8 END;
+    prefix := CASE WHEN plan='plus' THEN 'f' ELSE 'd' END;
     INSERT INTO bt_private.workshop_mechanic_entitlements(workshop_id,plan)
-    VALUES (w,plan) ON CONFLICT (workshop_id) DO UPDATE SET plan=EXCLUDED.plan;
-    FOR i IN 1..7 LOOP
-      PERFORM public.bt_r2_reserve_mechanic_invite(o,w,'slot'||i||'@example.com',
-        repeat('f',63)||i::text,now()+interval '1 hour');
+    VALUES (w,plan);
+    FOR i IN 1..count_to LOOP
+      PERFORM public.bt_r2_reserve_mechanic_invite(o,w,
+        'slot'||i||'@example.com',
+        repeat(prefix,63)||i::text,now()+interval '1 hour');
     END LOOP;
     IF (SELECT count(*) FROM bt_private.workshop_mechanic_invitations
-        WHERE workshop_id=w AND status='pending') <> 7 THEN
-      RAISE EXCEPTION 'FAIL expected seven reservations, plan %',plan; END IF;
+        WHERE workshop_id=w AND status='pending') <> count_to THEN
+      RAISE EXCEPTION 'FAIL expected % reservations, plan %',count_to,plan; END IF;
     BEGIN
       PERFORM public.bt_r2_reserve_mechanic_invite(o,w,'slot9@example.com',
-        repeat('e',64),now()+interval '1 hour');
-      RAISE EXCEPTION 'FAIL nine slots allowed, plan %',plan;
+        repeat('e',63)||CASE WHEN plan='plus' THEN '1' ELSE '2' END,
+        now()+interval '1 hour');
+      RAISE EXCEPTION 'FAIL nine occupied slots allowed, plan %',plan;
     EXCEPTION WHEN SQLSTATE '23514' THEN NULL; END;
-    -- Reset for independent second plan inside the same transaction.
-    DELETE FROM bt_private.workshop_invitation_audit WHERE workshop_id=w;
-    DELETE FROM bt_private.workshop_mechanic_invitations WHERE workshop_id=w;
   END LOOP;
 END $$;
 ROLLBACK;
-\echo PASS: Plus/Full 8/8 occupied; 9th denied
+\\echo PASS: Plus/Full 8/8 occupied; 9th denied
 
 -- Downgrade blocks acceptance above the Basic quota; history not erased.
 BEGIN;
