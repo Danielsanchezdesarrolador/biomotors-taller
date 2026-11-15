@@ -924,3 +924,13 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Activación y UX aún NO AUTORIZADAS:** endpoint `bt-mechanic-accept/index.ts` y worker siguen 503; no se desplegó ni envió correo, no hay invitación real ni pantalla de aceptación funcional PWA/Android. Próximo bloque: preparar UX segura del enlace y pruebas de reanudación de sesión sin persistir token ni abrir el backend; luego autorización explícita para SQL/secret/Resend/ensayo real.
 
 [Checkpoint R2-A6-6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_6_OFFLINE_20261115.md). Supabase alojado intacto (2 talleres, 4 usuarios, 4 membresías, 0 tablas privadas). Solo rama `main`.
+
+
+### BT-AUTH-R2-A6-7 — UX de enlace iPhone y handoff solamente en laboratorio (15/11/2026)
+
+- [x] **Pantalla iPhone más clara:** `InviteAcceptancePreview` orienta sobre el mismo correo y la posible separación de sesiones Safari/PWA, conserva el aviso de invitaciones no disponibles y no ofrece botones de activación ni formularios. CSS responsive y prueba de render.
+- [x] **Candidato de continuidad solo en memoria, NO conectado:** `inviteHandoffCandidate.ts` con redacción antes de almacenar, token hexadecimal único, caducidad 5 minutos, lectura única y descarte en error/nueva navegación. **10 pruebas nuevas** con rutas, duplicados, expiración, errores y aislamiento de pestañas. La PWA pública **sigue descartando todos los tokens**.
+- [x] **Guardia contra publicación accidental:** `verify-official-bundle.mjs` hace fallar el build si la utilidad de handoff candidata entra en el bundle público. [CI #43716531589](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43716531589) **SUCCESS, 42 archivos / 398/398 pruebas**, PWA y Android Expo aprobados; APK y Safari físico no probados.
+- [ ] **Continuación:** preparar integración futura de Auth confirmado/continuación del enlace y pruebas móviles; no habilitar aceptación pública, correo Resend, RPC SQL hospedada, workers, secretos ni registro sin aprobación expresa.
+
+[Checkpoint R2-A6-7](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_7_INVITE_UX_OFFLINE_20261115.md). Única rama `main`, Supabase alojado sin cambios.
