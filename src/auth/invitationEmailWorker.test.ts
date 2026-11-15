@@ -4,7 +4,7 @@ import { sealInviteEnvelope } from '../../supabase/functions/_shared/encryptedIn
 import {
   processOneInvitationEmail,
   type LeasedInvitationEmail,
-  type WorkerDependencies
+  type TrustedWorkshop
 } from '../../supabase/functions/_shared/invitationEmailWorker'
 import type { DeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
 
@@ -29,11 +29,11 @@ async function fixture() {
   }
   const calls = {
     claim: vi.fn(async (): Promise<LeasedInvitationEmail | null> => job),
-    getWorkshop: vi.fn(async () => ({ id: workshop_id, name: 'Taller de Prueba', status: 'active' as const })),
+    getWorkshop: vi.fn(async (): Promise<TrustedWorkshop | null> => ({ id: workshop_id, name: 'Taller de Prueba', status: 'active' })),
     leaseIsCurrent: vi.fn(async () => true),
     provider: vi.fn(async (_msg: DeliveryRequest) => ({accepted:true as const, providerMessageId:'provider-1'})),
     ack: vi.fn(async () => true),
-    fail: vi.fn(async (_job: LeasedInvitationEmail,_terminal:boolean) => 'retry' as const),
+    fail: vi.fn(async (_job: LeasedInvitationEmail,_terminal:boolean): Promise<'retry' | 'failed' | 'ignored'> => 'retry'),
     nowIso: () => nowIso,
     encryptionKey
   }
