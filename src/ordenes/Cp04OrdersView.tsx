@@ -8,7 +8,7 @@ import { ClipboardCheck,Search,Plus,CarFront,AlertTriangle,CheckCircle2,RefreshC
 import type { Context } from '../auth/controller'
 import { cp04Repository } from './cp04Repository'
 import {
-  inspectionCategories,workStatusLabel,workStatuses,workMessage,
+  inspectionCategories,workStatusLabel,workMessage,
   type Finding, type FindingResult, type OrderWithVehicle, type OrderStatus,
   type VehicleChoice
 } from './cp04Contracts'
