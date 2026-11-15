@@ -8,3 +8,7 @@ verify_jwt = true
 # R2-A2: código cerrado y sin desplegar, requiere JWT de usuario.
 [functions.bt-mechanic-accept]
 verify_jwt = true
+
+# R2-A2: revocación preparada y sin desplegar; requiere JWT.
+[functions.bt-mechanic-revoke]
+verify_jwt = true
