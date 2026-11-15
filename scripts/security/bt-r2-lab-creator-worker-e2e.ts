@@ -31,7 +31,7 @@ const outsiderId = '55555555-5555-4555-8555-555555555555'
 const from = 'invitaciones@bytetorque.example'
 const messageId = '12345678-1234-4234-8234-123456789abc'
 const key = crypto.getRandomValues(new Uint8Array(32))
-const assert = (ok: unknown, reason: string): asserts ok => {
+function assert(ok: unknown, reason: string): asserts ok {
   if (!ok) throw Error('P5 PostgreSQL integration: ' + reason)
 }
 function quote(s: string) {
@@ -68,10 +68,6 @@ async function getWorkshop(id: string): Promise<CandidateWorkshop | null> {
 }
 async function reserveAndQueue(args: ReserveAndQueueArgs): Promise<string> {
   // Match the seven-parameter SQL contract EXACTLY. No actor from HTTP body.
-  const values = [
-    args.p_actor_user_id + '::uuid',
-    args.p_workshop_id + '::uuid'
-  ]
   const q = (v: string) => quote(v)
   const call = [
     q(args.p_actor_user_id) + '::uuid',
@@ -82,7 +78,6 @@ async function reserveAndQueue(args: ReserveAndQueueArgs): Promise<string> {
     q(args.p_ciphertext_hex),
     q(args.p_nonce_hex)
   ]
-  void values // Keep RPC mapping explicit for security review.
   return await sql('SELECT public.bt_r2_reserve_and_queue_mechanic_invite(' +
     call.join(',') + ')::text;')
 }
@@ -186,11 +181,11 @@ const worker = await processOneInvitationEmail({
   leaseIsCurrent: async (current) =>
     (await sql('SELECT public.bt_r2_invitation_email_lease_valid(' +
       quote(current.outbox_id) + '::uuid,' + quote(current.lease_id) +
-      '::uuid)::text;')) === 't',
+      '::uuid)::text;')) === 'true',
   ack: async (current, providerMessageId) =>
     (await sql('SELECT public.bt_r2_mark_invitation_email_sent(' +
       quote(current.outbox_id) + '::uuid,' + quote(current.lease_id) +
-      '::uuid,' + quote(providerMessageId) + ')::text;')) === 't',
+      '::uuid,' + quote(providerMessageId) + ')::text;')) === 'true',
   fail: async (current) =>
     (await sql('SELECT public.bt_r2_fail_or_retry_invitation_email(' +
       quote(current.outbox_id) + '::uuid,' + quote(current.lease_id) +
