@@ -19,6 +19,20 @@ import {
   resolveAccessPath
 } from './access/accessContract'
 /** A separately approved private R1 rollout. No public-review route can mount it. */
+function PrivateWorkOrders({controller}:{controller:AuthController}){
+  const [Panel,setPanel]=useState<ComponentType<{controller:AuthController}>|null>(null)
+  const [failed,setFailed]=useState(false)
+  useEffect(()=>{
+    if(import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED!=='true')return
+    let active=true
+    void import('./ordenes/Cp04PrivatePanel').then(mod=>{
+      if(active)setPanel(()=>mod.Cp04PrivatePanel)
+    }).catch(()=>{if(active)setFailed(true)})
+    return()=>{active=false}
+  },[controller])
+  if(failed)return <p role="alert">No se pudo cargar el módulo de órdenes. Revisa el acceso.</p>
+  return Panel?<Panel controller={controller}/>:<p role="status">Preparando órdenes autorizadas…</p>
+}
 function PrivateClientDirectory({ controller }: { controller: AuthController }) {
   const [Panel, setPanel] = useState<ComponentType<{ controller: AuthController }> | null>(null)
   const [failed, setFailed] = useState(false)
@@ -82,7 +96,8 @@ export function OfficialWorkspaceView({
           </strong>
           <p>
             {session
-              ? session.directoryController && screen === 'clientes'
+              ? session.directoryController && (screen==='clientes' ||
+                  (screen==='ordenes'&&import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED==='true'))
                 ? 'Directorio privado conectado al taller autorizado. En las pruebas utiliza únicamente fichas ficticias.'
                 : 'Las demás operaciones de negocio aún no están habilitadas. No ingreses datos reales sin autorización.'
               : preparationNotice}
@@ -90,7 +105,10 @@ export function OfficialWorkspaceView({
           {session?.controls}
         </div>
       </div>
-      {screen === 'clientes' && session?.directoryController &&
+      {screen==='ordenes'&&session?.directoryController&&
+       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED==='true'?
+        <PrivateWorkOrders controller={session.directoryController}/> :
+       screen === 'clientes' && session?.directoryController &&
        import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ?
         <PrivateClientDirectory controller={session.directoryController} /> :
         <OfficialPanel screen={screen} onNavigate={navigateScreen} />}

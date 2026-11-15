@@ -19,6 +19,16 @@ assert.ok(
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
+const cp04PrivateEnabled = process.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true'
+if(cp04PrivateEnabled){
+ assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED,'true','CP04 requires verified R1')
+ assert.equal(process.env.VITE_BT_CP03_PRIVATE_ENABLED,'true','CP04 requires CP03')
+}
+if(!cp04PrivateEnabled){
+  assert.ok(modules.every(id=>
+    !/(?:Cp04(?:PrivatePanel|OrdersView)|cp04(?:Contracts|Repository|Draft))\.(?:ts|tsx|js)/.test(id)),
+    'CP04 must not be shipped without hosted SQL and private rollout authorization')
+}
 if (cp03PrivateEnabled)
   assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED, 'true',
     'Private CP03 requires R1 authenticated build')
@@ -37,7 +47,8 @@ assert.ok(
     (id) =>
       id.endsWith('.css') ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
-      (cp03PrivateEnabled && /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id))
+      (cp03PrivateEnabled && /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id)) ||
+      (cp04PrivateEnabled && /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView)|cp04(?:Contracts|Repository|Draft))\.(?:ts|tsx|js)/.test(id))
   )
 )
 for (const name of readdirSync('dist/assets')) {

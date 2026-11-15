@@ -6,7 +6,7 @@ import { OfficialWorkspaceView } from '../App'
 import { authConfig } from './config'
 import { AuthController, type AuthState, type Role } from './controller'
 import { lazyGateway } from './lazyGateway'
-import { clearPrivateScreen } from '../official/privateScreen'
+import { clearPrivateScreen, clearOperationalDrafts } from '../official/privateScreen'
 import { clearCp03Draft } from '../official/privateDraft'
 import './auth.css'
 const roleNames: Record<Role, string> = {
@@ -71,11 +71,12 @@ export function RealAccess({
   // Never restore a previous operator's section after an explicit sign-out.
   useEffect(() => {
     if (state.phase === 'anonymous' || state.phase === 'no-membership' ||
-        state.phase === 'disabled') { clearPrivateScreen(); clearCp03Draft() }
+        state.phase === 'disabled') { clearPrivateScreen(); clearCp03Draft(); clearOperationalDrafts() }
   }, [state.phase])
   const logout = () => {
     clearPrivateScreen()
     clearCp03Draft()
+    clearOperationalDrafts()
     void controller.logout()
   }
   const controls = (
@@ -87,6 +88,7 @@ export function RealAccess({
         <button type="button" onClick={() => {
           clearPrivateScreen()
           clearCp03Draft()
+          clearOperationalDrafts()
           void controller.changeWorkshop()
         }}>
           Cambiar taller

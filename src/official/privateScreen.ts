@@ -44,3 +44,10 @@ export function clearPrivateScreen(store: Store | null = browserStore()): void {
     // Best effort; Auth itself remains the security boundary.
   }
 }
+
+/** Remove CP04 draft on explicit sign-out or workshop change. No auth secrets. */
+export function clearOperationalDrafts():void {
+  try { if(typeof window!=='undefined')
+    window.sessionStorage.removeItem('bt:cp04:temporary-draft:v1')
+  } catch { /* blocked storage cannot authorize a session */ }
+}
