@@ -8,6 +8,7 @@ const reserve = read('docs/sql/BT_AUTH_R2_A_INVITATIONS_CANDIDATE.sql')
 const accept = read('docs/sql/BT_AUTH_R2_A2_ACCEPT_REVOKE_CANDIDATE.sql')
 const edgeIssue = read('supabase/functions/bt-mechanic-invites/index.ts')
 const edgeAccept = read('supabase/functions/bt-mechanic-accept/index.ts')
+const edgeRevoke = read('supabase/functions/bt-mechanic-revoke/index.ts')
 const config = read('supabase/config.toml')
 
 describe('BT-AUTH-R2-A2 · guardarraíles estáticos, NO pruebas de RLS real', () => {
@@ -39,5 +40,7 @@ describe('BT-AUTH-R2-A2 · guardarraíles estáticos, NO pruebas de RLS real', (
     expect(edgeAccept).toContain("return json(503, 'El proceso de validación todavía no está habilitado.'")
     expect(config).toContain('[functions.bt-mechanic-invites]\nverify_jwt = true')
     expect(config).toContain('[functions.bt-mechanic-accept]\nverify_jwt = true')
+    expect(edgeRevoke).toContain("return fail(503, 'El proceso de revocación todavía no está habilitado.'")
+    expect(config).toContain('[functions.bt-mechanic-revoke]\\nverify_jwt = true')
   })
 })
