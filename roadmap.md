@@ -804,3 +804,16 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] Confirmar configuración previa a lanzamiento: protección de contraseñas filtradas y estrategia definitiva de planes/cupo atómico por taller.
 
 [Checkpoint BT-AUTH-R2-A3](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A3_20261114.md). Mantener R1 cerrado, Render con registro/Auth público apagado y sin invitar usuarios reales.
+
+
+### BT-AUTH-R2-A4 — Preflight Auth y email seguro, sin envío (14/11/2026)
+
+- [x] R2-A3 PostgreSQL 17 aislado con doble reserva/aceptación concurrente y roles/cupos PASS. [Evidencia R2-A3](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A3_20261114.md).
+- [x] Código backend `verifyInviteActor`: `/auth/v1/user` (GET) fijado al proyecto Supabase autorizado, JWT del usuario y publishable/anon key, correo confirmado y no anónimo; estado 401/403/503 genérico. **No resuelve autorización por taller**, que sigue en candidatas SQL.
+- [x] Tres endpoints de invitar/aceptar/revocar incorporan el preflight después de validar payload, **antes de 503 incondicional**. Flags OFF y ningún despliegue/SMTP/RPC conectado.
+- [x] Plantilla de email texto/HTML y enlace fragmento con token de un solo uso, escape de HTML y expiración hasta 48h. **No se envía y la ruta de aceptación en la UI todavía no existe**.
+- [x] Tests de Auth HTTP simulado, rechazos de identidad/claims manipulados, plantilla/HTML/vencimiento y guardas estáticas de endpoint. Verificar CI del último commit para declarar la suite completa aprobada.
+- [ ] **R2-A5:** test E2E de handlers, rate limits/outbox de correo, SMTP autorizado, UI de aceptación Safari PWA e integración por etapas con SQL con autorización expresa para cualquier cambio en Supabase real.
+- [ ] Antes de publicar: habilitar protección de contraseñas filtradas, revisar SMTP y seguridad de datos, decidir fuente confiable del plan y manejo del descenso de 8 a 2 mecánicos.
+
+[Checkpoint R2-A4](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A4_20261114.md). Sin cambios a los dos talleres, cuatro membresías, Render Auth OFF ni Android.
