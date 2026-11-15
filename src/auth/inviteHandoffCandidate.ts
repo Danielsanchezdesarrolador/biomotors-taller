@@ -46,9 +46,10 @@ export function createMemoryOnlyInviteHandoff(
     if (location.pathname === '/' && location.search === '' &&
         location.hash.startsWith('#' + inviteAcceptancePath + '?')) {
       query = location.hash.slice(('#' + inviteAcceptancePath).length)
-    } else if (location.pathname === inviteAcceptancePath && location.hash === '') {
-      query = location.search
     }
+    // NEVER retain a token from pathname/search: a normal HTTP request already
+    // sends query parameters to the web host (potential logs / proxy traces).
+    // Old/deep links are scrubbed below but are categorically not redeemable.
 
     // URL scrubbing MUST succeed BEFORE anything is held in memory.
     try {

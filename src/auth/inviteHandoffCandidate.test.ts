@@ -37,14 +37,14 @@ describe('BT-AUTH-R2-A6-7 · handoff aislado de token, solo memoria', () => {
       expect(h.consumeOnce()).toBeNull()
     }
   })
-  it('permite ruta profunda canónica pero nunca conserva parámetros externos', () => {
+  it('rechaza token en query HTTP incluso si la URL profunda se limpia', () => {
     const h = createMemoryOnlyInviteHandoff()
     const replace = vi.fn()
     expect(h.capture({
       pathname:'/auth/aceptar-invitacion', search:'?token='+token, hash:''
-    },replace)).toBe('ready')
+    },replace)).toBe('rejected')
     expect(replace).toHaveBeenCalledWith(clean)
-    expect(h.consumeOnce()).toBe(token)
+    expect(h.consumeOnce()).toBeNull()
     expect(h.capture(invite('#/auth/aceptar-invitacion?token='+token,
       '?source=untrusted'),replace)).toBe('rejected')
   })
