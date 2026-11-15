@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { sealInviteEnvelope } from '../../supabase/functions/_shared/encryptedInviteEnvelope'
 import { createMechanicInviteToken } from '../../supabase/functions/_shared/mechanicInviteToken'
 import {
-  dispatchPreparedInvite, prepareInviteDelivery, type ClaimedInvitationEmail
+  dispatchPreparedInvite, prepareInviteDelivery, type ClaimedInvitationEmail, type DeliveryRequest
 } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
 
 const nowIso = '2026-11-14T18:00:00Z'
@@ -36,7 +36,7 @@ describe('BT-AUTH-R2-A6 · proveedor desacoplado, SIN correo real', () => {
   })
   it('simula aceptación del proveedor sin afirmar recepción en buzón', async () => {
     const {job,secret} = await createJob()
-    const provider = vi.fn(async () => ({ accepted: true as const, providerMessageId:'provider-accepted-1' }))
+    const provider = vi.fn(async (_request: DeliveryRequest) => ({ accepted: true as const, providerMessageId:'provider-accepted-1' }))
     expect(await dispatchPreparedInvite(job,secret,'Taller A',nowIso,provider))
       .toEqual({state:'accepted',providerMessageId:'provider-accepted-1'})
     expect(provider).toHaveBeenCalledTimes(1)
