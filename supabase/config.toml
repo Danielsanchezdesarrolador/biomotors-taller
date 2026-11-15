@@ -4,3 +4,7 @@ verify_jwt = true
 # R2-A: código preparado, aún NO desplegado; siempre requiere JWT.
 [functions.bt-mechanic-invites]
 verify_jwt = true
+
+# R2-A2: código cerrado y sin desplegar, requiere JWT de usuario.
+[functions.bt-mechanic-accept]
+verify_jwt = true
