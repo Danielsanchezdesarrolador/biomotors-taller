@@ -44,7 +44,7 @@ BEGIN
   v_window_seconds := CASE p_action WHEN 'accept' THEN 900 ELSE 3600 END;
   v_scope := CASE p_action WHEN 'accept' THEN 'global' ELSE p_workshop_id::text END;
   v_bucket := pg_catalog.to_timestamp(
-    pg_catalog.floor(pg_catalog.extract(epoch FROM pg_catalog.transaction_timestamp())
+    pg_catalog.floor(EXTRACT(epoch FROM pg_catalog.transaction_timestamp())
       / v_window_seconds) * v_window_seconds
   );
   INSERT INTO bt_private.mechanic_invite_attempts
