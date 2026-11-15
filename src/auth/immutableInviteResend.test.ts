@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { sealImmutableInviteEnvelope, sealInviteEnvelope } from '../../supabase/functions/_shared/encryptedInviteEnvelope'
-import { prepareImmutableInviteDelivery, type ImmutableDeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
+import { prepareImmutableInviteDelivery, type DeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
 import { createResendHttpCandidate, type InjectedResendHttpResponse } from '../../supabase/functions/_shared/resendInviteTransportCandidate'
 import { buildResendInviteRequest } from '../../supabase/functions/_shared/resendInviteCandidate'
 import { processOneInvitationEmail, type LeasedInvitationEmail, type TrustedWorkshop } from '../../supabase/functions/_shared/invitationEmailWorker'
@@ -166,7 +166,7 @@ describe('BT-AUTH-R2-A6-P2 · sobre inmutable y HTTP exclusivamente simulado', (
   })
   it('revocación detectada en lease impide cualquier HTTP externo', async () => {
     const { job, key } = await fixture()
-    const provider = vi.fn(async (_request: ImmutableDeliveryRequest) => ({
+    const provider = vi.fn(async (_request: DeliveryRequest) => ({
       accepted:true as const, providerMessageId:providerId
     }))
     const result = await processOneInvitationEmail({
