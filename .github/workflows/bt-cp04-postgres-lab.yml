@@ -1,0 +1,42 @@
+name: ByteTorque CP04 — Órdenes e inspecciones PostgreSQL aislado
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql'
+      - 'scripts/security/bt-cp04-lab-assertions.sql'
+      - '.github/workflows/bt-cp04-postgres-lab.yml'
+permissions:
+  contents: read
+jobs:
+  cp04-postgres:
+    name: Órdenes e inspecciones, RLS y continuidad (SOLO lab)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bytetorque
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-lab-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bytetorque"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap sintético de Auth
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-cp03-lab-bootstrap.sql
+      - name: Aplicar CP02 en contenedor local
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/applied/20261112144646_bt_cp02_c_core_tenants_rls.sql
+      - name: Aplicar CP03 en contenedor local
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql
+      - name: Aplicar CP04 candidato SOLO en contenedor local
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql
+      - name: RLS A/B, roles, cierre y pendientes históricos
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < scripts/security/bt-cp04-lab-assertions.sql
+      - name: No se modificó Supabase alojado
+        run: echo 'CP04 candidate verified in isolated PostgreSQL 17 — no hosted changes'
