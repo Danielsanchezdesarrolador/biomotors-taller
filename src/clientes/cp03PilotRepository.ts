@@ -85,6 +85,15 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
   function stillValid(version: number) {
     if (invalidated || epoch !== version) throw new DirectoryFailure('denied')
   }
+  async function recentCustomers(): Promise<CustomerRecord[]> {
+    const version = await guard(false)
+    const result = await client.from('customers').select(customerColumns)
+      .eq('workshop_id', tenant).is('archived_at', null)
+      .order('created_at', { ascending: false }).limit(25)
+    if (result.error) failure(result.error)
+    stillValid(version)
+    return checkMany<CustomerRecord>(result.data, tenant)
+  }
   async function search(term: string): Promise<{
     customers: CustomerRecord[]; vehicles: VehicleRecord[]
   }> {
@@ -199,6 +208,6 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
       throw new DirectoryFailure('unavailable')
     return row
   }
-  return Object.freeze({ search, getCustomer, getVehicle, vehiclesForCustomer, createCustomer,
+  return Object.freeze({ recentCustomers, search, getCustomer, getVehicle, vehiclesForCustomer, createCustomer,
     createVehicle, updateCustomer, updateVehicle, dispose })
 }

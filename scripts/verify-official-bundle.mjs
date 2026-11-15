@@ -22,7 +22,7 @@ assert.ok(
 // or written by the deployed official presentation until the Director gates it.
 assert.ok(
   modules.every((id) =>
-    !/cp03Pilot(?:Repository|Contracts)\.(?:ts|tsx|js)/.test(id)
+    !/cp03Pilot(?:Repository|Contracts|DirectoryView)\.(?:ts|tsx|js)/.test(id)
   ),
   'Unapproved CP03 customer/vehicle repository in public PWA'
 )

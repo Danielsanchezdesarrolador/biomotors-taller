@@ -140,6 +140,17 @@ describe('CP03-P2 · datos y validaciones, sin acceso a Supabase hospedado', () 
     expect(() => cp03PilotRepository(f.client,
       {...context(),userId:'not-an-uuid'})).toThrow(DirectoryFailure)
   })
+  it('muestra las últimas fichas del taller sin consultar otros talleres', async () => {
+    const f = fixture()
+    const rows = await cp03PilotRepository(f.client,context()).recentCustomers()
+    expect(rows).toMatchObject([customer])
+    expect(f.ops).toContainEqual({table:'customers',kind:'eq',args:['workshop_id',T]})
+    expect(f.ops).toContainEqual({table:'customers',kind:'is',args:['archived_at',null]})
+    expect(f.ops).toContainEqual({
+      table:'customers',kind:'order',args:['created_at',{ascending:false}]
+    })
+    expect(f.ops).toContainEqual({table:'customers',kind:'limit',args:[25]})
+  })
   it('busca cliente por nombre filtrando workshop y excluyendo archivados', async () => {
     const f = fixture()
     const r = cp03PilotRepository(f.client,context())

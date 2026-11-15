@@ -1,0 +1,393 @@
+/**
+ * BT-CP03-P3 · Pilot directory view. Reuses official visual vocabulary.
+ * NOT mounted from App, RealAccess, OfficialPanels, Render or Android.
+ * The caller MUST create the repository from verified Auth context and dispose
+ * it on sign-out, tenant change or loss of authorization. No persistence in
+ * browser storage, no demo fixture, no network except through injected repo.
+ */
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { CarFront, Search, Plus, Pencil, UsersRound, ArrowLeft, RefreshCw } from 'lucide-react'
+import type { Role } from '../auth/controller'
+import {
+  DirectoryFailure, customerPayload, vehiclePayload,
+  type CustomerInput, type CustomerRecord, type VehicleInput, type VehicleRecord
+} from './cp03PilotContracts'
+import type { cp03PilotRepository } from './cp03PilotRepository'
+import './cp03PilotDirectory.css'
+
+export type PilotDirectoryPort = Pick<ReturnType<typeof cp03PilotRepository>,
+  'recentCustomers' | 'search' | 'getCustomer' | 'getVehicle' |
+  'vehiclesForCustomer' | 'createCustomer' | 'createVehicle' |
+  'updateCustomer' | 'updateVehicle'>
+type Editor = 'new-customer' | 'edit-customer' | 'new-vehicle' | 'edit-vehicle' | null
+const emptyCustomer: CustomerInput = {
+  full_name: '', email: '', mobile_e164: '', notes: ''
+}
+const emptyVehicle: Omit<VehicleInput, 'customer_id'> = {
+  plate: '', make: '', model: '', model_year: null, odometer_km: null
+}
+export function cp03Message(error: unknown) {
+  const kind = error instanceof DirectoryFailure ? error.kind : 'unavailable'
+  switch (kind) {
+    case 'invalid': return 'Revisa los campos ingresados. No se guardaron los cambios.'
+    case 'duplicate': return 'Esa patente ya está registrada en este taller. Busca el vehículo existente.'
+    case 'conflict': return 'La ficha cambió desde otra sesión. Vuelve a cargarla antes de editar.'
+    case 'denied': return 'Tu sesión o tus permisos no permiten esta operación. Vuelve a verificar el acceso.'
+    default: return 'No pudimos completar la operación. Verifica tu conexión e inténtalo nuevamente.'
+  }
+}
+function formNumber(value: string): number | null {
+  if (!value.trim()) return null
+  const num = Number(value)
+  if (!/^\d+$/.test(value.trim()) || !Number.isSafeInteger(num)) return Number.NaN
+  return num
+}
+export function Cp03PilotDirectoryView({
+  repository, role, workshopName
+}: {
+  repository: PilotDirectoryPort
+  role: Role
+  workshopName: string
+}) {
+  const writable = role === 'owner' || role === 'admin' || role === 'reception'
+  const requestId = useRef(0)
+  const savingLock = useRef(false)
+  const active = useRef(true)
+  const [recent, setRecent] = useState<CustomerRecord[]>([])
+  const [matches, setMatches] = useState<{
+    customers: CustomerRecord[]; vehicles: VehicleRecord[]
+  } | null>(null)
+  const [term, setTerm] = useState('')
+  const [customer, setCustomer] = useState<CustomerRecord | null>(null)
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
+  const [vehicle, setVehicle] = useState<VehicleRecord | null>(null)
+  const [editor, setEditor] = useState<Editor>(null)
+  const [customerDraft, setCustomerDraft] = useState<CustomerInput>(emptyCustomer)
+  const [vehicleDraft, setVehicleDraft] = useState<Omit<VehicleInput,'customer_id'>>(emptyVehicle)
+  const [confirmed, setConfirmed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    active.current = true
+    const index = ++requestId.current
+    setLoading(true)
+    void repository.recentCustomers().then((rows) => {
+      if (active.current && requestId.current === index) setRecent(rows)
+    }).catch(error => {
+      if (active.current && requestId.current === index) setMessage(cp03Message(error))
+    }).finally(() => {
+      if (active.current && requestId.current === index) setLoading(false)
+    })
+    return () => {
+      active.current = false
+      requestId.current++
+      // Repository lifetime belongs to the future Auth-boundary. This view
+      // cancels UI updates; its owner must call repository.dispose() on logout.
+    }
+  }, [repository])
+
+  async function loadCustomer(id: string) {
+    const index = ++requestId.current
+    setLoading(true)
+    setMessage('')
+    setNotice('')
+    setEditor(null)
+    try {
+      const row = await repository.getCustomer(id)
+      if (!row) throw new DirectoryFailure('unavailable')
+      const list = await repository.vehiclesForCustomer(id)
+      if (!active.current || index !== requestId.current) return
+      setCustomer(row)
+      setVehicles(list)
+      setVehicle(null)
+      setMatches(null)
+    } catch (error) {
+      if (active.current && index === requestId.current) setMessage(cp03Message(error))
+    } finally {
+      if (active.current && index === requestId.current) setLoading(false)
+    }
+  }
+  async function loadVehicle(id: string) {
+    const index = ++requestId.current
+    setLoading(true)
+    setMessage('')
+    setNotice('')
+    setEditor(null)
+    try {
+      const row = await repository.getVehicle(id)
+      if (!row) throw new DirectoryFailure('unavailable')
+      const owner = await repository.getCustomer(row.customer_id)
+      if (!owner) throw new DirectoryFailure('unavailable')
+      const list = await repository.vehiclesForCustomer(owner.id)
+      if (!active.current || index !== requestId.current) return
+      setCustomer(owner)
+      setVehicles(list)
+      setVehicle(row)
+      setMatches(null)
+    } catch (error) {
+      if (active.current && index === requestId.current) setMessage(cp03Message(error))
+    } finally {
+      if (active.current && index === requestId.current) setLoading(false)
+    }
+  }
+  async function search(event: FormEvent) {
+    event.preventDefault()
+    const index = ++requestId.current
+    setMessage('')
+    setNotice('')
+    setMatches(null)
+    setLoading(true)
+    try {
+      const result = await repository.search(term)
+      if (!active.current || index !== requestId.current) return
+      setMatches(result)
+      setCustomer(null)
+      setVehicle(null)
+      setVehicles([])
+      setEditor(null)
+    } catch (error) {
+      if (active.current && index === requestId.current) setMessage(cp03Message(error))
+    } finally {
+      if (active.current && index === requestId.current) setLoading(false)
+    }
+  }
+  function startCustomer(edit: boolean) {
+    setMessage(''); setNotice('')
+    if (edit && !customer) return
+    setEditor(edit ? 'edit-customer' : 'new-customer')
+    setConfirmed(false)
+    setCustomerDraft(edit && customer
+      ? { full_name:customer.full_name,email:customer.email,
+        mobile_e164:customer.mobile_e164,notes:customer.notes }
+      : {...emptyCustomer})
+  }
+  function startVehicle(edit: boolean) {
+    setMessage(''); setNotice('')
+    if (!customer || (edit && !vehicle)) return
+    setEditor(edit ? 'edit-vehicle' : 'new-vehicle')
+    setVehicleDraft(edit && vehicle
+      ? {plate:vehicle.plate,make:vehicle.make,model:vehicle.model,
+        model_year:vehicle.model_year,odometer_km:vehicle.odometer_km}
+      : {...emptyVehicle})
+  }
+  async function saveCustomer(event: FormEvent) {
+    event.preventDefault()
+    if (!writable || savingLock.current) return
+    if (editor === 'new-customer' && !confirmed) {
+      setMessage('Confirma que tienes autorización para registrar los datos del cliente.')
+      return
+    }
+    savingLock.current = true
+    setSaving(true)
+    setMessage('')
+    setNotice('')
+    try {
+      const input = customerPayload(customerDraft)
+      // Do not silently merge same-name customers. If an exact email already
+      // appears, require the operator to select the existing customer.
+      if (editor === 'new-customer' && input.email) {
+        const found = await repository.search(input.email)
+        if (found.customers.some(row => row.email === input.email)) {
+          throw new DirectoryFailure('conflict')
+        }
+      }
+      const saved = editor === 'edit-customer' && customer
+        ? await repository.updateCustomer(customer.id,customer.updated_at,input)
+        : await repository.createCustomer(input)
+      if (!active.current) return
+      const list = await repository.vehiclesForCustomer(saved.id)
+      if (!active.current) return
+      setCustomer(saved)
+      setVehicles(list)
+      setVehicle(null)
+      setMatches(null)
+      setEditor(null)
+      setNotice('Ficha confirmada por el servidor.')
+      const rows = await repository.recentCustomers()
+      if (active.current) setRecent(rows)
+    } catch (error) {
+      if (active.current) {
+        if (error instanceof DirectoryFailure && error.kind === 'conflict' &&
+            editor === 'new-customer')
+          setMessage('Ya existe una ficha con ese correo. Búscala antes de crear otra.')
+        else setMessage(cp03Message(error))
+      }
+    } finally {
+      savingLock.current = false
+      if (active.current) setSaving(false)
+    }
+  }
+  async function saveVehicle(event: FormEvent) {
+    event.preventDefault()
+    if (!writable || savingLock.current || !customer) return
+    savingLock.current = true
+    setSaving(true)
+    setMessage('')
+    setNotice('')
+    try {
+      const input = vehiclePayload({...vehicleDraft,customer_id:customer.id})
+      const saved = editor === 'edit-vehicle' && vehicle
+        ? await repository.updateVehicle(vehicle.id,vehicle.updated_at,input)
+        : await repository.createVehicle(input)
+      if (!active.current) return
+      const list = await repository.vehiclesForCustomer(customer.id)
+      if (!active.current) return
+      setVehicles(list)
+      setVehicle(saved)
+      setEditor(null)
+      setNotice('Vehículo confirmado por el servidor.')
+    } catch(error) {
+      if (active.current) setMessage(cp03Message(error))
+    } finally {
+      savingLock.current = false
+      if (active.current) setSaving(false)
+    }
+  }
+
+  return (
+    <div className="official-panel cp03-pilot">
+      <section className="welcome-area">
+        <div className="welcome-head">
+          <div>
+            <span className="official-eyebrow">Directorio del taller</span>
+            <h1>Clientes y vehículos</h1>
+            <p>Fichas vinculadas a {workshopName}. Busca primero para evitar duplicados.</p>
+          </div>
+        </div>
+      </section>
+      <section className="dashboard-card cp03-panel" aria-label="Buscar clientes y vehículos">
+        <form className="cp03-search" onSubmit={search}>
+          <label htmlFor="cp03-search-input">Buscar por nombre, teléfono, correo o patente</label>
+          <div className="cp03-inline">
+            <input id="cp03-search-input" value={term} onChange={e=>setTerm(e.target.value)}
+              placeholder="Ej.: AB-1234 o nombre del cliente" maxLength={80} minLength={2}
+              autoComplete="off" required/>
+            <button className="cp03-primary" type="submit" disabled={loading || saving}>
+              <Search size={18}/> Buscar
+            </button>
+          </div>
+        </form>
+        {writable && <button type="button" className="cp03-secondary" disabled={loading || saving}
+          onClick={()=>startCustomer(false)}><Plus size={18}/> Nuevo cliente</button>}
+      </section>
+      <p className="cp03-status" role="status" aria-live="polite">
+        {loading ? 'Consultando las fichas autorizadas…' : notice || (matches ? 'Búsqueda completada.' : 'Selecciona una ficha para continuar.')}
+      </p>
+      {message && <p className="cp03-error" role="alert">{message}</p>}
+      <div className="cp03-layout">
+        <section className="dashboard-card cp03-panel" aria-label="Listado de clientes">
+          <h2><UsersRound size={20}/> {matches ? 'Resultados de la búsqueda' : 'Clientes recientes'}</h2>
+          {matches?.customers.length === 0 && matches.vehicles.length === 0 &&
+            <p>No encontramos coincidencias. Comprueba el dato antes de registrar una nueva ficha.</p>}
+          {(matches?.customers ?? recent).map(row=>(
+            <button type="button" key={row.id} className="cp03-result"
+              disabled={loading || saving} onClick={()=>void loadCustomer(row.id)}>
+              <strong>{row.full_name}</strong>
+              <small>{row.mobile_e164 ?? 'Sin teléfono'} · {row.email ?? 'Sin correo'}</small>
+            </button>
+          ))}
+          {matches?.vehicles.map(row=>(
+            <button type="button" key={row.id} className="cp03-result"
+              disabled={loading || saving} onClick={()=>void loadVehicle(row.id)}>
+              <strong><CarFront size={17}/> {row.plate ?? 'Sin patente'}</strong>
+              <small>{row.make} {row.model} · Ver ficha del propietario registrado</small>
+            </button>
+          ))}
+          {!matches && !loading && recent.length === 0 &&
+            <p>Todavía no hay clientes registrados en este taller.</p>}
+        </section>
+        <section className="dashboard-card cp03-panel" aria-label="Ficha seleccionada">
+          {customer ? <>
+            <h2>{customer.full_name}</h2>
+            <p>{customer.mobile_e164 ?? 'Sin teléfono'} · {customer.email ?? 'Sin correo'}</p>
+            <div className="cp03-inline">
+              {writable && <button className="cp03-secondary" type="button" disabled={saving}
+                onClick={()=>startCustomer(true)}><Pencil size={17}/> Editar cliente</button>}
+              {writable && <button className="cp03-secondary" type="button" disabled={saving}
+                onClick={()=>startVehicle(false)}><Plus size={17}/> Agregar vehículo</button>}
+            </div>
+            <h3>Vehículos vinculados</h3>
+            {vehicles.length===0 && <p>No hay vehículos vinculados a esta ficha.</p>}
+            {vehicles.map(row=>(
+              <button type="button" className="cp03-result" key={row.id}
+                onClick={()=>{setVehicle(row);setEditor(null);setNotice('')}} disabled={saving}>
+                <strong>{row.plate ?? 'Sin patente'} · {row.make} {row.model}</strong>
+                <small>{row.odometer_km === null ? 'Kilometraje no registrado' :
+                  row.odometer_km.toLocaleString('es-CL')+' km'}</small>
+              </button>
+            ))}
+            {vehicle && <div className="cp03-vehicle">
+              <h3>Vehículo seleccionado</h3>
+              <p>{vehicle.make} {vehicle.model} · {vehicle.plate ?? 'Sin patente'}</p>
+              <p>{vehicle.model_year ?? 'Año no indicado'} · {vehicle.odometer_km === null ?
+                'Kilometraje no indicado' : vehicle.odometer_km.toLocaleString('es-CL')+' km'}</p>
+              {writable && <button className="cp03-secondary" type="button" disabled={saving}
+                onClick={()=>startVehicle(true)}><Pencil size={17}/> Editar vehículo</button>}
+            </div>}
+          </> : <div className="cp03-unselected">
+            <CarFront size={40}/>
+            <h2>Selecciona un cliente o vehículo</h2>
+            <p>Podrás consultar su ficha y los automóviles asociados sin confundir patentes con identidades.</p>
+          </div>}
+        </section>
+      </div>
+      {writable && editor && <section className="dashboard-card cp03-panel cp03-editor" aria-label="Editar ficha">
+        <div className="cp03-inline cp03-heading">
+          <h2>{editor === 'new-customer' ? 'Registrar cliente' :
+            editor === 'edit-customer' ? 'Editar cliente' :
+            editor === 'new-vehicle' ? 'Registrar vehículo' : 'Editar vehículo'}</h2>
+          <button type="button" className="cp03-secondary" disabled={saving}
+            onClick={()=>setEditor(null)}><ArrowLeft size={17}/> Volver a la ficha</button>
+        </div>
+        {editor.endsWith('customer') ? (
+          <form onSubmit={saveCustomer} className="cp03-form">
+            <label>Nombre completo *<input required maxLength={120} value={customerDraft.full_name}
+              autoComplete="off" onChange={e=>setCustomerDraft(d=>({...d,full_name:e.target.value}))}/></label>
+            <label>Correo electrónico<input type="email" maxLength={254} value={customerDraft.email ?? ''}
+              autoComplete="off" onChange={e=>setCustomerDraft(d=>({...d,email:e.target.value}))}/></label>
+            <label>Teléfono móvil chileno<input type="tel" maxLength={24} value={customerDraft.mobile_e164 ?? ''}
+              autoComplete="off" placeholder="+56 9 1234 5678"
+              onChange={e=>setCustomerDraft(d=>({...d,mobile_e164:e.target.value}))}/></label>
+            <label className="cp03-wide">Observaciones de contacto (opcional)<textarea rows={3}
+              maxLength={1000} value={customerDraft.notes ?? ''}
+              onChange={e=>setCustomerDraft(d=>({...d,notes:e.target.value}))}/></label>
+            {editor === 'new-customer' && <label className="cp03-wide cp03-check">
+              <input type="checkbox" required checked={confirmed}
+                onChange={e=>setConfirmed(e.target.checked)}/>
+              Confirmo que tengo autorización para registrar los datos del cliente.
+            </label>}
+            <p className="cp03-wide cp03-hint">Los datos se asociarán únicamente al taller autenticado.
+              Esta confirmación todavía no constituye un registro formal de consentimiento.</p>
+            <button className="cp03-primary" type="submit" disabled={saving}>
+              {saving ? <RefreshCw size={17}/> : <Plus size={17}/>}
+              {saving ? 'Guardando…' : 'Guardar ficha de cliente'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={saveVehicle} className="cp03-form">
+            <p className="cp03-wide">Cliente: <strong>{customer?.full_name}</strong></p>
+            <label>Patente<input maxLength={14} value={vehicleDraft.plate ?? ''}
+              autoComplete="off" placeholder="AB-1234"
+              onChange={e=>setVehicleDraft(d=>({...d,plate:e.target.value}))}/></label>
+            <label>Marca *<input required maxLength={80} value={vehicleDraft.make}
+              onChange={e=>setVehicleDraft(d=>({...d,make:e.target.value}))}/></label>
+            <label>Modelo *<input required maxLength={80} value={vehicleDraft.model}
+              onChange={e=>setVehicleDraft(d=>({...d,model:e.target.value}))}/></label>
+            <label>Año<input type="number" min={1900} max={2100} value={vehicleDraft.model_year ?? ''}
+              onChange={e=>setVehicleDraft(d=>({...d,model_year:formNumber(e.target.value)}))}/></label>
+            <label>Kilometraje<input type="number" min={0} max={3000000}
+              value={vehicleDraft.odometer_km ?? ''}
+              onChange={e=>setVehicleDraft(d=>({...d,odometer_km:formNumber(e.target.value)}))}/></label>
+            <button className="cp03-primary" type="submit" disabled={saving}>
+              {saving ? <RefreshCw size={17}/> : <Plus size={17}/>}
+              {saving ? 'Guardando…' : 'Guardar ficha del vehículo'}
+            </button>
+          </form>
+        )}
+      </section>}
+    </div>
+  )
+}

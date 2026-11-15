@@ -1,0 +1,54 @@
+/* BT-CP03-P3: official white/navy/blue. Offline candidate, not in public bundle. */
+.cp03-pilot { color:var(--bt-text,#172b4d); }
+.cp03-pilot .cp03-panel { min-width:0; padding:22px; margin:0 0 16px; }
+.cp03-pilot .cp03-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:16px; }
+.cp03-pilot .cp03-panel h2 { display:flex; align-items:center; gap:8px; margin:0 0 14px; font-size:19px; }
+.cp03-pilot .cp03-panel h3 { margin:18px 0 8px; font-size:15px; }
+.cp03-pilot .cp03-panel p { color:#536e93; font-size:14px; line-height:1.5; }
+.cp03-pilot .cp03-search { display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
+.cp03-pilot .cp03-search label,.cp03-pilot .cp03-form label { font-size:14px; font-weight:600; }
+.cp03-pilot .cp03-inline { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.cp03-pilot .cp03-search input { flex:1; min-width:180px; }
+.cp03-pilot input:not([type=checkbox]),.cp03-pilot textarea {
+  background:#fff; color:#203a61; border:1px solid #bcd0e9; border-radius:9px;
+  padding:12px; min-height:46px; box-sizing:border-box; font:inherit; max-width:100%; width:100%;
+}
+.cp03-pilot input:focus-visible,.cp03-pilot textarea:focus-visible,.cp03-pilot button:focus-visible {
+  outline:3px solid #76adff; outline-offset:2px;
+}
+.cp03-pilot .cp03-primary,.cp03-pilot .cp03-secondary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 16px; min-height:46px; border-radius:10px; font:inherit;
+  font-size:14px; font-weight:650; cursor:pointer;
+}
+.cp03-pilot .cp03-primary { border:1px solid #0469f6; background:#0469f6; color:#fff; }
+.cp03-pilot .cp03-secondary { border:1px solid #c8dbf1; background:#f3f8ff; color:#194d91; }
+.cp03-pilot button:disabled { cursor:not-allowed; opacity:.62; }
+.cp03-pilot .cp03-result {
+  border:1px solid transparent; border-bottom:1px solid #e0eaf6;
+  width:100%; padding:13px 10px; text-align:left; color:#21416d; background:#fff;
+  display:flex; flex-direction:column; gap:4px; border-radius:7px; cursor:pointer;
+}
+.cp03-pilot .cp03-result:hover,.cp03-pilot .cp03-result:focus-visible { background:#edf5ff; border-color:#cadffb; }
+.cp03-pilot .cp03-result strong { display:flex; align-items:center; gap:6px; font-size:15px; }
+.cp03-pilot .cp03-result small { color:#617594; font-size:13px; line-height:1.4; }
+.cp03-pilot .cp03-status { min-height:20px; font-size:13px; color:#506d93; margin:0 0 14px; }
+.cp03-pilot .cp03-error { background:#fff0ef; padding:12px; color:#9b252b;
+  border:1px solid #f1c4c4; border-radius:9px; font-size:14px; }
+.cp03-pilot .cp03-vehicle { border-top:1px solid #dce7f4; margin-top:16px; padding-top:8px; }
+.cp03-pilot .cp03-unselected { padding:25px 5px; text-align:center; color:#6784a8; }
+.cp03-pilot .cp03-unselected svg { color:#0469f6; }
+.cp03-pilot .cp03-unselected h2 { justify-content:center; }
+.cp03-pilot .cp03-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.cp03-pilot .cp03-form label { display:grid; gap:7px; }
+.cp03-pilot .cp03-form .cp03-wide { grid-column:1/-1; }
+.cp03-pilot .cp03-check { display:flex!important; flex-direction:row; align-items:flex-start; }
+.cp03-pilot .cp03-check input { margin:4px 4px 0 0; width:18px; height:18px; flex:none; }
+.cp03-pilot .cp03-hint { margin:0; }
+.cp03-pilot .cp03-heading { justify-content:space-between; }
+@media (max-width:760px) {
+  .cp03-pilot .cp03-layout,.cp03-pilot .cp03-form { grid-template-columns:1fr; }
+  .cp03-pilot .cp03-panel { padding:16px; }
+  .cp03-pilot .cp03-search .cp03-inline > * { flex-basis:100%; }
+  .cp03-pilot .cp03-form .cp03-wide { grid-column:1; }
+}
