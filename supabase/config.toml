@@ -12,3 +12,7 @@ verify_jwt = true
 # R2-A2: revocación preparada y sin desplegar; requiere JWT.
 [functions.bt-mechanic-revoke]
 verify_jwt = true
+
+# R2-A6: endpoint interno SOLO candidato, siempre 503, NO desplegado.
+[functions.bt-invite-worker]
+verify_jwt = true
