@@ -27,7 +27,7 @@ Verificó en PostgreSQL 17:
 - Token caducado rechazado; descenso de Full a Básico no otorga plazas por encima del cupo ni elimina historial existente.
 - Dos reservas concurrentes para el último cupo: una confirmada y la segunda rechazada por cuota.
 
-**Prueba adicional:** carrera de doble aceptación añadida a `main` después de la primera ejecución. Su ejecución específica debe verificarse por el workflow más reciente; **no afirmar PASS hasta obtener evidencia**.
+**Segunda ejecución real:** [GitHub Actions #43663461102](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43663461102), commit `980f5cd`, **SUCCESS** (todos los pasos). Log del job muestra explícitamente `PASS: concurrent acceptance consumes single-use token exactly once`. La primera aceptación creó una sola membresía; la segunda, simultánea y bloqueada por el mismo taller, fue rechazada. El mensaje SQL `Mechanic seat limit reached` que aparece en logs corresponde al rechazo **esperado** de la segunda reserva en la prueba de concurrencia, no a un fallo del workflow.
 
 No son pruebas del servicio Auth, SMTP, Data API hospedada ni de operaciones reales de taller, y no sustituyen la revisión de las RPC antes de desplegarlas.
 
@@ -39,9 +39,9 @@ En Supabase `biomotors-taller` se confirmó después de las pruebas: **2 tallere
 
 ## Puertas R2-A4
 
-1. Revisar los resultados del laboratorio actualizado, incluida aceptación concurrente.
+1. Resultados del laboratorio actualizado revisados: dos workflows PostgreSQL aislados SUCCESS, incluida aceptación concurrente de un solo uso.
 2. Completar el backend real que valide `getUser`, correo confirmado, antifraude, reintentos y entrega segura; no aceptar identidad, rol, plan ni email verificado desde el navegador.
 3. Antes de instalar migraciones en Supabase, revisar los contratos y planes operativos, obtener autorización de aplicación y ensayar rollback en un entorno adecuado.
 4. Mantener los tres endpoints de invitaciones/aceptación/revocación en modo **503 fail-closed**, sin deploy, SMTP ni cuentas nuevas, hasta esa aprobación.
 
-**Estado:** pruebas SQL con PostgreSQL real verificadas en un contenedor aislado; integración hospedada aún **NO habilitada**.
+**Estado:** BT-AUTH-R2-A3 **APROBADO como laboratorio aislado** (reserva y aceptación concurrentes PASS). Integración hospedada aún **NO habilitada**.
