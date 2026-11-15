@@ -740,6 +740,6 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] Usuario de prueba confirmado y miembro `reception/active` exclusivamente en Taller A. SQL confirmó que los tres miembros anteriores siguen con sus roles intactos.
 - [x] **Login de recepción PASS reportado por el Director**: seleccionó «Administrador» pero recibió estado `restricted` sin panel administrativo. Membresía `reception/active` y pertenencia al Taller A confirmadas por SQL.
 - [x] **F5 con recepción PASS reportado por el Director**: se conservó el estado restringido y permaneció bloqueado el panel administrativo.
-- [ ] **13 comprobaciones RLS reales para recepción**, script preparado en [runbook](docs/BT_AUTH_01B_R1_RECEPTION_RLS_RUNBOOK.md), ejecución pendiente.
+- [x] **13/13 comprobaciones API RLS reales para recepción PASS**, ejecutadas en PowerShell y confirmadas por captura del Director. Consultas aisladas de Taller A/B, membresías y perfiles; sesión de script cerrada. [Runbook](docs/BT_AUTH_01B_R1_RECEPTION_RLS_RUNBOOK.md) y [checkpoint](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_20261114.md).
 - [ ] Verificar logout de recepción y continuar con el rol administrativo de pruebas, manteniendo acceso público apagado.
 - [ ] Definir permisos operativos de recepción en fase posterior y probarlos mediante API RLS cuando exista backend de negocio. Mantener Render/Auth público sin cambios.

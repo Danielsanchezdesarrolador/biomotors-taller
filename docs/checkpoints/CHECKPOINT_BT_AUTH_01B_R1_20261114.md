@@ -195,5 +195,14 @@ Las operaciones administrativas de vinculación, desactivación y restauración 
 
 - Director confirmó **«RECEPCIÓN RESTRINGIDA TRAS F5»**: sesión recuperada en Chrome, sin elevación a administrador ni acceso al panel privado. **PASS funcional**, no evidencia de escritura RLS.
 - Supabase consultado nuevamente: `reception/active` de Taller A, `mechanic/active` y `owner/active` de A, `owner/active` de B, todos conservados.
-- Preparado `scripts/security/bt-auth-r1-reception-readonly.mjs` y [procedimiento](../BT_AUTH_01B_R1_RECEPTION_RLS_RUNBOOK.md) para **13 comprobaciones reales de lectura API**, **todavía no ejecutadas**.
+- Preparado `scripts/security/bt-auth-r1-reception-readonly.mjs` y [procedimiento](../BT_AUTH_01B_R1_RECEPTION_RLS_RUNBOOK.md) para **13 comprobaciones reales de lectura API**, ahora **ejecutadas y aprobadas: 13/13 PASS**, según captura de PowerShell aportada por el Director.
 - No se cambiaron RLS, tablas, roles, identidad visual, Render ni Android. Faltan las pruebas API, logout y rol `admin`.
+
+### Recepción — prueba API RLS 13/13 PASS (14/11/2026)
+
+- El Director ejecutó `scripts/security/bt-auth-r1-reception-readonly.mjs` y aportó captura de PowerShell con **PASS 1–13** y `RESULTADO: 13/13 comprobaciones de lectura RLS PASS. Sin escrituras operativas.`
+- Comprobaciones: correo confirmado e identidad verificada; solo Taller A visible; Taller B no visible por UUID; solo membresía propia `reception`; bloqueada lectura de membresías de propietarios A/B y mecánico A; no se enumeran membresías de B; solo perfil propio y perfiles ajenos no visibles.
+- El script informó `Sesion aislada cerrada. Chrome no se modifico.` No se imprimieron secretos en el resultado mostrado.
+- Supabase consultado luego en lectura administrativa: cuatro cuentas ficticias mantienen roles y membresías `active` asignadas correctamente, sin alteraciones.
+- GitHub Actions del commit de preparación `eda61ce`: dos workflows `completed/success`.
+- La validación certifica estas consultas de lectura RLS, no autorizaciones de escritura futuras, renovación automática, Safari/PWA, logout de recepción ni integridad de una configuración de administrador secundario. Render permanece con Auth real apagado.
