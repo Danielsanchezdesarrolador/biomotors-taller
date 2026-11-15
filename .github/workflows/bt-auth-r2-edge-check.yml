@@ -27,6 +27,7 @@ jobs:
           deno check supabase/functions/_shared/encryptedInviteEnvelope.ts
           deno check supabase/functions/_shared/inviteDeliveryAdapter.ts
           deno check supabase/functions/_shared/invitationEmailWorker.ts
+          deno check supabase/functions/_shared/resendInviteCandidate.ts
           deno check supabase/functions/bt-invite-worker/index.ts
       - name: Confirmar que no se desplegó ni envió correo
         run: |
