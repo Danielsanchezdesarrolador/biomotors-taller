@@ -50,7 +50,7 @@ describe('BT-AUTH-R2-A6 · outbox cifrado local, sin correos reales', () => {
       [sealed, secret, { ...expected, workshopId: otherWorkshop }],
       [sealed, secret, { ...expected, recipientEmail: 'attacker@example.com' }],
       [sealed, secret, { ...expected, token_sha256_hex: 'b'.repeat(64) }],
-      [{ ...sealed, ciphertext_hex: '0' + sealed.ciphertext_hex.slice(1) }, secret, expected],
+      [{ ...sealed, ciphertext_hex: (sealed.ciphertext_hex[0] === '0' ? '1' : '0') + sealed.ciphertext_hex.slice(1) }, secret, expected],
       [{ ...sealed, nonce_hex: 'x'.repeat(24) }, secret, expected]
     ] as const) {
       await expect(openInviteEnvelope(envelope, rawKey, context, nowIso))
