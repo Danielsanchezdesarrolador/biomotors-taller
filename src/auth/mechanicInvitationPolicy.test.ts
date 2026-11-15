@@ -61,7 +61,7 @@ describe('BT-AUTH-R2 · política pura de cupos (no prueba RLS ni backend)', () 
     expect(evaluateMechanicSeat(input({
       memberships: [
         mechanic('taller-b'), { workshopId, role: 'owner', status: 'active' },
-        { workshopId, role: 'admin', status: 'active' }, { ...mechanic(), status: 'inactive' }
+        { workshopId, role: 'admin', status: 'active' }, { ...mechanic(), status: 'disabled' }
       ],
       invitations: [pending('taller-b')]
     }))).toMatchObject({ allowed: true, occupied: 0 })
@@ -75,7 +75,7 @@ describe('BT-AUTH-R2 · política pura de cupos (no prueba RLS ni backend)', () 
   )
   it('rechaza actor desactivado y administrador de otro taller', () => {
     expect(evaluateMechanicSeat(input({
-      actor: { ...actor, status: 'inactive' }
+      actor: { ...actor, status: 'disabled' }
     })).reason).toBe('forbidden')
     expect(evaluateMechanicSeat(input({
       actor: { ...actor, workshopId: 'taller-b' }
