@@ -197,6 +197,16 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 ### BT-CP03 — Gestión operativa de clientes y vehículos — PENDIENTE
 
+**Prioridad vigente:** habilitar el ciclo real del taller piloto de Ignacio ANTES de cualquier expansión comercial; el esquema CP03 se prueba aislado primero, sin introducir datos personales ni desplegar migraciones sin autorización.
+
+- [x] **BT-CP03-P1 (15/11/2026, solo candidato):** preparar `public.customers` y `public.vehicles` con `workshop_id`, clave foránea compuesta cliente–vehículo, patente normalizada única por taller, archivado no destructivo y validaciones de contacto chileno, año y kilometraje. Sin RUT obligatorio, sin contactos reales.
+- [x] **PostgreSQL 17 efímero:** aplicar el CP02 vigente y el SQL candidato CP03 a contenedor temporal; pruebas de RLS entre talleres, lectura mecánico, creación recepción, fallos de patente duplicada y FK cruzada, sesión desactivada y validación de móvil. [CI #43727156893](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43727156893) **SUCCESS**.
+- [ ] Revisión de seguridad y **autorización explícita** antes de instalar esta migración en el proyecto Supabase real, con aprobación de datos, rollback y verificaciones de pertenencia.
+- [ ] Integrar la fuente PostgreSQL en formularios y búsqueda web/PWA oficial con Auth, roles y consentimiento aprobados; no mostrar un guardado verdadero hasta que exista. Mantener Android nativo separado.
+- [ ] Completar la prueba funcional real de crear, editar, buscar por patente/nombre, distinguir retornos y conservar fichas tras recarga. Confirmar con Ignacio los campos definitivos y manejo de duplicados de clientes.
+
+[Checkpoint BT-CP03-P1](docs/checkpoints/CHECKPOINT_BT_CP03_P1_20261115.md) · [SQL candidato](docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql) · [Laboratorio CP03](.github/workflows/bt-cp03-postgres-lab.yml).
+
 - [ ] Clientes, vehículos y búsqueda rápida por patente/nombre.
 - [ ] Identificación de retornos de vehículos y navegación por historial.
 - [ ] Datos de contacto y validaciones útiles para Chile.
