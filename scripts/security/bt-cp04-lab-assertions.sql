@@ -87,6 +87,14 @@ DO $$ BEGIN
     RAISE EXCEPTION 'CP04_MODIFIED_CLOSED_DIAGNOSIS';
   EXCEPTION WHEN check_violation THEN NULL; END;
 END $$;
+-- Closing a work order MUST NOT erase an unresolved observation.
+DO $ BEGIN
+  IF (SELECT count(*) FROM public.inspection_findings
+       WHERE vehicle_id='aaaaaaaa-aaaa-4aaa-8aaa-000000000011'
+         AND resolution='pending')<>1 THEN
+    RAISE EXCEPTION 'CP04_PENDING_NOT_CARRIED_FORWARD_AFTER_CLOSE';
+  END IF;
+END $;
 -- Outstanding problem remains discoverable on the next visit; recording
 -- its resolution never overwrites the original inspection/complaint.
 UPDATE public.inspection_findings SET resolution='resolved'
@@ -114,7 +122,30 @@ DO $$ BEGIN
   END IF;
 END $$;
 RESET ROLE;
-DO $$ BEGIN
+-- Role or workshop revocation must deny both historical orders and findings.
+UPDATE public.workshop_memberships SET status='disabled'
+WHERE user_id='33333333-3333-4333-8333-333333333333';
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',false);
+DO $ BEGIN
+  IF (SELECT count(*) FROM public.work_orders)<>0 OR
+     (SELECT count(*) FROM public.inspection_findings)<>0 THEN
+    RAISE EXCEPTION 'CP04_REVOKED_MEMBERSHIP_LEAK';
+  END IF;
+END $;
+RESET ROLE;
+UPDATE public.workshops SET status='suspended'
+WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+DO $ BEGIN
+  IF (SELECT count(*) FROM public.work_orders)<>0 OR
+     (SELECT count(*) FROM public.inspection_findings)<>0 THEN
+    RAISE EXCEPTION 'CP04_SUSPENDED_WORKSHOP_LEAK';
+  END IF;
+END $;
+RESET ROLE;
+DO $ BEGIN
  IF EXISTS (SELECT 1 FROM information_schema.role_table_grants
    WHERE grantee='authenticated' AND privilege_type='DELETE'
      AND table_name IN ('work_orders','inspection_findings')) THEN
