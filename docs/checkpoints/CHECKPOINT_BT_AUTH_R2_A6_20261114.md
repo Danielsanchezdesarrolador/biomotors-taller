@@ -52,3 +52,12 @@
 Conforme a `AGENTS.md`, se priorizó implementación directa con herramientas GitHub para este bloque acotado. **El próximo trabajo amplio sí es buen candidato a Codex**: explorar todos los handlers y construir el worker/provider de forma limitada, usando este checkpoint como fuente de verdad, manteniendo `main` y sin desplegar ni tocar el Supabase alojado.
 
 **Resultado:** R2-A6 núcleo implementado en código y pruebas reales de PostgreSQL; integración operativa de envío/aceptación **pendiente y bloqueada**.
+
+
+## Evidencia CI final verificada
+
+- `0dec9fd`: [Verificación ByteTorque — GitHub Actions 43666289991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43666289991) **SUCCESS**; Web/iOS PWA y Android Expo aprobados; Web: **34 archivos / 300 pruebas Vitest PASS**, TypeScript y build/PWA aprobados, incluyendo cifrado y adaptador de entrega con proveedor simulado.
+- `0dec9fd`: [ByteTorque R2 — Deno Edge sin despliegue 43666289997](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43666289997) **SUCCESS**; typecheck de endpoints cerrados y módulos compartidos de cifrado/adaptador.
+- SQL candidato: [PostgreSQL 17 #43665924248](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43665924248) **SUCCESS** con transacciones, locks, rollback y borrado de ciphertext. Esta prueba no usó el Supabase real.
+- Comprobación hospedada **solo lectura** posterior: 2 talleres, 4 membresías, 4 usuarios Auth, 0 tablas `bt_private`. Ninguna operación A6 ejecutada en el Supabase alojado.
+- Los commits de documentación posteriores no cambian la funcionalidad; consultar CI de HEAD si fuera necesario. Estas evidencias **no certifican entrega SMTP real** ni acceso productivo.
