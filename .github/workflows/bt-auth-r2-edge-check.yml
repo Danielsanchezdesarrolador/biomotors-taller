@@ -34,7 +34,7 @@ jobs:
           deno check supabase/functions/_shared/resendInviteTransportCandidate.ts
           deno check supabase/functions/bt-invite-worker/index.ts
           deno check supabase/functions/bt-invite-worker/serviceAuthPolicy.ts
-          deno check supabase/functions/bt-invite-worker/serviceAuthCandidate.ts
+          deno check --node-modules-dir=auto supabase/functions/bt-invite-worker/serviceAuthCandidate.ts
       - name: Confirmar que no se desplegó ni envió correo
         run: |
           echo 'PASS: offline typecheck only. No Supabase deploy, RPC or SMTP'
