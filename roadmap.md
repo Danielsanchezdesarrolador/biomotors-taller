@@ -812,7 +812,8 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] Código backend `verifyInviteActor`: `/auth/v1/user` (GET) fijado al proyecto Supabase autorizado, JWT del usuario y publishable/anon key, correo confirmado y no anónimo; estado 401/403/503 genérico. **No resuelve autorización por taller**, que sigue en candidatas SQL.
 - [x] Tres endpoints de invitar/aceptar/revocar incorporan el preflight después de validar payload, **antes de 503 incondicional**. Flags OFF y ningún despliegue/SMTP/RPC conectado.
 - [x] Plantilla de email texto/HTML y enlace fragmento con token de un solo uso, escape de HTML y expiración hasta 48h. **No se envía y la ruta de aceptación en la UI todavía no existe**.
-- [x] Tests de Auth HTTP simulado, rechazos de identidad/claims manipulados, plantilla/HTML/vencimiento y guardas estáticas de endpoint. Verificar CI del último commit para declarar la suite completa aprobada.
+- [x] **CI R2-A4 confirmado:** [GitHub 43664201657](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664201657) SUCCESS — 31 archivos, **280 pruebas Vitest PASS**, TypeScript, build web/PWA y Android Expo. Pruebas HTTP simuladas de Auth, correo/HTML, vencimiento y guardas de endpoint.
+- [x] **Deno Edge typecheck:** [GitHub 43664289778](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664289778) SUCCESS para los tres endpoints; sin deploy, correo ni RPC real.
 - [ ] **R2-A5:** test E2E de handlers, rate limits/outbox de correo, SMTP autorizado, UI de aceptación Safari PWA e integración por etapas con SQL con autorización expresa para cualquier cambio en Supabase real.
 - [ ] Antes de publicar: habilitar protección de contraseñas filtradas, revisar SMTP y seguridad de datos, decidir fuente confiable del plan y manejo del descenso de 8 a 2 mecánicos.
 
