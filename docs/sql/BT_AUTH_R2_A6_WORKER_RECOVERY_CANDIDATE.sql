@@ -70,8 +70,21 @@ BEGIN
    WHERE i.id=o.invitation_id
      AND o.workshop_id=p_workshop_id AND i.workshop_id=p_workshop_id
      AND o.status IN ('queued','retry','processing')
-     AND (i.status<>'pending' OR i.expires_at<=v_now);
+     AND (i.status<>'pending' OR i.expires_at<=v_now
+       OR (o.first_attempt_at IS NOT NULL AND
+           o.first_attempt_at<=v_now-interval '23 hours'));
   GET DIAGNOSTICS v_count = ROW_COUNT;
+  -- Resend forgets idempotency after 24h. Cancel invitation at 23h
+  -- after first worker claim; cannot safely retry an ambiguous email later.
+  UPDATE bt_private.workshop_mechanic_invitations i
+     SET status='revoked', revoked_at=v_now
+    FROM bt_private.workshop_invitation_outbox o
+   WHERE o.invitation_id=i.id
+     AND o.workshop_id=p_workshop_id
+     AND i.workshop_id=p_workshop_id
+     AND i.status='pending' AND o.status='cancelled'
+     AND o.first_attempt_at IS NOT NULL
+     AND o.first_attempt_at<=v_now-interval '23 hours';
   UPDATE bt_private.workshop_mechanic_invitations i
      SET status='expired'
    WHERE i.workshop_id=p_workshop_id AND i.status='pending'
