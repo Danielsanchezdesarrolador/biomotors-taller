@@ -99,7 +99,7 @@ BEGIN
        job.outbox_id,gen_random_uuid()) <> 'ignored'
    THEN RAISE EXCEPTION 'FAIL wrong lease allowed failure'; END IF;
    outcome := public.bt_r2_fail_or_retry_invitation_email(job.outbox_id,job.lease_id);
-   IF outcome <> CASE WHEN attempt=5 THEN 'failed' ELSE 'retry' END
+   IF outcome <> (CASE WHEN attempt=5 THEN 'failed' ELSE 'retry' END)
    THEN RAISE EXCEPTION 'FAIL expected retry/failure at %, got %',attempt,outcome; END IF;
    IF attempt<5 THEN
      UPDATE bt_private.workshop_invitation_outbox
