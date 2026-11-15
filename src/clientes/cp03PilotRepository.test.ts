@@ -215,7 +215,7 @@ describe('CP03-P2 · datos y validaciones, sin acceso a Supabase hospedado', () 
     const f=fixture({wrongTenant:true})
     const client=f.client
     const real=client.from.bind(client)
-    vi.spyOn(client,'from').mockImplementation((table: never) => {
+    vi.spyOn(client,'from').mockImplementation((table: string) => {
       const q=real(table) as unknown as {then: (r:(v:unknown)=>unknown)=>Promise<unknown>}
       if (table==='customers') {
         q.then=(resolve) => Promise.resolve(resolve({
