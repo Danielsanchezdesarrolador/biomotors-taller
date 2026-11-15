@@ -30,15 +30,16 @@
 2. Límites candidatos de laboratorio: **invitar 5/hora por actor y taller**, **aceptar 10 intentos/15 minutos por actor global**, **revocar 10/hora por actor y taller**. Nadie desde navegador decide ni altera esos límites.
 3. `scripts/security/bt-r2-lab-rate-assertions.sql`: permisos negados anon/authenticated, RLS, límites 5+1 y 10+1, separación de actores/talleres, entradas inválidas y rollback transaccional.
 4. `scripts/security/bt-r2-lab-rate-concurrency.sh`: dos sesiones compiten por la quinta plaza disponible en la ventana: uno permitido, sexto rechazado. Incorporado al laboratorio `bt-auth-r2-postgres-lab.yml`.
-5. Primer candidato SQL rechazó `pg_catalog.extract(epoch FROM ...)` por sintaxis. Se corrigió a `EXTRACT(epoch FROM ...)` y el workflow completo [43664903467](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664903467) terminó SUCCESS. La prueba simultánea añadida después debe quedar aprobada solo si el nuevo workflow reporta SUCCESS.
+5. Primer candidato SQL rechazó `pg_catalog.extract(epoch FROM ...)` por sintaxis. Se corrigió a `EXTRACT(epoch FROM ...)`; el workflow [43664903467](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664903467) terminó SUCCESS.
+6. **Prueba concurrente CONFIRMADA PASS:** [workflow 43664975994](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664975994), commit `6929078d`, PostgreSQL 17 aislado. Log del job: `PASS: rate limiter atomic under simultaneous requests (5 allowed, 6th denied)`. El resto de tests SQL del laboratorio continuó PASS.
 
 **Límites de protección no implementados:** el throttling SQL aún NO se conecta a los endpoints y no bloquea producción. Antes de habilitar, se requieren límites por IP/dispositivo/WAF, antispam por destinatario (hash o presupuesto de envíos), reintentos, outbox de mensajes, expiración, política de retención (p.ej. borrar buckets después de 7 días), proveedor de email autorizado y validación Auth de cada solicitud.
 
 ## Evidencia CI y límites de certificación
 
 - Vitest de saneamiento de enlace y pantalla de revisión: [workflow 43664695428](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664695428) SUCCESS.
-- PostgreSQL 17 + SQL de throttling tras corregir EXTRACT: [workflow 43664903467](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664903467) SUCCESS.
-- CI navegador y prueba simultánea: verificar el workflow del HEAD actual y añadir resultados finales cuando correspondan, no suponerlos aprobados.
+- PostgreSQL 17 + SQL de throttling y concurrencia: [workflow 43664975994](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664975994) SUCCESS; 5/h invite, 10/15m accept, 10/h revoke y carrera 5º/6º PASS.
+- CI navegador Chromium: verificar el workflow del HEAD actual y añadir resultados cuando corresponda, no suponer PASS de la batería visual hasta obtener evidencia.
 
 ## Cierre del perímetro
 
