@@ -752,3 +752,15 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] Ronda PowerShell: **12 comprobaciones API RLS y refresh forzado**, script `scripts/security/bt-auth-r1-fast-ab.mjs`.
 - [ ] Verificación de renovación automática real en navegador, Safari/iPhone/PWA físico, auditoría y reversión estricta del fixture antes de cierre de R1.
 - [ ] Mantener login público y registro cerrados, sin modificar planes/pagos ni operaciones reales.
+
+
+### BT-AUTH-R2 — Inicio tras cierre R1 (14/11/2026)
+
+- [x] **R1 aceptado por el Director:** administrador secundario y selector A/B validados visualmente; API RLS `12/12 PASS`, PWA instalada y validada en iPhone, sesión cerrada; renovación reportada funcional por el Director. [Checkpoint de cierre](docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md). La captura de renovación automática no quedó registrada como traza E2E, pero el Director ordenó cerrar y avanzar, por lo que no se repetirá la prueba.
+- [x] **Limpieza real Supabase:** eliminada y verificada exclusivamente la membresía temporal `admin` en Taller B. Permanecen dos propietarios, un mecánico, una recepción, cuatro usuarios Auth y dos talleres ficticios; RLS intacta. No reejecutar script A/B con fixture anterior.
+- [x] **R2 — base de reglas:** `src/auth/mechanicInvitationPolicy.ts` y tests de cupos mecánicos por taller, pendiente revisar resultado de CI. Básico 2, Plus 8, Full 8; actor owner/admin del mismo taller; sin elevación; mecánicos activos más invitaciones vigentes. No se aplica en servidor todavía.
+- [ ] **R2-A — invitaciones backend:** diseño y revisión de migración reversible, permisos, cupos atómicos y concurrencia, tokens hasheados y expiración, revocación y auditoría; pruebas de API/RLS antes de habilitar cualquier invitación o correo.
+- [ ] **R2-B — recuperación segura de contraseña:** configuración SMTP verificada, redirecciones web/iOS PWA y recuperación sin enumeración de usuarios. La pantalla existente sigue desactivada hasta aprobación y pruebas.
+- [ ] **R2-C — interfaz personal:** conectar `Configuración → Usuarios y permisos` únicamente tras backend seguro. Sin cuentas reales, suscripciones ni registro público por superar R1.
+
+**Continuidad:** [Checkpoint inicial BT-AUTH-R2](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_INICIO_20261114.md). Mantener Render con Auth público OFF, una sola rama `main` y ningún cambio al servicio de BIOMOTORS Academia.
