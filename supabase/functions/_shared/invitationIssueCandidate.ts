@@ -14,7 +14,7 @@ import { createMechanicInviteToken } from './mechanicInviteToken.ts'
 import { sealImmutableInviteEnvelope, openImmutableInviteEnvelope } from './encryptedInviteEnvelope.ts'
 import type { VerifiedInviteActor } from './verifiedInviteActor.ts'
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const email = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
 const ONE_DAY = 24 * 60 * 60 * 1000
 
