@@ -124,3 +124,30 @@
   .invite-acceptance-header { gap: 8px; }
   .invite-acceptance-header > span { font-size: 11px; }
 }
+
+.invite-acceptance-safari {
+  margin-top: 20px;
+  padding: 17px 19px;
+  border: 1px solid #d5e3f4;
+  border-radius: 15px;
+  background: #f8fbff;
+  line-height: 1.5;
+  color: #253b5b;
+}
+.invite-acceptance-safari-label {
+  margin: 0 0 5px;
+  color: #0068d9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.invite-acceptance-safari strong { display: block; font-size: 15px; }
+.invite-acceptance-safari p:last-child {
+  color: #46617f;
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+@media (max-width: 480px) {
+  .invite-acceptance-safari { padding: 16px; }
+}

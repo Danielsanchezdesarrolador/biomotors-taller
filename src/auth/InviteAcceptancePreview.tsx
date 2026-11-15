@@ -28,6 +28,15 @@ export function InviteAcceptancePreview({ onNavigate }: {
           <Clock3 aria-hidden="true" />
           <span>Invitaciones aún no disponibles. No se ha creado ningún acceso.</span>
         </div>
+        <aside className="invite-acceptance-safari" aria-label="Información para iPhone">
+          <p className="invite-acceptance-safari-label">Si usas iPhone</p>
+          <strong>Inicia sesión en el mismo navegador.</strong>
+          <p>
+            Safari y ByteTorque instalado en la pantalla de inicio pueden conservar sesiones
+            diferentes. Cuando se habiliten las invitaciones, utiliza el mismo correo que
+            recibió el enlace y vuelve a abrirlo si cambiaste de navegador.
+          </p>
+        </aside>
         <h2>Así funcionará cuando se habilite</h2>
         <ol className="invite-acceptance-steps">
           <li><CheckCircle2 aria-hidden="true" /> <span>Recibir una invitación de tu taller.</span></li>
