@@ -34,7 +34,7 @@ function fixture() {
   }
 }
 describe('Official Supabase SDK adapter · mocked client only', () => {
-  it('enables SDK-only session persistence, refresh and disables URL session consumption', () => {
+  it('enables SDK-only session persistence, refresh and disables URL session consumption', async () => {
     const { client } = fixture()
     vi.mocked(createClient).mockReturnValue(client as never)
     const gateway = createGateway({
