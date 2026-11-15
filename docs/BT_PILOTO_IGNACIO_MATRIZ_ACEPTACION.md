@@ -1,13 +1,13 @@
 # ByteTorque — Matriz de aceptación del piloto de Ignacio
 
-**Fecha de corte:** 15/11/2026. **Fuente de verdad:** evidencia en CI/checkpoints; no se afirma uso real sin QA y aprobación de Ignacio. **Prioridad:** piloto completo antes de comercialización. Todas las pruebas DEMO se realizan con datos sintéticos.
+**Fecha de corte:** 15/11/2026. **Fuente de verdad:** evidencia de pruebas del Director, consulta SQL alojada y CI/checkpoints. CP03 fue comprobado en escritorio con datos ficticios; no se afirma QA físico iPhone ni aprobación de Ignacio. **Prioridad:** piloto completo antes de comercialización.
 
 | Funcionalidad | Interfaz DEMO / preparación | Backend real en Supabase alojado | QA relevante | Aprobación Ignacio |
 |---|---|---|---|---|
 | Login y usuarios | Acceso R1 y roles presentes; visibilidad detrás de flag | Auth y membresías existentes; acceso operativo limitado | A/B R1 previos; Safari físico pendiente | Pendiente |
-| Clientes | Formulario DEMO; panel P3 candidato aislado (no visible en web oficial) | **CP03 SQL alojado, tablas vacías y RLS FORCE comprobada**; UI privada preparada bajo flag OFF | Mock CP03 + RLS PG17 taller suspendido PASS; E2E alojado pendiente | Pendiente |
-| Vehículos | Registro DEMO; alta/edición P3 candidatos aislados | **CP03 SQL alojado, tablas vacías y RLS FORCE comprobada**; UI privada preparada bajo flag OFF | Duplicados/tenant/taller suspendido PG17 PASS; E2E alojado pendiente | Pendiente |
-| Identificación de retornos | Enlaces DEMO y búsqueda | Búsqueda por patente, ficha reciente y recuperación por ID P2/P3 preparadas, aisladas | Binding Auth y búsqueda normalizada probados; sin persistencia alojada | Pendiente |
+| Clientes | **Directorio privado operativo en web con Auth real** | **Ficha ficticia creada y persistente en Supabase alojado**; RLS FORCE activa | Director confirmó alta, logout/login, recuperación y edición; prueba iPhone pendiente | Pendiente |
+| Vehículos | **Alta y edición reales en directorio privado CP03** | **`QA1234` persistente**; marca/modelo ficticios, año 2020, kilometraje almacenado 123456 | Director confirmó recuperación por patente tras nueva sesión; SQL alojado comprobó datos editados | Pendiente |
+| Identificación de retornos | **Búsqueda real por patente y ficha vinculada** | Cliente y vehículo recuperados en Supabase alojado tras cerrar sesión | Flujo ficticio `QA1234` confirmado en escritorio; retorno meses después pendiente | Pendiente |
 | Recepción | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
 | Orden de trabajo | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
 | Inspección multipunto | Flujo DEMO | No conectado | Demo QA; hoja real por contrastar | Pendiente |
@@ -17,8 +17,8 @@
 | PDF | Impresión preliminar DEMO | Sin emisión archivada ni vinculación real | Diseño A4 previo; producción pendiente | Pendiente |
 | Correos | Simulado | Resend no activado; sin correos reales | HTTP mock, sin pruebas proveedor real | Pendiente |
 | Historial por vehículo | DEMO | No persistente | Recuperación después de meses pendiente | Pendiente |
-| Respaldo y restauración | No operativos | Pendiente | Restauración real pendiente | Pendiente |
-| iPhone Safari/PWA | Preparación web | Auth parcial; operaciones CP03–CP06 inactivas | WebKit Linux PASS, Safari real pendiente | Pendiente |
+| Respaldo y restauración | Procedimiento manual de recuperación ejecutado fuera de la aplicación | Exportaciones Auth/public y restauración aislada PostgreSQL 17 verificadas antes de CP03 | Sin automatización; copia externa redundante no confirmada | Pendiente |
+| iPhone Safari/PWA | CP03 disponible en PWA privada publicada | Backend CP03 hospedado y Auth/RLS activos | **Safari físico de Ignacio pendiente**; WebKit Linux no lo reemplaza | Pendiente |
 | Android nativo | React Native/Expo existente | Sin paridad de datos reales | Bundle Expo PASS, APK física pendiente | Pendiente |
 | Piloto de Ignacio | No iniciado | Sin flujo extremo a extremo | Cierre y aprobación pendientes | **Pendiente** |
 

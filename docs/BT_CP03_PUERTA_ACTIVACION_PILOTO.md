@@ -2,6 +2,14 @@
 
 **Fecha de preparación:** 15/11/2026. **Responsable de aprobar:** Director del proyecto. **Prioridad:** que Ignacio pueda crear, encontrar y corregir clientes/vehículos con persistencia auténtica. **No es un checkpoint de capacidad concluida.**
 
+## Aceptación de escritorio informada por el Director — 15/11/2026
+
+El Director confirmó ejecución satisfactoria de alta de `Cliente Prueba ByteTorque`, asociación del automóvil ficticio `QA1234`, cierre y reapertura de sesión, búsqueda y edición. Una consulta PostgreSQL de **solo lectura** en el proyecto alojado `suxcqqnmcjoezfxltoms` confirmó la ficha, marca `MarcaDemo`, modelo `ModeloDemo`, año `2020` y odómetro editado a **123456**. La prueba humana e inspección alojada acreditan persistencia real en escritorio. La diferencia entre el kilometraje pedido en el ejemplo (12346) y el realmente guardado (123456) se registra sin corregir datos.
+
+Esto **no autoriza ingreso de datos personales reales**. No se probó físicamente el iPhone de Ignacio ni se ha completado la aceptación intertaller alojada; quedan pendientes de cierre global CP03. La recuperación de borradores en pestaña quedó publicada en `b284d884`, CI [#43765421073](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43765421073) **496 PASS**.
+
+**Continuidad:** pasar a CP04 — inspecciones y órdenes de trabajo. Aplicar el mismo método de entrega funcional completa, pero requerir autorización independiente para cualquier nueva migración SQL, envío externo o datos reales.
+
 ## Estado posterior al respaldo y migración
 
 **Migración instalada y verificada.** El 15/11/2026, después de restauración local comprobada de Auth y public (4 usuarios, 2 talleres, 4 perfiles, 4 membresías, 0 relaciones huérfanas, RLS activa), se instaló una sola migración autorizada en Supabase: `20261115205812_bt_cp03_customers_vehicles_tenant_rls`. `public.customers` y `public.vehicles` existen y tienen cero registros, RLS FORCE, seis políticas y FK por taller. El esquema y los registros CP02 se conservaron. Se creó y probó un 7-Zip de cinco archivos sin errores, pero **no se ha confirmado copia externa redundante**; mantenerlo cifrado y privado.
