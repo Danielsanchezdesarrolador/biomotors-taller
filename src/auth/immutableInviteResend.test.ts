@@ -53,6 +53,12 @@ describe('BT-AUTH-R2-A6-P2 · sobre inmutable y HTTP exclusivamente simulado', (
     expect(mail.html).toContain(token)
     const retry = await prepareImmutableInviteDelivery(job, key, later)
     expect(retry).toEqual(mail)
+    // PostgreSQL timestamptz may serialize the exact same instant using +00:00.
+    const postgresTimestamp = { ...job, expires_at: '2026-11-15T18:00:00+00:00' }
+    expect(await prepareImmutableInviteDelivery(postgresTimestamp, key, now)).toEqual(mail)
+    const changedInstant = { ...job, expires_at: '2026-11-15T18:00:01+00:00' }
+    await expect(prepareImmutableInviteDelivery(changedInstant, key, now))
+      .rejects.toThrow('could not be verified')
     const firstHttp = buildResendInviteRequest(mail, config)
     const retryHttp = buildResendInviteRequest(retry, config)
     expect(mail.wireBody).toBe(firstHttp.body)

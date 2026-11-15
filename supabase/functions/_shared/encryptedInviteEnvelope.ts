@@ -215,7 +215,8 @@ export async function openImmutableInviteEnvelope(
     }, Date.parse(nowIso))
     if (verified.workshopId !== expected.workshopId.toLowerCase() ||
         verified.recipientEmail !== expected.recipientEmail.trim().toLowerCase() ||
-        verified.expiresAt !== expected.expiresAt || p.to !== verified.recipientEmail ||
+        Date.parse(verified.expiresAt) !== Date.parse(expected.expiresAt) ||
+        p.to !== verified.recipientEmail ||
         (await hashMechanicInviteToken(verified.token)) !== expected.token_sha256_hex ||
         p.subject.length < 1 || p.subject.length > 250 || mailControls.test(p.subject) ||
         p.text.length < 1 || p.text.length > 15000 ||
