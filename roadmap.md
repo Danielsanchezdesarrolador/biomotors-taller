@@ -956,3 +956,15 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **Puertas pendientes:** verificar Safari en iPhone y contenedor PWA instalado según [guía QA](docs/BT_AUTH_R2_A6_9_SAFARI_QA.md); antes de habilitar aceptación real, autorizar expresamente SQL/RLS privados, secretos y Edge service-only, dominio y envío Resend de prueba y plan de rollback. **Sin cambios alojados ni activación pública.**
 
 [Checkpoint R2-A6-9](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_9_BROWSER_OFFLINE_20261115.md). Solo main; Supabase hospedado: 2 talleres, 4 Auth, 4 membresías, 0 tablas privadas.
+
+
+### BT-AUTH-R2-A6-10 — WebKit de CI y preparación de activación controlada (15/11/2026)
+
+- [x] Desde R2-A6-9 se corrigió el caso de página **ya oculta** al conectar el ciclo de vida de invitaciones, además de `pageshow` con visibilidad oculta; dos nuevas pruebas sintéticas de regresión, módulos aún aislados.
+- [x] Se añadió prueba pública con **Playwright WebKit Linux** además de Chromium, en 375/390/768/1440 px: limpieza de URL, navegación y ausencia de escrituras, requests de aceptación y fugas. **No equivale a Safari iPhone físico.**
+- [x] CI principal [#43724776112](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43724776112) **SUCCESS**, 44 archivos / **443/443 Vitest**, PWA, TypeScript, bundle e integración Android Expo sin APK; CI de interfaz/WebKit [#43724776108](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43724776108) **SUCCESS**.
+- [x] Se revisó el contrato futuro token hash → memoria 5 min → Auth confirmado → recheck → backend service-only → SQL única, y se documentó la matriz de riesgos, rollback y aprobaciones separadas. `bt-mechanic-invites`, `bt-mechanic-accept` y worker permanecen 503.
+- [ ] **Bloqueo real:** validar Safari físico e instalación de PWA con enlace sintético, sin confundir el resultado Linux/Chromium con iOS. Revisar especialmente BFCache, cambio de aplicación, navegación y separación Safari/PWA.
+- [ ] **Activación NO autorizada:** solicitar por separado permiso explícito para SQL/RLS, secreto nominativo y despliegue Edge, Resend verificado y correo de prueba propio, luego piloto limitado y monitoreo; pagos fuera de alcance. No instalar ni habilitar nada por un «continúa».
+
+[Checkpoint R2-A6-10](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_10_20261115.md) · [Matriz y puertas de activación](docs/BT_AUTH_R2_A6_10_SAFARI_GATE.md) · [Guía iPhone](docs/BT_AUTH_R2_A6_9_SAFARI_QA.md). **La siguiente acción depende de evidencia física y autorizaciones concretas, no de otra etapa artificial.**
