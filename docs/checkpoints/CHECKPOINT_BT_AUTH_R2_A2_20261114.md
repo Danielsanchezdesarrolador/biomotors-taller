@@ -22,9 +22,9 @@
    - Aceptación: SHA-256 de token original, invitación `pending` y no vencida, coincidencia con correo confirmado recibido desde el **backend confiable**, taller activo, sin membresía previa de esa identidad, cupos vigentes y escritura `mechanic` exclusivamente; aceptación única y auditada;
    - Ante reducción de plan, no otorgar una plaza por encima del cupo vigente; jamás cambiar roles de miembros preexistentes;
    - Sin SELECT público de tablas privadas, ni acceso a datos de otros talleres.
-5. `supabase/functions/bt-mechanic-accept/index.ts`: endpoint de aceptación preparado que **siempre responde 503 al alcanzar el paso operativo**, incluso si alguien cambia su flag. Sin efectos operativos; no consulta Auth ni base todavía. `supabase/config.toml`: `verify_jwt=true` declarado, **no equivale a deploy**.
+5. `supabase/functions/bt-mechanic-accept/index.ts` y `supabase/functions/bt-mechanic-revoke/index.ts`: endpoints de aceptación y revocación preparados, ambos con **respuesta final 503 incluso si alguien cambia su flag**. Sin efectos operativos; no consultan Auth ni base todavía. `supabase/config.toml`: `verify_jwt=true` declarado para ambos, **no equivale a deploy**.
 6. `supabase/functions/_shared/mechanicInviteRequest.ts` y sus tests: validación estricta del contrato de revocación (únicamente `workshop_id` e `invitation_id`), sin rol, actor, email o plan editables.
-7. `src/auth/mechanicInviteSqlContracts.test.ts`: pruebas estáticas sobre los SQL, las restricciones de los endpoints, acceso por rol y flags. **No son pruebas de PostgreSQL en ejecución ni pruebas de seguridad de RLS reales**.
+7. `src/auth/mechanicInviteSqlContracts.test.ts`: pruebas estáticas sobre los SQL, los tres endpoints de invitación/aceptación/revocación, acceso por rol y flags. **No son pruebas de PostgreSQL en ejecución ni pruebas de seguridad de RLS reales**.
 
 ## 3. Separación obligatoria de responsabilidades
 
