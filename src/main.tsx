@@ -1,8 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
+import { scrubInviteLocation } from './auth/inviteLinkRouting'
 import './styles.css'
 import './premium.css'
+
+// A5: discard invite tokens from hash/query synchronously before React mounts.
+// Preview cannot consume tokens, so never keep them in app state or storage.
+scrubInviteLocation(window.location, (url) => {
+  window.history.replaceState(window.history.state, '', url)
+})
 
 const root = document.getElementById('root')
 if (!root) throw new Error('No se encontró el contenedor principal')
