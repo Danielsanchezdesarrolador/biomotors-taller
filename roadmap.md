@@ -29,6 +29,25 @@ Crear el sistema más simple y confiable posible para registrar el trabajo diari
 - **Ignacio:** líder comercial y primer usuario piloto.
 - Precio objetivo por validar: **US$5 por taller/mes**. No equivale aún a tarifa aprobada para cobro real ni define porcentajes de utilidad.
 
+### Decisión de producto — primero operación completa del taller de Ignacio (15/11/2026)
+
+**PRIORIDAD ABSOLUTA:** terminar, conectar, probar y estabilizar ByteTorque para que **Ignacio pueda usarlo de principio a fin en su taller real**, antes de implementar funciones destinadas a otros talleres. El SaaS multitenant continúa como requisito de arquitectura y aislamiento (no rehacerlo), pero **la captación, onboarding comercial de terceros, suscripciones, cobros y escalamiento (CP07–CP09) quedan POSPUESTOS** hasta la aprobación expresa del piloto completo por el Director e Ignacio.
+
+**Definición verificable de «funciona al 100 % en el taller piloto»:**
+
+- [ ] Ignacio accede desde su **iPhone Safari/PWA** (y escritorio si lo usa), con sesión, roles y permisos reales. Validar dispositivos físicos y manejo de pérdida de red sin exponer registros.
+- [ ] Crear, buscar, modificar y reconocer **clientes y vehículos** mediante datos persistentes; evitar duplicados y recuperar vehículos que vuelven.
+- [ ] Realizar una **recepción, inspección multipunto, orden de trabajo y cierre** de visita, con fecha, responsable, resultados y observaciones pendientes.
+- [ ] Crear **cotizaciones y documentos PDF** correctos; enviar revisión/presupuesto al correo del cliente con consentimiento, proveedor autorizado, historial de entrega y manejo de errores.
+- [ ] Consultar **historial completo por vehículo** luego de cerrar y volver a abrir la aplicación, sin pérdida de datos; respaldos y recuperación probados.
+- [ ] Confirmar aislamiento del taller por **backend y RLS**, cuentas de trabajo con privilegios mínimos, seguridad de datos y flujo sin credenciales de servicio en clientes.
+- [ ] Ejecutar el recorrido real completo en el taller con datos autorizados y registrar **conformidad de Ignacio**. Corregir defectos que impidan operar antes de declarar completado el piloto.
+- [ ] Si algún trabajador de Ignacio usa Android, comprobar la **APK nativa firmada** en su dispositivo antes de dar por terminada esa experiencia. No confundir builds Expo con APK instalada; la paridad Android también será obligatoria antes de ofrecer ByteTorque como producto multiplataforma a terceros.
+
+**Orden prioritario:** resolver las puertas mínimas de seguridad/identidad necesarias para operar → **CP03 clientes/vehículos reales** → **CP04 inspección/OT y pendientes** → **CP05 cotizaciones, PDF, correo** → **CP06 historial, respaldos, QA iPhone/Android necesario y piloto de Ignacio** → aprobación expresa → **CP07–CP09 comercialización y expansión**.
+
+Las funcionalidades para administrar otros talleres, las páginas de precios, los pagos y las integraciones comerciales no deben desplazar tareas P0 del piloto. Se pueden conservar diseños, tablas y controles de aislamiento ya construidos, sin activarlos comercialmente. «100 %» significa **todas las necesidades acordadas del taller operativas y verificadas**, no ausencia absoluta de todo bug posible. No ingresar datos reales, cambiar secretos, desplegar SQL/Edge ni enviar correos sin superar los controles y autorizaciones correspondientes.
+
 ## Distribución OFICIAL — corregida el 11/11/2026
 
 **Android será una aplicación nativa React Native + Expo + TypeScript, distribuida inicialmente mediante APK firmada e instalable directamente, como PUNTO FÉNIX. NO será PWA ni un sitio web en WebView.**
