@@ -818,3 +818,17 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] Antes de publicar: habilitar protección de contraseñas filtradas, revisar SMTP y seguridad de datos, decidir fuente confiable del plan y manejo del descenso de 8 a 2 mecánicos.
 
 [Checkpoint R2-A4](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A4_20261114.md). Sin cambios a los dos talleres, cuatro membresías, Render Auth OFF ni Android.
+
+
+### BT-AUTH-R2-A5 — Pantalla de invitación y límites de frecuencia (14/11/2026)
+
+- [x] Vista responsive `InviteAcceptancePreview` con estado honesto (aún no operativo), identidad ByteTorque y regreso al login mecánico, sin forma de alta ni privilegios.
+- [x] Sanitización del enlace `/#/auth/aceptar-invitacion?token=...` inmediatamente antes de montar React y después de `hashchange`: se **descarta** token sin memoria/Storage ni operaciones.
+- [x] Unit tests de sanitización, rutas y vista sin token. CI inicial [43664695428](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664695428) SUCCESS.
+- [x] Prueba Chromium añadida en 375/390/768/1440 para verificar URL limpia, sin desbordes/escrituras ni retención, con capturas en GitHub Actions. Resultado completo del nuevo job pendiente de revisión.
+- [x] Propuesta SQL privada con límites de intentos: invitar 5/hora por actor/taller; aceptar 10/15 min por actor; revocar 10/hora por actor/taller. No aplicada a Supabase; falta integrar en API y añadir rate limit IP/WAF.
+- [x] SQL rate limit corregido y probado en PostgreSQL 17 aislado [43664903467](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43664903467) SUCCESS, incluyendo permisos y cuotas.
+- [ ] Confirmar PASS de carrera simultánea por último intento en nuevo workflow antes de certificar esa subprueba.
+- [ ] **R2-A6:** diseño de outbox, límite de envíos, SMTP y aceptación verdadera con token de un solo uso. Migración y despliegue solo tras revisión y autorización expresa; sin datos reales ni registro público.
+
+[Checkpoint BT-AUTH-R2-A5](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A5_20261114.md). R1/R2-A4 anteriores conservados. Única rama `main`, Supabase alojado sin cambios.
