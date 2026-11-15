@@ -154,6 +154,23 @@ describe('CP03-P2 · datos y validaciones, sin acceso a Supabase hospedado', () 
       {table:'vehicles',kind:'eq',args:['plate_key','AB1234']}
     ]))
   })
+  it('recupera cliente y vehículo por ID estable, sin usar patente como identidad', async () => {
+    const f = fixture()
+    const r = cp03PilotRepository(f.client, context())
+    expect(await r.getCustomer(CUSTOMER)).toMatchObject(customer)
+    expect(await r.getVehicle(VEHICLE)).toMatchObject(vehicle)
+    for (const [table,id] of [['customers',CUSTOMER],['vehicles',VEHICLE]]) {
+      expect(f.ops).toContainEqual({table,kind:'eq',args:['workshop_id',T]})
+      expect(f.ops).toContainEqual({table,kind:'eq',args:['id',id]})
+    }
+  })
+  it('rechaza búsqueda de ficha por ID no válido antes de consultar identidad', async () => {
+    const f=fixture()
+    const r=cp03PilotRepository(f.client,context())
+    await expectFailure(r.getCustomer('bad'),'invalid')
+    await expectFailure(r.getVehicle('bad'),'invalid')
+    expect(f.user).not.toHaveBeenCalled()
+  })
   it('consulta correo exacto sin inyectar condiciones OR PostgREST', async () => {
     const f=fixture()
     await cp03PilotRepository(f.client,context()).search('PILOT@EXAMPLE.TEST')

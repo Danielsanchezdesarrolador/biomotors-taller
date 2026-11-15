@@ -111,6 +111,26 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
     stillValid(version)
     return { customers, vehicles }
   }
+  async function getCustomer(id: string): Promise<CustomerRecord | null> {
+    if (!UUID.test(id)) throw new DirectoryFailure('invalid')
+    const version = await guard(false)
+    const result = await client.from('customers').select(customerColumns)
+      .eq('workshop_id', tenant).eq('id', id.toLowerCase())
+      .is('archived_at', null).maybeSingle()
+    if (result.error) failure(result.error)
+    stillValid(version)
+    return result.data ? checkRow<CustomerRecord>(result.data, tenant) : null
+  }
+  async function getVehicle(id: string): Promise<VehicleRecord | null> {
+    if (!UUID.test(id)) throw new DirectoryFailure('invalid')
+    const version = await guard(false)
+    const result = await client.from('vehicles').select(vehicleColumns)
+      .eq('workshop_id', tenant).eq('id', id.toLowerCase())
+      .is('archived_at', null).maybeSingle()
+    if (result.error) failure(result.error)
+    stillValid(version)
+    return result.data ? checkRow<VehicleRecord>(result.data, tenant) : null
+  }
   async function vehiclesForCustomer(customerId: string): Promise<VehicleRecord[]> {
     if (!UUID.test(customerId)) throw new DirectoryFailure('invalid')
     const version = await guard(false)
@@ -179,6 +199,6 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
       throw new DirectoryFailure('unavailable')
     return row
   }
-  return Object.freeze({ search, vehiclesForCustomer, createCustomer,
+  return Object.freeze({ search, getCustomer, getVehicle, vehiclesForCustomer, createCustomer,
     createVehicle, updateCustomer, updateVehicle, dispose })
 }
