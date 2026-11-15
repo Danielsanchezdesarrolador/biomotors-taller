@@ -46,7 +46,7 @@ describe('BT-AUTH-R2-A2 · guardarraíles estáticos, NO pruebas de RLS real', (
       expect(endpoint).toContain('verifyInviteActor(request.headers.get(\'authorization\')')
       expect(endpoint).toContain('if (!identity.ok)')
       expect(endpoint).toContain("Deno.env.get('SUPABASE_ANON_KEY')")
-      expect(endpoint).not.toMatch(/Deno\\.env\\.get\\(['"]SUPABASE_SERVICE_ROLE_KEY/)
+      expect(endpoint).not.toMatch(/Deno\.env\.get\(['"]SUPABASE_SERVICE_ROLE_KEY/)
     }
 
   })
