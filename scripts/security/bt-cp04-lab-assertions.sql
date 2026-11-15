@@ -21,15 +21,19 @@ INSERT INTO public.vehicles(workshop_id,id,customer_id,plate,make,model,created_
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','bbbbbbbb-bbbb-4bbb-8bbb-000000000011','bbbbbbbb-bbbb-4bbb-8bbb-000000000001','BB1234','Kia','Rio','55555555-5555-4555-8555-555555555555');
 
 
-SET ROLE authenticated;
-SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
-INSERT INTO public.work_orders(workshop_id,id,vehicle_id,complaint,intake_odometer)
+-- Seed stable identifiers as the database owner; authenticated clients
+-- MUST NOT have INSERT grants for server generated ID or audit columns.
+INSERT INTO public.work_orders(workshop_id,id,vehicle_id,complaint,intake_odometer,opened_by)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','aaaaaaaa-aaaa-4aaa-8aaa-000000000021',
-'aaaaaaaa-aaaa-4aaa-8aaa-000000000011','Ruido al frenar',123000);
-INSERT INTO public.inspection_findings(workshop_id,id,order_id,vehicle_id,category,result,note,resolution)
+'aaaaaaaa-aaaa-4aaa-8aaa-000000000011','Ruido al frenar',123000,
+'11111111-1111-4111-8111-111111111111');
+INSERT INTO public.inspection_findings(workshop_id,id,order_id,vehicle_id,category,result,note,resolution,recorded_by)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','aaaaaaaa-aaaa-4aaa-8aaa-000000000031',
 'aaaaaaaa-aaaa-4aaa-8aaa-000000000021','aaaaaaaa-aaaa-4aaa-8aaa-000000000011',
-'Frenos','attention','Pastillas desgastadas','pending');
+'Frenos','attention','Pastillas desgastadas','pending',
+'11111111-1111-4111-8111-111111111111');
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
 DO $$ BEGIN
   IF (SELECT count(*) FROM public.work_orders)<>1 OR
      (SELECT count(*) FROM public.inspection_findings)<>1 THEN
@@ -92,11 +96,15 @@ DO $$ BEGIN
       WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-000000000031') THEN
     RAISE EXCEPTION 'CP04_RESOLVED_AT_MISSING';
   END IF;
-  BEGIN
-    UPDATE public.work_orders SET status='received'
+  UPDATE public.work_orders SET status='received'
     WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-000000000021';
+  IF (SELECT status FROM public.work_orders WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-000000000021')<>'closed' THEN
     RAISE EXCEPTION 'CP04_REOPENED_CLOSED_ORDER';
-  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+  END IF;
+  -- Original vehicle can be received again after the previous order is closed.
+  INSERT INTO public.work_orders(workshop_id,vehicle_id,complaint)
+  VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'aaaaaaaa-aaaa-4aaa-8aaa-000000000011','Nueva visita');
 END $$;
 SELECT set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',false);
 DO $$ BEGIN
