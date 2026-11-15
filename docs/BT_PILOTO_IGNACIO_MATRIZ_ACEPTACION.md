@@ -5,9 +5,9 @@
 | Funcionalidad | Interfaz DEMO / preparación | Backend real en Supabase alojado | QA relevante | Aprobación Ignacio |
 |---|---|---|---|---|
 | Login y usuarios | Acceso R1 y roles presentes; visibilidad detrás de flag | Auth y membresías existentes; acceso operativo limitado | A/B R1 previos; Safari físico pendiente | Pendiente |
-| Clientes | Formulario DEMO; panel P3 candidato aislado (no visible en web oficial) | **CP03 SQL candidato, aún no aplicado**; repositorio P2 no conectado | Mock P2/P3 + PG17 RLS P1 PASS; E2E real pendiente | Pendiente |
-| Vehículos | Registro DEMO; alta/edición P3 candidatos aislados | **CP03 SQL candidato, aún no aplicado**; repositorio P2 no conectado | Duplicados/tenant PG17 + UI P3 pruebas estáticas PASS; E2E real pendiente | Pendiente |
-| Identificación de retornos | Enlaces DEMO y búsqueda | Búsqueda por patente, ficha reciente y recuperación por ID P2/P3 preparadas, aisladas | Mock P2/P3 PASS, sin datos persistentes reales | Pendiente |
+| Clientes | Formulario DEMO; panel P3 candidato aislado (no visible en web oficial) | **CP03 SQL candidato, aún no aplicado**; repositorio P2 no conectado | Mock CP03 + RLS PG17 taller suspendido PASS; E2E alojado pendiente | Pendiente |
+| Vehículos | Registro DEMO; alta/edición P3 candidatos aislados | **CP03 SQL candidato, aún no aplicado**; repositorio P2 no conectado | Duplicados/tenant/taller suspendido PG17 PASS; E2E alojado pendiente | Pendiente |
+| Identificación de retornos | Enlaces DEMO y búsqueda | Búsqueda por patente, ficha reciente y recuperación por ID P2/P3 preparadas, aisladas | Binding Auth y búsqueda normalizada probados; sin persistencia alojada | Pendiente |
 | Recepción | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
 | Orden de trabajo | Flujo DEMO | No conectado | Demo QA, producción pendiente | Pendiente |
 | Inspección multipunto | Flujo DEMO | No conectado | Demo QA; hoja real por contrastar | Pendiente |
