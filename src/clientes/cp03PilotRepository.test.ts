@@ -71,8 +71,14 @@ function fixture(options: {
         const qPlate = ops.some(o=>o.table===table&&o.kind==='eq'&&o.args[0]==='plate_key')
         return {data:table==='vehicles' && !qPlate ? [vehicle] : [row],error:null}
       }
-      query.single = vi.fn(async () => response())
-      query.maybeSingle = vi.fn(async () => response())
+      query.single = vi.fn(async () => {
+        const result = response()
+        return { ...result, data: Array.isArray(result.data) ? result.data[0] ?? null : result.data }
+      })
+      query.maybeSingle = vi.fn(async () => {
+        const result = response()
+        return { ...result, data: Array.isArray(result.data) ? result.data[0] ?? null : result.data }
+      })
       query.then = (
         resolve:(result:ReturnType<typeof response>)=>unknown,
         reject?: (error:unknown)=>unknown
