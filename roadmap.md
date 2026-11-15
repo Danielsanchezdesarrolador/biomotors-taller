@@ -848,3 +848,17 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [x] **Encargo Codex preparado**, aún NO ejecutado: [worker seguro R2-A6, solo código/pruebas](docs/CODEX_BT_AUTH_R2_A6_WORKER_HANDOFF.md), usando el checkpoint actual. No habilitar envíos, SMTP ni migraciones reales sin nueva autorización.
 
 [Checkpoint BT-AUTH-R2-A6](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_20261114.md). Supabase alojado y Render público sin cambios; única rama `main`, independientemente de BIOMOTORS Academia.
+
+
+### BT-AUTH-R2-A6-WORKER — Orquestador de entrega y recuperación (14/11/2026)
+
+- [x] **Coordinador simulado** `invitationEmailWorker.ts`: claim → taller validado → lease vigente → descifrado/verificación → proveedor mock → ack/retry; errores genéricos, no se registra token/PII. Si proveedor acepta y ack falla, resulta `ack-unknown`, no se marca fallido.
+- [x] Pruebas Vitest para acceso cruzado, taller suspendido, token alterado, lease revocado, fallo temporal/permanente, doble intento, proveedor idempotente simulado y error en ack. **Es simulación, no proveedor real**.
+- [x] **Endpoint interno fail-closed** `bt-invite-worker`: siempre 503, sin credenciales, sin conexiones y sin deploy; `verify_jwt=true` preparado hasta revisar autorización machine-to-machine.
+- [x] **SQL candidato de recuperación** `BT_AUTH_R2_A6_WORKER_RECOVERY_CANDIDATE.sql`: FK compuesta para evitar cola de otro taller, revocación+cierre de outbox, limpieza de expirados, error terminal, validación de lease. Todo privado `SECURITY INVOKER`, solo `service_role`. **NO aplicado a Supabase real**.
+- [x] **Prueba real PostgreSQL 17 + dos trabajadores PASS:** [GitHub Actions 43667670454](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667670454) SUCCESS, `FOR UPDATE SKIP LOCKED` permite un solo claim, el segundo trabajador lo omite, lease conservado; FK multitenant y limpieza PASS.
+- [x] **CI general PASS** sobre implementación del worker: [GitHub Actions 43667670460](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667670460), web/iOS PWA y Android React Native/Expo SUCCESS; typecheck Deno del worker [43667597419](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43667597419) SUCCESS.
+- [ ] Confirmar reejecución PostgreSQL tras calificar la revisión de lease como `VOLATILE` (consulta reloj), y CI de la última versión documental.
+- [ ] **Siguiente puerta antes de usarlo:** proveedor SMTP/API autorizado con idempotencia garantizada, dominio remitente verificado, credenciales fuera del código, worker real protegido, expiración/cancelación bajo carreras y QA E2E. NO habilitar emails, migraciones hospedadas, cron ni aceptación pública sin nueva autorización.
+
+[Checkpoint BT-AUTH-R2-A6-WORKER](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_WORKER_20261114.md). El código está preparado en `main` sin necesidad de ejecutar Codex en este bloque; respetar `AGENTS.md`. Supabase/Render reales sin nuevos permisos.
