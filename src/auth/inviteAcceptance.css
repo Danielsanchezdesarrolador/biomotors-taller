@@ -1,0 +1,126 @@
+.invite-acceptance-stage {
+  min-height: 100svh;
+  padding: clamp(18px, 3vw, 40px);
+  background: radial-gradient(circle at 90% 3%, #1755a2 0, #061d3d 52%, #031329 100%);
+  color: #102344;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.invite-acceptance-header {
+  width: min(100%, 720px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: #e2eeff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  margin-bottom: clamp(26px, 6vh, 58px);
+}
+.invite-acceptance-header .brand-logo { max-width: 240px; }
+.invite-acceptance-card {
+  width: min(100%, 620px);
+  border-radius: 24px;
+  padding: clamp(22px, 5vw, 44px);
+  box-sizing: border-box;
+  background: #fff;
+  box-shadow: 0 22px 70px #0004;
+}
+.invite-acceptance-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  color: #0069e6;
+  background: #e5f1ff;
+}
+.invite-acceptance-icon svg { width: 29px; height: 29px; }
+.invite-acceptance-eyebrow {
+  margin: 20px 0 6px;
+  color: #0066d9;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.invite-acceptance-card h1 {
+  font-size: clamp(25px, 5vw, 36px);
+  line-height: 1.18;
+  margin: 0 0 16px;
+  letter-spacing: -.025em;
+}
+.invite-acceptance-description,
+.invite-acceptance-footnote {
+  color: #45607f;
+  line-height: 1.58;
+}
+.invite-acceptance-description { font-size: 16px; margin: 0 0 20px; }
+.invite-acceptance-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #c9dbf5;
+  border-radius: 14px;
+  background: #f2f7fe;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1c426f;
+}
+.invite-acceptance-note svg {
+  flex: 0 0 23px; height: 23px;
+  color: #216ac0;
+}
+.invite-acceptance-card h2 { font-size: 17px; margin: 26px 0 14px; }
+.invite-acceptance-steps {
+  display: grid;
+  gap: 13px;
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+.invite-acceptance-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.45;
+  color: #243b5b;
+}
+.invite-acceptance-steps svg {
+  width: 22px; height: 22px;
+  color: #1b77d7;
+  flex-shrink: 0;
+}
+.invite-acceptance-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  background: #0969d6;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 13px;
+  cursor: pointer;
+}
+.invite-acceptance-back:hover,
+.invite-acceptance-back:focus-visible { background: #0357b4; }
+.invite-acceptance-back:focus-visible { outline: 3px solid #69b3ff; outline-offset: 3px; }
+.invite-acceptance-back svg { width: 19px; height: 19px; }
+.invite-acceptance-footnote { font-size: 12px; margin: 22px 0 0; }
+@media (max-width: 480px) {
+  .invite-acceptance-stage { padding: 18px 12px 30px; }
+  .invite-acceptance-card { border-radius: 20px; }
+  .invite-acceptance-header { gap: 8px; }
+  .invite-acceptance-header > span { font-size: 11px; }
+}
