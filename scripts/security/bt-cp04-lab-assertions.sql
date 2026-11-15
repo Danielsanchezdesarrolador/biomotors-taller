@@ -51,7 +51,7 @@ DO $$ BEGIN
       'aaaaaaaa-aaaa-4aaa-8aaa-000000000021',
       'bbbbbbbb-bbbb-4bbb-8bbb-000000000011','Frenos','attention','Cross tenant','pending');
     RAISE EXCEPTION 'CP04_CROSS_TENANT_FINDING_ALLOWED';
-  EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+  EXCEPTION WHEN foreign_key_violation OR insufficient_privilege THEN NULL; END;
   BEGIN
     INSERT INTO public.work_orders(workshop_id,vehicle_id,complaint)
     VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
