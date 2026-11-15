@@ -7,6 +7,8 @@ on:
       - 'supabase/functions/_shared/**'
       - 'supabase/functions/bt-mechanic-*/**'
       - 'supabase/functions/bt-invite-worker/**'
+      - 'supabase/config.toml'
+      - 'scripts/security/bt-r2-worker-fail-closed.mjs'
       - '.github/workflows/bt-auth-r2-edge-check.yml'
 permissions:
   contents: read
@@ -38,6 +40,8 @@ jobs:
       - name: Autenticación M2M con SDK real y claves sintéticas (sin red)
         run: |
           deno test --node-modules-dir=auto --allow-env scripts/security/bt-r2-service-auth-offline.test.ts
+      - name: Preservar worker 503 y configuración JWT inactiva
+        run: node scripts/security/bt-r2-worker-fail-closed.mjs
       - name: Confirmar que no se desplegó ni envió correo
         run: |
           echo 'PASS: offline typecheck only. No Supabase deploy, RPC or SMTP'
