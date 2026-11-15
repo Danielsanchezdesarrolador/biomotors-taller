@@ -777,3 +777,18 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] Verificar CI de todos los commits y ejecución real de tests. Un PASS de CI no equivale a seguridad de escritura en Supabase.
 
 [Checkpoint detallado BT-AUTH-R2-A](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A_20261114.md). Mantener una sola rama `main`, mismo Render y seguridad pública sin cambios.
+
+
+### BT-AUTH-R2-A2 — Aceptación y revocación de invitaciones, preparación (14/11/2026)
+
+- [x] R2-A: CI de `aa64e82` confirmado SUCCESS; tres tablas existentes de Supabase y cuatro membresías intactas.
+- [x] Alineada regla de estados de membresía `active|disabled` con el esquema real.
+- [x] Tokens de 32 bytes criptográficamente aleatorios, digest SHA-256 y contrato de aceptación únicamente por token; pruebas unitarias de formato y hashing.
+- [x] Candidato SQL separado de aceptación única y revocación con bloqueo por taller, rol `mechanic`, email confirmado desde Auth vía backend, cupos por plan y auditoría. **SIN APLICAR**.
+- [x] Endpoint `bt-mechanic-accept` preparado **fail-closed 503**; flag y `verify_jwt=true` declarados, sin deploy ni servicio operativo.
+- [x] Parser de revocación solo con taller/ID de invitación; pruebas para rechazar elevación de rol y parámetros extra.
+- [x] Tests estáticos de contratos de seguridad, sin sustituir pruebas de BD/RLS reales.
+- [ ] **R2-A3:** laboratorio aislado PostgreSQL/Supabase; probar concurrencia, revocación, tokens caducados/reutilizados, descenso de plan, permisos denegados y acceso cruzado A/B. Revisar SQL y convertir en migración solo tras aprobación.
+- [ ] **R2-A4:** servidor con verificación Auth, correo confirmado y rate limits; integración SMTP, entrega y aceptación real, antes de conectar la interfaz y habilitar la función.
+
+[Checkpoint BT-AUTH-R2-A2](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A2_20261114.md). No tocar las cuentas ficticias existentes ni abrir Auth en Render. Mantener `main`.
