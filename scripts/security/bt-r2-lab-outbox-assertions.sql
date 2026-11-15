@@ -25,6 +25,10 @@ DECLARE
  one uuid;
  job record;
 BEGIN
+  -- Plus permits two reservations so the second reaches the UNIQUE nonce
+  -- constraint, rather than failing early at the Basic mechanic seat cap.
+  INSERT INTO bt_private.workshop_mechanic_entitlements(workshop_id,plan)
+    VALUES (a,'plus');
   BEGIN
     PERFORM public.bt_r2_reserve_and_queue_mechanic_invite(
       other_owner,a,'newmech1@example.com',repeat('a',64),
