@@ -7,7 +7,7 @@
  * IMPORTANT: a provider accept followed by an ack outage is ambiguous.
  * Retries are safe ONLY if a chosen provider enforces the same idempotency key.
  */
-import { dispatchPreparedInvite, type ClaimedInvitationEmail, type DeliveryProvider } from './inviteDeliveryAdapter.ts'
+import { dispatchImmutableInvite, type ClaimedInvitationEmail, type DeliveryProvider } from './inviteDeliveryAdapter.ts'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -74,8 +74,8 @@ export async function processOneInvitationEmail(
     if (!await deps.leaseIsCurrent(job)) return { status: 'stale' }
   } catch { return rejectClaim(false) }
 
-  const result = await dispatchPreparedInvite(
-    job, deps.encryptionKey, workshop.name, deps.nowIso(), deps.provider
+  const result = await dispatchImmutableInvite(
+    job, deps.encryptionKey, deps.nowIso(), deps.provider
   )
   if (result.state !== 'accepted')
     return rejectClaim(result.state === 'permanent-failure')

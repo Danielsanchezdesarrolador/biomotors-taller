@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { buildResendInviteRequest, classifyResendReply } from '../../supabase/functions/_shared/resendInviteCandidate'
-import type { DeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
+import type { ImmutableDeliveryRequest } from '../../supabase/functions/_shared/inviteDeliveryAdapter'
 
 const id = '12121212-1212-4121-8121-121212121212'
-const content: DeliveryRequest = {
+const content: ImmutableDeliveryRequest = {
+  from: 'invitaciones@bytetorque.example',
   to: 'mechanic@example.com',
   subject: 'Invitación a ByteTorque',
   text: 'Invitación mecánico para acceder a un taller (token sintético).',
@@ -34,6 +35,7 @@ describe('BT-AUTH-R2-A6-P · Resend candidato sin peticiones HTTP', () => {
     { ...content, subject: 'Hola\nBcc: atacante@example.com' },
     { ...content, to: 'a@example.com,b@example.com' },
     { ...content, to: 'attacker\r\nCc: victim@example.com' },
+    { ...content, from: 'other@bytetorque.example' },
     { ...content, html: '' },
     { ...content, text: '' }
   ])('rechaza intento de alterar key, destinatario o cabeceras %#', invalid => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createMechanicInviteToken } from '../../supabase/functions/_shared/mechanicInviteToken'
-import { sealInviteEnvelope } from '../../supabase/functions/_shared/encryptedInviteEnvelope'
+import { sealImmutableInviteEnvelope } from '../../supabase/functions/_shared/encryptedInviteEnvelope'
 import {
   processOneInvitationEmail,
   type LeasedInvitationEmail,
@@ -18,8 +18,9 @@ const invitation_id = 'cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd'
 async function fixture() {
   const encryptionKey = crypto.getRandomValues(new Uint8Array(new ArrayBuffer(32)))
   const { token } = await createMechanicInviteToken()
-  const sealed = await sealInviteEnvelope({
-    workshopId: workshop_id,
+  const sealed = await sealImmutableInviteEnvelope({
+    workshopId: workshop_id, workshopName: 'Taller de Prueba',
+    fromEmail: 'invitaciones@bytetorque.example',
     recipientEmail: 'mechanic@example.com',token,expiresAt
   },encryptionKey,nowIso)
   const job: LeasedInvitationEmail = {

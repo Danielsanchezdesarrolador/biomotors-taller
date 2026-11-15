@@ -8,7 +8,7 @@
  * A future sender MUST keep the from/to/subject/html/text body identical for
  * every retry, and use the same stable key from the outbox ID.
  */
-import type { DeliveryReceipt, DeliveryRequest } from './inviteDeliveryAdapter.ts'
+import type { DeliveryReceipt, ImmutableDeliveryRequest } from './inviteDeliveryAdapter.ts'
 
 const email = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -29,7 +29,7 @@ export type ResendRequest = Readonly<{
 
 /** ONLY a trusted worker can use the returned request; never log it. */
 export function buildResendInviteRequest(
-  request: DeliveryRequest,
+  request: ImmutableDeliveryRequest,
   config: { apiKey: string; fromEmail: string }
 ): ResendRequest {
   const key = request.idempotencyKey.toLowerCase()
@@ -40,6 +40,8 @@ export function buildResendInviteRequest(
       !/^re_[A-Za-z0-9_\-]{10,256}$/.test(config.apiKey) ||
       typeof config.fromEmail !== 'string' ||
       !email.test(config.fromEmail) || control.test(config.fromEmail) ||
+      request.from !== config.fromEmail ||
+      !email.test(request.from) || control.test(request.from) ||
       !email.test(request.to) || control.test(request.to) ||
       !request.subject || control.test(request.subject) ||
       request.subject.length > 250 ||
@@ -58,7 +60,7 @@ export function buildResendInviteRequest(
       'Idempotency-Key': key
     },
     body: JSON.stringify({
-      from: config.fromEmail,
+      from: request.from,
       to: [request.to],
       subject: request.subject,
       text: request.text,

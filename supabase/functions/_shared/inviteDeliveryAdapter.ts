@@ -5,7 +5,7 @@
  * MUST enforce idempotency on retries using stable outbox_id.
  * A request accepted by provider is NOT delivery to the recipient.
  */
-import { openInviteEnvelope } from './encryptedInviteEnvelope.ts'
+import { openInviteEnvelope, openImmutableInviteEnvelope } from './encryptedInviteEnvelope.ts'
 import { renderMechanicInviteEmail } from './mechanicInviteEmail.ts'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -83,5 +83,37 @@ export async function dispatchPreparedInvite(
   } catch {
     // No token, destination, credentials or upstream errors in results.
     return { state: 'retry' }
+  }
+}
+
+/** R2-A6-P2: worker accepts only the sealed v2 email, never re-renders it. */
+export type ImmutableDeliveryRequest = DeliveryRequest & Readonly<{ from: string }>
+export async function prepareImmutableInviteDelivery(
+  job: ClaimedInvitationEmail, key: Uint8Array, nowIso: string
+): Promise<ImmutableDeliveryRequest> {
+  if (!uuid.test(job.outbox_id) || !uuid.test(job.workshop_id))
+    throw new Error('Invalid immutable delivery job')
+  const frozen = await openImmutableInviteEnvelope({
+    ciphertext_hex: job.ciphertext_hex, nonce_hex: job.nonce_hex,
+    token_sha256_hex: job.token_sha256_hex
+  }, key, {
+    workshopId: job.workshop_id, recipientEmail: job.recipient_email,
+    expiresAt: job.expires_at, token_sha256_hex: job.token_sha256_hex
+  }, nowIso)
+  return { ...frozen, idempotencyKey: 'bt-r2-invite:' + job.outbox_id.toLowerCase() }
+}
+export async function dispatchImmutableInvite(
+  job: ClaimedInvitationEmail, key: Uint8Array, nowIso: string, send: DeliveryProvider
+): Promise<DeliveryResult> {
+  try {
+    const prepared = await prepareImmutableInviteDelivery(job, key, nowIso)
+    const result = await send(prepared)
+    if (result.accepted && result.providerMessageId.trim().length > 0 &&
+        result.providerMessageId.length <= 200)
+      return { state: 'accepted', providerMessageId: result.providerMessageId }
+    if (result.accepted) return { state: 'retry' }
+    return { state: result.retryable ? 'retry' : 'permanent-failure' }
+  } catch {
+    return { state: 'retry' } // Never surface token, email or provider diagnostics.
   }
 }

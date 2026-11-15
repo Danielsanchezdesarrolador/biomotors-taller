@@ -6,6 +6,8 @@ on:
     paths:
       - 'docs/sql/BT_AUTH_R2_*.sql'
       - 'scripts/security/bt-r2-lab-**'
+      - 'supabase/functions/_shared/**'
+      - 'src/auth/immutableInviteResend.test.ts'
       - '.github/workflows/bt-auth-r2-postgres-lab.yml'
 permissions:
   contents: read
