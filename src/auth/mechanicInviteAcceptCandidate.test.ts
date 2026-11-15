@@ -58,7 +58,7 @@ describe('BT-AUTH-R2-A6-6 · aceptación segura backend, RPC inyectada',()=>{
   })
   it('no escribe con identidad Auth ausente, inválida o correo no normalizado',async()=>{
     for(const identity of [
-      null,{...actor,userId:'not-uuid'},{...actor,userId:actor.userId.toUpperCase()},
+      null,{...actor,userId:'not-uuid'},{...actor,userId:actor.userId.slice(0,-1) + 'A'},
       {...actor,confirmedEmail:''},{...actor,confirmedEmail:'UNVERIFIED@example.com'},
       {...actor,confirmedEmail:' mech@example.com '},
       {...actor,confirmedEmail:'evil\r\n@example.com'},
