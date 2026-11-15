@@ -43,6 +43,7 @@ jobs:
           node scripts/verify-auth-r1-ui.cjs
           node scripts/verify-brand-ui.cjs
           node scripts/verify-brand-02-ui.cjs
+          node scripts/verify-r2-invite-ui.cjs
       - name: Build R1 activado solo en loopback con HTTP simulado (no Auth real)
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_local_build_mock node node_modules/vite/bin/vite.js build --outDir /tmp/bt-auth-r1-enabled
@@ -63,5 +64,6 @@ jobs:
             artifacts/bt-auth-01b-r1-production-mock/
             artifacts/bt-brand-01/
             artifacts/bt-brand-02/
+            artifacts/bt-r2-a5/
           if-no-files-found: warn
           retention-days: 30
