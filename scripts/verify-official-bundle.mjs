@@ -18,6 +18,14 @@ assert.ok(
   modules.every((id) => !/inviteBrowserLifecycleCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
+// CP03 is an unapproved data-access candidate: no customers may be loaded
+// or written by the deployed official presentation until the Director gates it.
+assert.ok(
+  modules.every((id) =>
+    !/cp03Pilot(?:Repository|Contracts)\.(?:ts|tsx|js)/.test(id)
+  ),
+  'Unapproved CP03 customer/vehicle repository in public PWA'
+)
 assert.ok(
   modules.every(
     (id) =>
