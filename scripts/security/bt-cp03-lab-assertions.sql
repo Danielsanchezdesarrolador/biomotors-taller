@@ -100,6 +100,14 @@ END $$;
 
 -- Reception can add customers; must not see B.
 SELECT set_config('request.jwt.claim.sub','44444444-4444-4444-4444-444444444444',false);
+SELECT current_user, auth.uid() AS uid,
+ (SELECT count(*) FROM public.workshop_memberships) AS memberships_visible,
+ (SELECT count(*) FROM public.workshops) AS workshops_visible,
+ (SELECT count(*) FROM public.workshop_memberships m
+   JOIN public.workshops w ON w.id = m.workshop_id
+   WHERE m.workshop_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+     AND m.user_id=auth.uid() AND m.status='active'
+     AND m.role IN ('owner','admin','reception') AND w.status='active') AS allowed_write;
 INSERT INTO public.customers(workshop_id,full_name)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Recepcion Test');
 DO $$ BEGIN
