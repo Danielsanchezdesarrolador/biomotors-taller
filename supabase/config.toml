@@ -1,2 +1,6 @@
 [functions.bt-owner-onboarding]
 verify_jwt = true
+
+# R2-A: código preparado, aún NO desplegado; siempre requiere JWT.
+[functions.bt-mechanic-invites]
+verify_jwt = true
