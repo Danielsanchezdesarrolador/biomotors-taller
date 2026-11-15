@@ -792,3 +792,15 @@ No se inició BT-AUTH-01B, BT-CP02-D ni backend.
 - [ ] **R2-A4:** servidor con verificación Auth, correo confirmado y rate limits; integración SMTP, entrega y aceptación real, antes de conectar la interfaz y habilitar la función.
 
 [Checkpoint BT-AUTH-R2-A2](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A2_20261114.md). No tocar las cuentas ficticias existentes ni abrir Auth en Render. Mantener `main`.
+
+
+### BT-AUTH-R2-A3 — Laboratorio PostgreSQL 17 aislado (14/11/2026)
+
+- [x] Crear laboratorio efímero en GitHub Actions, con talleres/identidades sintéticos y propuestas SQL originales R2-A/R2-A2 (sin tocar Supabase hospedado).
+- [x] **Primera prueba SQL real PASS**: [workflow 43663351089](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/43663351089): grants/RLS, BOLA, roles, cupos Básico/Plus/Full, aceptación única, email, caducidad, revocación, downgrade y carrera de reservas para el último cupo.
+- [x] Incorporada carrera de aceptación simultánea del mismo token, con conteo final de una membresía; confirmar PASS de la ejecución actualizada de Actions antes de marcar esta subprueba aprobada.
+- [x] Estado Supabase real consultado sin escritura: 2 talleres, 4 membresías, 4 usuarios Auth, 0 tablas privadas de invitación nuevas.
+- [ ] **R2-A4:** revisión de resultados completos, integración de identidad confirmada con Supabase Auth, protección de abuso y entrega de invitaciones con SMTP autorizado; no migrar ni desplegar funciones sin puerta de aprobación.
+- [ ] Confirmar configuración previa a lanzamiento: protección de contraseñas filtradas y estrategia definitiva de planes/cupo atómico por taller.
+
+[Checkpoint BT-AUTH-R2-A3](docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A3_20261114.md). Mantener R1 cerrado, Render con registro/Auth público apagado y sin invitar usuarios reales.
