@@ -22,6 +22,7 @@ CREATE TABLE bt_private.workshop_invitation_outbox (
   created_at timestamptz NOT NULL DEFAULT now(),
   sent_at timestamptz,
   last_attempt_at timestamptz,
+  first_attempt_at timestamptz,
   CHECK (
     ((status IN ('queued','processing','retry')) AND
      ciphertext IS NOT NULL AND octet_length(ciphertext) BETWEEN 32 AND 8192 AND
@@ -92,8 +93,10 @@ GRANT EXECUTE ON FUNCTION public.bt_r2_reserve_and_queue_mechanic_invite(
 
 -- Workers claim only pending nonexpired invitations, in concurrent-safe order.
 -- Each claim grants a unique lease; a stale worker may not complete a new lease.
--- "attempts" increments before transport; provider-level idempotency is
--- still mandatory because a successful send can precede a worker crash.
+-- "attempts" increments before transport. Resend's provider-level
+-- idempotency key only lives 24 hours: no further claim after 23 hours
+-- from FIRST attempt. Reconciliation revokes/cleans stranded jobs.
+-- A successful send can precede a worker crash; stable payload is required.
 CREATE FUNCTION public.bt_r2_claim_invitation_email()
 RETURNS TABLE (
   outbox_id uuid,
@@ -118,6 +121,8 @@ BEGIN
       FROM bt_private.workshop_invitation_outbox o
       JOIN bt_private.workshop_mechanic_invitations i ON i.id=o.invitation_id
      WHERE o.attempts < 5 AND o.next_attempt_at <= v_now
+       AND (o.first_attempt_at IS NULL OR
+            o.first_attempt_at > v_now - interval '23 hours')
        AND (o.status IN ('queued','retry')
             OR (o.status='processing' AND o.leased_until < v_now))
        AND i.status='pending' AND i.expires_at > v_now + interval '2 minutes'
@@ -128,7 +133,8 @@ BEGIN
        SET status='processing', attempts=o.attempts+1,
            lease_id=pg_catalog.gen_random_uuid(),
            leased_until=v_now+interval '2 minutes',
-           last_attempt_at=v_now
+           last_attempt_at=v_now,
+           first_attempt_at=pg_catalog.coalesce(o.first_attempt_at,v_now)
       FROM candidate c WHERE o.id=c.id
     RETURNING o.id, o.invitation_id, o.workshop_id, o.ciphertext, o.nonce,
               o.lease_id, o.attempts
