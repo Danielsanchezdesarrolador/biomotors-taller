@@ -11,7 +11,7 @@ export type WorkshopPlan = 'basic' | 'plus' | 'full'
 export type WorkshopMember = {
   workshopId: string
   role: WorkshopRole
-  status: 'active' | 'inactive'
+  status: 'active' | 'disabled'
 }
 export type WorkshopInvitation = {
   workshopId: string
