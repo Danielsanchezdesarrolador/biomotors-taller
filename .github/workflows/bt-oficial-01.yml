@@ -4,6 +4,11 @@ on:
     branches: [main]
     paths: ['src/**', 'assets/**', 'tests/**', 'vite*.ts', 'vitest.config.ts', 'scripts/**', 'public/**', 'package.json', 'package-lock.json', '.github/workflows/bt-oficial-01.yml']
   workflow_dispatch:
+concurrency:
+  # En push, solo el HEAD mas nuevo necesita el resultado de este workflow.
+  # Las ejecuciones manuales y PR mantienen grupos unicos independientes.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 permissions:
   contents: read
 jobs:
@@ -15,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Preparar pruebas
         run: |
           npm install --no-audit --no-fund

@@ -2,7 +2,18 @@ name: Verificación ByteTorque
 on:
   push:
     branches: [main]
+    # Se omite solo documentacion pura. SQL, codigo, scripts y workflows SI se prueban.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/checkpoints/**'
+      - 'docs/screenshots/**'
+      - 'docs/qa/**'
   pull_request:
+concurrency:
+  # En push, solo el HEAD mas nuevo necesita el resultado de este workflow.
+  # Las ejecuciones manuales y PR mantienen grupos unicos independientes.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 permissions:
   contents: read
 jobs:
@@ -14,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Instalar dependencias web
         run: npm install --no-audit --no-fund
       - name: Validar sintaxis de prueba de seguridad A/B (sin ejecutar acceso real)

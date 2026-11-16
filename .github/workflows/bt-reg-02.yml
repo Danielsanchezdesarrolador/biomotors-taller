@@ -11,6 +11,11 @@ on:
       - 'vite.harness.config.ts'
       - 'vitest.config.ts'
   workflow_dispatch:
+concurrency:
+  # En push, solo el HEAD mas nuevo necesita el resultado de este workflow.
+  # Las ejecuciones manuales y PR mantienen grupos unicos independientes.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 permissions:
   contents: read
 jobs:
@@ -22,6 +27,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Instalar aplicación web y navegador de prueba
         run: |
           npm install --no-audit --no-fund
