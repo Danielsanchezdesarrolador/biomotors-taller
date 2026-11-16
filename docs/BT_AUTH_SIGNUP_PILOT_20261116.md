@@ -7,7 +7,7 @@ El flujo usa el cliente de Auth R1 existente, la clave pública de proyecto y el
 
 ## Puertas previas a habilitar el servicio
 1. En Supabase `suxcqqnmcjoezfxltoms`, Auth → Providers → Email: habilitar correo, **Confirm Email ON**, y verificar ajustes de **Allow new users to sign up**. No abrir el registro general de otros talleres ni relajar los controles RLS. Esta cuenta queda inicialmente sin membresía.
-2. Auth → URL Configuration: Site URL `https://biomotors-taller-demo.onrender.com`; permitir exactamente la devolución `https://biomotors-taller-demo.onrender.com/#/auth/confirmacion`. Evitar wildcards innecesarios.
+2. Auth → URL Configuration: Site URL `https://bytetorque.cl` cuando el dominio esté verificado con HTTPS (Render informó Verified y Certificate Issued el 16/11/2026); permitir exactamente la devolución `https://bytetorque.cl/#/auth/confirmacion`. Mantener la URL vieja de Render solo como respaldo de transición; evitar wildcards innecesarios.
 3. Confirmar el transportista de correo antes de probar: el SMTP predeterminado de Supabase solo envía a correos de integrantes del equipo Supabase, con límites fuertes; para otros correos hace falta SMTP propio verificado, configurado **exclusivamente en Supabase**. Nunca publicar una contraseña SMTP en repositorio, frontend o chat.
 4. Comprobar plantilla **Confirm sign up** con `{{ .ConfirmationURL }}` y que el usuario reciba efectivamente un enlace. Hacer el primer ensayo solo con una dirección controlada por el Director. No inferir entrega de un retorno API.
 5. En Render Static existente (sin servicio adicional), habilitar `VITE_BT_AUTH_SIGNUP_ENABLED=true` solo tras comprobaciones 1–4 y autorización operacional. Reconstruir el mismo sitio desde main; el valor por defecto en código es **OFF**. `VITE_BT_AUTH_R1_ENABLED=true` debe seguir activo.
@@ -15,6 +15,7 @@ El flujo usa el cliente de Auth R1 existente, la clave pública de proyecto y el
 7. Si login indica «Sin taller autorizado», es esperado. La asignación de membresía al taller de pruebas correcto y rol del Director es **otro cambio alojado**, que debe revisar y autorizarse expresamente tras comprobar el usuario confirmado. No reemplazar las cuatro cuentas existentes. Nunca convertir una preferencia de rol de la UI en privilegio de base de datos.
 
 ## Seguridad y limitaciones
+- El código ya utiliza el dominio `bytetorque.cl` para nuevos enlaces de confirmación; todavía se debe verificar Site URL, la plantilla y la entrega SMTP reales antes de abrir el piloto.
 - El registro se habilita con un flag de presentación de Vite; **no es una lista de permitidos del servidor**. Si `Allow new users to sign up` se activa en Supabase, otros usuarios podrían crear cuentas sin obtener acceso a talleres. Para un piloto cerrado, preferir invitaciones administradas hasta aprobar la exposición pública.
 - Si Confirm Email está OFF, `signUp` podría crear una cuenta autoconfirmada: el cliente elimina cualquier sesión inmediata y falla, pero no puede deshacer esa creación. Verificar la opción en dashboard ANTES de activar.
 - SMTP no se configura por código. Sin servidor válido o correo autorizado, el envío fallará.

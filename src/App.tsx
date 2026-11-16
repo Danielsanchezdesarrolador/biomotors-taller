@@ -249,6 +249,15 @@ export function OfficialWorkspaceView({
 }
 
 function currentSafeEntryPath() {
+  // Remove only the referral tracking parameter from ChatGPT, preserving
+  // other query parameters, hash routes, and authentication state.
+  if (window.location.search) {
+    const url = new URL(window.location.href)
+    if (url.searchParams.get('utm_source') === 'chatgpt.com') {
+      url.searchParams.delete('utm_source')
+      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+    }
+  }
   // Auth has already validated the email at its confirmation URL.
   // Do not leave an unconsumed PKCE callback code in browser history.
   if (window.location.hash.startsWith('#/auth/confirmacion') && window.location.search) {

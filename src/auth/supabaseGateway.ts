@@ -48,7 +48,7 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
         email,
         password,
         options: {
-          emailRedirectTo: 'https://biomotors-taller-demo.onrender.com/#/auth/confirmacion'
+          emailRedirectTo: 'https://bytetorque.cl/#/auth/confirmacion'
         }
       })
       check(error)
