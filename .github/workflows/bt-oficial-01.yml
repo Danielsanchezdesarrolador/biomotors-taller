@@ -44,6 +44,14 @@ jobs:
           node scripts/verify-brand-ui.cjs
           node scripts/verify-brand-02-ui.cjs
           node scripts/verify-r2-invite-ui.cjs
+      - name: CP04 · Rediseño y autoguardado con HTTP simulado (sin datos alojados)
+        run: |
+          VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true npm run dev:harness -- --port 5179 --strictPort > /tmp/bt-cp04-design.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5179/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-cp04-redesign.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
         env:
           BT_INVITE_BROWSER: webkit
@@ -63,6 +71,7 @@ jobs:
         with:
           name: BT-OFICIAL-01A-Estados-vacios-Capturas
           path: |
+            artifacts/cp04-redesign/
             artifacts/bt-oficial-01a/
             artifacts/bt-auth-01a/
             artifacts/bt-auth-01b-r1/

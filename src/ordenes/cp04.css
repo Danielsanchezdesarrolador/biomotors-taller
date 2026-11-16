@@ -120,3 +120,122 @@
  .cp04-private .cp04-checklist-sheet .mp-item-name{font-size:14px}
  .cp04-inline-control{padding:8px}
 }
+
+/* Official work-order redesign. Existing inspection sheet/queues remain intact. */
+.cp04-private .cp04-heading{position:relative;min-height:155px;padding-top:23px;padding-bottom:22px;box-sizing:border-box}
+.cp04-private .cp04-heading::before{height:100%;min-height:170px}
+.cp04-private .cp04-heading::after{display:none}
+.cp04-private .cp04-heading .official-eyebrow{position:relative;padding-left:16px;font-size:12px;letter-spacing:.7px;line-height:1.5;display:block;color:#0068f5}
+.cp04-private .cp04-heading .official-eyebrow::before{content:'';position:absolute;left:0;top:2px;width:4px;height:26px;border-radius:4px;background:linear-gradient(#08c6ff,#0058ff)}
+.cp04-private .cp04-heading h1{color:#091b3c;font-size:clamp(28px,3vw,38px);letter-spacing:-1px;margin:8px 0}
+.cp04-private .cp04-heading>p{max-width:620px;line-height:1.55;margin:0;color:#385379;font-size:15px}
+.cp04-autosave-bar{display:flex;align-items:center;gap:12px;margin:16px 0 18px;padding:9px 14px;background:linear-gradient(110deg,#eaf4ff,#f4f8ff);border:1px solid #c6ddfc;border-radius:14px;color:#385a83;font-size:13px;position:relative}
+.cp04-autosave-bar>svg{width:26px;height:26px;flex-shrink:0;color:#0068f5}
+.cp04-autosave-bar>strong{font-size:14px;color:#10294e;flex-shrink:0}
+.cp04-autosave-bar>span{border-left:1px solid #bfd4ed;padding-left:14px;line-height:1.5}
+.cp04-save-help{margin-left:auto;flex-shrink:0}
+.cp04-save-help summary{list-style:none;min-width:44px;min-height:44px;display:grid;place-items:center;cursor:pointer;color:#315d92;border-radius:9px}
+.cp04-save-help summary::-webkit-details-marker{display:none}
+.cp04-save-help summary:focus-visible{outline:3px solid #73b1ff;outline-offset:2px}
+.cp04-save-help p{position:absolute;right:8px;top:calc(100% - 6px);z-index:5;max-width:calc(100% - 16px);width:330px;box-sizing:border-box;margin:0;padding:15px;line-height:1.6;background:white;border:1px solid #c6d8f3;border-radius:13px;box-shadow:0 8px 24px #24466b20;color:#24476f}
+.cp04-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cp04-metric{display:flex;align-items:center;gap:15px;min-height:100px;border:1px solid #cee1fb;border-radius:16px;padding:18px;box-sizing:border-box;background:linear-gradient(120deg,#f5f9ff,#e7f1ff);box-shadow:0 3px 8px #16365d0a}
+.cp04-metric>svg{color:#006cff;width:32px;height:32px;flex-shrink:0;align-self:flex-start;margin-top:5px}
+.cp04-metric>div{min-width:0;display:grid;gap:3px}
+.cp04-metric strong{font-size:31px;line-height:1.1;letter-spacing:-.7px;color:#0b2247;font-weight:800;min-height:34px;display:block}
+.cp04-metric span{font-size:13px;line-height:1.35;color:#1c375b}
+.cp04-metric-amber{background:linear-gradient(120deg,#fffcf5,#fff6e7);border-color:#f4dfb8}
+.cp04-metric-amber>svg{color:#cf8b00}
+.cp04-metric-green{background:linear-gradient(120deg,#f5fcf8,#e6f5f0);border-color:#c5e5db}
+.cp04-metric-green>svg{color:#09834b}
+.cp04-scope{font-size:12px;color:#557294;margin:10px 0 17px;line-height:1.5}
+.cp04-quick-actions{display:flex;gap:14px;margin:0 0 8px}
+.cp04-quick-actions button{min-height:48px;padding:12px 20px;border-radius:13px;font-size:15px;box-shadow:0 3px 7px #174e9610}
+.cp04-quick-actions .cp04-primary{background:linear-gradient(110deg,#0785ff,#0056ef);border-color:#0068f5;min-width:220px}
+.cp04-quick-actions .cp04-secondary{min-width:180px;background:linear-gradient(110deg,#fff,#eff5ff)}
+.cp04-private .cp04-primary,.cp04-private .cp04-secondary,.cp04-private .cp04-quiet{min-height:44px}
+.cp04-private .cp04-layout{grid-template-columns:minmax(0,1.3fr) minmax(290px,.85fr);align-items:start}
+.cp04-private .cp04-panel{border:1px solid #d3e2f8;background:linear-gradient(135deg,#fff,#f9fbff);box-shadow:0 5px 18px #123e7910;padding:20px;border-radius:19px}
+.cp04-private .cp04-list-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px;flex-wrap:wrap}
+.cp04-private .cp04-list-heading h2{color:#0d2448;letter-spacing:-.4px;font-size:21px;margin:0}
+.cp04-list-heading h2>svg{width:24px;height:24px;flex-shrink:0}
+.cp04-list-count{color:#0064f5;font-size:13px;white-space:nowrap}
+.cp04-orders{display:grid;gap:12px}
+.cp04-private .cp04-order{display:flex;align-items:center;gap:14px;position:relative;margin:0;padding:14px;border-radius:15px;border:1px solid #cddcf3;background:linear-gradient(115deg,#fff,#f8fbff);box-shadow:0 2px 4px #163c6910;width:100%;min-width:0;box-sizing:border-box;transition:background .15s,border-color .15s}
+.cp04-private .cp04-order.selected,.cp04-private .cp04-order:hover{background:#eff6ff;border-color:#398df7}
+.cp04-private .cp04-car-icon{display:grid;place-items:center;flex:0 0 76px;min-height:98px;border-radius:12px;background:linear-gradient(135deg,#eaf3ff,#dceaff);color:#1669d3}
+.cp04-car-icon svg{width:47px;height:47px;stroke-width:1.5}
+.cp04-order-content{min-width:0;flex:1;display:grid;gap:5px}
+.cp04-order-heading{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}
+.cp04-private .cp04-plate{font-size:21px;letter-spacing:.4px;line-height:1.15;color:#0a2752;background:#e3efff;border:1px solid #b7d0f3;border-radius:7px;padding:3px 8px;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}
+.cp04-private .cp04-vehicle-name{font-size:16px;line-height:1.35;color:#112a4d;overflow-wrap:anywhere}
+.cp04-private .cp04-complaint{font-size:13px;color:#536b8d;line-height:1.5;display:flex;align-items:flex-start;gap:6px;overflow-wrap:anywhere}
+.cp04-complaint>svg{width:16px;height:16px;flex-shrink:0;margin-top:2px}
+.cp04-private .cp04-order-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#eaf1fa;border-radius:8px;padding:5px 8px;margin-top:2px;color:#445d7d;font-size:12px}
+.cp04-order-meta time,.cp04-order-meta>span{display:inline-flex;align-items:center;gap:6px;min-width:0;line-height:1.5}
+.cp04-order-meta svg{width:16px;height:16px;flex-shrink:0}
+.cp04-order-meta>span{font-weight:700}
+.cp04-order-chevron{width:19px;height:19px;flex-shrink:0;color:#44658f}
+.cp04-private .cp04-status{display:inline-flex;align-items:center;max-width:100%;white-space:normal;border-radius:999px;padding:5px 10px;font-size:11px;line-height:1.35;font-weight:750;box-sizing:border-box}
+.cp04-private .cp04-status-received{background:#e8eef9;color:#425c80}
+.cp04-private .cp04-status-inspecting{background:#fff1d7;color:#996000}
+.cp04-private .cp04-status-in_service{background:#dfedff;color:#005fdf}
+.cp04-private .cp04-status-ready{background:#dff5e7;color:#08753b}
+.cp04-private .cp04-status-closed{background:#edf0f5;color:#596576}
+.cp04-reception,.cp04-detail{scroll-margin-top:18px}
+.cp04-private .cp04-reception h2{font-size:20px;color:#132d51}
+.cp04-pilot-note{font-size:12px;color:#5c7696;line-height:1.5;margin:15px 0 0}
+.cp04-empty,.cp04-list-error{display:grid;justify-items:center;gap:12px;text-align:center;padding:24px 12px;color:#476487}
+.cp04-empty>svg,.cp04-list-error>svg{width:48px;height:48px;color:#0069ef;background:#edf5ff;padding:16px;border-radius:18px;box-sizing:content-box}
+.cp04-private .cp04-empty h3,.cp04-private .cp04-list-error h3{display:block;font-size:18px;color:#173356;margin:0}
+.cp04-empty p,.cp04-list-error p{font-size:14px;line-height:1.6;margin:0}
+.cp04-list-error>svg{color:#ac3f22;background:#fff0e9}
+.cp04-skeleton-card{display:flex;gap:14px;border:1px solid #e0e9f5;border-radius:15px;padding:14px;margin-bottom:12px}
+.cp04-skeleton-card i{display:block;width:76px;height:100px;border-radius:12px;flex-shrink:0;background:#e8f0fa}
+.cp04-skeleton-card>div{flex:1;display:grid;align-content:center;gap:13px}
+.cp04-skeleton-card b{display:block;height:15px;width:100%;background:#e8f0fa;border-radius:5px}
+.cp04-skeleton-card b:first-child{width:55%}
+.cp04-skeleton-number{width:52px;background:#dce8f7;border-radius:7px}
+.cp04-order-skeleton,.cp04-skeleton-number{animation:cp04-pulse 1.3s ease-in-out infinite alternate}
+@keyframes cp04-pulse{from{opacity:1}to{opacity:.5}}
+@media(prefers-reduced-motion:reduce){.cp04-order-skeleton,.cp04-skeleton-number{animation:none}.cp04-private .cp04-order{transition:none}}
+@media(max-width:1050px){.cp04-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cp04-private .cp04-layout{grid-template-columns:1fr}.cp04-private .cp04-reception{margin-top:0}.cp04-metric{padding:16px;gap:10px}}
+@media(max-width:760px){
+ .cp04-private .cp04-heading{min-height:154px;padding-top:18px;padding-bottom:18px}
+ .cp04-private .cp04-heading h1{font-size:29px;letter-spacing:-1px}
+ .cp04-private .cp04-heading>p{font-size:14px;max-width:94%;line-height:1.5}
+ .cp04-private .cp04-heading::before{min-height:0;background-image:linear-gradient(90deg,#f1f7ff 0%,rgba(237,246,255,.97) 38%,rgba(222,239,255,.72) 100%),url('/hero-workshop.webp');background-size:100% 100%,430px auto;background-position:center,right center;mask-image:linear-gradient(#000 70%,transparent)}
+ .cp04-private .cp04-heading .official-eyebrow{font-size:10px;letter-spacing:.3px}
+ .cp04-autosave-bar{gap:8px;padding:8px 10px;margin:10px 0 14px;display:grid;grid-template-columns:24px minmax(0,1fr) 44px;grid-template-rows:auto auto}
+ .cp04-autosave-bar>svg{grid-row:1/3;width:24px;height:24px}
+ .cp04-autosave-bar>strong{font-size:13px;grid-column:2;align-self:end}
+ .cp04-autosave-bar>span{grid-column:2;border:0;padding:0;font-size:11px;line-height:1.4}
+ .cp04-save-help{grid-column:3;grid-row:1/3;margin:0}
+ .cp04-save-help summary{min-width:44px;min-height:44px}
+ .cp04-save-help summary svg{width:19px;height:19px}
+ .cp04-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .cp04-metric{min-height:94px;padding:14px;gap:11px;border-radius:14px}
+ .cp04-metric>svg{width:29px;height:29px;margin-top:3px}
+ .cp04-metric strong{font-size:28px;min-height:31px}
+ .cp04-metric span{font-size:12px}
+ .cp04-scope{font-size:11px;margin:9px 0 14px}
+ .cp04-quick-actions{gap:10px}
+ .cp04-quick-actions button{flex:1;min-width:0!important;padding:10px 9px;font-size:14px;gap:7px}
+ .cp04-quick-actions svg{width:19px;height:19px;flex-shrink:0}
+ .cp04-private .cp04-panel{padding:13px;border-radius:16px;margin-top:16px}
+ .cp04-private .cp04-list-heading{gap:8px;margin-bottom:13px}
+ .cp04-private .cp04-list-heading h2{font-size:19px;gap:8px}
+ .cp04-list-count{font-size:11px}
+ .cp04-private .cp04-order{gap:10px;padding:11px;border-radius:13px;align-items:flex-start}
+ .cp04-private .cp04-car-icon{flex-basis:53px;min-height:83px;margin-top:3px}
+ .cp04-car-icon svg{width:36px;height:36px}
+ .cp04-private .cp04-plate{font-size:19px;padding:3px 6px}
+ .cp04-order-heading{gap:6px;align-items:flex-start}
+ .cp04-private .cp04-status{font-size:10px;padding:4px 7px}
+ .cp04-private .cp04-vehicle-name{font-size:14px}
+ .cp04-private .cp04-complaint{font-size:12px}
+ .cp04-private .cp04-order-meta{font-size:10px;gap:4px 10px;padding:5px 6px}
+ .cp04-order-meta svg{width:14px;height:14px}
+ .cp04-order-chevron{width:15px;height:18px;align-self:center}
+ .cp04-private .cp04-order-content{gap:5px}
+}

@@ -9,7 +9,7 @@ import type { Context,Role } from '../auth/controller'
 import { UUID } from '../clientes/cp03PilotContracts'
 import {
   WorkOrderFailure, workFailure, validId, validPlateSearch, orderInput,
-  findingInput, workStatuses, type WorkOrder, type Finding, type NewOrder,
+  findingInput, workStatuses, recentOrdersLimit, type WorkOrder, type Finding, type NewOrder,
   type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle
 } from './cp04Contracts'
 
@@ -86,7 +86,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
   async function recentOrders():Promise<OrderWithVehicle[]>{
     const version=await guard()
     const orders=await client.from('work_orders').select(orderCols)
-      .eq('workshop_id',tenant).order('opened_at',{ascending:false}).limit(40)
+      .eq('workshop_id',tenant).order('opened_at',{ascending:false}).limit(recentOrdersLimit)
     if(orders.error)workFailure(orders.error)
     const list=many<WorkOrder>(orders.data,tenant)
     if(!list.length)return []

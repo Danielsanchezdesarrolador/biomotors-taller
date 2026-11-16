@@ -31,6 +31,7 @@ export type NewFinding=Readonly<{
   order_id:string;vehicle_id:string;category:string;
   result:FindingResult;note:string|null
 }>
+export const recentOrdersLimit = 40
 export const workStatuses:readonly OrderStatus[]=['received','inspecting','in_service','ready','closed']
 export const workStatusLabel:Record<OrderStatus,string>={
   received:'Recibido',inspecting:'En inspección',in_service:'En reparación',

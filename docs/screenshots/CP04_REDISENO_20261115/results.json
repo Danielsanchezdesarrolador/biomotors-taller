@@ -1,0 +1,57 @@
+[
+  {
+    "width": 1650,
+    "status": "PASS",
+    "marks": 10,
+    "savingErrorRetryAndClosedOrder": false,
+    "backend": "HTTP mocked — no real Auth/RLS/persistence proof"
+  },
+  {
+    "width": 1440,
+    "status": "PASS",
+    "marks": 10,
+    "savingErrorRetryAndClosedOrder": false,
+    "backend": "HTTP mocked — no real Auth/RLS/persistence proof"
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "marks": 10,
+    "savingErrorRetryAndClosedOrder": false,
+    "backend": "HTTP mocked — no real Auth/RLS/persistence proof"
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "marks": 34,
+    "savingErrorRetryAndClosedOrder": true,
+    "backend": "HTTP mocked — no real Auth/RLS/persistence proof"
+  },
+  {
+    "width": 375,
+    "status": "PASS",
+    "marks": 10,
+    "savingErrorRetryAndClosedOrder": false,
+    "backend": "HTTP mocked — no real Auth/RLS/persistence proof"
+  },
+  {
+    "scenario": "error",
+    "status": "PASS",
+    "backend": "HTTP mocked"
+  },
+  {
+    "scenario": "empty",
+    "status": "PASS",
+    "backend": "HTTP mocked"
+  },
+  {
+    "scenario": "loading",
+    "status": "PASS",
+    "backend": "HTTP mocked"
+  },
+  {
+    "scenario": "revoked",
+    "status": "PASS",
+    "backend": "HTTP mocked"
+  }
+]
