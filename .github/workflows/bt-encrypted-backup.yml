@@ -1,0 +1,56 @@
+name: BT-BACKUP-GHA-02 - Encrypted PostgreSQL export to private Drive
+
+# Future publication commit MUST contain [skip render]. No automatic triggers.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_database_export:
+        description: Authorize this real encrypted DB export; restoration and full-project coverage remain unverified
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-encrypted-backup-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          github.repository == 'Danielsanchezdesarrolador/biomotors-taller' &&
+          github.event.repository.private == true &&
+          github.ref == 'refs/heads/main' && inputs.confirm_database_export == true }}
+    runs-on: ubuntu-latest
+    environment: bytetorque-backup-export
+    timeout-minutes: 20
+    # PostgreSQL 17 official clients. No database service is started by this job.
+    # Confirm the hosted server version before first authorized execution.
+    container:
+      image: postgres:17-bookworm
+    steps:
+      - name: Read the dispatched main commit without retaining Git credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install export tools before exposing backup secrets
+        timeout-minutes: 5
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends python3 ca-certificates gnupg rclone
+      - name: Validate bindings and export encrypted data with external readback
+        timeout-minutes: 14
+        env:
+          BT_BACKUP_PGPASS_CONTENT: ${{ secrets.BT_BACKUP_PGPASS_CONTENT }}
+          BT_BACKUP_DRIVE_CONFIG_CONTENT: ${{ secrets.BT_BACKUP_DRIVE_CONFIG_CONTENT }}
+          BT_BACKUP_RECIPIENT_CONTENT: ${{ secrets.BT_BACKUP_RECIPIENT_CONTENT }}
+          BT_BACKUP_RECIPIENT_FINGERPRINT: ${{ secrets.BT_BACKUP_RECIPIENT_FINGERPRINT }}
+          BT_BACKUP_PG_CA_PEM: ${{ secrets.BT_BACKUP_PG_CA_PEM }}
+        run: python3 -B scripts/backup/github_actions_export.py
