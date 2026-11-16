@@ -46,12 +46,13 @@ jobs:
           node scripts/verify-r2-invite-ui.cjs
       - name: CP04 · Rediseño y autoguardado con HTTP simulado (sin datos alojados)
         run: |
-          VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true npm run dev:harness -- --port 5179 --strictPort > /tmp/bt-cp04-design.log 2>&1 &
+          VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp04-design-build
+          node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-cp04-design-build --port 5179 --strictPort > /tmp/bt-cp04-design.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:5179/ > /dev/null; then break; fi
             sleep 1
           done
-          node scripts/verify-cp04-redesign.cjs
+          CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-cp04-redesign.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
         env:
           BT_INVITE_BROWSER: webkit

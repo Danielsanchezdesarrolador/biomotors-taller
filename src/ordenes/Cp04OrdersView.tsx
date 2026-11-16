@@ -85,6 +85,7 @@ export function Cp04OrdersView({
         workshopId: context.workshop.id
       }) ?? emptyCp04Draft
   )
+  const viewRoot = useRef<HTMLDivElement>(null)
   const scrollPosition = useRef(initial.scrollY ?? 0)
   const restoredPosition = useRef(false)
   const [orders, setOrders] = useState<OrderWithVehicle[]>([])
@@ -120,6 +121,7 @@ export function Cp04OrdersView({
   // Text stays in a same-tab draft during focus/session revalidation. Never
   // send unsaved descriptions to the server or store an authorization token.
   useEffect(() => {
+    if (!viewRoot.current?.isConnected) return
     writeCp04Draft(scope, {
       scrollY: scrollPosition.current,
       selectedOrderId: selected?.order.id ?? initial.selectedOrderId,
@@ -147,17 +149,22 @@ export function Cp04OrdersView({
   useEffect(() => {
     let frame: number | undefined
     const remember = () => {
-      if (!restoredPosition.current || !active.current) return
+      if (!restoredPosition.current || !active.current || !viewRoot.current?.isConnected) return
       scrollPosition.current = window.scrollY
       if (frame === undefined)
         frame = window.requestAnimationFrame(() => {
           frame = undefined
-          if (active.current && restoredPosition.current)
+          if (active.current && restoredPosition.current && viewRoot.current?.isConnected)
             rememberCp04Position(scope, scrollPosition.current)
         })
     }
     const hidden = () => {
-      if (document.visibilityState === 'hidden' && active.current && restoredPosition.current)
+      if (
+        document.visibilityState === 'hidden' &&
+        active.current &&
+        restoredPosition.current &&
+        viewRoot.current?.isConnected
+      )
         rememberCp04Position(scope, window.scrollY)
     }
     window.addEventListener('scroll', remember, { passive: true })
@@ -192,11 +199,13 @@ export function Cp04OrdersView({
       } finally {
         if (active.current && !cancelled) {
           setLoading(false)
-          window.requestAnimationFrame(() => {
-            if (!active.current || cancelled) return
-            window.scrollTo({ top: scrollPosition.current, behavior: 'auto' })
-            restoredPosition.current = true
-          })
+          window.requestAnimationFrame(() =>
+            window.requestAnimationFrame(() => {
+              if (!active.current || cancelled || !viewRoot.current?.isConnected) return
+              window.scrollTo({ top: scrollPosition.current, behavior: 'auto' })
+              restoredPosition.current = true
+            })
+          )
         }
       }
     }
@@ -454,7 +463,7 @@ export function Cp04OrdersView({
     }
   ]
   return (
-    <div className="official-panel cp04-private">
+    <div className="official-panel cp04-private" ref={viewRoot}>
       <section className="welcome-area cp04-heading">
         <span className="official-eyebrow">Recepción e inspección — taller autorizado</span>
         <h1>Órdenes de trabajo</h1>
