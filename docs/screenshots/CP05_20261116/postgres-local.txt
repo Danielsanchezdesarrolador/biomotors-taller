@@ -60,41 +60,41 @@ CREATE FUNCTION
 CREATE TABLE
 GRANT
 SET
-              set_config              
+              set_config
 --------------------------------------
  11111111-1111-4111-8111-111111111111
 (1 row)
 
 INSERT 0 1
 DO
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
 DO
-              set_config              
+              set_config
 --------------------------------------
  33333333-3333-4333-8333-333333333333
 (1 row)
 
 DO
-              set_config              
+              set_config
 --------------------------------------
  55555555-5555-4555-8555-555555555555
 (1 row)
@@ -105,24 +105,24 @@ SET
 INSERT 0 1
 DO
 RESET
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
 UPDATE 2
 SET
-              set_config              
+              set_config
 --------------------------------------
  11111111-1111-4111-8111-111111111111
 (1 row)
@@ -132,7 +132,7 @@ DO
 RESET
 UPDATE 1
 SET
-              set_config              
+              set_config
 --------------------------------------
  11111111-1111-4111-8111-111111111111
 (1 row)
@@ -140,7 +140,7 @@ SET
 DO
 RESET
 UPDATE 1
-          ?column?           
+          ?column?
 -----------------------------
  CP05_LOCAL_RLS_HISTORY_PASS
 (1 row)
@@ -153,50 +153,50 @@ UPDATE 1
 UPDATE 1
 SET
 DO
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
 RESET
 UPDATE 1
 SET
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
- lab_expect 
+ lab_expect
 ------------
- 
+
 (1 row)
 
 RESET
 SET
-              set_config              
+              set_config
 --------------------------------------
  44444444-4444-4444-8444-444444444444
 (1 row)
 
-                      bt_cp05_open_quote                      
+                      bt_cp05_open_quote
 --------------------------------------------------------------
  {"id": "dceb9658-04cd-4fdf-8a47-cfcd46736cfa", "version": 5}
 (1 row)
 
 RESET
-                ?column?                 
+                ?column?
 -----------------------------------------
  CP05_ANON_EMAIL_WORKSHOP_RECEPTION_PASS
 (1 row)
 
 SET
-              set_config              
+              set_config
 --------------------------------------
  11111111-1111-4111-8111-111111111111
 (1 row)
 
 DO
-                ?column?                
+                ?column?
 ----------------------------------------
  CP05_FRESH_CONNECTION_PERSISTENCE_PASS
 (1 row)
