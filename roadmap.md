@@ -252,7 +252,7 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 - [x] TypeScript, **525/525 Vitest**, build web/PWA y privado, cinco anchos de navegador; 34 marcas, error/reintento, posición, recepción, cierre y revocación comprobados con **HTTP simulado**; regresiones públicas de cinco paneles y siete pantallas PASS.
 - [x] **Publicado en el Render existente y verificado**, código `f987f8f` (`61d058f` integración principal): HTTP 200, CSS CP04 idéntico al build y módulo actualizado; recorrido del frontend publicado en cinco anchos PASS con HTTP interceptado. [Único informe con capturas antes/después y evidencia](docs/screenshots/CP04_REDISENO_20261115/README.md).
 - [ ] Resultado CI remoto por confirmar: API de Actions devuelve Forbidden, también con consulta escalada; no equivale a fallo del CI ni a PASS comprobado. El workflow existente repite la regresión sobre build privado de producción.
-- [ ] Aprobación visual y QA físico con la sesión del Director. Sin SQL nuevo, cambios de secretos/Auth/RLS ni escrituras del agente sobre registros alojados. No se crean checkpoints adicionales.
+- [x] Aprobación visual del rediseño otorgada por el Director el 16/11/2026 (informe Codex y commit `4243863`). Se conserva como **pendiente** la prueba física y la persistencia real de las 34 X en Android/iPhone. Sin SQL nuevo, secretos/Auth/RLS ni escrituras alojadas del agente. No abrir checkpoints adicionales.
 
 ### BT-CP04 — Inspección multipunto y observaciones — REFERENCIA HISTÓRICA
 
@@ -263,7 +263,9 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Salida:** inspección completa y observaciones recuperables un año después.
 
-### BT-CP05 — Presupuestos, PDF y correo — PENDIENTE
+### BT-CP05 — Presupuestos, PDF y correo — PREPARACIÓN (NO OPERATIVO)
+
+- [x] Contrato de entrega funcional única consolidado el 16/11/2026 en [BT_CP05_ENTREGA_FUNCIONAL.md](docs/BT_CP05_ENTREGA_FUNCIONAL.md). El editor de cotizaciones DEMO existente será reutilizado; no equivale a persistencia real. SQL y Storage alojados, envío externo y activación privada **no autorizados**. Ninguna implementación CP05 está certificada todavía.
 
 - [ ] Digitalizar la hoja real de presupuesto, relacionándola con inspecciones y vehículos.
 - [ ] Ítems, mano de obra, valores, totales, vigencia y estados.
