@@ -44,3 +44,28 @@
   padding:5px 10px;border-radius:999px;font-weight:700;font-size:12px;max-width:100%;flex-wrap:wrap}
 .cp04-resolution.is-pending{background:#fff1da;color:#83520b}
 .cp04-resolution.is-resolved{background:#e2f6e9;color:#155d42}
+
+/* CP04 real checklist uses the same X sheet as the original multipoint report. */
+.cp04-checklist-launch{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:17px 0}
+.cp04-checklist-launch small{color:#597597;font-size:13px}
+.cp04-multipunto-anchor{scroll-margin-top:24px}
+.cp04-checklist{margin-top:20px;padding-top:18px;border-top:1px solid #dbe6f5}
+.cp04-checklist-top{display:flex;justify-content:space-between;align-items:start;gap:14px;flex-wrap:wrap}
+.cp04-checklist-top h2{display:flex;align-items:center;gap:8px;margin:6px 0!important}
+.cp04-checklist-top p{color:#587390;font-size:14px;line-height:1.5}
+.cp04-count{background:#edf5ff;border:1px solid #caddf6;border-radius:11px;padding:12px}
+.cp04-checklist-legend{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0;font-size:13px;font-weight:650}
+.cp04-checklist-legend span{display:inline-flex;align-items:center;gap:7px}
+.cp04-checklist-legend i{width:22px;height:17px;border-radius:4px}
+.cp04-legend-ok{background:#97df42}
+.cp04-legend-attention{background:#ffdd24}
+.cp04-legend-immediate{background:#fa3838}
+.cp04-checklist-sheet{padding:18px!important}
+.cp04-checklist-editor{margin-top:18px;padding:16px;border:1px solid #cedff4;border-radius:13px;background:#f9fcff}
+.cp04-checklist-editor h3{margin:0}
+@media(max-width:760px){
+ .cp04-checklist-sheet{padding:9px!important;overflow-x:auto}
+ .cp04-checklist-legend{font-size:11px;gap:8px}
+ .cp04-checklist-top>button{width:100%}
+ .cp04-checklist-editor{padding:12px}
+}

@@ -21,6 +21,15 @@ describe('CP04 same-tab draft lifecycle',()=>{
    writeCp04Draft(scope,emptyCp04Draft,store,100)
    expect(readCp04Draft(scope,store,100+8*60*60*1000+1)).toBeNull()
  })
+ it('preserves the marked X and note when WhatsApp interrupts Auth R1',()=>{
+   const {store}=tab()
+   const x={...emptyCp04Draft,multipunto:{open:true,choice:{
+     itemId:'frenos/pastillas',state:'immediate' as const,note:'Pastillas agotadas'
+   }}}
+   expect(writeCp04Draft(scope,x,store,100)).toBe(true)
+   expect(readCp04Draft(scope,store,101)?.multipunto).toEqual(x.multipunto)
+   expect(readCp04Draft({...scope,userId:'22222222-2222-4222-8222-222222222222'},store,102)).toBeNull()
+ })
  it('clears after save and signout and validates record shape',()=>{
    const {store}=tab()
    expect(writeCp04Draft(scope,{...emptyCp04Draft,note:'a'.repeat(2001)},store,100)).toBe(false)

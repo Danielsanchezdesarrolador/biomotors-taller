@@ -13,6 +13,9 @@ import {
   type VehicleChoice
 } from './cp04Contracts'
 import {readCp04Draft,writeCp04Draft,emptyCp04Draft} from './cp04Draft'
+import {Cp04MultipuntoChecklist,emptyMultipuntoChoice,
+ type MultipuntoChoice} from './Cp04MultipuntoChecklist'
+import type {NewFinding} from './cp04Contracts'
 import './cp04.css'
 export type Cp04Port=Pick<ReturnType<typeof cp04Repository>,
   'findVehicleByPlate'|'recentOrders'|'getOrder'|'findingsForOrder'|
@@ -53,6 +56,10 @@ export function Cp04OrdersView({repository,context}:{
   const [category,setCategory]=useState(initial.category)
   const [result,setResult]=useState<FindingResult>(initial.result)
   const [note,setNote]=useState(initial.note)
+  const [multipuntoOpen,setMultipuntoOpen]=useState(initial.multipunto?.open??false)
+  const [multipuntoChoice,setMultipuntoChoice]=useState<MultipuntoChoice>(()=>
+    initial.multipunto?.choice??emptyMultipuntoChoice)
+  const multipuntoSection=useRef<HTMLDivElement>(null)
   const [busy,setBusy]=useState(false)
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
@@ -66,9 +73,11 @@ export function Cp04OrdersView({repository,context}:{
   useEffect(()=>{
     writeCp04Draft(scope,{
       selectedOrderId:selected?.order.id??initial.selectedOrderId,
-      plate,complaint,intakeOdometer:intake,category,result,note
+      plate,complaint,intakeOdometer:intake,category,result,note,
+      multipunto:{open:multipuntoOpen,choice:multipuntoChoice}
     })
-  },[context.userId,context.workshop.id,selected?.order.id,plate,complaint,intake,category,result,note])
+  },[context.userId,context.workshop.id,selected?.order.id,plate,complaint,intake,
+    category,result,note,multipuntoOpen,multipuntoChoice])
 
   useEffect(()=>{
     active.current=true
@@ -107,6 +116,10 @@ export function Cp04OrdersView({repository,context}:{
         repository.pendingForVehicle(item.order.vehicle_id)
       ])
       if(!active.current||request!==revision.current)return
+      if(selected && selected.order.id!==item.order.id) {
+        setMultipuntoOpen(false)
+        setMultipuntoChoice(emptyMultipuntoChoice)
+      }
       setSelected(item);setVehicle(item.vehicle);setPlate(item.vehicle.plate??'')
       setFindings(list);setPending(outstanding)
     }catch(error){
@@ -174,6 +187,33 @@ export function Cp04OrdersView({repository,context}:{
       setNotice('Resultado de inspección guardado en Supabase.')
     }catch(error){if(active.current)setMessage(workMessage(error))}
     finally{lock.current=false;if(active.current)setBusy(false)}
+  }
+  async function saveMultipunto(input:NewFinding):Promise<boolean>{
+    if(lock.current||!selected||selected.order.status==='closed'||!canInspect)return false
+    lock.current=true;setBusy(true);setMessage('');setNotice('')
+    try{
+      // No fixture or separate endpoint: only the existing Auth/RLS repository.
+      if(input.order_id!==selected.order.id||input.vehicle_id!==selected.order.vehicle_id)
+        return false
+      await repository.createFinding(input)
+      if(!active.current)return false
+      const [list,outstanding]=await Promise.all([
+        repository.findingsForOrder(selected.order.id),
+        repository.pendingForVehicle(selected.order.vehicle_id)
+      ])
+      if(!active.current)return false
+      setFindings(list);setPending(outstanding)
+      setNotice('X guardada en Supabase. La revisión anterior permanece en el historial.')
+      return true
+    }catch(error){
+      if(active.current)setMessage(workMessage(error))
+      return false
+    }finally{lock.current=false;if(active.current)setBusy(false)}
+  }
+  function openMultipunto(){
+    setMultipuntoOpen(true)
+    window.requestAnimationFrame(()=>
+      multipuntoSection.current?.scrollIntoView({behavior:'smooth',block:'start'}))
   }
   async function changeStatus(next:OrderStatus) {
     if(!selected||lock.current||!canCreate)return
@@ -276,6 +316,12 @@ export function Cp04OrdersView({repository,context}:{
         </div>
         <span className="cp04-status">{workStatusLabel[selected.order.status]}</span>
       </div>
+      <div className="cp04-checklist-launch">
+        <button type="button" className="cp04-primary" onClick={openMultipunto}>
+          <ClipboardCheck size={18}/> Abrir inspección multipunto con X
+        </button>
+        <small>Revisar los componentes de la hoja original y registrar cada X en Supabase.</small>
+      </div>
       {canCreate&&statusNext[selected.order.status].length>0&&<div className="cp04-actions">
         {statusNext[selected.order.status].map(next=><button type="button" key={next}
           className={next==='closed'?'cp04-secondary':'cp04-primary'} disabled={busy}
@@ -283,7 +329,17 @@ export function Cp04OrdersView({repository,context}:{
           {next==='closed'?'Cerrar y conservar historial':workStatusLabel[next]}
         </button>)}
       </div>}
-      <div className="cp04-detail-grid">
+      {multipuntoOpen&&<div ref={multipuntoSection} className="cp04-multipunto-anchor">
+        <Cp04MultipuntoChecklist
+          orderId={selected.order.id} vehicleId={selected.order.vehicle_id}
+          findings={findings} choice={multipuntoChoice} onChange={setMultipuntoChoice}
+          onSave={saveMultipunto} disabled={busy||loading}
+          readOnly={!canInspect||selected.order.status==='closed'}
+          plate={selected.vehicle.plate}
+          onBack={()=>setMultipuntoOpen(false)}
+        />
+      </div>}
+      {!multipuntoOpen&&<div className="cp04-detail-grid">
         <div>
           <h3><ClipboardCheck size={18}/> Inspección multipunto</h3>
           {findings.length===0&&<p>Todavía no se han registrado puntos de inspección.</p>}
@@ -333,7 +389,7 @@ export function Cp04OrdersView({repository,context}:{
               onClick={()=>void resolve(item)}><CheckCircle2 size={16}/> Marcar resuelto</button>}
           </div>)}
         </div>
-      </div>
+      </div>}
     </section>}
   </div>
 }

@@ -13,6 +13,15 @@ export type Cp04Draft=Readonly<{
   category:string
   result:'ok'|'attention'|'not_checked'
   note:string
+  /** Backwards compatible: older CP04 drafts have no multipoint editor state. */
+  multipunto?: {
+    open:boolean
+    choice:{
+      itemId:string|null
+      state:'unreviewed'|'ok'|'attention'|'immediate'
+      note:string
+    }
+  }
 }>
 type Scope=Readonly<{userId:string;workshopId:string}>
 type StoragePort=Pick<Storage,'getItem'|'setItem'|'removeItem'>
@@ -34,7 +43,20 @@ function valid(input:unknown):input is Cp04Draft{
    typeof v.intakeOdometer==='string'&&v.intakeOdometer.length<=10&&
    typeof v.category==='string'&&v.category.length<=80&&
    ['ok','attention','not_checked'].includes(String(v.result))&&
-   typeof v.note==='string'&&v.note.length<=2000
+   typeof v.note==='string'&&v.note.length<=2000 &&
+   (v.multipunto===undefined || (
+     v.multipunto!==null&&typeof v.multipunto==='object' &&
+     typeof (v.multipunto as Record<string,unknown>).open==='boolean' &&
+     (() => {
+       const data=(v.multipunto as Record<string,unknown>).choice
+       if(!data||typeof data!=='object'||Array.isArray(data))return false
+       const sel=data as Record<string,unknown>
+       return (sel.itemId===null||(typeof sel.itemId==='string'&&
+         /^[a-z-]+\/[a-z-]+$/.test(sel.itemId))) &&
+         ['unreviewed','ok','attention','immediate'].includes(String(sel.state))&&
+         typeof sel.note==='string'&&sel.note.length<=1900
+     })()
+   ))
 }
 export function clearCp04Draft(store:StoragePort|null=storage()){
   try{store?.removeItem(key)}catch{/* best effort when blocked */}
