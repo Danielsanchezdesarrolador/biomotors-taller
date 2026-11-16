@@ -265,8 +265,13 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 ### BT-CP05 — Presupuestos, PDF y correo — PREPARACIÓN (NO OPERATIVO)
 
-- [x] Contrato de entrega funcional única consolidado el 16/11/2026 en [BT_CP05_ENTREGA_FUNCIONAL.md](docs/BT_CP05_ENTREGA_FUNCIONAL.md). El editor de cotizaciones DEMO existente será reutilizado; no equivale a persistencia real. SQL y Storage alojados, envío externo y activación privada **no autorizados**. Ninguna implementación CP05 está certificada todavía.
+- [x] Contrato de entrega funcional única consolidado el 16/11/2026 en [BT_CP05_ENTREGA_FUNCIONAL.md](docs/BT_CP05_ENTREGA_FUNCIONAL.md). El editor de partidas y el motor de cálculo existentes fueron reutilizados sin importar fixtures; el candidato no equivale a persistencia alojada. SQL y Storage alojados, envío externo y activación privada **no autorizados**. CP05 no está certificado como operativo.
 
+- [x] Preparación técnica integrada en `main`: acceso desde OT CP04 y vehículo CP03, mismo SDK Auth, edición neta/IVA, guardado RPC candidato con concurrencia e idempotencia, historial inmutable y PDF A4 descargable de borrador.
+- [x] SQL aditivo/RLS candidato probado en PostgreSQL 17 efímero sin red, incluyendo A/B, roles, persistencia entre conexiones, numeración concurrente, snapshots, anulación y trazabilidad de proveedor sintético. Ninguna migración alojada aplicada.
+- [x] Emisión/archivo privados y correo preparados como puertos backend, bloqueados. `VITE_BT_CP05_PRIVATE_ENABLED=false` por defecto; no cambia flags de Render ni secretos.
+- [x] Validación consolidada: 552 pruebas, TypeScript, builds público/CP04/CP05/PWA, cinco tamaños y regresión CP04, bundle Android nativo. [Informe único CP05](docs/checkpoints/CHECKPOINT_BT_CP05_20261116.md).
+- [ ] Autorizar por separado SQL alojado tras respaldo recuperable, validar persistencia real con nueva sesión, aprobar Storage privado/backend y probar archivo/restauración antes de emitir. Correo requiere autorización independiente.
 - [ ] Digitalizar la hoja real de presupuesto, relacionándola con inspecciones y vehículos.
 - [ ] Ítems, mano de obra, valores, totales, vigencia y estados.
 - [ ] Generar PDF legible e identificable con datos del taller.

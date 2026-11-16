@@ -19,25 +19,45 @@ assert.ok(
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
+const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+if (cp05PrivateEnabled)
+  assert.equal(process.env.VITE_BT_CP04_PRIVATE_ENABLED, 'true', 'CP05 requires CP04')
+if (!cp05PrivateEnabled)
+  assert.ok(
+    modules.every((id) => !id.includes('src/cp05/')),
+    'CP05 disabled by default'
+  )
 const cp04PrivateEnabled = process.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true'
-if(cp04PrivateEnabled){
- assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED,'true','CP04 requires verified R1')
- assert.equal(process.env.VITE_BT_CP03_PRIVATE_ENABLED,'true','CP04 requires CP03')
+if (cp04PrivateEnabled) {
+  assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED, 'true', 'CP04 requires verified R1')
+  assert.equal(process.env.VITE_BT_CP03_PRIVATE_ENABLED, 'true', 'CP04 requires CP03')
 }
-if(!cp04PrivateEnabled){
-  assert.ok(modules.every(id=>
-    !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(id)),
-    'CP04 must not be shipped without hosted SQL and private rollout authorization')
+if (!cp04PrivateEnabled) {
+  assert.ok(
+    modules.every(
+      (id) =>
+        !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+          id
+        )
+    ),
+    'CP04 must not be shipped without hosted SQL and private rollout authorization'
+  )
 }
 if (cp03PrivateEnabled)
-  assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED, 'true',
-    'Private CP03 requires R1 authenticated build')
+  assert.equal(
+    process.env.VITE_BT_AUTH_R1_ENABLED,
+    'true',
+    'Private CP03 requires R1 authenticated build'
+  )
 // CP03 is an unapproved data-access candidate: no customers may be loaded
 // or written by the deployed official presentation until the Director gates it.
 if (!cp03PrivateEnabled) {
   assert.ok(
-    modules.every((id) =>
-      !/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id)
+    modules.every(
+      (id) =>
+        !/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
+          id
+        )
     ),
     'Unapproved CP03 customer/vehicle repository in public PWA'
   )
@@ -46,10 +66,21 @@ assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
+      (cp05PrivateEnabled &&
+        /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
+          id
+        )) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
-      (cp03PrivateEnabled && /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id)) ||
-      (cp04PrivateEnabled && /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(id)) ||
-      (cp04PrivateEnabled && /src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(id))
+      (cp03PrivateEnabled &&
+        /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
+          id
+        )) ||
+      (cp04PrivateEnabled &&
+        /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+          id
+        )) ||
+      (cp04PrivateEnabled &&
+        /src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(id))
   )
 )
 for (const name of readdirSync('dist/assets')) {

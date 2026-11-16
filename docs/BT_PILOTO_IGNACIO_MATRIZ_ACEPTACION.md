@@ -1,6 +1,6 @@
 # ByteTorque — Matriz de aceptación del piloto de Ignacio
 
-**Fecha de corte:** 15/11/2026. **Fuente de verdad:** evidencia de pruebas del Director, consulta SQL alojada y CI/checkpoints. CP03 fue comprobado en escritorio con datos ficticios; no se afirma QA físico iPhone ni aprobación de Ignacio. **Prioridad:** piloto completo antes de comercialización.
+**Fecha de corte:** 16/11/2026. **Fuente de verdad:** evidencia de pruebas del Director, consulta SQL alojada y CI/checkpoints. CP03 fue comprobado en escritorio con datos ficticios; no se afirma QA físico iPhone ni aprobación de Ignacio. **Prioridad:** piloto completo antes de comercialización.
 
 | Funcionalidad | Interfaz DEMO / preparación | Backend real en Supabase alojado | QA relevante | Aprobación Ignacio |
 |---|---|---|---|---|
@@ -13,9 +13,9 @@
 | Inspección multipunto | **Formulario de inspección CP04 activado** | SQL real en `inspection_findings`, RLS FORCE activa | Hallazgo ficticio «Requiere atención» comprobado en transacción revertida; QA físico pendiente | Pendiente |
 | Diagnósticos/observaciones | **Historial de problemas pendientes y acción «resuelto» publicados** | SQL CP04 instalado; conserva nota original y fecha/resolución | RLS PostgreSQL 17, cierre histórico y prueba transaccional aprobados; flujo entre visitas desde UI pendiente | Pendiente |
 | Reparaciones/seguimiento/entrega | Flujo DEMO | No conectado | Recorrido real pendiente | Pendiente |
-| Cotización | Flujo DEMO | No conectado | Datos de precios reales pendientes | Pendiente |
-| PDF | Impresión preliminar DEMO | Sin emisión archivada ni vinculación real | Diseño A4 previo; producción pendiente | Pendiente |
-| Correos | Simulado | Resend no activado; sin correos reales | HTTP mock, sin pruebas proveedor real | Pendiente |
+| Cotización | CP05 candidato integrado a OT/vehículo; editor existente, neto/IVA y RPC | **SQL no aplicado; CP05 NO operativo** | 552 tests; PostgreSQL local A/B, concurrencia y recuperación entre conexiones; UI HTTP sintético | Pendiente |
+| PDF | PDF A4 auténtico descargable de borrador CP05; logo oficial y Unicode | Emisión/archivo privados bloqueados; Storage no activado | Descarga Chromium, bytes válidos, A4, paginación y restauración con adaptador simulado; archivo alojado pendiente | Pendiente |
+| Correos | Puertos backend CP05 y ledger candidato queued/sent/failed | **Desactivados**; sin Edge/proveedor/secretos nuevos | Acuse sintético, rechazo y estado ambiguo; ningún correo real | Pendiente |
 | Historial por vehículo | DEMO | No persistente | Recuperación después de meses pendiente | Pendiente |
 | Respaldo y restauración | Procedimiento manual de recuperación ejecutado fuera de la aplicación | Exportaciones Auth/public y restauración aislada PostgreSQL 17 verificadas antes de CP03 | Sin automatización; copia externa redundante no confirmada | Pendiente |
 | iPhone Safari/PWA | CP03 disponible en PWA privada publicada | Backend CP03 hospedado y Auth/RLS activos | **Safari físico de Ignacio pendiente**; WebKit Linux no lo reemplaza | Pendiente |
@@ -27,3 +27,5 @@
 No cambiar estado de una capacidad a **Operativa** sin comprobar persistencia real, autorización Auth/RLS del taller, reinicio de sesión, errores y recuperación; registrar evidencia fechada y revisión del usuario. Nada de clientes reales o envío de correos antes de autorizaciones independientes. Una ejecución PostgreSQL aislada o Vitest mock nunca equivale a QA de producción.
 
 **Orden obligatorio:** Auth mínimo seguro → CP03 → CP04 → CP05 → CP06 → aceptación Ignacio → CP07–CP09.
+
+Evidencia de esta preparación: [informe único CP05](checkpoints/CHECKPOINT_BT_CP05_20261116.md). No se declara persistencia, emisión ni envío alojados.

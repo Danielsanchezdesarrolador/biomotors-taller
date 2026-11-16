@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2, Wrench } from 'lucide-react'
-import { currency, itemTypes, validateItem, type WorkDocument, type WorkItem } from './trabajosData'
+import { calculateTotals } from '../../ordenes/orderMoney'
+import { currency, itemTypes, validateItem, type WorkItem } from './workItemCore'
 export function WorkItemsTable({
   document: d,
   onEdit,
   onDelete,
   onPerformed,
-  onTemplate
+  onTemplate,
+  readOnly = false
 }: {
-  document: WorkDocument
+  document: { mode: 'quote' | 'work'; items: WorkItem[] }
   onEdit: (item?: WorkItem) => void
   onDelete: (item: WorkItem) => void
   onPerformed: (id: string, value: boolean) => void
   onTemplate?: () => void
+  readOnly?: boolean
 }) {
   return (
     <section className="dashboard-card wt-items wt-card">
@@ -72,7 +75,7 @@ export function WorkItemsTable({
               <td data-label="Cantidad">{item.quantity.toLocaleString('es-CL')}</td>
               <td data-label="Precio unitario">{currency(item.price)}</td>
               <td data-label="Total">
-                <strong>{currency(Math.round(item.quantity * item.price))}</strong>
+                <strong>{currency(calculateTotals([item]).subtotal)}</strong>
                 {d.mode === 'work' && !item.performed && <small>No incluido · Sin realizar</small>}
               </td>
               {d.mode === 'work' && (
@@ -89,10 +92,18 @@ export function WorkItemsTable({
                 </td>
               )}
               <td className="wt-row-actions">
-                <button aria-label={`Editar ítem ${i + 1}`} onClick={() => onEdit(item)}>
+                <button
+                  disabled={readOnly}
+                  aria-label={`Editar ítem ${i + 1}`}
+                  onClick={() => onEdit(item)}
+                >
                   <Pencil />
                 </button>
-                <button aria-label={`Eliminar ítem ${i + 1}`} onClick={() => onDelete(item)}>
+                <button
+                  disabled={readOnly}
+                  aria-label={`Eliminar ítem ${i + 1}`}
+                  onClick={() => onDelete(item)}
+                >
                   <Trash2 />
                 </button>
               </td>
@@ -103,7 +114,7 @@ export function WorkItemsTable({
       {!d.items.length && (
         <p className="wt-empty">Sin ítems. Agrega un repuesto, insumo, servicio o mano de obra.</p>
       )}
-      <button className="rp-inline" onClick={() => onEdit()}>
+      <button disabled={readOnly} className="rp-inline" onClick={() => onEdit()}>
         <Plus /> Agregar otro ítem
       </button>
     </section>
@@ -111,10 +122,16 @@ export function WorkItemsTable({
 }
 export function WorkItemForm({
   item,
-  onSave
+  onSave,
+  validate = validateItem,
+  saveLabel = 'Guardar ítem DEMO',
+  minimumPrice = 0
 }: {
   item?: WorkItem
   onSave: (value: WorkItem) => void
+  validate?: (value: WorkItem) => string
+  saveLabel?: string
+  minimumPrice?: number
 }) {
   const [value, setValue] = useState<WorkItem>(() =>
     item
@@ -136,7 +153,7 @@ export function WorkItemForm({
       quantity: quantity.trim() ? Number(quantity) : NaN,
       price: price.trim() ? Number(price) : NaN
     },
-    problem = validateItem(candidate)
+    problem = validate(candidate)
   function save(e: React.FormEvent) {
     e.preventDefault()
     if (problem) {
@@ -193,7 +210,7 @@ export function WorkItemForm({
             aria-label="Precio del ítem"
             type="number"
             inputMode="numeric"
-            min="0"
+            min={minimumPrice}
             max="100000000"
             step="1"
             value={price}
@@ -203,9 +220,7 @@ export function WorkItemForm({
       </div>
       <p className="wt-line-total">
         Total del ítem:{' '}
-        {problem
-          ? 'Revisa los valores'
-          : currency(Math.round(candidate.quantity * candidate.price))}
+        {problem ? 'Revisa los valores' : currency(calculateTotals([candidate]).subtotal)}
       </p>
       {error && (
         <p className="rp-error" role="alert">
@@ -213,7 +228,7 @@ export function WorkItemForm({
         </p>
       )}
       <button className="rp-primary" type="submit">
-        Guardar ítem DEMO
+        {saveLabel}
       </button>
     </form>
   )

@@ -70,10 +70,12 @@ function safeDate(value: string): string {
 }
 export function Cp04OrdersView({
   repository,
-  context
+  context,
+  onQuote
 }: {
   repository: Cp04Port
   context: Context
+  onQuote?: (id: string) => void
 }) {
   const active = useRef(true),
     revision = useRef(0),
@@ -746,6 +748,15 @@ export function Cp04OrdersView({
               {workStatusLabel[selected.order.status]}
             </span>
           </div>
+          {onQuote && (
+            <button
+              className="cp04-secondary"
+              disabled={loading || busy}
+              onClick={() => onQuote(selected.order.id)}
+            >
+              Preparar / consultar cotización
+            </button>
+          )}
           <div className="cp04-checklist-launch">
             <button
               type="button"

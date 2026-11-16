@@ -12,16 +12,16 @@ import { Cp03PilotDirectoryView } from './cp03PilotDirectoryView'
 
 type Binding = ReturnType<typeof cp03PilotAccessBinding>
 
-function BoundDirectory({ binding }: { binding: Binding }) {
+function BoundDirectory({ binding, onVehicleQuotes }: { binding: Binding; onVehicleQuotes?: (id:string)=>void }) {
   const access = useSyncExternalStore(binding.subscribe,binding.getSnapshot,() => null)
   if (!access) return <p role="status">Verificando el acceso al directorio privado…</p>
   const { context, repository } = access
   return <Cp03PilotDirectoryView key={context.userId+'-'+context.workshop.id+'-'+context.role}
-    repository={repository} role={context.role} workshopName={context.workshop.name}
+    onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
     draftScope={{userId:context.userId,workshopId:context.workshop.id}}/>
 }
-function AuthClientDirectory({ controller, client }: {
-  controller: AuthController; client: SupabaseClient
+function AuthClientDirectory({ controller, client, onVehicleQuotes }: {
+  controller: AuthController; client: SupabaseClient; onVehicleQuotes?: (id:string)=>void
 }) {
   const [binding, setBinding] = useState<Binding|null>(null)
   useEffect(() => {
@@ -29,10 +29,10 @@ function AuthClientDirectory({ controller, client }: {
     setBinding(created)
     return () => { created.dispose() }
   }, [controller,client])
-  return binding ? <BoundDirectory binding={binding}/> :
+  return binding ? <BoundDirectory binding={binding} onVehicleQuotes={onVehicleQuotes}/> :
     <p role="status">Validando la sesión del taller…</p>
 }
-export function Cp03PrivatePanel({ controller }: { controller: AuthController }) {
+export function Cp03PrivatePanel({ controller, onVehicleQuotes }: { controller: AuthController; onVehicleQuotes?: (id:string)=>void }) {
   const [client,setClient] = useState<SupabaseClient|null>(null)
   const [error,setError] = useState(false)
   useEffect(() => {
@@ -48,6 +48,6 @@ export function Cp03PrivatePanel({ controller }: { controller: AuthController })
     return ()=>{active=false}
   },[controller])
   if (error) return <p role="alert">Acceso al directorio no disponible. Cierra sesión y vuelve a verificar.</p>
-  return client ? <AuthClientDirectory controller={controller} client={client}/> :
+  return client ? <AuthClientDirectory controller={controller} client={client} onVehicleQuotes={onVehicleQuotes}/> :
     <p role="status">Abriendo fichas del taller autorizado…</p>
 }

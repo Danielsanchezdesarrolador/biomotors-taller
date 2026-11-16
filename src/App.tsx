@@ -19,8 +19,17 @@ import {
   resolveAccessPath
 } from './access/accessContract'
 /** A separately approved private R1 rollout. No public-review route can mount it. */
-function PrivateWorkOrders({ controller }: { controller: AuthController }) {
-  const [Panel, setPanel] = useState<ComponentType<{ controller: AuthController }> | null>(null)
+function PrivateWorkOrders({
+  controller,
+  onQuote
+}: {
+  controller: AuthController
+  onQuote?: (id: string) => void
+}) {
+  const [Panel, setPanel] = useState<ComponentType<{
+    controller: AuthController
+    onQuote?: (id: string) => void
+  }> | null>(null)
   const [failed, setFailed] = useState(false)
   useEffect(() => {
     if (import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED !== 'true') return
@@ -38,13 +47,52 @@ function PrivateWorkOrders({ controller }: { controller: AuthController }) {
   }, [controller])
   if (failed) return <p role="alert">No se pudo cargar el módulo de órdenes. Revisa el acceso.</p>
   return Panel ? (
-    <Panel controller={controller} />
+    <Panel controller={controller} onQuote={onQuote} />
   ) : (
     <p role="status">Preparando órdenes autorizadas…</p>
   )
 }
-function PrivateClientDirectory({ controller }: { controller: AuthController }) {
-  const [Panel, setPanel] = useState<ComponentType<{ controller: AuthController }> | null>(null)
+function PrivateQuotes(props: {
+  controller: AuthController
+  initialOrderId?: string
+  initialVehicleId?: string
+  onBack: () => void
+}) {
+  const [Panel, setPanel] = useState<ComponentType<typeof props> | null>(null)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    let active = true
+    if (import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true')
+      void import('./cp05/Cp05PrivatePanel')
+        .then((m) => {
+          if (active) setPanel(() => m.Cp05PrivatePanel)
+        })
+        .catch(() => {
+          if (active) setFailed(true)
+        })
+    return () => {
+      active = false
+    }
+  }, [props.controller])
+  return failed ? (
+    <p role="alert">No se pudo cargar cotizaciones. Verifica la conexión.</p>
+  ) : Panel ? (
+    <Panel {...props} />
+  ) : (
+    <p role="status">Preparando cotizaciones autorizadas…</p>
+  )
+}
+function PrivateClientDirectory({
+  controller,
+  onVehicleQuotes
+}: {
+  controller: AuthController
+  onVehicleQuotes?: (id: string) => void
+}) {
+  const [Panel, setPanel] = useState<ComponentType<{
+    controller: AuthController
+    onVehicleQuotes?: (id: string) => void
+  }> | null>(null)
   const [failed, setFailed] = useState(false)
   useEffect(() => {
     if (import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED !== 'true') return
@@ -63,7 +111,7 @@ function PrivateClientDirectory({ controller }: { controller: AuthController }) 
   if (failed)
     return <p role="alert">No se pudo cargar el directorio privado. Reintenta el acceso.</p>
   return Panel ? (
-    <Panel controller={controller} />
+    <Panel controller={controller} onVehicleQuotes={onVehicleQuotes} />
   ) : (
     <p role="status">Preparando clientes y vehículos del taller autorizado…</p>
   )
@@ -87,7 +135,13 @@ export function OfficialWorkspaceView({
   const [screen, setScreen] = useState<Screen>(() =>
     session && !review ? readPrivateScreen() : 'inicio'
   )
+  const [quoteOrder, setQuoteOrder] = useState<string | undefined>()
+  const [quoteVehicle, setQuoteVehicle] = useState<string | undefined>()
   const navigateScreen = (next: Screen) => {
+    if (next !== 'informes') {
+      setQuoteOrder(undefined)
+      setQuoteVehicle(undefined)
+    }
     setScreen(next)
     if (session && !review) rememberPrivateScreen(next)
   }
@@ -134,9 +188,11 @@ export function OfficialWorkspaceView({
               : session
                 ? session.directoryController &&
                   (screen === 'clientes' ||
+                    (screen === 'informes' &&
+                      import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true') ||
                     (screen === 'ordenes' &&
                       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true'))
-                  ? 'Directorio privado conectado al taller autorizado. En las pruebas utiliza únicamente fichas ficticias.'
+                  ? 'Datos privados conectados al taller autorizado. Utiliza únicamente registros autorizados.'
                   : 'Las demás operaciones de negocio aún no están habilitadas. No ingreses datos reales sin autorización.'
                 : preparationNotice}
           </p>
@@ -147,11 +203,44 @@ export function OfficialWorkspaceView({
       {screen === 'ordenes' &&
       session?.directoryController &&
       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
-        <PrivateWorkOrders controller={session.directoryController} />
+        <PrivateWorkOrders
+          controller={session.directoryController}
+          onQuote={
+            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+              ? (id) => {
+                  setQuoteOrder(id)
+                  setScreen('informes')
+                  rememberPrivateScreen('informes')
+                }
+              : undefined
+          }
+        />
+      ) : screen === 'informes' &&
+        !review &&
+        session?.directoryController &&
+        import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' ? (
+        <PrivateQuotes
+          controller={session.directoryController}
+          initialVehicleId={quoteVehicle}
+          initialOrderId={quoteOrder}
+          onBack={() => navigateScreen(quoteVehicle ? 'clientes' : 'ordenes')}
+        />
       ) : screen === 'clientes' &&
         session?.directoryController &&
         import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ? (
-        <PrivateClientDirectory controller={session.directoryController} />
+        <PrivateClientDirectory
+          controller={session.directoryController}
+          onVehicleQuotes={
+            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+              ? (id) => {
+                  setQuoteVehicle(id)
+                  setQuoteOrder(undefined)
+                  setScreen('informes')
+                  rememberPrivateScreen('informes')
+                }
+              : undefined
+          }
+        />
       ) : (
         <OfficialPanel screen={screen} onNavigate={navigateScreen} />
       )}

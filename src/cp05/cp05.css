@@ -1,0 +1,245 @@
+.cp05-panel {
+  color: #18345b;
+  min-width: 0;
+}
+.cp05-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.cp05-heading h1 {
+  margin: 0;
+  font-size: 30px;
+  color: #0a2346;
+}
+.cp05-heading p {
+  margin: 5px 0;
+  color: #547393;
+}
+.cp05-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #c9dff8;
+  background: #edf5ff;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cp05-notice svg {
+  flex-shrink: 0;
+}
+.cp05-layout {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.cp05-list,
+.cp05-context,
+.cp05-item,
+.cp05-conditions,
+.cp05-totals,
+.cp05-history,
+.cp05-empty {
+  padding: 20px;
+  min-width: 0;
+  border: 1px solid #d3e2f8;
+  border-radius: 16px;
+  background: #fff;
+}
+.cp05-list {
+  display: grid;
+  gap: 12px;
+}
+.cp05-list h2,
+.cp05-context h2,
+.cp05-history h2 {
+  font-size: 19px;
+  margin: 0 0 9px;
+}
+.cp05-list p,
+.cp05-list small {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #567194;
+}
+.cp05-panel label {
+  display: grid;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cp05-panel input,
+.cp05-panel select,
+.cp05-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #bdd2ef;
+  border-radius: 9px;
+  padding: 10px;
+  font: inherit;
+  color: #17375b;
+  background: white;
+}
+.cp05-editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.cp05-panel .wt-items {
+  margin: 0;
+  padding: 18px;
+}
+.cp05-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cp05-actions button {
+  min-height: 44px;
+}
+.cp05-conditions {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+.cp05-conditions legend {
+  font-weight: 700;
+}
+.cp05-context p {
+  line-height: 1.5;
+}
+.cp05-context small {
+  overflow-wrap: anywhere;
+}
+.cp05-totals {
+  position: sticky;
+  bottom: 8px;
+  background: #f0f7ff;
+  z-index: 2;
+  box-shadow: 0 3px 15px #123e7915;
+  display: grid;
+  gap: 8px;
+}
+.cp05-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cp05-totals > div:nth-child(3) {
+  font-size: 19px;
+  color: #005bea;
+  font-weight: 750;
+}
+.cp05-totals small {
+  font-size: 11px;
+  line-height: 1.5;
+}
+.cp05-history article {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid #dce6f5;
+  padding: 12px 0;
+}
+.cp05-history code {
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.cp05-history p {
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.cp05-panel button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.cp05-panel .wt-row-actions button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.cp05-panel button:focus-visible,
+.cp05-panel input:focus-visible,
+.cp05-panel select:focus-visible,
+.cp05-panel textarea:focus-visible {
+  outline: 3px solid #6ab2ff;
+  outline-offset: 2px;
+}
+@media (max-width: 1000px) {
+  .cp05-layout {
+    grid-template-columns: 1fr;
+  }
+  .cp05-list {
+    grid-template-columns: 1fr;
+  }
+  .cp05-heading h1 {
+    font-size: 27px;
+  }
+}
+@media (max-width: 760px) {
+  .cp05-panel .wt-items {
+    padding: 12px;
+  }
+  .cp05-totals {
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding: 12px;
+  }
+  .cp05-conditions,
+  .cp05-list,
+  .cp05-context,
+  .cp05-history {
+    padding: 15px;
+  }
+  .cp05-panel .wt-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .cp05-actions button {
+    flex: 1 1 160px;
+  }
+  .cp05-panel .wt-items table {
+    table-layout: auto;
+  }
+  .cp05-panel .wt-items td {
+    overflow-wrap: anywhere;
+  }
+}
+
+.cp05-panel {
+  padding-bottom: 78px;
+}
+.cp05-floating-total {
+  position: fixed;
+  right: 24px;
+  bottom: 20px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+  border: 1px solid #b7d4ff;
+  border-radius: 13px;
+  background: #eef6ff;
+  box-shadow: 0 4px 18px #0b397a25;
+  color: #005bea;
+}
+.cp05-floating-total span {
+  font-size: 12px;
+  color: #294a73;
+}
+@media (max-width: 760px) {
+  .cp05-floating-total {
+    left: 14px;
+    right: 14px;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding: 12px 14px;
+  }
+  .cp05-panel {
+    padding-bottom: 100px;
+  }
+}

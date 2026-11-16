@@ -9,7 +9,15 @@ import type { AuthController, Context } from '../auth/controller'
 import { cp04Repository } from './cp04Repository'
 import { Cp04OrdersView } from './Cp04OrdersView'
 
-function VerifiedOrderScreen({ client, context }: { client: SupabaseClient; context: Context }) {
+function VerifiedOrderScreen({
+  client,
+  context,
+  onQuote
+}: {
+  client: SupabaseClient
+  context: Context
+  onQuote?: (id: string) => void
+}) {
   const [repository, setRepository] = useState<ReturnType<typeof cp04Repository> | null>(null)
   // Each effect lifetime owns a fresh binding. StrictMode cleanup invalidates
   // its predecessor; the next mount must never reuse that disposed repository.
@@ -19,9 +27,15 @@ function VerifiedOrderScreen({ client, context }: { client: SupabaseClient; cont
     return () => binding.dispose()
   }, [client, context])
   if (!repository) return <p role="status">Preparando órdenes autorizadas…</p>
-  return <Cp04OrdersView repository={repository} context={context} />
+  return <Cp04OrdersView repository={repository} context={context} onQuote={onQuote} />
 }
-export function Cp04PrivatePanel({ controller }: { controller: AuthController }) {
+export function Cp04PrivatePanel({
+  controller,
+  onQuote
+}: {
+  controller: AuthController
+  onQuote?: (id: string) => void
+}) {
   const [ready, setReady] = useState<{ client: SupabaseClient; context: Context } | null>(null)
   const [error, setError] = useState(false)
   useEffect(() => {
@@ -58,6 +72,7 @@ export function Cp04PrivatePanel({ controller }: { controller: AuthController })
   return (
     <VerifiedOrderScreen
       key={ready.context.userId + '-' + ready.context.workshop.id}
+      onQuote={onQuote}
       client={ready.client}
       context={ready.context}
     />

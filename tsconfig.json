@@ -33,6 +33,7 @@
     "vite.config.ts",
     "vitest.config.ts",
     "vite.harness.config.ts",
-    "tests"
+    "tests",
+    "server"
   ]
 }

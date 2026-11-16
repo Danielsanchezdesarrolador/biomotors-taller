@@ -46,11 +46,12 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName, draftScope
+  repository, role, workshopName, draftScope, onVehicleQuotes
 }: {
   repository: PilotDirectoryPort
   role: Role
   workshopName: string
+  onVehicleQuotes?: (id:string)=>void
   draftScope?: DraftScope
 }) {
   const writable = role === 'owner' || role === 'admin' || role === 'reception'
@@ -437,6 +438,7 @@ export function Cp03PilotDirectoryView({
             ))}
             {vehicle && <div className="cp03-vehicle">
               <h3>Vehículo seleccionado</h3>
+              {onVehicleQuotes && <button className="cp03-secondary" disabled={saving} onClick={()=>onVehicleQuotes(vehicle.id)}>Consultar cotizaciones del vehículo</button>}
               <p>{vehicle.make} {vehicle.model} · {vehicle.plate ?? 'Sin patente'}</p>
               <p>{vehicle.model_year ?? 'Año no indicado'} · {vehicle.odometer_km === null ?
                 'Kilometraje no indicado' : vehicle.odometer_km.toLocaleString('es-CL')+' km'}</p>

@@ -1,0 +1,21 @@
+name: ByteTorque CP05 — Cotizaciones y RLS PostgreSQL aislado
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/sql/BT_CP05_QUOTES_CANDIDATE.sql'
+      - 'scripts/security/bt-cp05-lab-assertions.sql'
+      - 'scripts/security/bt-cp05-lab-fixtures.sql'
+      - 'scripts/security/verify-cp05-local.sh'
+      - '.github/workflows/bt-cp05-postgres-lab.yml'
+permissions:
+  contents: read
+jobs:
+  cp05-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: CP05 — PostgreSQL local, RLS, snapshots y concurrencia
+        run: scripts/security/verify-cp05-local.sh

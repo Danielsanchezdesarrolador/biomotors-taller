@@ -1,13 +1,11 @@
 import { createDocument, documentContext } from '../documentosData'
-import { calculateTotals, clp, exampleItems, type LineItem } from '../../ordenes/detalleData'
+import { calculateTotals, exampleItems } from '../../ordenes/detalleData'
 import { loadDemoSettings } from '../../configuracion/settingsSession'
 import { listMultipunto, readMultipunto } from '../multipunto/multipuntoSession'
 export type WorkMode = 'quote' | 'work'
-export type WorkItem = Omit<LineItem, 'type'> & {
-  type: LineItem['type'] | 'Insumo'
-  performed: boolean
-  origin?: 'OT confirmada' | 'Definición manual' | 'Plantilla DEMO' | 'Cotización aceptada DEMO'
-}
+export { currency, itemTypes, validateItem } from './workItemCore'
+export type { WorkItem } from './workItemCore'
+import { currency, validateItem, type WorkItem } from './workItemCore'
 export type WorkState = 'Borrador' | 'Pendiente de revisión' | 'Aprobado DEMO' | 'Finalizado DEMO'
 export type WorkDocument = {
   id: string
@@ -43,13 +41,16 @@ export type WorkDocument = {
     footer: string
   }
 }
-export type WorkRequest = { mode: WorkMode; orderId: string; draftId?: string; compactQuote?: boolean }
+export type WorkRequest = {
+  mode: WorkMode
+  orderId: string
+  draftId?: string
+  compactQuote?: boolean
+}
 export const workModes: Record<WorkMode, string> = {
   quote: 'Cotización',
   work: 'Informe de trabajo'
 }
-export const itemTypes: WorkItem['type'][] = ['Repuesto', 'Insumo', 'Mano de obra', 'Servicio']
-export const currency = (value: number) => clp(value) + ' CLP'
 export function createWorkDocument(orderId: string, mode: WorkMode): WorkDocument {
   const source = createDocument('source', 'Cotización', orderId),
     { order } = documentContext(source),
@@ -90,16 +91,6 @@ export function createWorkDocument(orderId: string, mode: WorkMode): WorkDocumen
       footer: settings.branding.footer
     }
   }
-}
-export function validateItem(item: WorkItem) {
-  if (!item.description.trim() || item.description.trim().length > 160)
-    return 'Describe el ítem (1 a 160 caracteres).'
-  if (!itemTypes.includes(item.type)) return 'Selecciona un tipo válido.'
-  if (!Number.isFinite(item.quantity) || item.quantity <= 0 || item.quantity > 10000)
-    return 'Cantidad mayor que cero y hasta 10.000.'
-  if (!Number.isSafeInteger(item.price) || item.price < 0 || item.price > 100000000)
-    return 'Precio entero entre $0 y $100.000.000 CLP.'
-  return ''
 }
 export function includedItems(doc: WorkDocument) {
   return doc.mode === 'quote' ? doc.items : doc.items.filter((i) => i.performed)

@@ -1,0 +1,57 @@
+[
+  {
+    "width": 1650,
+    "items": 3,
+    "net": 130150,
+    "tax": 24729,
+    "total": 154879,
+    "http": "synthetic",
+    "overflow": false,
+    "pdf": false,
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "items": 3,
+    "net": 130150,
+    "tax": 24729,
+    "total": 154879,
+    "http": "synthetic",
+    "overflow": false,
+    "pdf": false,
+    "errors": []
+  },
+  {
+    "width": 768,
+    "items": 3,
+    "net": 130150,
+    "tax": 24729,
+    "total": 154879,
+    "http": "synthetic",
+    "overflow": false,
+    "pdf": false,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "items": 3,
+    "net": 130150,
+    "tax": 24729,
+    "total": 154879,
+    "http": "synthetic",
+    "overflow": false,
+    "pdf": true,
+    "errors": []
+  },
+  {
+    "width": 375,
+    "items": 3,
+    "net": 130150,
+    "tax": 24729,
+    "total": 154879,
+    "http": "synthetic",
+    "overflow": false,
+    "pdf": false,
+    "errors": []
+  }
+]

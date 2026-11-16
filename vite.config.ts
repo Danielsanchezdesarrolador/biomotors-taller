@@ -11,10 +11,13 @@ export default defineConfig(({ mode }) => {
   }
   if (env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
     throw new Error('CP03 private access requires R1 authentication; refusing build.')
-  if (env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
-      (env.VITE_BT_AUTH_R1_ENABLED !== 'true' ||
-       env.VITE_BT_CP03_PRIVATE_ENABLED !== 'true'))
+  if (
+    env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
+    (env.VITE_BT_AUTH_R1_ENABLED !== 'true' || env.VITE_BT_CP03_PRIVATE_ENABLED !== 'true')
+  )
     throw new Error('CP04 needs verified Auth R1 + CP03 directory before private build.')
+  if (env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' && env.VITE_BT_CP04_PRIVATE_ENABLED !== 'true')
+    throw new Error('CP05 requires CP04 private rollout.')
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')
@@ -28,18 +31,39 @@ export default defineConfig(({ mode }) => {
         generateBundle() {
           const files = [...this.getModuleIds()].map((id) => normalizePath(id))
           const application = files.filter(
-            (id) => id.startsWith(root + 'src/') || id.startsWith(root + 'tests/')
+            (id) =>
+              id.startsWith(root + 'src/') ||
+              id.startsWith(root + 'tests/') ||
+              id.startsWith(root + 'server/')
           )
           const forbidden = application.filter(
             (id) =>
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
-                !(env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(id)) &&
-                !(env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(id)) &&
-                !(env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(id)) &&
+                !(
+                  env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
+                    id
+                  )
+                ) &&
+                !(
+                  env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+                    id
+                  )
+                ) &&
+                !(
+                  env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(
+                    id
+                  )
+                ) &&
+                !(
+                  env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(
+                    id
+                  )
+                ) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
                   id
                 ))
