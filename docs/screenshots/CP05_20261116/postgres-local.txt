@@ -1,0 +1,206 @@
+BEGIN
+CREATE SCHEMA
+REVOKE
+GRANT
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+REVOKE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+COMMIT
+INSERT 0 4
+INSERT 0 2
+INSERT 0 4
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+UPDATE 2
+CREATE FUNCTION
+CREATE TABLE
+GRANT
+SET
+              set_config              
+--------------------------------------
+ 11111111-1111-4111-8111-111111111111
+(1 row)
+
+INSERT 0 1
+DO
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+DO
+              set_config              
+--------------------------------------
+ 33333333-3333-4333-8333-333333333333
+(1 row)
+
+DO
+              set_config              
+--------------------------------------
+ 55555555-5555-4555-8555-555555555555
+(1 row)
+
+DO
+RESET
+SET
+INSERT 0 1
+DO
+RESET
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+UPDATE 2
+SET
+              set_config              
+--------------------------------------
+ 11111111-1111-4111-8111-111111111111
+(1 row)
+
+UPDATE 1
+DO
+RESET
+UPDATE 1
+SET
+              set_config              
+--------------------------------------
+ 11111111-1111-4111-8111-111111111111
+(1 row)
+
+DO
+RESET
+UPDATE 1
+          ?column?           
+-----------------------------
+ CP05_LOCAL_RLS_HISTORY_PASS
+(1 row)
+
+UPDATE 1
+SET
+DO
+RESET
+UPDATE 1
+UPDATE 1
+SET
+DO
+ lab_expect 
+------------
+ 
+(1 row)
+
+RESET
+UPDATE 1
+SET
+ lab_expect 
+------------
+ 
+(1 row)
+
+ lab_expect 
+------------
+ 
+(1 row)
+
+RESET
+SET
+              set_config              
+--------------------------------------
+ 44444444-4444-4444-8444-444444444444
+(1 row)
+
+                      bt_cp05_open_quote                      
+--------------------------------------------------------------
+ {"id": "dceb9658-04cd-4fdf-8a47-cfcd46736cfa", "version": 5}
+(1 row)
+
+RESET
+                ?column?                 
+-----------------------------------------
+ CP05_ANON_EMAIL_WORKSHOP_RECEPTION_PASS
+(1 row)
+
+SET
+              set_config              
+--------------------------------------
+ 11111111-1111-4111-8111-111111111111
+(1 row)
+
+DO
+                ?column?                
+----------------------------------------
+ CP05_FRESH_CONNECTION_PERSISTENCE_PASS
+(1 row)
+
+INSERT 0 2
+DO
+CP05_CONCURRENT_NUMBERS_PASS

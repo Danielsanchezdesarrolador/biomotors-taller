@@ -1,0 +1,58 @@
+{
+  "_cp03PilotContracts-CLLVQ8HK.js": {
+    "file": "assets/cp03PilotContracts-CLLVQ8HK.js",
+    "name": "cp03PilotContracts",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index-CMnVOxC_.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/auth/supabaseGateway.ts",
+      "src/ordenes/Cp04PrivatePanel.tsx",
+      "src/clientes/Cp03PrivatePanel.tsx"
+    ],
+    "css": [
+      "assets/index-BExMWAYa.css"
+    ]
+  },
+  "src/auth/supabaseGateway.ts": {
+    "file": "assets/supabaseGateway-GhdQP7mq.js",
+    "name": "supabaseGateway",
+    "src": "src/auth/supabaseGateway.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "src/clientes/Cp03PrivatePanel.tsx": {
+    "file": "assets/Cp03PrivatePanel-BGlgmpRq.js",
+    "name": "Cp03PrivatePanel",
+    "src": "src/clientes/Cp03PrivatePanel.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_cp03PilotContracts-CLLVQ8HK.js"
+    ],
+    "css": [
+      "assets/Cp03PrivatePanel-Bmp21Q-3.css"
+    ]
+  },
+  "src/ordenes/Cp04PrivatePanel.tsx": {
+    "file": "assets/Cp04PrivatePanel-C-hbueuc.js",
+    "name": "Cp04PrivatePanel",
+    "src": "src/ordenes/Cp04PrivatePanel.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_cp03PilotContracts-CLLVQ8HK.js"
+    ],
+    "css": [
+      "assets/Cp04PrivatePanel-C_dlb2Md.css"
+    ]
+  }
+}

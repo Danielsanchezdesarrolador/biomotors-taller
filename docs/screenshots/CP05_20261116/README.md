@@ -8,3 +8,5 @@ Capturas reales de Chromium Linux a 1650/1440/768/390/375 px, aplicación React 
 - [Resultados](browser-results.json). Script reproducible: `scripts/verify-cp05-browser.cjs` con harness privado de loopback y flags Auth/CP03/CP04/CP05; **nunca contra un backend real**.
 
 El recorrido comprueba tres partidas, neto $130.150, IVA $24.729 y total $154.879; guardado/recarga, nuevo login, consulta desde vehículo, controles de emisión/correo bloqueados, cero llamadas Storage/Functions, ausencia de desbordamiento y errores JS. SQL/RLS/persistencia PostgreSQL local tienen evidencia independiente en el informe único; Safari/iPhone y Android físico pendientes.
+
+Registros de ejecución: [PostgreSQL aislado](postgres-local.txt), [Vitest](vitest.txt), [regresión CP04](cp04-regression.txt), [bundle Android](android-bundle.txt). No contienen pruebas alojadas ni credenciales reales.

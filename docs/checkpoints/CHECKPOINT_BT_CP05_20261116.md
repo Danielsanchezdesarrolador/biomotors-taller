@@ -1,6 +1,6 @@
 # CP05 — entrega integrada preparada, NO OPERATIVA
 
-Fecha: 16/11/2026. Base verificada `main`: `29d81f0` (no cambios concurrentes al iniciar ni en fetch final). Este es el informe único de la entrega; su commit se identifica con `git log -1 --format=%H -- docs/checkpoints/CHECKPOINT_BT_CP05_20261116.md`. No se inició CP06.
+Fecha: 16/11/2026. Base verificada `main`: `29d81f0` (no cambios concurrentes al iniciar ni en fetch final). Commit de implementación: `7bd4bb7d0358a554c110a9694cab8bdf5537995c`, publicado en `origin/main`. Este es el informe único de la entrega; su commit se identifica con `git log -1 --format=%H -- docs/checkpoints/CHECKPOINT_BT_CP05_20261116.md`. No se inició CP06.
 
 **CP05 no está operativo en Supabase alojado.** Se implementó el candidato completo permitido sin aplicar migraciones alojadas ni habilitar Storage, Edge, correos, secretos o rollout privado. El guardado real y la recuperación del piloto deben comprobarse tras autorización del Director; HTTP simulado y PostgreSQL local no sustituyen esa prueba.
 
@@ -14,7 +14,7 @@ La base asigna número por taller y versión; RPC atómicas controlan duplicados
 
 `draft` admite edición; `issued` y snapshots son inmutables. Anular exige motivo y agrega auditoría; revisar abre nuevo borrador sin cambiar el documento previo. La reserva backend congela datos y partidas hasta completar/cancelar el archivo. No cambia estados de OT, no declara trabajos realizados ni aceptación contractual.
 
-PDF auténtico A4, marca oficial ByteTorque separada del nombre real configurado del taller, cliente/vehículo/patente/OT, fecha, vigencia, partidas, neto/IVA/total, términos y aviso no tributario. Fuente DejaVu Sans sin modificar y licencia versionadas; se subconfigura al generar PDF, sin fuentes externas. Descarga de **borrador** habilitada en candidato; emisión archivada y descarga de revisión privada bloqueadas hasta aprobar infraestructura. No se presenta impresión HTML como PDF almacenado.
+PDF auténtico A4, marca oficial ByteTorque separada del nombre real configurado del taller, cliente/vehículo/patente/OT, fecha, vigencia, partidas, neto/IVA/total, términos y aviso no tributario. Fuente DejaVu Sans sin modificar y licencia versionadas; se incrustan solo los caracteres utilizados al generar PDF, sin fuentes externas. Descarga de **borrador** habilitada en candidato; emisión archivada y descarga de revisión privada bloqueadas hasta aprobar infraestructura. No se presenta impresión HTML como PDF almacenado.
 
 ## Persistencia y seguridad candidatas
 
@@ -50,7 +50,7 @@ Reproducción: `npm run typecheck`, `npm test`, `npm run build`; flags `VITE_BT_
 
 Núcleo: `src/cp05/`, `server/cp05/`, SQL/lab/workflow CP05; extracción pura `orderMoney.ts` y `workItemCore.ts`, adaptación mínima `WorkItemsEditor.tsx`. Entrada desde `App.tsx` y callbacks opcionales en paneles CP03/CP04; caché temporal limpiada por el mecanismo existente. Build/entorno/CI actualizados y licencia/fuente PDF agregadas. Auth, SQL/modelos CP03/CP04, multipunto/autoguardado y Android nativo preservados.
 
-Render existente: `https://biomotors-taller-demo.onrender.com`, accesible HTTP 200 al verificar. No se modificaron sus variables, backend ni servicios. `VITE_BT_CP05_PRIVATE_ENABLED=false` por defecto; **no activar el flag por el mero hecho de compilar**. El push de código mantiene la presentación pública y los módulos CP03/CP04 autorizados; el estado de publicación se distingue de la activación CP05 y no certifica persistencia nueva. No se creó otro Render.
+Render existente: `https://biomotors-taller-demo.onrender.com`, HTTP 200; publicación de código comprobada el 16/11/2026 a las 11:11 UTC por cambio del manifiesto, nuevo entry `assets/index-CMnVOxC_.js` y marcador del callback de vehículo en el chunk CP03. El manifiesto conserva CP03/CP04 y no incluye CP05. Apertura de `/` en Chromium muestra `/#/acceso` y «Inicia sesión», sin panel CP05. No se afirma un SHA servido por API Render (no disponible). No se modificaron sus variables, backend ni servicios. `VITE_BT_CP05_PRIVATE_ENABLED=false` por defecto; **no activar el flag por el mero hecho de compilar**. El push de código mantiene la presentación pública y los módulos CP03/CP04 autorizados; el estado de publicación se distingue de la activación CP05 y no certifica persistencia nueva. No se creó otro Render.
 
 ## Pendientes para operación autorizada
 
@@ -58,6 +58,6 @@ Render existente: `https://biomotors-taller-demo.onrender.com`, accesible HTTP 2
 2. Aprobar bucket privado/políticas, backend seguro y secretos fuera del frontend; validar emisión con archivo persistente, descarga/restauración verificadas y recuperación de reservas fallidas. Solo entonces habilitar el rollout privado correspondiente.
 3. Contrastar formato, reglas de impuestos, numeración y datos comerciales con la hoja real de Ignacio. Probar el flujo imprescindible en su iPhone/Safari y en Android físico.
 4. Correo exige autorización independiente de dominio/proveedor/backend, idempotencia, conciliación de acuses ambiguos y prueba real autorizada. Sigue OFF.
-5. Consultar CI remoto cuando GitHub Actions sea accesible y confirmar la publicación servida; no sustituirla por resultados locales.
+5. Consultar CI remoto cuando GitHub Actions sea accesible. La publicación de código se observó por assets, no mediante metadatos de commit del proveedor; mantener esta distinción al verificar futuros despliegues.
 
 CP06 queda como próxima capacidad de historial/respaldo/piloto, **no iniciada**. No se solicita ni presupone autorización de infraestructura en esta entrega.

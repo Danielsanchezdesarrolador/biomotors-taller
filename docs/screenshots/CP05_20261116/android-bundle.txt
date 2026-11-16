@@ -1,0 +1,26 @@
+Starting Metro Bundler
+
+Android Bundled 9153ms index.js (602 modules)
+
+› Assets (2):
+assets/brand/logo-horizontal-dark.png (102KB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (390KB)
+
+› android bundles (1):
+_expo/static/js/android/index-4a15a1bc7856eb8e384e23e1c584b381.hbc (1.5MB)
+
+› Files (1):
+metadata.json (275B)
+
+Exported: /tmp/bt-cp05-android
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> bytetorque-android@0.1.0 verify-config
+> node scripts/verify-config.mjs
+
+ByteTorque Android: configuración nativa y perfil APK PASS (APK no generada)
+BT-BRAND-01: native icon, adaptive foreground, splash and horizontal artwork PASS
