@@ -5,13 +5,16 @@ import {
   type InspectionItem,
   type Result
 } from './multipuntoTemplate'
+import type { ReactNode } from 'react'
 type Change = (id: string, state: Result) => void
 export function MultipuntoTable({
   items,
-  onChange
+  onChange,
+  renderAfterRow
 }: {
   items: InspectionItem[]
   onChange?: Change
+  renderAfterRow?: (item: InspectionItem) => ReactNode
 }) {
   return (
     <div className="mp-tables">
@@ -27,7 +30,7 @@ export function MultipuntoTable({
               .filter((i) => i.category === category.id)
               .sort((a, b) => a.order - b.order)
               .map((item) => (
-                <MultipuntoRow key={item.id} item={item} onChange={onChange} />
+                <MultipuntoRow key={item.id} item={item} onChange={onChange} extra={renderAfterRow?.(item)} />
               ))}
           </div>
         </section>
@@ -35,7 +38,7 @@ export function MultipuntoTable({
     </div>
   )
 }
-export function MultipuntoRow({ item, onChange }: { item: InspectionItem; onChange?: Change }) {
+export function MultipuntoRow({ item, onChange, extra }: { item: InspectionItem; onChange?: Change; extra?: ReactNode }) {
   return (
     <div className="mp-row" data-item={item.id}>
       <MultipuntoStatusSelector item={item} onChange={onChange} />
@@ -46,6 +49,7 @@ export function MultipuntoRow({ item, onChange }: { item: InspectionItem; onChan
           <small className="mp-unreviewed">Sin revisar</small>
         )}
       </span>
+      {extra && <div className="mp-row-extra">{extra}</div>}
     </div>
   )
 }

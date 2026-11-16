@@ -278,7 +278,8 @@ export class Cp04AutosaveQueue {
      if(index>=0)this.finds[index]=row
      else this.finds.push(row)
      this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
-     if(this.active)this.onSaved?.(row)
+     if(!this.active) return // Allow current-tab recovery to reconcile any committed request.
+     this.onSaved?.(row)
      const current=this.entries[id]
      if(current&&current.revision===entry.revision){
        delete this.entries[id]

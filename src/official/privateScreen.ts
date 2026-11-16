@@ -48,6 +48,12 @@ export function clearPrivateScreen(store: Store | null = browserStore()): void {
 /** Remove CP04 draft on explicit sign-out or workshop change. No auth secrets. */
 export function clearOperationalDrafts():void {
   try { if(typeof window!=='undefined')
-    window.sessionStorage.removeItem('bt:cp04:temporary-draft:v1')
+    {const store=window.sessionStorage
+      store.removeItem('bt:cp04:temporary-draft:v1')
+      for(let i=store.length-1;i>=0;i--){
+        const key=store.key(i)
+        if(key?.startsWith('bt:cp04:multipunto-autosave:v1:'))store.removeItem(key)
+      }
+    }
   } catch { /* blocked storage cannot authorize a session */ }
 }

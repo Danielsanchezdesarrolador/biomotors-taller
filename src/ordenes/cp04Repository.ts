@@ -180,6 +180,41 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       throw new WorkOrderFailure('unavailable')
     return record
   }
+  /** Edit a note on the same finding, not a duplicate 'pending' observation.
+   * Optimistic timestamp prevents overwriting a colleague's edits.
+   * Closed diagnoses remain immutable through the existing SQL trigger.
+   */
+  async function updateFindingNote(id:string,expectedUpdatedAt:string,note:string):Promise<Finding>{
+    const key=validId(id)
+    if(!Number.isFinite(Date.parse(expectedUpdatedAt))||
+       typeof note!=='string'||note.trim().length>2000)
+      throw new WorkOrderFailure('invalid')
+    const version=await guard(inspectionStaff)
+    const current=await client.from('inspection_findings')
+      .select('id,order_id,workshop_id,result,resolution')
+      .eq('workshop_id',tenant).eq('id',key).maybeSingle()
+    if(current.error)workFailure(current.error)
+    if(!current.data||current.data.workshop_id!==tenant||
+       current.data.resolution==='resolved')
+      throw new WorkOrderFailure('denied')
+    const order=await client.from('work_orders')
+      .select('id,status,workshop_id').eq('workshop_id',tenant)
+      .eq('id',current.data.order_id).maybeSingle()
+    if(order.error)workFailure(order.error)
+    if(!order.data||order.data.workshop_id!==tenant||order.data.status==='closed')
+      throw new WorkOrderFailure('denied')
+    const text=note.trim()
+    if(current.data.result==='attention'&&text.length<3)
+      throw new WorkOrderFailure('invalid')
+    valid(version)
+    const result=await client.from('inspection_findings').update({note:text||null})
+      .eq('workshop_id',tenant).eq('id',key).eq('updated_at',expectedUpdatedAt)
+      .select(findingCols).maybeSingle()
+    if(result.error)workFailure(result.error)
+    valid(version)
+    if(!result.data)throw new WorkOrderFailure('conflict')
+    return check<Finding>(result.data,tenant)
+  }
   async function markResolved(id:string,expectedUpdatedAt:string,resolved:boolean):Promise<Finding>{
     const key=validId(id)
     if(!Number.isFinite(Date.parse(expectedUpdatedAt)))throw new WorkOrderFailure('invalid')
@@ -194,5 +229,5 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     return check<Finding>(result.data,tenant)
   }
   return Object.freeze({findVehicleByPlate,getVehicle,recentOrders,getOrder,
-    findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,markResolved,dispose})
+    findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
 }
