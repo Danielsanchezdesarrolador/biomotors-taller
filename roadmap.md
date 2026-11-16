@@ -330,6 +330,7 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 - [ ] Validar impuestos, moneda real de cobro, pasarela, rentabilidad y límites por plan antes de habilitar pagos.
 - [ ] Implementar alta, pago, renovación, cancelación y suspensión con seguridad e idempotencia.
 - [ ] Asegurar que una suspensión comercial no borre datos de clientes ni historiales.
+- [ ] **Propuestas 16/11/2026 por revisar antes de CP07–CP09:** registro abierto para personas naturales, independientes y talleres, Básico 5 clientes y 0 mecánicos (revisaría decisión previa de 2), Plus/Full con colaboradores, política de inactividad sin borrados prematuros; detalles y conflictos en `docs/REGISTRO_IDEAS_PLANES.md` BT-IDEA-013–017. Solo documentación, sin nueva autorización técnica.
 - [ ] Lanzamiento comercial progresivo y seguimiento de retención/incidencias.
 
 **Salida:** cobranza recurrente funcional y auditable para talleres que acepten las condiciones.
