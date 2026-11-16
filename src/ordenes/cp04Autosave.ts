@@ -106,6 +106,8 @@ export class Cp04AutosaveQueue {
  private readonly subscribers=new Set<()=>void>()
  private readonly timers=new Map<string,ReturnType<typeof setTimeout>>()
  private readonly running=new Set<string>()
+ /** A previous request may already have committed despite tab suspension. */
+ private readonly uncertain=new Set<string>()
  private finds:Finding[]
  private entries:Record<string,AutosaveEntry>
  private current:AutosaveSnapshot={}
@@ -118,6 +120,7 @@ export class Cp04AutosaveQueue {
   this.store=config.store===undefined?storage():config.store
   this.finds=[...config.initialFindings]
   this.entries={...read(config.scope,this.store)}
+  for(const id of Object.keys(this.entries))this.uncertain.add(id)
   this.current={...this.entries}
   this.onSaved=config.onSaved
  }
@@ -254,6 +257,22 @@ export class Cp04AutosaveQueue {
    this.emit()
    try{
      const item=template.find(x=>x.id===id)!
+     if(this.uncertain.has(id)){
+       // A network failure is ambiguous: first inspect the remote order to
+       // avoid blindly issuing a second INSERT for a request that committed.
+       const remote=await this.config.port.findingsForOrder(this.config.scope.orderId)
+       if(!Array.isArray(remote)||remote.some(row=>
+         row.workshop_id!==this.config.scope.workshopId||
+         row.order_id!==this.config.scope.orderId||
+         row.vehicle_id!==this.config.scope.vehicleId))throw Error('Unsafe CP04 reconciliation')
+       for(const record of remote){
+         const index=this.finds.findIndex(x=>x.id===record.id)
+         if(index>=0)this.finds[index]=record
+         else this.finds.push(record)
+       }
+       this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+       this.uncertain.delete(id)
+     }
      // Reconcile server first when draft was restored after an interrupted
      // request; the original INSERT might already have reached PostgreSQL.
      let row=latestForMultipuntoItem(item,this.finds)
@@ -291,6 +310,7 @@ export class Cp04AutosaveQueue {
        this.schedule(id,50)
      }
    }catch(error){
+     this.uncertain.add(id)
      const current=this.entries[id]
      if(current){
        this.entries[id]={...current,phase:'error',
