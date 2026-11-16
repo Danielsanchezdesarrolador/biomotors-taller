@@ -30,6 +30,7 @@ export function Cp04MultipuntoChecklist({
    queue.setOnSaved(onSaved)
  },[queue,onSaved])
  useEffect(()=>{
+   if(readOnly) return ()=>queue.stop()
    queue.start()
    const retry=()=>queue.retryAll()
    window.addEventListener('online',retry)
@@ -40,7 +41,7 @@ export function Cp04MultipuntoChecklist({
      window.removeEventListener('focus',focus)
      queue.stop()
    }
- },[queue])
+ },[queue,readOnly])
  useEffect(()=>{queue.setFindings(findings)},[queue,findings])
  const items=queue.getCurrentItems()
  const unconfirmed=Object.values(entries).filter(v=>v.phase!=='saved').length

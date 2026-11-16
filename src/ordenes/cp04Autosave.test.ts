@@ -92,6 +92,26 @@ describe('CP04 X multipoint autosave queue',()=>{
    recovered.stop()
   }finally{vi.useRealTimers()}
  })
+ it('reconciles a server commit whose response was lost, without creating a duplicate',async()=>{
+  vi.useFakeTimers()
+  try {
+    const {engine,port,rows}=lab()
+    const original=port.createFinding.getMockImplementation()!
+    port.createFinding.mockImplementationOnce(async input=>{
+      await original(input)
+      throw Error('network response lost after INSERT')
+    })
+    engine.start();engine.select(template[0].id,'ok');await flush()
+    expect(engine.snapshot()[template[0].id].phase).toBe('error')
+    expect(rows).toHaveLength(1)
+    engine.retry(template[0].id);await flush()
+    expect(rows).toHaveLength(1)
+    expect(port.createFinding).toHaveBeenCalledTimes(1)
+    expect(port.findingsForOrder).toHaveBeenCalled()
+    expect(Object.keys(engine.snapshot())).toHaveLength(0)
+    engine.stop()
+  }finally{vi.useRealTimers()}
+ })
  it('does not load drafts from a different workshop or order',()=>{
    const {engine,store,port}=lab()
    engine.start();engine.select(template[0].id,'ok')

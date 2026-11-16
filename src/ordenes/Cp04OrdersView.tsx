@@ -248,8 +248,10 @@ export function Cp04OrdersView({repository,context}:{
       <p>Recibe un vehículo, documenta su inspección y consulta problemas pendientes de visitas anteriores.</p>
     </section>
     <p className="cp04-private-hint">
-      Las fichas se guardan en el servidor únicamente al confirmar cada acción.
-      Los campos incompletos permanecen temporalmente en esta pestaña. Pruebas: utiliza solo información ficticia.
+      Las órdenes de trabajo se guardan al confirmar su creación. En la hoja multipunto,
+      cada X se guarda automáticamente en Supabase. Los cambios sin confirmar se
+      muestran por componente y se conservan temporalmente en esta pestaña.
+      Pruebas: utiliza solo información ficticia.
     </p>
     {message&&<p className="cp04-error" role="alert">{message}</p>}
     {notice&&<p className="cp04-success" role="status">{notice}</p>}
