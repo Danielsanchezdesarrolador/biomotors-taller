@@ -5,7 +5,7 @@ import {
 } from './cp04Multipunto'
 import type {Finding} from './cp04Contracts'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
-const row=(category:string,result:'ok'|'attention',note:string|null):Finding=>({
+const row=(category:string,result:'ok'|'attention'|'not_checked',note:string|null):Finding=>({
   workshop_id:a,id:a,order_id:a,vehicle_id:a,category,result,note,
   resolution:result==='attention'?'pending':'not_applicable',
   resolved_at:null,recorded_by:a,created_at:'2026-11-15T10:00:00Z',
