@@ -1,0 +1,14 @@
+{
+  "checkedAtUTC": "2026-11-16T02:44:56.699919+00:00",
+  "codeCommit": "f987f8f",
+  "url": "https://biomotors-taller-demo.onrender.com",
+  "httpStatus": 200,
+  "mainScript": "/assets/index-DhsmX63g.js",
+  "cp04Script": "assets/Cp04PrivatePanel-CzkD5l81.js",
+  "cp04Styles": "assets/Cp04PrivatePanel-C_dlb2Md.css",
+  "cp04StylesMatchTestedBuild": true,
+  "stylesSHA256": "263aef85e7e96c2d1eaeb1ec121d2752cbd1e6a6882d2a119c46ad3bacfcd099",
+  "scriptSHA256": "e8e93defb3eef6f259d5f054074ea7c689f743cfb17db483e9e72f5b0b75e6e2",
+  "mountedViewGuardPresent": true,
+  "databaseWrites": 0
+}
