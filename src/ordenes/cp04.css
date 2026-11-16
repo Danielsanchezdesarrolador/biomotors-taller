@@ -69,3 +69,54 @@
  .cp04-checklist-top>button{width:100%}
  .cp04-checklist-editor{padding:12px}
 }
+
+/* Multipoint auto-save: inline controls and large touch targets. The
+ * historical report sheet still uses its original multipunto.css unchanged. */
+.cp04-private .cp04-checklist-sheet .mp-category-rows{
+  display:grid;grid-template-columns:1fr;grid-auto-flow:row;grid-template-rows:none
+}
+.cp04-private .cp04-checklist-sheet .mp-row{
+  display:flex;flex-wrap:wrap;align-items:stretch;min-height:60px;
+  background:#fafdff;gap:0;border-bottom:1px solid #d1dce9
+}
+.cp04-private .cp04-checklist-sheet .mp-status{width:100%;min-width:0}
+.cp04-private .cp04-checklist-sheet .mp-cell{
+  min-width:0;flex:1 1 0;min-height:48px;font-size:18px;touch-action:manipulation
+}
+.cp04-private .cp04-checklist-sheet .mp-clear{
+  flex:0 0 44px;min-height:48px;font-size:24px
+}
+.cp04-private .cp04-checklist-sheet .mp-item-name{
+  padding:8px 12px;font-size:15px;font-weight:650;min-height:34px;
+  overflow-wrap:anywhere
+}
+.cp04-private .cp04-checklist-sheet .mp-item-name small{
+  font-size:12px;font-weight:400;line-height:1.5
+}
+.cp04-private .cp04-checklist-sheet .mp-row-extra{flex-basis:100%;min-width:0}
+.cp04-inline-control{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  padding:5px 12px 10px;font-size:12px
+}
+.cp04-inline-status{
+  display:inline-block;border-radius:8px;padding:4px 8px;
+  background:#e7f4e9;color:#125f3c;font-weight:700
+}
+.cp04-inline-status.is-saving{background:#eaf3ff;color:#144c93}
+.cp04-inline-status.is-error{background:#ffebed;color:#a0263b}
+.cp04-inline-note{
+  flex-basis:100%;display:grid;gap:5px;font-size:13px;font-weight:600
+}
+.cp04-inline-note strong,.cp04-error-text{color:#ad4214}
+.cp04-inline-note textarea{
+  box-sizing:border-box;width:100%;min-height:58px;border-radius:9px;
+  border:1px solid #b9cfea;background:#fff;color:#18345b;
+  padding:8px;font:inherit;resize:vertical
+}
+.cp04-provisional-hint{color:#82500a;line-height:1.4}
+.cp04-error{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+@media(max-width:450px){
+ .cp04-private .cp04-checklist-sheet .mp-cell{min-height:54px}
+ .cp04-private .cp04-checklist-sheet .mp-item-name{font-size:14px}
+ .cp04-inline-control{padding:8px}
+}

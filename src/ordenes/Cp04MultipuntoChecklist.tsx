@@ -1,106 +1,124 @@
-import {useMemo,useRef,type FormEvent} from 'react'
-import {ArrowLeft,ClipboardCheck,Save} from 'lucide-react'
+import {useEffect,useMemo,useSyncExternalStore} from 'react'
+import {ArrowLeft,ClipboardCheck,RefreshCcw,WifiOff} from 'lucide-react'
 import {MultipuntoTable} from '../informes/multipunto/MultipuntoTable'
-import type {Result} from '../informes/multipunto/multipuntoTemplate'
-import type {Finding,NewFinding} from './cp04Contracts'
+import type {Finding} from './cp04Contracts'
+import type {Cp04AutosaveQueue as AutosaveType,AutosaveScope} from './cp04Autosave'
 import {
- multipuntoItemsFromFindings,multipuntoTemplateItems,multipuntoFinding,
- latestForMultipuntoItem,multipuntoSavedState
-} from './cp04Multipunto'
+  Cp04AutosaveQueue,CP04_PROVISIONAL_NOTE,provisionalFinding
+} from './cp04Autosave'
+import {latestForMultipuntoItem} from './cp04Multipunto'
 import '../informes/multipunto/multipunto.css'
 
-export type MultipuntoChoice={itemId:string|null;state:Result;note:string}
-export const emptyMultipuntoChoice:MultipuntoChoice={
-  itemId:null,state:'unreviewed',note:''
-}
 export function Cp04MultipuntoChecklist({
- findings,choice,onChange,onSave,onBack,disabled,readOnly,plate,orderId,vehicleId
+ findings,repository,scope,onSaved,onBack,disabled,readOnly,plate
 }:{
  findings:readonly Finding[]
- choice:MultipuntoChoice
- onChange:(value:MultipuntoChoice)=>void
- onSave:(data:NewFinding)=>Promise<boolean>
+ repository:ConstructorParameters<typeof Cp04AutosaveQueue>[0]['port']
+ scope:AutosaveScope
+ onSaved:(record:Finding)=>void
  onBack:()=>void
  disabled:boolean
  readOnly:boolean
  plate:string|null
- orderId:string
- vehicleId:string
 }){
- const saving=useRef(false)
- const items=useMemo(()=>{
-   const source=multipuntoItemsFromFindings(findings)
-   return choice.itemId&&choice.state!=='unreviewed'
-    ?source.map(i=>i.id===choice.itemId?{...i,state:choice.state,note:choice.note}:i)
-    :source
- },[findings,choice])
- const current=items.find(i=>i.id===choice.itemId)
- const count=multipuntoItemsFromFindings(findings).filter(i=>i.state!=='unreviewed').length
- const total=multipuntoTemplateItems().length
- const pending=!!choice.itemId&&choice.state!=='unreviewed'
- const needsNote=choice.state==='attention'||choice.state==='immediate'
- const old=current?latestForMultipuntoItem(current,findings):null
- const oldState=multipuntoSavedState(old)
- function select(itemId:string,state:Result){
-   if(readOnly||disabled)return
-   if(state==='unreviewed'){onChange(emptyMultipuntoChoice);return}
-   onChange({itemId,state,note:choice.itemId===itemId?choice.note:''})
- }
- async function save(e:FormEvent){
-   e.preventDefault()
-   if(!pending||!current||readOnly||disabled||saving.current)return
-   let input:NewFinding
-   try {input=multipuntoFinding(choice.itemId!,choice.state,choice.note,orderId,vehicleId)}
-   catch {return}
-   saving.current=true
-   try {
-     const saved=await onSave(input)
-     if(saved)onChange(emptyMultipuntoChoice)
-   }finally{saving.current=false}
- }
- return <div className="cp04-checklist" aria-label="Hoja de inspección multipunto con X">
+ const queue=useMemo(()=>new Cp04AutosaveQueue({
+   scope,initialFindings:findings,port:repository
+ }),[scope.userId,scope.workshopId,scope.orderId,scope.vehicleId,repository])
+ const entries=useSyncExternalStore(queue.subscribe,queue.snapshot,queue.snapshot)
+ useEffect(()=>{
+   queue.setOnSaved(onSaved)
+ },[queue,onSaved])
+ useEffect(()=>{
+   queue.start()
+   const retry=()=>queue.retryAll()
+   window.addEventListener('online',retry)
+   const focus=()=>{if(navigator.onLine)queue.retryAll()}
+   window.addEventListener('focus',focus)
+   return()=>{
+     window.removeEventListener('online',retry)
+     window.removeEventListener('focus',focus)
+     queue.stop()
+   }
+ },[queue])
+ useEffect(()=>{queue.setFindings(findings)},[queue,findings])
+ const items=queue.getCurrentItems()
+ const unconfirmed=Object.values(entries).filter(v=>v.phase!=='saved').length
+ const errors=Object.values(entries).filter(v=>v.phase==='error').length
+ const incomplete=queue.hasIncompleteNotes()
+ const savedCount=queue.getSavedCount()
+ const readOnlyOrBusy=readOnly||disabled
+ return <div className="cp04-checklist" aria-label="Hoja de inspección multipunto con X y autoguardado">
    <div className="cp04-checklist-top">
      <div>
-       <span className="official-eyebrow">Orden autenticada · {plate??'Vehículo sin patente'}</span>
-       <h2><ClipboardCheck size={21}/> Hoja multipunto · Marcar con X</h2>
-       <p>Revisión por componentes. Marca el resultado y guárdalo en la ficha real de este vehículo.</p>
+       <span className="official-eyebrow">Orden real · {plate??'Vehículo sin patente'}</span>
+       <h2><ClipboardCheck size={21}/> Inspección multipunto con X</h2>
+       <p>Marca uno o varios componentes seguidos: cada X se guarda automáticamente sin desplazarte a otro formulario.</p>
      </div>
      <button type="button" className="cp04-secondary" onClick={onBack}>
        <ArrowLeft size={16}/> Volver a la orden
      </button>
    </div>
-   <p className="cp04-count"><strong>{count}/{total}</strong> componentes guardados.
-     {pending&&' La X que seleccionaste aún NO está guardada.'}</p>
+   <div className="cp04-count" role="status" aria-live="polite">
+     <strong>{savedCount}/34</strong> componentes guardados en Supabase.
+     {unconfirmed>0&&<span> · {unconfirmed} cambio(s) sin confirmar</span>}
+     {errors>0&&<strong className="cp04-error-text"> · {errors} error(es) de guardado</strong>}
+     {incomplete&&<span> · Hay observaciones técnicas pendientes de completar</span>}
+   </div>
    <div className="cp04-checklist-legend">
      <span><i className="cp04-legend-ok"/> OK</span>
      <span><i className="cp04-legend-attention"/> Requiere atención</span>
      <span><i className="cp04-legend-immediate"/> Cambio inmediato</span>
    </div>
+   {errors>0&&<p className="cp04-error" role="alert">
+     <WifiOff size={17} aria-hidden="true"/> Algunas X no están confirmadas en Supabase.
+     Conservamos sus cambios temporalmente en esta pestaña.
+     <button type="button" className="cp04-secondary"
+       onClick={()=>queue.retryAll()}><RefreshCcw size={16}/> Reintentar guardados</button>
+   </p>}
    <div className="mp-sheet mp-edit-sheet cp04-checklist-sheet">
-     <MultipuntoTable items={items} onChange={readOnly||disabled?undefined:select}/>
+     <MultipuntoTable items={items}
+       onChange={readOnlyOrBusy?undefined:(itemId,state)=>queue.select(itemId,state)}
+       renderAfterRow={item=>{
+         const entry=entries[item.id]
+         const saved=latestForMultipuntoItem(item,findings)
+         const phase=entry?.phase
+         const showNote=item.state==='attention'||item.state==='immediate'
+         const isResolved=saved?.resolution==='resolved' && !entry
+         const note=item.note.replace(/^PRIORIDAD INMEDIATA: /,'')
+         const incompleteNote=showNote&&(!note.trim()||note===CP04_PROVISIONAL_NOTE)
+         const status=entry?phase==='queued'?'Pendiente de enviar'
+           :phase==='saving'?'Guardando…'
+           :phase==='error'?'Error al guardar':'Guardado'
+           :saved?'Guardado':'Sin revisar'
+         return <div className="cp04-inline-control">
+           <span className={
+             'cp04-inline-status '+(phase==='error'?'is-error':
+             phase==='saving'||phase==='queued'?'is-saving':'is-saved')
+           } role="status" aria-live="polite">{status}</span>
+           {phase==='error'&&<button type="button" className="cp04-secondary"
+              onClick={()=>queue.retry(item.id)}>Reintentar esta X</button>}
+           {showNote&&<label className="cp04-inline-note">
+             <span>Detalle técnico {incompleteNote&&<strong>· Pendiente de completar</strong>}</span>
+             <textarea rows={2} maxLength={1900}
+               aria-label={`Observación técnica de ${item.name}`}
+               value={note===CP04_PROVISIONAL_NOTE?'':note}
+               placeholder="Describe el problema sin salir de la inspección"
+               disabled={readOnlyOrBusy||isResolved}
+               onChange={e=>queue.note(item.id,e.target.value)}/>
+           </label>}
+           {showNote&&saved&&provisionalFinding(saved)&&
+             <small className="cp04-provisional-hint">El servidor conserva provisionalmente «{CP04_PROVISIONAL_NOTE}». No es un diagnóstico final.</small>}
+           {isResolved&&<small className="cp04-provisional-hint">
+             Esta observación fue resuelta; una nueva inspección debe generar otro hallazgo.
+           </small>}
+         </div>
+       }}
+     />
    </div>
-   {readOnly&&<p className="cp04-private-hint">Puedes consultar las X históricas, pero esta orden no permite nuevas revisiones.</p>}
-   {!readOnly&&<form className="cp04-form cp04-checklist-editor" onSubmit={save}>
-     <h3>Guardar componente inspeccionado</h3>
-     {!current||!pending?<p>Selecciona con una X el estado de un componente en la hoja.</p>:<>
-       <strong>{current.name}: {choice.state==='ok'?'OK':choice.state==='immediate'?'Cambio inmediato':'Requiere atención'}</strong>
-       {old&&<p className="cp04-info">Ya existe una revisión de este componente
-         ({oldState==='ok'?'OK':oldState==='immediate'?'Cambio inmediato':oldState==='attention'?'Requiere atención':'Sin revisar'}).
-         Guardar otra conserva el registro anterior como historial.</p>}
-       <label>Observación técnica {needsNote?'(obligatoria)':'(opcional)'}
-         <textarea rows={3} maxLength={1900} value={choice.note}
-           minLength={needsNote?3:undefined} required={needsNote}
-           placeholder="Describe el resultado para el historial del vehículo"
-           onChange={e=>onChange({...choice,note:e.target.value})}/>
-       </label>
-       {choice.state==='immediate'&&<p className="cp04-info">
-         La prioridad inmediata se registra expresamente en la observación técnica del hallazgo.
-       </p>}
-     </>}
-     <button type="submit" className="cp04-primary"
-       disabled={!pending||disabled||(needsNote&&choice.note.trim().length<3)}>
-       <Save size={17}/> Guardar X en Supabase
-     </button>
-   </form>}
+   {readOnly&&<p className="cp04-private-hint">
+     Orden cerrada o cuenta de consulta: se muestran las marcas ya guardadas, sin permitir modificaciones.
+   </p>}
+   <p className="cp04-private-hint">La conexión o sesión pueden interrumpirse. Si ves «Guardando» o «Error»,
+     esa X aún no debe considerarse guardada. Al volver a la misma pestaña se intentará recuperar el borrador.</p>
  </div>
 }
