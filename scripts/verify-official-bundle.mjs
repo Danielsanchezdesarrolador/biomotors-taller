@@ -26,7 +26,7 @@ if(cp04PrivateEnabled){
 }
 if(!cp04PrivateEnabled){
   assert.ok(modules.every(id=>
-    !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto))\.(?:ts|tsx|js)/.test(id)),
+    !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(id)),
     'CP04 must not be shipped without hosted SQL and private rollout authorization')
 }
 if (cp03PrivateEnabled)
@@ -48,7 +48,7 @@ assert.ok(
       id.endsWith('.css') ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled && /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(id)) ||
-      (cp04PrivateEnabled && /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto))\.(?:ts|tsx|js)/.test(id)) ||
+      (cp04PrivateEnabled && /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(id)) ||
       (cp04PrivateEnabled && /src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(id))
   )
 )
