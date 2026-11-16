@@ -1,5 +1,7 @@
 # ByteTorque — ROADMAP OFICIAL
 
+- **BT-LEGAL-01 (16/11/2026):** borradores públicos de privacidad y términos en `/privacidad` y `/terminos`, con enlaces en acceso/registro, sin cambiar Auth ni activar funciones. Revisión jurídica, identidad/contacto y políticas definitivas pendientes. [Checkpoint y validaciones](docs/checkpoints/CHECKPOINT_BT_LEGAL_01_20261116.md).
+
 **Edición:** v1.8 — Identidad premium R2 OFICIAL + BT-UI-03 Órdenes  
 **Fecha:** 2026-11-11  
 **Checkpoint de continuidad:** BT-UI-02-R2-APROBACION-20261111  

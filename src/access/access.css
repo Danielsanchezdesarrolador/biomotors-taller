@@ -501,6 +501,26 @@
   color: #536e93;
   margin: 10px 0 8px;
 }
+.access-legal-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding-bottom: 6px;
+  font-size: 12px;
+}
+.access-legal-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #1552c0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.access-legal-links a:focus-visible {
+  outline: 3px solid #266bff;
+  outline-offset: 3px;
+}
 .access-preview-link,
 .access-public-home {
   min-height: 44px;

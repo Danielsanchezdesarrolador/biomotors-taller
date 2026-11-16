@@ -671,6 +671,12 @@ export function AccessScreens({
             </button>
           )}
           <footer className="access-review-tools">
+            {(page === 'login' || page === 'register') && (
+              <nav className="access-legal-links" aria-label="Documentos legales públicos">
+                <a href="/privacidad" target="_blank" rel="noopener noreferrer" aria-label="Política de Privacidad (se abre en otra pestaña)">Política de Privacidad</a>
+                <a href="/terminos" target="_blank" rel="noopener noreferrer" aria-label="Términos y Condiciones (se abre en otra pestaña)">Términos y Condiciones</a>
+              </nav>
+            )}
             {interactive && !realLogin && (
               <p>
                 Usa exclusivamente la credencial ficticia de revisión. Nunca una contraseña real.
@@ -711,12 +717,15 @@ export function AccessScreens({
                 if (node && !node.open) node.showModal()
               }}
               onCancel={() => setLegal(false)}
-              aria-label="Información legal en preparación"
+              aria-label="Borradores legales públicos"
             >
-              <h2>Información legal en preparación</h2>
+              <h2>Borradores legales públicos</h2>
               <p>
-                Los términos y la política de privacidad se publicarán antes de activar el registro.
-                Esta revisión no permite aceptar un contrato ni crear una cuenta.
+                Consulta los borradores de la{' '}
+                <a href="/privacidad" target="_blank" rel="noopener noreferrer">Política de Privacidad (otra pestaña)</a>{' '}
+                y los{' '}
+                <a href="/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones (otra pestaña)</a>.
+                Están sujetos a revisión legal y aprobación del propietario; su publicación no activa funciones ni cobros.
               </p>
               <button type="button" onClick={() => setLegal(false)}>
                 Cerrar
