@@ -5,10 +5,25 @@ lab="bt-cp05-verify-$$"
 docker_cmd=(docker --host=unix:///var/run/docker.sock)
 trap '"${docker_cmd[@]}" rm -f "$lab" >/dev/null 2>&1 || true' EXIT
 "${docker_cmd[@]}" run --rm -d --network none --name "$lab" -e POSTGRES_PASSWORD=synthetic-local-only -e POSTGRES_DB=bytetorque postgres:17 >/dev/null
-for attempt in {1..30}; do
- if "${docker_cmd[@]}" exec "$lab" pg_isready -U postgres -d bytetorque >/dev/null 2>&1; then break; fi
+# The official postgres:17 image starts a temporary bootstrap server before
+# stopping it and launching the final server. pg_isready alone can report
+# success against that transient instance, then the first psql gets terminated.
+# Wait for bootstrap completion AND verify a real query against the final one.
+lab_ready=false
+for attempt in {1..45}; do
+ if "${docker_cmd[@]}" logs "$lab" 2>&1 | grep -Fq 'PostgreSQL init process complete' &&
+    "${docker_cmd[@]}" exec "$lab" pg_isready -U postgres -d bytetorque >/dev/null 2>&1 &&
+    [[ "$("${docker_cmd[@]}" exec "$lab" psql -X -A -t -v ON_ERROR_STOP=1 -U postgres -d bytetorque -c 'SELECT 1' 2>/dev/null)" == "1" ]]; then
+   lab_ready=true
+   break
+ fi
  sleep 1
 done
+if [[ "$lab_ready" != true ]]; then
+ echo 'CP05_POSTGRES_NOT_READY: PostgreSQL final server did not initialize in time' >&2
+ "${docker_cmd[@]}" logs "$lab" >&2 || true
+ exit 1
+fi
 psql_lab(){ "${docker_cmd[@]}" exec -i "$lab" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque "$@"; }
 for file in scripts/security/bt-cp03-lab-bootstrap.sql docs/sql/applied/20261112144646_bt_cp02_c_core_tenants_rls.sql docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql; do psql_lab < "$file" >/dev/null; done
 psql_lab -c 'ALTER TABLE auth.users ADD COLUMN email_confirmed_at timestamptz DEFAULT now();' >/dev/null
