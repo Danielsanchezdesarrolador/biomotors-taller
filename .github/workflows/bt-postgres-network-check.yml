@@ -1,0 +1,55 @@
+name: ByteTorque - PostgreSQL network check (no credentials)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connectivity:
+    if: ${{ github.repository == 'Danielsanchezdesarrolador/biomotors-taller' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: DNS and TCP check to Supabase Session pooler
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import errno
+          import socket
+          import sys
+
+          host = "aws-0-sa-east-1.pooler.supabase.com"
+          port = 5432
+          print(f"Checking DNS and TCP only: {host}:{port} (no authentication)", flush=True)
+
+          try:
+              addresses = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+          except socket.gaierror as exc:
+              print(f"DNS BLOCKED: {exc.__class__.__name__} (errno={exc.errno})", flush=True)
+              sys.exit(1)
+
+          print(f"DNS PASS: {len(addresses)} address candidate(s)", flush=True)
+          outcomes = []
+          for family, socktype, proto, _, sockaddr in addresses:
+              try:
+                  with socket.socket(family, socktype, proto) as client:
+                      client.settimeout(5)
+                      client.connect(sockaddr)
+                  print(f"TCP PASS: connection established to {host}:{port}; no PostgreSQL authentication attempted", flush=True)
+                  sys.exit(0)
+              except socket.timeout:
+                  outcome = "TIMEOUT"
+              except ConnectionRefusedError:
+                  outcome = "CONNECTION_REFUSED"
+              except OSError as exc:
+                  outcome = {
+                      errno.ENETUNREACH: "NETWORK_UNREACHABLE",
+                      errno.EHOSTUNREACH: "HOST_UNREACHABLE",
+                  }.get(exc.errno, f"OS_ERROR_{exc.errno}")
+              outcomes.append(outcome)
+
+          print("TCP BLOCKED: " + ", ".join(sorted(set(outcomes))), flush=True)
+          sys.exit(1)
+          PY
