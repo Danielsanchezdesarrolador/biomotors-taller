@@ -35,7 +35,9 @@ export default defineConfig(({ mode }) => {
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
                 !(env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView)|cp04(?:Contracts|Repository|Draft))\.(?:ts|tsx|js)/.test(id)) &&
+                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto))\.(?:ts|tsx|js)/.test(id)) &&
+                !(env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/informes\/multipunto\/(?:MultipuntoTable|multipuntoTemplate)\.(?:ts|tsx|js)/.test(id)) &&
                 !(env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' &&
                   /\/src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(id)) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
