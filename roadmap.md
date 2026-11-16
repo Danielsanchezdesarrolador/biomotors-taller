@@ -280,7 +280,21 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Salida:** Ignacio genera documentos y los envía desde la aplicación con trazabilidad, sin confundir cotización con documento tributario.
 
-### BT-CP06 — Historial confiable, respaldo y prueba piloto — PENDIENTE
+### BT-CP06 — Historial confiable, respaldo y prueba piloto — PREPARACIÓN DE CÓDIGO (16/11/2026)
+
+**Decisión de ejecución del Director (16/11/2026):** desarrollar los módulos pendientes desde Codex en la nube y ChatGPT antes de la etapa final de respaldo consolidado, instalación controlada y piloto real. No bloquear cada módulo candidato por un respaldo individual, pero **no modificar Supabase alojado, datos reales, Auth, roles ni desplegar SQL/Storage/Edge/correos** sin respaldo recuperable y autorización aplicable. No declarar CP05 ni CP06 operativos. El respaldo del final no sustituye la protección periódica cuando haya clientes reales.
+
+**Situación vinculante:** CP05 está preparado en `main` y su laboratorio PostgreSQL remoto aprobado en ejecución `43872238209`; las tablas CP05 siguen ausentes de Supabase y el flag privado está OFF. CP03/CP04 ya están alojados. Integrar la vista histórica CP06 inicialmente sobre CP03/CP04 sin depender de tablas CP05 inexistentes, y añadir la capa de cotizaciones únicamente si su flag y contrato están habilitados y la migración ha sido verificada. Entrega de código: `docs/BT_CP06_ENTREGA_CODIGO_HISTORIAL_20261116.md`. No duplicar bitácoras/snapshots ni alterar las 34 X/autoguardado CP04.
+
+- [ ] Implementar historial por vehículo cronológico y paginado, visitas, diagnósticos/observaciones y pendientes, con enlaces a registros verificados.
+- [ ] Preparar integración de cotizaciones emitidas/revisiones inmutables y no confundir borrador con documento emitido; mantener consulta CP05 desacoplada y bloqueada cuando CP05 OFF.
+- [ ] Validar sesión, roles y aislamiento de taller en backend RLS; anular consultas al cambiar usuario, taller o membresía.
+- [ ] Ejecutar una batería final de TypeScript, Vitest, build/PWA, pruebas UI móvil relevantes y SQL/RLS aislado; distinguir tests locales, CI y QA físico.
+- [ ] **Puerta final consolidada:** respaldo recuperable verificado, migraciones autorizadas, revisión de datos reales, correo/Storage con autorización separada, pruebas de iPhone/Android y conformidad de Ignacio.
+
+**No realizar activación alojada ni dar por finalizada CP06 sin la puerta final y las pruebas físicas.**
+
+
 
 - [ ] Historial cronológico unificado por vehículo.
 - [ ] Exportación, restauración probada, permisos y políticas de conservación.
