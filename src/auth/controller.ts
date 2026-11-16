@@ -13,6 +13,7 @@ export interface AuthGateway {
   hasSession(): Promise<boolean>
   getUser(): Promise<Identity | null>
   signIn(email: string, password: string): Promise<void>
+  register?(email: string, password: string): Promise<void>
   signOut(): Promise<void>
   memberships(userId: string): Promise<Membership[]>
   workshops(ids: string[]): Promise<Workshop[]>
@@ -23,6 +24,8 @@ export type AuthState = {
     | 'disabled'
     | 'checking'
     | 'signing-in'
+    | 'registering'
+    | 'registration-sent'
     | 'anonymous'
     | 'unconfirmed'
     | 'no-membership'
@@ -51,6 +54,7 @@ export class AuthController {
   private selected?: string
   private blocked = false
   private signingIn = false
+  private registering = false
   constructor(
     private gateway: AuthGateway | null,
     disabledReason = ''
@@ -112,7 +116,7 @@ export class AuthController {
         this.epoch++
         this.selected = undefined
         this.set({ phase: 'anonymous', message: this.blocked ? 'Sesión cerrada.' : expired })
-      } else if (!this.blocked && !this.signingIn) {
+      } else if (!this.blocked && !this.signingIn && !this.registering) {
         // Never await SDK calls inside onAuthStateChange (Auth lock).
         this.epoch++
         this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
@@ -132,7 +136,7 @@ export class AuthController {
     }
   }
   async validate(selection?: string) {
-    if (!this.gateway || this.blocked || this.signingIn) return
+    if (!this.gateway || this.blocked || this.signingIn || this.registering) return
     const epoch = ++this.epoch
     const requested = selection ?? this.selected
     this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
@@ -219,6 +223,30 @@ export class AuthController {
       // Recover that loading screen through a fresh server check, never the stale result.
       if (epoch !== this.epoch && this.cleanup && !this.blocked && this.state.phase === 'checking')
         void this.validate()
+    }
+  }
+  async register(email: string, password: string) {
+    if (!this.gateway?.register || this.registering || this.signingIn || this.blocked) return
+    this.registering = true
+    const epoch = ++this.epoch
+    this.set({ phase: 'registering', message: 'Solicitando confirmación de correo…' })
+    try {
+      await this.gateway.register(email.trim().toLowerCase(), password)
+      if (epoch === this.epoch) {
+        this.set({
+          phase: 'registration-sent',
+          message: 'Si esta dirección es válida y puede recibir correos, llegará un enlace de confirmación. Revísalo, confirma tu correo y luego inicia sesión. La autorización de un taller se asigna por separado.'
+        })
+      }
+    } catch {
+      if (epoch === this.epoch) {
+        this.set({
+          phase: 'error',
+          message: 'No se pudo completar la solicitud de registro. Comprueba la configuración de correo del proyecto o inténtalo más tarde.'
+        })
+      }
+    } finally {
+      this.registering = false
     }
   }
   async logout() {

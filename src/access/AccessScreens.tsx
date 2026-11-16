@@ -66,6 +66,9 @@ export function AccessScreens({
     busy: boolean
     message: string
     onLogin: (email: string, password: string) => void
+    registrationEnabled?: boolean
+    completed?: boolean
+    onRegister?: (email: string, password: string) => void
     content?: ReactNode
   }
   onReviewSubmit?: (draft: AccessDraft, presentation: AccessPresentation) => string | void
@@ -77,7 +80,10 @@ export function AccessScreens({
     [legal, setLegal] = useState(false),
     [registrationRole, setRegistrationRole] = useState<AccessPresentation>(presentation)
   const realLogin = !!auth?.enabled && page === 'login'
-  const interactive = !!onReviewSubmit || (realLogin && !auth?.busy)
+  const realRegistration = !!auth?.enabled && !!auth?.registrationEnabled && page === 'register'
+  const realPage = realLogin || realRegistration
+  const interactive = !!onReviewSubmit ||
+    (realPage && !auth?.busy && !(realRegistration && auth?.completed))
   const patch = <K extends keyof AccessDraft>(key: K, value: AccessDraft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }))
   const criteria = passwordCriteria(draft.password),
@@ -195,6 +201,25 @@ export function AccessScreens({
       auth.onLogin(draft.email, password)
       return
     }
+    if (realRegistration && auth?.onRegister && !auth.busy) {
+      const email = draft.email.trim()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setMessage('Ingresa un correo electrónico válido.')
+        return
+      }
+      if (!Object.values(passwordCriteria(draft.password)).every(Boolean)) {
+        setMessage('Utiliza 8 o más caracteres, mayúscula, número y símbolo.')
+        return
+      }
+      if (draft.password !== draft.confirmPassword) {
+        setMessage('Las contraseñas no coinciden.')
+        return
+      }
+      const password = draft.password
+      setDraft((current) => ({ ...current, password: '', confirmPassword: '' }))
+      auth.onRegister(email, password)
+      return
+    }
     if (!onReviewSubmit) return
     if (page === 'login') {
       if (!draft.email.trim() || !draft.password) {
@@ -257,21 +282,22 @@ export function AccessScreens({
       </section>
       <section className="access-form-side">
         <div className={'access-card access-card-' + page}>
-          {realLogin ? (
+          {realPage ? (
             <div className="access-review-note" role="note">
               <ShieldCheck />
               <div>
                 <strong>Acceso seguro · Supabase Auth</strong>
                 <span>
-                  El taller y el rol se verifican en el servidor. Registro y recuperación todavía
-                  deshabilitados.
+                  {realRegistration
+                    ? 'Registro con correo verificado. Crear una cuenta no concede acceso a ningún taller.'
+                    : 'El taller y el rol se verifican en el servidor. El acceso no concede permisos sin membresía.'}
                 </span>
               </div>
             </div>
           ) : (
             <ReviewBanner compact />
           )}
-          {auth && !realLogin && (
+          {auth && !realPage && (
             <p className="access-message auth-login-message" role="status">
               {auth.message}
             </p>
@@ -283,10 +309,12 @@ export function AccessScreens({
           )}
           <header className="access-card-heading">
             <h1>{titles[page][0]}</h1>
-            <p>{titles[page][1]}</p>
+            <p>{realRegistration
+              ? 'Registra tu correo y una contraseña. La confirmación es obligatoria y el acceso al taller requiere autorización posterior.'
+              : titles[page][1]}</p>
           </header>
           {auth?.content}
-          {!auth?.content && (page === 'login' || page === 'register') && (
+          {!auth?.content && (page === 'login' || (page === 'register' && !realRegistration)) && (
             <section className="access-type">
               <strong>{page === 'login' ? 'Acceso para' : 'Tipo de acceso'}</strong>
               <div role="group" aria-label="Tipo de acceso visual">
@@ -324,7 +352,7 @@ export function AccessScreens({
               page === 'recover' ||
               page === 'newPassword') && (
               <form className="access-form" onSubmit={submit} noValidate>
-                {page === 'register' && context === 'mecanico' ? (
+                {page === 'register' && context === 'mecanico' && !realRegistration ? (
                   <div className="access-information">
                     <Info />
                     <p>
@@ -340,7 +368,7 @@ export function AccessScreens({
                         solicitar un enlace de recuperación.
                       </p>
                     )}
-                    {page === 'register' &&
+                    {page === 'register' && !realRegistration &&
                       field('name', 'Nombre completo', 'Ingresa tu nombre completo')}
                     {page !== 'newPassword' &&
                       field(
@@ -350,7 +378,7 @@ export function AccessScreens({
                         'email',
                         <Mail />
                       )}
-                    {page === 'register' && (
+                    {page === 'register' && !realRegistration && (
                       <>
                         {field('phone', 'Teléfono', 'Ej. +56 9 XXXX XXXX', 'tel', <Smartphone />)}
                         {field(
@@ -400,7 +428,7 @@ export function AccessScreens({
                         </button>
                       </div>
                     )}
-                    {page === 'register' && (
+                    {page === 'register' && !realRegistration && (
                       <label className="access-terms">
                         <input
                           type="checkbox"
@@ -458,10 +486,10 @@ export function AccessScreens({
                         </section>
                       </div>
                     )}
-                    {(message || (realLogin && auth?.message)) && (
+                    {(message || (realPage && auth?.message)) && (
                       <p
                         className={
-                          'access-message' + (realLogin && !message ? ' auth-login-message' : '')
+                          'access-message' + (realPage && !message ? ' auth-login-message' : '')
                         }
                         role="status"
                       >
@@ -536,7 +564,9 @@ export function AccessScreens({
               </div>
               <p>
                 {page === 'verify'
-                  ? 'La cuenta requerirá confirmar su dirección de correo antes del primer acceso.'
+                  ? auth?.registrationEnabled
+                    ? 'Si abriste el enlace de confirmación, vuelve a Iniciar sesión para comprobar que tu correo quedó verificado.'
+                    : 'La cuenta requerirá confirmar su dirección de correo antes del primer acceso.'
                   : 'La recuperación se realizará siguiendo el enlace enviado por el servicio de acceso seguro cuando esté habilitado.'}
               </p>
               <div className="access-address">
@@ -544,7 +574,9 @@ export function AccessScreens({
                 <strong>Dirección pendiente de verificación</strong>
               </div>
               <span className="access-state-reference">
-                Estado de referencia · No se ha enviado un correo
+                {page === 'verify' && auth?.registrationEnabled
+                  ? 'La confirmación solo se valida al iniciar sesión con el servidor.'
+                  : 'Estado de referencia · No se ha enviado un correo'}
               </span>
               {page === 'verify' ? (
                 <>

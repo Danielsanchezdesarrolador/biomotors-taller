@@ -128,7 +128,10 @@ export function RealAccess({
       )
   }
   const real = state.phase !== 'disabled'
-  const busy = ['checking', 'signing-in', 'signing-out'].includes(state.phase)
+  const busy = ['checking', 'signing-in', 'registering', 'signing-out'].includes(state.phase)
+  // Explicit pilot switch, OFF by default. Registration does not grant membership.
+  const registrationEnabled =
+    import.meta.env.VITE_BT_AUTH_SIGNUP_ENABLED === 'true' && real
   const needsPanel = real && page === 'login' && !['anonymous', 'signing-in'].includes(state.phase)
   return (
     <AccessScreens
@@ -138,6 +141,11 @@ export function RealAccess({
       auth={{
         enabled: real,
         busy,
+        registrationEnabled,
+        completed: state.phase === 'registration-sent',
+        onRegister: (email, password) => {
+          if (registrationEnabled) void controller.register(email, password)
+        },
         message: state.message,
         onLogin: (email, password) => {
           void controller.login(email, password)

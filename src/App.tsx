@@ -249,6 +249,14 @@ export function OfficialWorkspaceView({
 }
 
 function currentSafeEntryPath() {
+  // Auth has already validated the email at its confirmation URL.
+  // Do not leave an unconsumed PKCE callback code in browser history.
+  if (window.location.hash.startsWith('#/auth/confirmacion') && window.location.search) {
+    const url = new URL(window.location.href)
+    for (const field of ['code', 'access_token', 'refresh_token', 'token', 'token_hash',
+      'error', 'error_code', 'error_description']) url.searchParams.delete(field)
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+  }
   // Also process links opened by hashchange after the initial page mount.
   const scrubbed = scrubInviteLocation(window.location, (url) => {
     window.history.replaceState(window.history.state, '', url)

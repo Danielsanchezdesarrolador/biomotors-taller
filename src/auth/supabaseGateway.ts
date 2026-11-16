@@ -42,6 +42,22 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
       const { error } = await client.auth.signInWithPassword({ email, password })
       check(error)
     },
+    async register(email, password) {
+      // Approved production destination, never taken from query strings.
+      const { data, error } = await client.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: 'https://biomotors-taller-demo.onrender.com/#/auth/confirmacion'
+        }
+      })
+      check(error)
+      // Refuse an immediate session: the hosted project must require email confirmation.
+      if (data.session) {
+        await client.auth.signOut({ scope: 'local' })
+        throw new AuthFailure('permission')
+      }
+    },
     async signOut() {
       const { error } = await client.auth.signOut({ scope: 'local' })
       check(error)

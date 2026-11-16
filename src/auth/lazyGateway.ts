@@ -10,6 +10,11 @@ export function lazyGateway(config: Extract<AuthConfig, { enabled: true }>): Aut
     hasSession: async () => (await get()).hasSession(),
     getUser: async () => (await get()).getUser(),
     signIn: async (email, password) => (await get()).signIn(email, password),
+    register: async (email, password) => {
+      const gateway = await get()
+      if (!gateway.register) throw new Error('Registro no disponible')
+      await gateway.register(email, password)
+    },
     signOut: async () => (await get()).signOut(),
     memberships: async (id) => (await get()).memberships(id),
     workshops: async (ids) => (await get()).workshops(ids),
