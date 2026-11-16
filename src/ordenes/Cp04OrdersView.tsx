@@ -8,7 +8,7 @@ import { ClipboardCheck,Search,Plus,CarFront,AlertTriangle,CheckCircle2,RefreshC
 import type { Context } from '../auth/controller'
 import { cp04Repository } from './cp04Repository'
 import {
-  inspectionCategories,workStatusLabel,workMessage,
+  inspectionCategories,workStatusLabel,workMessage,inspectionResolutionLabel,
   type Finding, type FindingResult, type OrderWithVehicle, type OrderStatus,
   type VehicleChoice
 } from './cp04Contracts'
@@ -289,9 +289,13 @@ export function Cp04OrdersView({repository,context}:{
           {findings.length===0&&<p>Todavía no se han registrado puntos de inspección.</p>}
           {findings.map(item=><div key={item.id} className="cp04-finding">
             <strong>{item.category}</strong>
-            <span>{item.result==='ok'?'Correcto':item.result==='attention'?'Requiere atención':'No revisado'}</span>
+            <span>Diagnóstico: {item.result==='ok'?'Correcto':item.result==='attention'?'Requiere atención':'No revisado'}</span>
+            {item.result==='attention'&&<span className={'cp04-resolution '+(item.resolution==='resolved'?'is-resolved':'is-pending')}>
+              {inspectionResolutionLabel(item)}
+              {item.resolution==='resolved'&&item.resolved_at?' · '+safeDate(item.resolved_at):''}
+            </span>}
             {item.note&&<p>{item.note}</p>}
-            <small>{safeDate(item.created_at)}</small>
+            <small>Registrado: {safeDate(item.created_at)}</small>
           </div>)}
           {canInspect&&selected.order.status!=='closed'&&<form className="cp04-form" onSubmit={saveFinding}>
             <label>Punto a revisar

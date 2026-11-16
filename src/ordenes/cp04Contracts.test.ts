@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest'
-import { findingInput,orderInput,validPlateSearch,validOdometer,WorkOrderFailure,workMessage } from './cp04Contracts'
+import { findingInput,orderInput,validPlateSearch,validOdometer,WorkOrderFailure,workMessage,inspectionResolutionLabel } from './cp04Contracts'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 describe('CP04: typed intake/inspection contracts',()=>{
   it('normalizes plate search and numeric intake',()=>{
@@ -21,6 +21,11 @@ describe('CP04: typed intake/inspection contracts',()=>{
     expect(findingInput({order_id:a,vehicle_id:a,category:'Frenos',result:'attention',note:'Pastillas al límite'}).resolution).toBe('pending')
     expect(findingInput({order_id:a,vehicle_id:a,category:'Luces',result:'ok',note:null}).resolution).toBe('not_applicable')
     expect(findingInput({order_id:a,vehicle_id:a,category:'Motor',result:'not_checked',note:null}).result).toBe('not_checked')
+  })
+  it('shows original diagnosis separately from later repair resolution',()=>{
+    expect(inspectionResolutionLabel({result:'attention',resolution:'pending'})).toBe('Reparación pendiente')
+    expect(inspectionResolutionLabel({result:'attention',resolution:'resolved'})).toBe('Reparación resuelta')
+    expect(inspectionResolutionLabel({result:'ok',resolution:'not_applicable'})).toBe('')
   })
   it('never exposes unexpected server errors to operator',()=>{
     expect(workMessage(new Error('password Bearer private@client.com')))

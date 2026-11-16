@@ -39,3 +39,8 @@
 .cp04-error{background:#fff0f0;color:#8e2136;border:1px solid #f2c3ca}
 .cp04-success{background:#eaf8f0;color:#155d42;border:1px solid #b0e5c7}
 @media(max-width:820px){.cp04-layout,.cp04-detail-grid{grid-template-columns:1fr}.cp04-private .cp04-panel{padding:16px}.cp04-actions button{flex:1}}
+
+.cp04-resolution{display:inline-flex;align-items:center;width:fit-content;
+  padding:5px 10px;border-radius:999px;font-weight:700;font-size:12px;max-width:100%;flex-wrap:wrap}
+.cp04-resolution.is-pending{background:#fff1da;color:#83520b}
+.cp04-resolution.is-resolved{background:#e2f6e9;color:#155d42}

@@ -3,6 +3,13 @@ import { UUID, normalizedPlate } from '../clientes/cp03PilotContracts'
 export type OrderStatus='received'|'inspecting'|'in_service'|'ready'|'closed'
 export type FindingResult='ok'|'attention'|'not_checked'
 export type FindingResolution='not_applicable'|'pending'|'resolved'
+/** Diagnosis is historical; resolution is a separate lifecycle state. */
+export function inspectionResolutionLabel(item:Pick<Finding,'result'|'resolution'>):string {
+  if(item.result!=='attention')return ''
+  if(item.resolution==='resolved')return 'Reparación resuelta'
+  if(item.resolution==='pending')return 'Reparación pendiente'
+  return 'Estado de resolución no disponible'
+}
 export type WorkOrder=Readonly<{
   workshop_id:string;id:string;vehicle_id:string;complaint:string;
   intake_odometer:number|null;status:OrderStatus;opened_by:string;
