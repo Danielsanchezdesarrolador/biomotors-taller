@@ -18,6 +18,9 @@ assert.ok(
   modules.every((id) => !/inviteBrowserLifecycleCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
+const cp06PrivateEnabled=process.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'
+if(cp06PrivateEnabled)assert.equal(process.env.VITE_BT_CP04_PRIVATE_ENABLED,'true','CP06 requires CP04')
+if(!cp06PrivateEnabled)assert.ok(modules.every(id=>!id.includes('src/historial/')),'CP06 must remain excluded by default')
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
 const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
 if (cp05PrivateEnabled)
@@ -55,7 +58,7 @@ if (!cp03PrivateEnabled) {
   assert.ok(
     modules.every(
       (id) =>
-        !/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
+        !/(?:Cp06HistoryLoader|Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
           id
         )
     ),
@@ -66,13 +69,14 @@ assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
+      (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||
       (cp05PrivateEnabled &&
         /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
           id
         )) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&
-        /src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
+        /src\/clientes\/(?:Cp06HistoryLoader|Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
           id
         )) ||
       (cp04PrivateEnabled &&

@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     throw new Error('CP04 needs verified Auth R1 + CP03 directory before private build.')
   if (env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' && env.VITE_BT_CP04_PRIVATE_ENABLED !== 'true')
     throw new Error('CP05 requires CP04 private rollout.')
+  if(env.VITE_BT_CP06_PRIVATE_ENABLED==='true'&&env.VITE_BT_CP04_PRIVATE_ENABLED!=='true')throw new Error('CP06 requires verified CP03/CP04 private rollout.')
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')
@@ -40,6 +41,7 @@ export default defineConfig(({ mode }) => {
             (id) =>
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
+                !(env.VITE_BT_CP06_PRIVATE_ENABLED==='true' && /\/src\/historial\//.test(id)) &&
                 !(
                   env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' &&
                   /\/src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
@@ -60,7 +62,7 @@ export default defineConfig(({ mode }) => {
                 ) &&
                 !(
                   env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/clientes\/(?:Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(
+                  /\/src\/clientes\/(?:Cp06HistoryLoader|Cp03PrivatePanel|cp03Pilot(?:DirectoryView|Repository|Contracts|AccessBinding))\.(?:ts|tsx|js)/.test(
                     id
                   )
                 ) &&

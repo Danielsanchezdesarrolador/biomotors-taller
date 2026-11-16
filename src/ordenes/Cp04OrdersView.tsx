@@ -71,11 +71,13 @@ function safeDate(value: string): string {
 export function Cp04OrdersView({
   repository,
   context,
-  onQuote
+  onQuote,
+  initialOrderId
 }: {
   repository: Cp04Port
   context: Context
   onQuote?: (id: string) => void
+  initialOrderId?: string
 }) {
   const active = useRef(true),
     revision = useRef(0),
@@ -187,8 +189,8 @@ export function Cp04OrdersView({
       try {
         await reload()
         if (!active.current || cancelled) return
-        if (initial.selectedOrderId) await openOrder(initial.selectedOrderId)
-        if (initial.plate && !initial.selectedOrderId) {
+        if (initialOrderId || initial.selectedOrderId) await openOrder(initialOrderId || initial.selectedOrderId!)
+        if (initial.plate && !initial.selectedOrderId && !initialOrderId) {
           try {
             const found = await repository.findVehicleByPlate(initial.plate)
             if (active.current && !cancelled) setVehicle(found)

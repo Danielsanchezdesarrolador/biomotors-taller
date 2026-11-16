@@ -16,7 +16,7 @@
 | Cotización | CP05 candidato integrado a OT/vehículo; editor existente, neto/IVA y RPC | **SQL no aplicado; CP05 NO operativo** | 552 tests; PostgreSQL local A/B, concurrencia y recuperación entre conexiones; UI HTTP sintético | Pendiente |
 | PDF | PDF A4 auténtico descargable de borrador CP05; logo oficial y Unicode | Emisión/archivo privados bloqueados; Storage no activado | Descarga Chromium, bytes válidos, A4, paginación y restauración con adaptador simulado; archivo alojado pendiente | Pendiente |
 | Correos | Puertos backend CP05 y ledger candidato queued/sent/failed | **Desactivados**; sin Edge/proveedor/secretos nuevos | Acuse sintético, rechazo y estado ambiguo; ningún correo real | Pendiente |
-| Historial por vehículo | DEMO | No persistente | Recuperación después de meses pendiente | Pendiente |
+| Historial por vehículo | CP06 candidato integrado en ficha; visitas/pendientes paginados y enlaces a OT/revisiones | Lee contratos CP03/CP04 existentes; CP06 OFF, sin nuevas tablas ni activación | 569 tests; HTTP sintético 45 visitas/25 pendientes, logout/login, revocación, 1440/390/375; alojado/físico pendientes | Pendiente |
 | Respaldo y restauración | Procedimiento manual de recuperación ejecutado fuera de la aplicación | Exportaciones Auth/public y restauración aislada PostgreSQL 17 verificadas antes de CP03 | Sin automatización; copia externa redundante no confirmada | Pendiente |
 | iPhone Safari/PWA | CP03 disponible en PWA privada publicada | Backend CP03 hospedado y Auth/RLS activos | **Safari físico de Ignacio pendiente**; WebKit Linux no lo reemplaza | Pendiente |
 | Android nativo | React Native/Expo existente | Sin paridad de datos reales | Bundle Expo PASS, APK física pendiente | Pendiente |

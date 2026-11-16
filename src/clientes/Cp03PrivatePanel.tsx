@@ -8,15 +8,17 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AuthController } from '../auth/controller'
 import { cp03PilotAccessBinding } from './cp03PilotAccessBinding'
+import { Cp06HistoryLoader } from './Cp06HistoryLoader'
 import { Cp03PilotDirectoryView } from './cp03PilotDirectoryView'
 
 type Binding = ReturnType<typeof cp03PilotAccessBinding>
 
-function BoundDirectory({ binding, onVehicleQuotes }: { binding: Binding; onVehicleQuotes?: (id:string)=>void }) {
+function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { binding: Binding; client:SupabaseClient; onAccessLost:()=>void; onVehicleQuotes?: (id:string)=>void }) {
   const access = useSyncExternalStore(binding.subscribe,binding.getSnapshot,() => null)
   if (!access) return <p role="status">Verificando el acceso al directorio privado…</p>
   const { context, repository } = access
   return <Cp03PilotDirectoryView key={context.userId+'-'+context.workshop.id+'-'+context.role}
+    renderHistory={import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'?(vehicle,onBack)=><Cp06HistoryLoader key={vehicle.id} client={client} context={context} vehicleId={vehicle.id} onBack={onBack} onAccessLost={onAccessLost}/>:undefined}
     onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
     draftScope={{userId:context.userId,workshopId:context.workshop.id}}/>
 }
@@ -29,7 +31,7 @@ function AuthClientDirectory({ controller, client, onVehicleQuotes }: {
     setBinding(created)
     return () => { created.dispose() }
   }, [controller,client])
-  return binding ? <BoundDirectory binding={binding} onVehicleQuotes={onVehicleQuotes}/> :
+  return binding ? <BoundDirectory binding={binding} client={client} onAccessLost={()=>{void controller.validate()}} onVehicleQuotes={onVehicleQuotes}/> :
     <p role="status">Validando la sesión del taller…</p>
 }
 export function Cp03PrivatePanel({ controller, onVehicleQuotes }: { controller: AuthController; onVehicleQuotes?: (id:string)=>void }) {

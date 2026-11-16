@@ -46,14 +46,16 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName, draftScope, onVehicleQuotes
+  repository, role, workshopName, draftScope, onVehicleQuotes, renderHistory
 }: {
   repository: PilotDirectoryPort
   role: Role
   workshopName: string
+  renderHistory?: (vehicle:VehicleRecord,onBack:()=>void)=>import('react').ReactNode
   onVehicleQuotes?: (id:string)=>void
   draftScope?: DraftScope
 }) {
+  const [historyVehicle,setHistoryVehicle]=useState<VehicleRecord|null>(null)
   const writable = role === 'owner' || role === 'admin' || role === 'reception'
   const [initialDraft] = useState(() => writable && draftScope ? readCp03Draft(draftScope) : null)
   const editorRef = useRef<HTMLElement>(null)
@@ -356,6 +358,7 @@ export function Cp03PilotDirectoryView({
     }
   }
 
+  if(historyVehicle&&renderHistory)return <>{renderHistory(historyVehicle,()=>setHistoryVehicle(null))}</>
   return (
     <div className="official-panel cp03-pilot">
       <section className="welcome-area">
@@ -438,6 +441,7 @@ export function Cp03PilotDirectoryView({
             ))}
             {vehicle && <div className="cp03-vehicle">
               <h3>Vehículo seleccionado</h3>
+              {renderHistory&&<button className="cp03-secondary" disabled={saving} onClick={()=>setHistoryVehicle(vehicle)}>Ver historial</button>}
               {onVehicleQuotes && <button className="cp03-secondary" disabled={saving} onClick={()=>onVehicleQuotes(vehicle.id)}>Consultar cotizaciones del vehículo</button>}
               <p>{vehicle.make} {vehicle.model} · {vehicle.plate ?? 'Sin patente'}</p>
               <p>{vehicle.model_year ?? 'Año no indicado'} · {vehicle.odometer_km === null ?

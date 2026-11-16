@@ -286,10 +286,10 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Situación vinculante:** CP05 está preparado en `main` y su laboratorio PostgreSQL remoto aprobado en ejecución `43872238209`; las tablas CP05 siguen ausentes de Supabase y el flag privado está OFF. CP03/CP04 ya están alojados. Integrar la vista histórica CP06 inicialmente sobre CP03/CP04 sin depender de tablas CP05 inexistentes, y añadir la capa de cotizaciones únicamente si su flag y contrato están habilitados y la migración ha sido verificada. Entrega de código: `docs/BT_CP06_ENTREGA_CODIGO_HISTORIAL_20261116.md`. No duplicar bitácoras/snapshots ni alterar las 34 X/autoguardado CP04.
 
-- [ ] Implementar historial por vehículo cronológico y paginado, visitas, diagnósticos/observaciones y pendientes, con enlaces a registros verificados.
-- [ ] Preparar integración de cotizaciones emitidas/revisiones inmutables y no confundir borrador con documento emitido; mantener consulta CP05 desacoplada y bloqueada cuando CP05 OFF.
-- [ ] Validar sesión, roles y aislamiento de taller en backend RLS; anular consultas al cambiar usuario, taller o membresía.
-- [ ] Ejecutar una batería final de TypeScript, Vitest, build/PWA, pruebas UI móvil relevantes y SQL/RLS aislado; distinguir tests locales, CI y QA físico.
+- [x] Código candidato CP06: «Ver historial» en la ficha, paginación por fecha/ID sin límite de 40, visitas/hallazgos/pendientes y retorno desde OT/cotización usando módulos existentes.
+- [x] Integración CP05 opcional con snapshots/revisiones/eventos; cero consultas CP05 cuando OFF y aviso independiente ante SQL no disponible.
+- [x] Código de lectura con revalidación de usuario/correo, rol, membresía y taller, filtros tenant/vehículo y abortado de respuestas obsoletas; pruebas SDK/HTTP sintéticas A/B y cuatro roles. RLS alojada no modificada ni revalidada por CP06.
+- [x] Ronda consolidada local: TypeScript, 569 Vitest, builds/PWA público y privados, Chromium 1440/390/375. Sin SQL nuevo ni cambios Android/Auth/multipunto. CI remoto no verificable por proxy `Forbidden`. [Checkpoint único CP06](docs/checkpoints/CHECKPOINT_BT_CP06_20261116.md).
 - [ ] **Puerta final consolidada:** respaldo recuperable verificado, migraciones autorizadas, revisión de datos reales, correo/Storage con autorización separada, pruebas de iPhone/Android y conformidad de Ignacio.
 
 **No realizar activación alojada ni dar por finalizada CP06 sin la puerta final y las pruebas físicas.**

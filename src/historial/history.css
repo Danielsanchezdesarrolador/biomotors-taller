@@ -1,0 +1,139 @@
+.cp06-history {
+  color: #18345b;
+  min-width: 0;
+  padding: 12px 0 35px;
+}
+.cp06-history h1 {
+  font-size: 28px;
+  color: #081d3c;
+}
+.cp06-history h2 {
+  font-size: 21px;
+}
+.cp06-history h3 {
+  font-size: 16px;
+  margin: 16px 0 7px;
+}
+.cp06-history p {
+  line-height: 1.6;
+}
+.cp06-history small {
+  display: block;
+  color: #58718f;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.cp06-history button {
+  min-height: 44px;
+  margin: 5px 0;
+  white-space: normal;
+}
+.cp06-vehicle,
+.cp06-pending,
+.cp06-visit,
+.cp06-empty {
+  padding: 22px;
+  margin: 18px 0;
+  border: 1px solid #cfdef4;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 5px 16px #1640770b;
+}
+.cp06-vehicle strong {
+  display: block;
+  font-size: 20px;
+}
+.cp06-visits,
+.cp06-pending ul {
+  list-style: none;
+  padding: 0;
+}
+.cp06-visit {
+  border-left: 4px solid #0585ff;
+  overflow-wrap: anywhere;
+}
+.cp06-visit header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cp06-status {
+  background: #e7f1ff;
+  color: #005cd8;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.cp06-status-closed {
+  background: #edf0f5;
+  color: #45617c;
+}
+.cp06-pending {
+  background: #fffdf7;
+}
+.cp06-pending ul > li {
+  border-top: 1px solid #ebdfc1;
+  padding: 14px 0;
+}
+.cp06-findings {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.cp06-findings li {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f3f7ff;
+}
+.cp06-findings span {
+  display: block;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.cp06-quotes {
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #d8d9f7;
+  border-radius: 12px;
+}
+.cp06-quotes article {
+  border-top: 1px solid #d8d9f7;
+  padding-top: 10px;
+}
+.cp06-note {
+  background: #edf5ff;
+  border-radius: 12px;
+  padding: 15px;
+}
+.cp06-error {
+  color: #973b31;
+  border: 1px solid #e7b5ac;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff7f4;
+}
+.cp06-history button:focus-visible {
+  outline: 3px solid #6ab2ff;
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .cp06-history h1 {
+    font-size: 25px;
+  }
+  .cp06-vehicle,
+  .cp06-pending,
+  .cp06-visit,
+  .cp06-empty {
+    padding: 16px;
+  }
+  .cp06-history .cp03-secondary {
+    max-width: 100%;
+  }
+  .cp06-visit header time {
+    font-size: 14px;
+  }
+}
