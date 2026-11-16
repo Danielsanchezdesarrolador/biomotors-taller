@@ -13,13 +13,12 @@ import {
   type VehicleChoice
 } from './cp04Contracts'
 import {readCp04Draft,writeCp04Draft,emptyCp04Draft} from './cp04Draft'
-import {Cp04MultipuntoChecklist,emptyMultipuntoChoice,
- type MultipuntoChoice} from './Cp04MultipuntoChecklist'
-import type {NewFinding} from './cp04Contracts'
+import {Cp04MultipuntoChecklist} from './Cp04MultipuntoChecklist'
+import {provisionalFinding} from './cp04Autosave'
 import './cp04.css'
 export type Cp04Port=Pick<ReturnType<typeof cp04Repository>,
   'findVehicleByPlate'|'recentOrders'|'getOrder'|'findingsForOrder'|
-  'pendingForVehicle'|'createOrder'|'setStatus'|'createFinding'|'markResolved'>
+  'pendingForVehicle'|'createOrder'|'setStatus'|'createFinding'|'updateFindingNote'|'markResolved'>
 
 const statusNext:Record<OrderStatus,OrderStatus[]> = {
   received:['inspecting','closed'],
@@ -57,8 +56,8 @@ export function Cp04OrdersView({repository,context}:{
   const [result,setResult]=useState<FindingResult>(initial.result)
   const [note,setNote]=useState(initial.note)
   const [multipuntoOpen,setMultipuntoOpen]=useState(initial.multipunto?.open??false)
-  const [multipuntoChoice,setMultipuntoChoice]=useState<MultipuntoChoice>(()=>
-    initial.multipunto?.choice??emptyMultipuntoChoice)
+  const [multipuntoOutstanding,setMultipuntoOutstanding]=useState(0)
+  const [multipuntoIncomplete,setMultipuntoIncomplete]=useState(false)
   const multipuntoSection=useRef<HTMLDivElement>(null)
   const [busy,setBusy]=useState(false)
   const [loading,setLoading]=useState(true)
@@ -74,10 +73,10 @@ export function Cp04OrdersView({repository,context}:{
     writeCp04Draft(scope,{
       selectedOrderId:selected?.order.id??initial.selectedOrderId,
       plate,complaint,intakeOdometer:intake,category,result,note,
-      multipunto:{open:multipuntoOpen,choice:multipuntoChoice}
+      multipunto:{open:multipuntoOpen,choice:{itemId:null,state:'unreviewed',note:''}}
     })
   },[context.userId,context.workshop.id,selected?.order.id,plate,complaint,intake,
-    category,result,note,multipuntoOpen,multipuntoChoice])
+    category,result,note,multipuntoOpen])
 
   useEffect(()=>{
     active.current=true
@@ -118,7 +117,8 @@ export function Cp04OrdersView({repository,context}:{
       if(!active.current||request!==revision.current)return
       if(selected && selected.order.id!==item.order.id) {
         setMultipuntoOpen(false)
-        setMultipuntoChoice(emptyMultipuntoChoice)
+        setMultipuntoOutstanding(0)
+        setMultipuntoIncomplete(false)
       }
       setSelected(item);setVehicle(item.vehicle);setPlate(item.vehicle.plate??'')
       setFindings(list);setPending(outstanding)
@@ -188,27 +188,18 @@ export function Cp04OrdersView({repository,context}:{
     }catch(error){if(active.current)setMessage(workMessage(error))}
     finally{lock.current=false;if(active.current)setBusy(false)}
   }
-  async function saveMultipunto(input:NewFinding):Promise<boolean>{
-    if(lock.current||!selected||selected.order.status==='closed'||!canInspect)return false
-    lock.current=true;setBusy(true);setMessage('');setNotice('')
-    try{
-      // No fixture or separate endpoint: only the existing Auth/RLS repository.
-      if(input.order_id!==selected.order.id||input.vehicle_id!==selected.order.vehicle_id)
-        return false
-      await repository.createFinding(input)
-      if(!active.current)return false
-      const [list,outstanding]=await Promise.all([
-        repository.findingsForOrder(selected.order.id),
-        repository.pendingForVehicle(selected.order.vehicle_id)
-      ])
-      if(!active.current)return false
-      setFindings(list);setPending(outstanding)
-      setNotice('X guardada en Supabase. La revisión anterior permanece en el historial.')
-      return true
-    }catch(error){
-      if(active.current)setMessage(workMessage(error))
-      return false
-    }finally{lock.current=false;if(active.current)setBusy(false)}
+  function multipuntoCommitted(record:Finding){
+    if(!active.current||!selected||record.order_id!==selected.order.id)return
+    // Updates replace the same finding ID, not a duplicate pending diagnosis.
+    setFindings(prev=>{
+      const index=prev.findIndex(x=>x.id===record.id)
+      if(index<0)return [...prev,record]
+      return prev.map(x=>x.id===record.id?record:x)
+    })
+    setPending(prev=>{
+      const remaining=prev.filter(x=>x.id!==record.id)
+      return record.resolution==='pending' ?[record,...remaining]:remaining
+    })
   }
   function openMultipunto(){
     setMultipuntoOpen(true)
@@ -217,6 +208,11 @@ export function Cp04OrdersView({repository,context}:{
   }
   async function changeStatus(next:OrderStatus) {
     if(!selected||lock.current||!canCreate)return
+    if(next==='closed'&&(multipuntoOutstanding>0||multipuntoIncomplete||
+        findings.some(provisionalFinding))){
+      setMessage('No cierres la orden: existen X sin guardar o detalles técnicos pendientes de completar.')
+      return
+    }
     lock.current=true;setBusy(true);setMessage('');setNotice('')
     try{
       const saved=await repository.setStatus(selected.order.id,selected.order.updated_at,next)
@@ -331,9 +327,16 @@ export function Cp04OrdersView({repository,context}:{
       </div>}
       {multipuntoOpen&&<div ref={multipuntoSection} className="cp04-multipunto-anchor">
         <Cp04MultipuntoChecklist
-          orderId={selected.order.id} vehicleId={selected.order.vehicle_id}
-          findings={findings} choice={multipuntoChoice} onChange={setMultipuntoChoice}
-          onSave={saveMultipunto} disabled={busy||loading}
+          key={selected.order.id}
+          repository={repository}
+          scope={{userId:context.userId,workshopId:context.workshop.id,
+            orderId:selected.order.id,vehicleId:selected.order.vehicle_id}}
+          findings={findings} onSaved={multipuntoCommitted}
+          onQueueChange={(outstanding,incomplete)=>{
+            setMultipuntoOutstanding(outstanding)
+            setMultipuntoIncomplete(incomplete)
+          }}
+          disabled={busy||loading}
           readOnly={!canInspect||selected.order.status==='closed'}
           plate={selected.vehicle.plate}
           onBack={()=>setMultipuntoOpen(false)}

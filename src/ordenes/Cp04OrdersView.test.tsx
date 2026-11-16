@@ -13,6 +13,7 @@ function api():Cp04Port{
   pendingForVehicle:vi.fn(async()=>[]),
   createOrder:vi.fn(async()=>{throw Error('not in SSR')}),
   createFinding:vi.fn(async()=>{throw Error('not in SSR')}),
+  updateFindingNote:vi.fn(async()=>{throw Error('not in SSR')}),
   setStatus:vi.fn(async()=>{throw Error('not in SSR')}),
   markResolved:vi.fn(async()=>{throw Error('not in SSR')})
  }

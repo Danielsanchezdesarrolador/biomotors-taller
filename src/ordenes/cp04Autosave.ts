@@ -96,6 +96,7 @@ function encodedNote(state:Result,note:string):string|null{
 }
 export function provisionalFinding(f:Finding):boolean {
  return f.category.startsWith('Multipunto · ')&&f.result==='attention'&&
+   f.resolution==='pending'&&
   (f.note===CP04_PROVISIONAL_NOTE||
    f.note===CP04_IMMEDIATE_PREFIX+CP04_PROVISIONAL_NOTE)
 }

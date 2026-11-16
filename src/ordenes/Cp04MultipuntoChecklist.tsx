@@ -2,7 +2,7 @@ import {useEffect,useMemo,useSyncExternalStore} from 'react'
 import {ArrowLeft,ClipboardCheck,RefreshCcw,WifiOff} from 'lucide-react'
 import {MultipuntoTable} from '../informes/multipunto/MultipuntoTable'
 import type {Finding} from './cp04Contracts'
-import type {Cp04AutosaveQueue as AutosaveType,AutosaveScope} from './cp04Autosave'
+import type {AutosaveScope} from './cp04Autosave'
 import {
   Cp04AutosaveQueue,CP04_PROVISIONAL_NOTE,provisionalFinding
 } from './cp04Autosave'
@@ -10,12 +10,13 @@ import {latestForMultipuntoItem} from './cp04Multipunto'
 import '../informes/multipunto/multipunto.css'
 
 export function Cp04MultipuntoChecklist({
- findings,repository,scope,onSaved,onBack,disabled,readOnly,plate
+ findings,repository,scope,onSaved,onBack,onQueueChange,disabled,readOnly,plate
 }:{
  findings:readonly Finding[]
  repository:ConstructorParameters<typeof Cp04AutosaveQueue>[0]['port']
  scope:AutosaveScope
  onSaved:(record:Finding)=>void
+ onQueueChange?:(outstanding:number,incomplete:boolean)=>void
  onBack:()=>void
  disabled:boolean
  readOnly:boolean
@@ -46,6 +47,7 @@ export function Cp04MultipuntoChecklist({
  const errors=Object.values(entries).filter(v=>v.phase==='error').length
  const incomplete=queue.hasIncompleteNotes()
  const savedCount=queue.getSavedCount()
+ useEffect(()=>{onQueueChange?.(unconfirmed,incomplete)},[unconfirmed,incomplete,onQueueChange])
  const readOnlyOrBusy=readOnly||disabled
  return <div className="cp04-checklist" aria-label="Hoja de inspección multipunto con X y autoguardado">
    <div className="cp04-checklist-top">
