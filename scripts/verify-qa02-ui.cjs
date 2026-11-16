@@ -213,8 +213,9 @@ const { chromium } = require('playwright'),
       const options = button('Opciones de visita')
       assert.equal(await options.getAttribute('aria-expanded'), 'false')
       assert.equal(await button('Cancelar visita DEMO').isVisible(), false)
-      await options.focus()
-      await p.keyboard.press('Enter')
+      // Address the keyboard action to the actual control; delayed stage focus
+      // is separately covered by verify-qa02-focus.cjs, without timing sleeps.
+      await options.press('Enter')
       await p.locator('.fl-options-toggle[aria-expanded="true"]').waitFor()
       assert.equal(await options.getAttribute('aria-expanded'), 'true')
       await p.keyboard.press('Escape')
@@ -230,7 +231,9 @@ const { chromium } = require('playwright'),
       await p.getByLabel('Describe qué falta').fill('Repuestos ficticios pendientes de llegada.')
       await p.getByRole('checkbox', { name: /Confirmo expresamente esta decisión DEMO/ }).check()
       await button('Confirmar espera DEMO').click()
-      await p.waitForFunction(() => document.activeElement?.textContent?.includes('Opciones de visita'))
+      await p.waitForFunction(() =>
+        document.activeElement?.textContent?.includes('Opciones de visita')
+      )
       assert.equal(await options.getAttribute('aria-expanded'), 'false')
       assert.equal(await button('Resolver pausa').isVisible(), true)
       assert.equal(await button('Revisar y confirmar entrega DEMO').isDisabled(), true)

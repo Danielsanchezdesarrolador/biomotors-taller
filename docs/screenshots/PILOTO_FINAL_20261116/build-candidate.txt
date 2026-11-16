@@ -1,0 +1,55 @@
+
+> biomotors-taller@0.1.0 prebuild
+> node scripts/generate-pwa-icons.mjs
+
+BT-BRAND-01: official versioned PWA artwork published
+
+> biomotors-taller@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 1941 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                 1.10 kB │ gzip:   0.53 kB
+dist/.vite/public-modules.json                  2.15 kB │ gzip:   0.63 kB
+dist/.vite/manifest.json                        4.23 kB │ gzip:   0.76 kB
+dist/assets/VehicleHistory-yK5AUdip.css         1.88 kB │ gzip:   0.73 kB
+dist/assets/Cp03PrivatePanel-Bmp21Q-3.css       3.25 kB │ gzip:   1.03 kB
+dist/assets/QuotePanel-C_A3pLV5.css            20.72 kB │ gzip:   4.75 kB
+dist/assets/Cp04OrdersView-C_dlb2Md.css        29.05 kB │ gzip:   6.72 kB
+dist/assets/index-BExMWAYa.css                 89.44 kB │ gzip:  18.89 kB
+dist/assets/pencil-CyvP3MXE.js                  0.26 kB │ gzip:   0.21 kB
+dist/assets/Cp04PrivatePanel-B-n1_m5k.js        1.13 kB │ gzip:   0.60 kB
+dist/assets/Cp05PrivatePanel-DP2ekKob.js        1.28 kB │ gzip:   0.63 kB
+dist/assets/cp03PilotContracts-RTgOqdLM.js      2.06 kB │ gzip:   0.96 kB
+dist/assets/repository-Y2saZz9H.js              4.16 kB │ gzip:   1.50 kB
+dist/assets/documentClient-CgKRmefy.js          6.10 kB │ gzip:   2.68 kB
+dist/assets/cp04Repository-CZ06SbYG.js          8.58 kB │ gzip:   2.67 kB
+dist/assets/VehicleHistory-DCyaFIzx.js         16.52 kB │ gzip:   5.42 kB
+dist/assets/QuotePanel-D2bXq9Q_.js             21.10 kB │ gzip:   7.07 kB
+dist/assets/Cp03PrivatePanel-TwAFR2kz.js       23.06 kB │ gzip:   6.80 kB
+dist/assets/Cp04OrdersView-OJ6AVCXH.js         38.56 kB │ gzip:  11.61 kB
+dist/assets/supabaseGateway-BhgGN0M1.js       217.83 kB │ gzip:  56.27 kB
+dist/assets/index-4i2gBC9Z.js                 286.55 kB │ gzip:  88.57 kB
+dist/assets/pdf-YwJ8BrAO.js                 1,134.68 kB │ gzip: 506.71 kB
+
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 916ms
+
+> biomotors-taller@0.1.0 postbuild
+> node scripts/verify-pwa.mjs && node scripts/verify-official-bundle.mjs && node scripts/verify-dark-brand.mjs
+
+BT-BRAND-01 PWA: original hashes/transparency, official PNGs, manifest, favicon and maskable safe area PASS
+Public module graph, fixture exclusion and ByteTorque PWA identity: PASS
+BT-BRAND-02: dark derivative, original/symbol/alpha provenance and protected PWA/Android assets PASS
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

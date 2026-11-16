@@ -1,0 +1,1 @@
+CP05 offline package prepared. No deployment, secrets or service activation performed.

@@ -17,6 +17,7 @@ DO $$ DECLARE a jsonb;b jsonb; BEGIN
  IF a<>b OR (SELECT count(*) FROM public.quotes)<>1 THEN RAISE EXCEPTION 'DUPLICATE_OPEN'; END IF;
 END $$;
 SELECT public.lab_expect('DELETE FROM public.quotes','42501');
+SELECT public.lab_expect($q$SELECT public.bt_cp05_issue_status('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',gen_random_uuid(),'11111111-1111-4111-8111-111111111111')$q$,'42501');
 SELECT public.lab_expect('UPDATE public.quotes SET updated_at=now()','42501');
 SELECT public.lab_expect('INSERT INTO public.quote_items DEFAULT VALUES','42501');
 SELECT public.lab_expect($q$SELECT public.bt_cp05_open_quote('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','aaaaaaaa-aaaa-4aaa-8aaa-000000000021',gen_random_uuid())$q$,'42501');
@@ -45,6 +46,7 @@ SET ROLE service_role;
 INSERT INTO public.lab_results SELECT 'reserve',public.bt_cp05_prepare_issue('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',(value->>'id')::uuid,2,'10000000-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111') FROM public.lab_results WHERE name='open';
 DO $$ DECLARE r jsonb;path text; issued jsonb; BEGIN
  SELECT value INTO r FROM public.lab_results WHERE name='reserve';
+ IF (public.bt_cp05_issue_status('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',(r->'payload'->'quote'->>'id')::uuid,'11111111-1111-4111-8111-111111111111')->>'request_id') IS DISTINCT FROM '10000000-0000-4000-8000-000000000003' THEN RAISE EXCEPTION 'PENDING_RECOVERY_MISSING'; END IF;
  IF (r->'payload'->'totals'->>'total')::bigint<>107411 THEN RAISE EXCEPTION 'TOTAL_ROUNDING'; END IF;
  path:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/quotes/'||(r->'payload'->'quote'->>'id')||'/r1/'||(r->>'payload_sha256')||'.pdf';
  issued:=public.bt_cp05_finish_issue('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','10000000-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111',path,repeat('a',64),1234);

@@ -19,6 +19,8 @@ export default defineConfig(({ mode }) => {
   if (env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' && env.VITE_BT_CP04_PRIVATE_ENABLED !== 'true')
     throw new Error('CP05 requires CP04 private rollout.')
   if(env.VITE_BT_CP06_PRIVATE_ENABLED==='true'&&env.VITE_BT_CP04_PRIVATE_ENABLED!=='true')throw new Error('CP06 requires verified CP03/CP04 private rollout.')
+  if(env.VITE_BT_CP05_DOCUMENTS_ENABLED==='true'&&env.VITE_BT_CP05_PRIVATE_ENABLED!=='true')throw new Error('CP05 documents require private CP05.')
+  if(env.VITE_BT_CP05_EMAIL_ENABLED==='true'&&env.VITE_BT_CP05_DOCUMENTS_ENABLED!=='true')throw new Error('CP05 email requires approved private documents.')
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')

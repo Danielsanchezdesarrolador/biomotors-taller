@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { documentClient } from './documentClient'
 import type { Context } from '../auth/controller'
 import { cp04Repository } from '../ordenes/cp04Repository'
 import {
@@ -17,7 +18,11 @@ import {
 export function cp05Repository(client: SupabaseClient, context: Context) {
   const wid = quoteId(context.workshop.id),
     uid = quoteId(context.userId),
-    orders = cp04Repository(client, context)
+    orders = cp04Repository(client, context),
+    documents = documentClient(client, context, {
+      archive: import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true',
+      email: import.meta.env.VITE_BT_CP05_EMAIL_ENABLED === 'true'
+    })
   let generation = 0,
     stopped = false
   function check(error: unknown) {
@@ -217,6 +222,7 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     return b
   }
   return {
+    documents,
     list,
     forOrder,
     load,
@@ -249,6 +255,7 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
       stopped = true
       generation++
       orders.dispose()
+      documents.dispose()
     }
   }
 }

@@ -1,0 +1,1 @@
+{"backup_id": "SYNTHETIC_CLOUD_ONLY", "isolated_restore_verified": true, "network": "none", "database_checks": {"auth_users": 4, "customers": 2, "vehicles": 2, "orders": 1, "findings": 1, "rls_fk_grants_verified": true}, "external_storage_verified_by_this_command": false, "full_project_backup": false}

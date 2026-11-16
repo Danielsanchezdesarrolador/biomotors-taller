@@ -29,6 +29,7 @@ import {
   type Revision
 } from './contracts'
 import type { Cp05Port } from './repository'
+import { documentOperation } from './documentClient'
 import { localDraft, rememberDraft, clearLocalDraft } from './temporaryDraft'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
@@ -264,15 +265,72 @@ export function QuotePanel({
     try {
       // Official archived bytes must be downloaded through the approved private archive.
       // The current rollout has no Storage authorization; only a clearly marked draft can be generated.
-      if (revision) throw Error('ARCHIVE_DISABLED')
       const renderer = await import('./pdf')
-      const bytes = await renderer.browserQuotePdf(previewSnapshot(bundle, draft), true)
-      if (active.current) renderer.downloadPdf(bytes, `${quoteNumber(bundle.quote)}-borrador.pdf`)
+      const bytes = revision
+        ? await repository.documents.download(revision)
+        : await renderer.browserQuotePdf(previewSnapshot(bundle, draft), true)
+      if (active.current)
+        renderer.downloadPdf(
+          bytes,
+          `${quoteNumber(bundle.quote)}-${revision ? 'r' + revision.revision : 'borrador'}.pdf`
+        )
     } catch {
       if (active.current)
         setError(
           'No se pudo generar el PDF. El archivo privado emitido sigue bloqueado hasta autorizar su almacenamiento.'
         )
+    } finally {
+      lock.current = false
+      if (active.current) setBusy(false)
+    }
+  }
+  async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision) {
+    if (!bundle || lock.current || !canWrite) return
+    if (kind === 'issue' && dirty) {
+      setError('Guarda y revisa el borrador antes de emitir.')
+      return
+    }
+    if (
+      !window.confirm(
+        kind === 'issue'
+          ? '¿Emitir y archivar esta revisión inmutable?'
+          : kind === 'cancel'
+            ? '¿Cancelar la reserva pendiente sin emitir?'
+            : `¿Enviar ${quoteNumber(bundle.quote)} revisión ${revision?.revision} a ${revision?.payload.customer.full_name || ''} <${revision?.payload.customer.email || ''}>? ${bundle.quote.status === 'draft' ? 'Los cambios del borrador actual no se incluyen.' : ''}`
+      )
+    )
+      return
+    lock.current = true
+    setBusy(true)
+    setError('')
+    setMessage('')
+    try {
+      const requestId = documentOperation(context, bundle.quote)
+      let status = ''
+      if (kind === 'issue') {
+        await repository.documents.issue(bundle.quote, requestId)
+        status = 'Revisión emitida y archivo privado verificado.'
+      } else if (kind === 'cancel') {
+        await repository.documents.cancel(bundle.quote, requestId)
+        status = 'Reserva cancelada; borrador disponible para revisión.'
+      } else if (revision) {
+        const attempts = bundle.deliveries.filter((d) => d.revision_id === revision.id)
+        const attempt = 1 + Math.max(0, ...attempts.map((d) => d.attempt))
+        const result = await repository.documents.send(revision, attempt)
+        status =
+          result === 'failed'
+            ? 'El proveedor rechazó el envío. Revisa la trazabilidad.'
+            : result === 'already_sent'
+              ? 'El proveedor ya confirmó esta revisión; no se generó otro envío.'
+              : 'Envío aceptado por el proveedor; no acredita lectura ni entrega en la bandeja.'
+      }
+      const next = await repository.load(bundle.quote.id)
+      if (!active.current) return
+      setBundle(next)
+      setDraft(draftFrom(next))
+      setMessage(status)
+    } catch (e) {
+      if (active.current) failure(e)
     } finally {
       lock.current = false
       if (active.current) setBusy(false)
@@ -290,8 +348,11 @@ export function QuotePanel({
         </div>
       </header>
       <p className="cp05-notice">
-        <LockKeyhole size={19} /> Precios netos CLP · IVA 19 %. Emisión archivada y correos
-        desactivados; no se registra aceptación del cliente.
+        <LockKeyhole size={19} /> Precios netos CLP · IVA 19 %.{' '}
+        {repository.documents.enabled
+          ? 'Emisión y archivo sujetos a autorización del servidor.'
+          : 'Emisión archivada y correos desactivados.'}{' '}
+        No se registra aceptación del cliente.
       </p>
       {busy && <p role="status">Consultando o guardando la cotización…</p>}
       {error && (
@@ -518,15 +579,50 @@ export function QuotePanel({
                   </button>
                 )}
                 <button
-                  disabled
+                  disabled={
+                    busy ||
+                    !canWrite ||
+                    !repository.documents.enabled ||
+                    bundle.quote.status !== 'draft' ||
+                    dirty ||
+                    !draft.items.length
+                  }
                   className="cp04-secondary"
                   title="Requiere archivo privado y backend autorizados"
+                  onClick={() => void documentAction('issue')}
                 >
-                  Emitir revisión archivada · pendiente
+                  {repository.documents.enabled
+                    ? bundle.quote.issue_pending
+                      ? 'Retomar emisión pendiente'
+                      : 'Emitir revisión archivada'
+                    : 'Emitir revisión archivada · pendiente'}
                 </button>
-                <button disabled className="cp04-secondary" title="No se habilitaron correos">
-                  <Send size={17} /> Enviar correo · desactivado
+                <button
+                  disabled={
+                    busy ||
+                    !canWrite ||
+                    !repository.documents.emailEnabled ||
+                    bundle.quote.status === 'voided' ||
+                    !bundle.revisions.length
+                  }
+                  className="cp04-secondary"
+                  title="El backend debe autorizar el proveedor"
+                  onClick={() => void documentAction('send', bundle.revisions[0])}
+                >
+                  <Send size={17} />{' '}
+                  {repository.documents.emailEnabled
+                    ? 'Enviar última revisión'
+                    : 'Enviar correo · desactivado'}
                 </button>
+                {bundle.quote.issue_pending && repository.documents.enabled && canWrite && (
+                  <button
+                    className="cp04-secondary"
+                    disabled={busy}
+                    onClick={() => void documentAction('cancel')}
+                  >
+                    Cancelar reserva pendiente
+                  </button>
+                )}
               </div>
               {canWrite && bundle.quote.status !== 'draft' && (
                 <div className="dashboard-card cp05-conditions">
@@ -578,11 +674,14 @@ export function QuotePanel({
                     </p>
                     <code>SHA-256: {r.pdf_sha256}</code>
                     <button
-                      disabled
+                      disabled={busy || !repository.documents.enabled}
                       className="cp04-secondary"
-                      title="Descarga privada pendiente de habilitación"
+                      onClick={() => void pdf(r)}
+                      title="Descarga autenticada del archivo emitido"
                     >
-                      Archivo PDF privado · pendiente de acceso
+                      {repository.documents.enabled
+                        ? 'Descargar PDF emitido'
+                        : 'Archivo PDF privado · pendiente de acceso'}
                     </button>
                   </article>
                 ))}
@@ -602,7 +701,7 @@ export function QuotePanel({
                       {d.status === 'queued'
                         ? 'En cola, no confirmado'
                         : d.status === 'sent'
-                          ? 'Enviado con confirmación del proveedor'
+                          ? 'Aceptado por el proveedor (no acredita recepción)'
                           : 'Error confirmado'}{' '}
                       · {new Date(d.created_at).toLocaleString('es-CL')}
                       {d.error_code ? ' · ' + d.error_code : ''}

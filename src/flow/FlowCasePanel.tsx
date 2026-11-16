@@ -1,7 +1,7 @@
 import { FlowProposalPanel } from './FlowProposalPanel'
 import { FlowDeliveryPanel, FlowVisitActions } from './FlowDeliveryPanel'
 import { FlowQuotePanel, FlowExecutionPanel } from './FlowQuotePanels'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, CarFront, Check, ClipboardList, Layers } from 'lucide-react'
 import {
   caseContext,
@@ -35,10 +35,17 @@ export function FlowCasePanel({
   const heading = useRef<HTMLHeadingElement>(null)
   const shortVisitRef = visit.id.slice(-8).toUpperCase()
   const current = milestones.find((m) => m.id === stage) ?? milestones[0]
+  const focusFrame=useRef<number|null>(null)
+  useEffect(()=>()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current)},[])
   function select(value: string) {
+    const trigger=document.activeElement
+    if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current)
     setStage(value)
     setConfirm(false)
-    requestAnimationFrame(() => {
+    focusFrame.current=requestAnimationFrame(() => {
+      focusFrame.current=null
+      // A delayed frame must not steal focus after the operator moves to another control.
+      if(document.activeElement!==trigger&&document.activeElement!==document.body)return
       heading.current?.focus()
       heading.current?.scrollIntoView({ block: 'start' })
     })

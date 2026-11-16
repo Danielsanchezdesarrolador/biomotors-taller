@@ -51,6 +51,7 @@ export function clearOperationalDrafts():void {
     {const store=window.sessionStorage
       store.removeItem('bt:cp04:temporary-draft:v1')
       store.removeItem('bt:cp05:unsaved:v1')
+      store.removeItem('bt:cp05:document-operation:v1')
       for(let i=store.length-1;i>=0;i--){
         const key=store.key(i)
         if(key?.startsWith('bt:cp04:multipunto-autosave:v1:'))store.removeItem(key)

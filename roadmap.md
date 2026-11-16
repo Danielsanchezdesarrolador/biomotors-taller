@@ -280,6 +280,15 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Salida:** Ignacio genera documentos y los envía desde la aplicación con trazabilidad, sin confundir cotización con documento tributario.
 
+### Preparación final del piloto — código listo para revisión, servicios pendientes (16/11/2026)
+
+- [x] CP05: puente UI/HTTP autenticado, emisión → readback/hash → finalización, recuperación/cancelación de reservas, descarga privada y envío transaccional con adjunto y trazabilidad; todo candidato/OFF. Se niega envío de revisiones anuladas/reemplazadas.
+- [x] CP06 consultó cotizaciones habilitadas en HTTP sintético; se conserva el bloqueo de tablas CP05 cuando OFF y no cambian 34 X/autoguardado.
+- [x] QA02: carrera de foco de `verify-qa02-ui.cjs:218` reproducida y corregida puntualmente, sin repetir auditorías completas.
+- [x] Exportador cifrado a Drive privado y restaurador offline preparados, con ensayo PostgreSQL/GPG sintético verificado. **No hay respaldo real ni subida a Drive**: faltan conexiones, secretos protegidos, ruta TLS y custodia de claves externas.
+- [x] Validación local: 584 tests, TypeScript, builds/PWA, SQL y Storage candidatos en PostgreSQL efímero, navegador 390 y foco 1440/375. CI remoto no verificable por proxy. [Informe único con pasos de navegador y activaciones](docs/BT_PILOTO_PREPARACION_FINAL_20261116.md).
+- [ ] Cumplir respaldo real actualizado/recuperable y autorizaciones separadas antes de SQL CP05, Storage, Edge, correos o flags. No iniciar CP07–CP09.
+
 ### BT-CP06 — Historial confiable, respaldo y prueba piloto — PREPARACIÓN DE CÓDIGO (16/11/2026)
 
 **Decisión de ejecución del Director (16/11/2026):** desarrollar los módulos pendientes desde Codex en la nube y ChatGPT antes de la etapa final de respaldo consolidado, instalación controlada y piloto real. No bloquear cada módulo candidato por un respaldo individual, pero **no modificar Supabase alojado, datos reales, Auth, roles ni desplegar SQL/Storage/Edge/correos** sin respaldo recuperable y autorización aplicable. No declarar CP05 ni CP06 operativos. El respaldo del final no sustituye la protección periódica cuando haya clientes reales.

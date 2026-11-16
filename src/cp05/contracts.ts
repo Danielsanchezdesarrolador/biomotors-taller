@@ -100,7 +100,9 @@ export type Draft = {
   items: WorkItem[]
 }
 export class QuoteFailure extends Error {
-  constructor(public kind: 'denied' | 'invalid' | 'conflict' | 'unavailable' | 'blocked') {
+  constructor(
+    public kind: 'denied' | 'invalid' | 'conflict' | 'unavailable' | 'blocked' | 'delivery_pending'
+  ) {
     super(kind)
   }
 }
@@ -192,6 +194,8 @@ export function previewSnapshot(bundle: Bundle, draft: Draft): Snapshot {
 }
 export function quoteMessage(error: unknown) {
   const kind = error instanceof QuoteFailure ? error.kind : 'unavailable'
+  if (kind === 'delivery_pending')
+    return 'El envío está pendiente de conciliación con el proveedor. No lo repitas hasta verificar el resultado.'
   return kind === 'conflict'
     ? 'Otra persona cambió la cotización. Conserva tus cambios y recarga antes de guardar.'
     : kind === 'denied'

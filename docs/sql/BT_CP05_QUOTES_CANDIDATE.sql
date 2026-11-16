@@ -246,6 +246,19 @@ BEGIN
 END $$;
 CREATE FUNCTION public.bt_cp05_cancel_issue(p_workshop_id uuid,p_request_id uuid,p_actor_id uuid) RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path=pg_catalog AS $$ SELECT bt_cp05_private.cancel_issue(p_workshop_id,p_request_id,p_actor_id) $$;
 
+-- Service-only recovery of an interrupted reservation after logout/cloud restart.
+CREATE FUNCTION bt_cp05_private.issue_status(wid uuid,qid uuid,actor uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+DECLARE req bt_cp05_private.issue_requests;
+BEGIN
+ PERFORM bt_cp05_private.authorize(wid,actor,true);
+ SELECT * INTO req FROM bt_cp05_private.issue_requests WHERE workshop_id=wid AND quote_id=qid AND actor_id=actor AND state='pending';
+ IF NOT FOUND THEN RETURN NULL; END IF;
+ RETURN jsonb_build_object('request_id',req.request_id,'expected_version',req.expected_version);
+END $$;
+CREATE FUNCTION public.bt_cp05_issue_status(p_workshop_id uuid,p_quote_id uuid,p_actor_id uuid) RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path=pg_catalog AS $$ SELECT bt_cp05_private.issue_status(p_workshop_id,p_quote_id,p_actor_id) $$;
+REVOKE ALL ON FUNCTION public.bt_cp05_issue_status(uuid,uuid,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.bt_cp05_issue_status(uuid,uuid,uuid) TO service_role;
+
 -- Append-only delivery ledger. Only a trusted future worker can enqueue/ack.
 -- No worker is deployed. The recipient must equal the immutable revision snapshot.
 CREATE FUNCTION bt_cp05_private.delivery(wid uuid,revid uuid,attempt_no integer,next_status text,provider text,error text) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
@@ -289,7 +302,7 @@ END $$;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_cp05_private FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION bt_cp05_private.read_allowed(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION bt_cp05_private.open_quote(uuid,uuid,uuid),bt_cp05_private.save_quote(uuid,uuid,bigint,uuid,jsonb),bt_cp05_private.revise_quote(uuid,uuid,bigint,uuid,text),bt_cp05_private.void_quote(uuid,uuid,bigint,uuid,text) TO authenticated;
-GRANT EXECUTE ON FUNCTION bt_cp05_private.prepare_issue(uuid,uuid,bigint,uuid,uuid),bt_cp05_private.finish_issue(uuid,uuid,uuid,text,text,integer),bt_cp05_private.cancel_issue(uuid,uuid,uuid),bt_cp05_private.delivery(uuid,uuid,integer,text,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION bt_cp05_private.issue_status(uuid,uuid,uuid),bt_cp05_private.prepare_issue(uuid,uuid,bigint,uuid,uuid),bt_cp05_private.finish_issue(uuid,uuid,uuid,text,text,integer),bt_cp05_private.cancel_issue(uuid,uuid,uuid),bt_cp05_private.delivery(uuid,uuid,integer,text,text,text) TO service_role;
 REVOKE ALL ON FUNCTION public.bt_cp05_can_read(uuid),public.bt_cp05_open_quote(uuid,uuid,uuid),public.bt_cp05_save_quote(uuid,uuid,bigint,uuid,jsonb),public.bt_cp05_revise_quote(uuid,uuid,bigint,uuid,text),public.bt_cp05_void_quote(uuid,uuid,bigint,uuid,text),public.bt_cp05_prepare_issue(uuid,uuid,bigint,uuid,uuid),public.bt_cp05_finish_issue(uuid,uuid,uuid,text,text,integer),public.bt_cp05_cancel_issue(uuid,uuid,uuid),public.bt_cp05_record_delivery(uuid,uuid,integer,text,text,text) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.bt_cp05_can_read(uuid),public.bt_cp05_open_quote(uuid,uuid,uuid),public.bt_cp05_save_quote(uuid,uuid,bigint,uuid,jsonb),public.bt_cp05_revise_quote(uuid,uuid,bigint,uuid,text),public.bt_cp05_void_quote(uuid,uuid,bigint,uuid,text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.bt_cp05_prepare_issue(uuid,uuid,bigint,uuid,uuid),public.bt_cp05_finish_issue(uuid,uuid,uuid,text,text,integer),public.bt_cp05_cancel_issue(uuid,uuid,uuid),public.bt_cp05_record_delivery(uuid,uuid,integer,text,text,text) TO service_role;

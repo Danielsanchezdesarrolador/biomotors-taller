@@ -2,7 +2,7 @@
 import type { Revision } from '../../src/cp05/contracts'
 export interface DeliveryPorts {
   authorize(revisionId: string): Promise<Revision>
-  queue(revisionId: string, attempt: number): Promise<void>
+  queue(revisionId: string, attempt: number): Promise<void | 'already_sent'>
   send(input: { recipient: string; revision: Revision; idempotencyKey: string }): Promise<{
     confirmed: boolean
     providerId?: string
@@ -30,7 +30,7 @@ export async function deliverQuoteCandidate(
   if (revision.id !== revisionId) throw Error('INVALID_REVISION')
   if (!recipient || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient))
     throw Error('AUTHORIZED_RECIPIENT_REQUIRED')
-  await ports.queue(revisionId, attempt)
+  if ((await ports.queue(revisionId, attempt)) === 'already_sent') return 'already_sent' as const
   // One stable key per revision. Retries require provider idempotency/reconciliation;
   // never infer sent from an exception or an ambiguous acknowledgement.
   const result = await ports.send({
@@ -46,8 +46,9 @@ export async function deliverQuoteCandidate(
       null,
       /^[A-Z0-9_]{1,80}$/.test(result.errorCode || '') ? result.errorCode! : 'PROVIDER_REJECTED'
     )
-    return
+    return 'failed' as const
   }
   if (!result.confirmed || !result.providerId) throw Error('PROVIDER_ACK_UNKNOWN')
   await ports.record(revisionId, attempt, 'sent', result.providerId, null)
+  return 'sent' as const
 }

@@ -1,4 +1,5 @@
 /** Backend-only injected candidate. NOT imported by the PWA; no endpoint or credentials. */
+import { quoteId } from '../../src/cp05/contracts'
 import type { Snapshot, Revision, Quote } from '../../src/cp05/contracts'
 export type Reservation = {
   request_id: string
@@ -32,9 +33,14 @@ export async function issueQuoteCandidate(
 ): Promise<Revision> {
   // This switch is a trusted server rollout policy, never a browser authorization.
   if (policy.archiveApproved !== true) throw Error('ARCHIVE_NOT_AUTHORIZED')
+  quoteId(quote.id)
+  quoteId(requestId)
+  if (!Number.isSafeInteger(quote.version) || quote.version < 1)
+    throw Error('INVALID_QUOTE_VERSION')
   const user = await ports.verifyUser()
   if (!user.confirmed) throw Error('UNVERIFIED_ACTOR')
   const frozen = await ports.reserve(user.id, quote.id, quote.version, requestId)
+  quoteId(frozen.request_id)
   const snapshot = frozen.payload
   if (
     snapshot.quote.id !== quote.id ||
@@ -58,7 +64,7 @@ export async function issueQuoteCandidate(
     receipt.contentType !== 'application/pdf'
   )
     throw Error('ARCHIVE_NOT_CONFIRMED')
-  const issued = await ports.finish(user.id, requestId, receipt)
+  const issued = await ports.finish(user.id, frozen.request_id, receipt)
   if (
     issued.pdf_sha256 !== hash ||
     issued.pdf_object_path !== path ||

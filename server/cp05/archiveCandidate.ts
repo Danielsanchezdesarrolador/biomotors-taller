@@ -20,13 +20,12 @@ export function privateArchiveCandidate(client: SupabaseClient, policy: { approv
         contentType: 'application/pdf',
         upsert: false
       })
-      if (uploaded.error) {
-        // Includes a lost upload acknowledgement: compare existing bytes, never overwrite.
-        const existing = await bucket.download(path)
-        if (existing.error || !existing.data) throw Error('ARCHIVE_NOT_CONFIRMED')
-        if ((await hash(new Uint8Array(await existing.data.arrayBuffer()))) !== sha256)
-          throw Error('ARCHIVE_CONFLICT')
-      }
+      // Read back even after a successful upload acknowledgement before finalizing SQL.
+      const existing = await bucket.download(path)
+      if (existing.error || !existing.data) throw Error('ARCHIVE_NOT_CONFIRMED')
+      const restored = new Uint8Array(await existing.data.arrayBuffer())
+      if (restored.length !== pdf.length || (await hash(restored)) !== sha256)
+        throw Error(uploaded.error ? 'ARCHIVE_CONFLICT' : 'ARCHIVE_INTEGRITY_ERROR')
       return { path, sha256, size: pdf.length, contentType: 'application/pdf' as const }
     },
     async restore(path: string, expectedHash: string) {

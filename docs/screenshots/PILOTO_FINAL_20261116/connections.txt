@@ -1,0 +1,6 @@
+Cloud status: no secret bindings, runtime variables or outbound identities.
+Configured custom host: existing Render only.
+Supabase HTTPS: CONNECT proxy 403; PostgreSQL authenticated TLS not verified.
+Google Drive API: CONNECT proxy 403.
+rclone listremotes: no config file, no remotes.
+No real export, upload, hosted restore or activation attempted.

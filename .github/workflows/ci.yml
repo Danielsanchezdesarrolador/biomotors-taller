@@ -59,6 +59,8 @@ jobs:
           VITE_BT_CP04_PRIVATE_ENABLED: 'true'
           VITE_BT_CP05_PRIVATE_ENABLED: 'true'
           VITE_BT_CP06_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP05_DOCUMENTS_ENABLED: 'true'
+          VITE_BT_CP05_EMAIL_ENABLED: 'true'
           VITE_SUPABASE_URL: 'https://suxcqqnmcjoezfxltoms.supabase.co'
           VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_build_only'
         run: npm run build

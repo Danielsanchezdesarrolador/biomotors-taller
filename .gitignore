@@ -16,3 +16,13 @@ coverage/
 /public/favicon-32.png
 /public/favicon-48.png
 /public/icon.svg
+
+# Runtime backups and connection material must never be committed.
+__pycache__/
+/backups/
+*.dump
+*.dump.gpg
+*.sql.gpg
+.pgpass
+.pg_service.conf
+.rclone.conf

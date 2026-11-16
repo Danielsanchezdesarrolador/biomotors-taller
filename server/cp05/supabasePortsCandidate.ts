@@ -21,6 +21,7 @@ export function issuancePortsCandidate(
   async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
     gate()
     const result = await trustedClient.rpc(name, { p_workshop_id: wid, ...args })
+    if (result.error?.code === '42501') throw Error('ACCESS_DENIED')
     if (result.error || !result.data) throw Error('ISSUE_NOT_CONFIRMED')
     return result.data as T
   }
@@ -40,10 +41,17 @@ export function issuancePortsCandidate(
         .eq('id', quoteId)
         .maybeSingle()
       if (visible.error || visible.data?.id !== quoteId) throw Error('QUOTE_NOT_AUTHORIZED')
+      const recovery = await trustedClient.rpc('bt_cp05_issue_status', {
+        p_workshop_id: wid,
+        p_quote_id: quoteId,
+        p_actor_id: actorId
+      })
+      if (recovery.error || (recovery.data && recovery.data.expected_version !== version))
+        throw Error('ISSUE_NOT_CONFIRMED')
       const reservation = await rpc<Reservation>('bt_cp05_prepare_issue', {
         p_quote_id: quoteId,
         p_expected_version: version,
-        p_request_id: requestId,
+        p_request_id: recovery.data?.request_id || requestId,
         p_actor_id: actorId
       })
       if (reservation.payload.quote.workshop_id !== wid) throw Error('INVALID_TENANT')
@@ -88,6 +96,8 @@ export async function restoreRevisionCandidate(
     .maybeSingle()
   if (r.error || !r.data || r.data.workshop_id !== wid || r.data.id !== rid)
     throw Error('REVISION_NOT_AUTHORIZED')
+  const expected = `${wid}/quotes/${quoteId(r.data.quote_id)}/r${r.data.revision}/${r.data.payload_sha256}.pdf`
+  if (r.data.pdf_object_path !== expected) throw Error('ARCHIVE_PATH_MISMATCH')
   return privateArchiveCandidate(trustedClient, policy).restore(
     r.data.pdf_object_path,
     r.data.pdf_sha256
