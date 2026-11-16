@@ -4,7 +4,7 @@ import {
   results,
   type InspectionItem,
   type Result
-} from './multipuntoData'
+} from './multipuntoTemplate'
 type Change = (id: string, state: Result) => void
 export function MultipuntoTable({
   items,

@@ -2,15 +2,9 @@ import { createDocument, documentContext } from '../documentosData'
 import { loadDemoSettings } from '../../configuracion/settingsSession'
 import { readOrderRevision } from '../../ordenes/orderSession'
 import type { InspectionState } from '../../ordenes/ordenesData'
-export type Result = 'unreviewed' | 'ok' | 'attention' | 'immediate'
-export type InspectionItem = {
-  id: string
-  category: string
-  name: string
-  order: number
-  state: Result
-  note: string
-}
+import { categories, type Result, type InspectionItem } from './multipuntoTemplate'
+export { categories, resultLabels, results } from './multipuntoTemplate'
+export type { Result, InspectionItem } from './multipuntoTemplate'
 export type Photo = { id: string; name: string; size: number; url: string; itemId: string }
 export type MultipuntoReport = {
   id: string
@@ -47,79 +41,6 @@ export type MultipuntoReport = {
   finalized: boolean
   closedWithPending: boolean
 }
-export const resultLabels: Record<Result, string> = {
-  unreviewed: 'Sin revisar',
-  ok: 'OK',
-  attention: 'Requiere atención',
-  immediate: 'Cambio inmediato'
-}
-export const results: Result[] = ['ok', 'attention', 'immediate']
-export const categories = [
-  {
-    id: 'general',
-    name: 'General',
-    items: [
-      ['neblina', 'Luces de neblina'],
-      ['bajas', 'Luces bajas'],
-      ['intermitentes', 'Luces intermitentes'],
-      ['altas', 'Luces altas'],
-      ['freno-luces', 'Luces de freno'],
-      ['reversa', 'Luz de marcha atrás'],
-      ['posicion', 'Luces de posición'],
-      ['bocina', 'Bocina'],
-      ['herramientas', 'Kit de herramientas'],
-      ['extintor', 'Extintor']
-    ]
-  },
-  {
-    id: 'capo',
-    name: 'Bajo capó',
-    items: [
-      ['liquido-frenos', 'Líquido de frenos'],
-      ['aceite-motor', 'Nivel de aceite de motor'],
-      ['aceite-transmision', 'Aceite de transmisión'],
-      ['liquido-direccion', 'Líquido de dirección'],
-      ['refrigerante', 'Líquido refrigerante'],
-      ['accesorios', 'Correas de accesorios'],
-      ['distribucion', 'Distribución'],
-      ['embrague', 'Funcionamiento del embrague']
-    ]
-  },
-  {
-    id: 'bajo',
-    name: 'Bajo vehículo',
-    items: [
-      ['bandejas', 'Bandejas'],
-      ['bieletas', 'Bieletas'],
-      ['axiales', 'Axiales y terminales'],
-      ['amortiguadores', 'Amortiguadores'],
-      ['fuga-aceite', 'Fugas de aceite'],
-      ['fuga-refrigerante', 'Fugas de refrigerante'],
-      ['homocineticas', 'Homocinéticas'],
-      ['cremallera', 'Cremallera de dirección']
-    ]
-  },
-  {
-    id: 'frenos',
-    name: 'Estado de frenos',
-    items: [
-      ['discos', 'Discos de freno'],
-      ['tambores', 'Tambores'],
-      ['estacionamiento', 'Freno de estacionamiento'],
-      ['pastillas', 'Pastillas de freno']
-    ]
-  },
-  {
-    id: 'neumaticos',
-    name: 'Estado de neumáticos',
-    items: [
-      ['delanteras', 'Ruedas delanteras'],
-      ['traseras', 'Ruedas traseras'],
-      ['repuesto', 'Rueda de repuesto'],
-      ['presion', 'Presión de neumáticos']
-    ]
-  }
-]
 export const legacyResult = (state: InspectionState): Result =>
   state === 'correcto' ? 'ok' : state === 'atencion' ? 'attention' : 'unreviewed'
 // Only the oil LEVEL is equivalent. Broad groups (brakes, suspension, lights,
