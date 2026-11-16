@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 import uuid
 from datetime import datetime, timezone
-from urllib.request import Request, urlopen
+from drive_destination import PrivateDrive, FOLDER_ID, REMOTE
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
 
@@ -62,41 +62,11 @@ def encrypt_export(command, output, recipient, gnupghome, env=None):
 
 
 def inspect_drive(config_path, remote, folder):
-    config = configparser.ConfigParser(interpolation=None)
-    config.read(config_path)
-    if not config.has_section(remote) or config[remote].get('type') != 'drive':
-        raise RuntimeError('An existing Google Drive remote is required')
-    if config[remote].get('root_folder_id') != folder:
-        raise RuntimeError('Drive remote must be scoped to the approved backup folder')
-    # Let rclone refresh its OAuth credential without exposing it in output.
-    subprocess.run(['rclone', '--config', config_path, 'lsf', remote + ':', '--max-depth', '1'],
-                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    config.read(config_path)
-    token = json.loads(config[remote]['token'])['access_token']
-    url = ('https://www.googleapis.com/drive/v3/files/' + folder +
-           '?fields=id,mimeType,trashed,permissions(type,role)')
-    with urlopen(Request(url, headers={'Authorization': 'Bearer ' + token}), timeout=30) as response:
-        metadata = json.load(response)
-    if (metadata.get('id') != folder or metadata.get('trashed') or
-            metadata.get('mimeType') != 'application/vnd.google-apps.folder' or
-            not metadata.get('permissions') or
-            any(p.get('type') in ('anyone', 'domain') for p in metadata['permissions'])):
-        raise RuntimeError('Private Drive folder permissions were not verified')
+    return PrivateDrive(config_path, remote, folder)
 
 
-def upload_verify(config, remote_path, paths, temp):
-    """Never assume upload success: read each encrypted object back and compare SHA256."""
-    for path in paths:
-        target = remote_path + '/' + path.name
-        subprocess.run(['rclone', '--config', config, 'copyto', str(path), target,
-                        '--immutable'], check=True, stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL)
-        restored = temp / ('readback-' + path.name)
-        subprocess.run(['rclone', '--config', config, 'copyto', target, str(restored)],
-                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if digest(path) != digest(restored):
-            raise RuntimeError('Encrypted Drive object integrity mismatch')
-        restored.unlink()
+def upload_verify(destination, directory, paths, temp):
+    destination.upload_verify(directory, paths, temp)
 
 
 def main():
@@ -109,6 +79,8 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]{0,59}',args.drive_remote) or not re.fullmatch(r'[A-Za-z0-9_-]{10,120}',args.drive_folder_id) or not re.fullmatch(r'[A-Fa-f0-9]{40}|[A-Fa-f0-9]{64}',args.recipient_fingerprint):
         raise RuntimeError('Invalid remote/folder/full recipient fingerprint')
+    if args.drive_remote != REMOTE or args.drive_folder_id != FOLDER_ID:
+        raise RuntimeError('Unapproved Drive destination')
     if args.project_ref != PROJECT:
         raise RuntimeError('Unexpected Supabase project')
     for executable in ['pg_dump', 'pg_dumpall', 'psql', 'gpg', 'rclone']:
@@ -136,7 +108,7 @@ def main():
                            env=pg_env, capture_output=True, text=True)
     if probe.returncode or probe.stdout.strip() != 't':
         raise RuntimeError('Authenticated PostgreSQL TLS connection not verified')
-    inspect_drive(drive, args.drive_remote, args.drive_folder_id)
+    destination = inspect_drive(drive, args.drive_remote, args.drive_folder_id)
     os.umask(0o077)
     name = 'bytetorque-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-') + uuid.uuid4().hex
     with tempfile.TemporaryDirectory(prefix='bt-encrypted-backup-') as directory:
@@ -159,9 +131,11 @@ def main():
             'scope': 'whole PostgreSQL database including auth/storage metadata and roles without role passwords',
             'excluded': ['Storage object bytes', 'Edge source/config/secrets', 'provider project settings'],
             'restoration_verified': False,
+            'drive_folder_id': FOLDER_ID,
             'files': [{'name': p.name, 'sha256': digest(p), 'bytes': p.stat().st_size} for p in paths]}, indent=2))
         paths.append(manifest)
-        upload_verify(drive, args.drive_remote + ':' + name, paths, temp)
+        directory = destination.backup_directory(name, create=True)
+        upload_verify(destination, directory, paths, temp)
         print(json.dumps({'backup_id': name, 'encrypted_external_readback_verified': True,
                           'restoration_verified': False,
                           'full_project_backup': False}))

@@ -7,10 +7,10 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import tempfile
 from cloud_backup import required_file, inspect_drive, upload_verify
 from restore_isolated import restore
+from drive_destination import FOLDER_ID, REMOTE
 
 
 def main():
@@ -24,26 +24,28 @@ def main():
         raise RuntimeError('Invalid backup identifier')
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]{0,59}', args.drive_remote) or not re.fullmatch(r'[A-Za-z0-9_-]{10,120}', args.drive_folder_id):
         raise RuntimeError('Invalid Drive identifier')
+    if args.drive_remote != REMOTE or args.drive_folder_id != FOLDER_ID:
+        raise RuntimeError('Unapproved Drive destination')
     config = required_file('BT_BACKUP_DRIVE_CONFIG')
     keyring = os.environ.get('BT_RESTORE_GNUPGHOME')
     if not keyring or not Path(keyring).is_dir():
         raise RuntimeError('Secure decryption binding required')
-    inspect_drive(config, args.drive_remote, args.drive_folder_id)
+    destination = inspect_drive(config, args.drive_remote, args.drive_folder_id)
     os.umask(0o077)
     with tempfile.TemporaryDirectory(prefix='bt-drive-restore-') as directory:
         temp = Path(directory)
-        remote = args.drive_remote + ':' + args.backup_id
+        directory = destination.backup_directory(args.backup_id)
         for filename in ['manifest.json', 'database.dump.gpg', 'roles.sql.gpg']:
-            subprocess.run(['rclone', '--config', config, 'copyto', remote + '/' + filename,
-                            str(temp / filename)], check=True, stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
-        if json.loads((temp/'manifest.json').read_text()).get('backup_id')!=args.backup_id:
-            raise RuntimeError('Unexpected backup identity')
+            destination.download(directory, filename, temp / filename)
+        manifest = json.loads((temp / 'manifest.json').read_text())
+        if manifest.get('backup_id') != args.backup_id or manifest.get('drive_folder_id') != FOLDER_ID:
+            raise RuntimeError('Unexpected backup or Drive identity')
         result = restore(temp / 'manifest.json', keyring, args.image)
         result['encrypted_external_source_verified'] = True
+        result['drive_folder_id'] = FOLDER_ID
         receipt = temp / 'restore-receipt.json'
         receipt.write_text(json.dumps(result, indent=2))
-        upload_verify(config, remote, [receipt], temp)
+        upload_verify(destination, directory, [receipt], temp)
         print(json.dumps(result))
 
 

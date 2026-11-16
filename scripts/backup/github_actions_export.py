@@ -15,10 +15,10 @@ import ssl
 import subprocess
 import sys
 import tempfile
+from drive_destination import FOLDER_ID as FOLDER, validate_config
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
 HOST = 'aws-0-sa-east-1.pooler.supabase.com'
-FOLDER = '1FPD-Bnfbf8m0vxnYCOtT0yald7mCi9pT'
 REMOTE = 'bytetorque_backup'
 SECRET_NAMES = (
     'BT_BACKUP_PGPASS_CONTENT', 'BT_BACKUP_DRIVE_CONFIG_CONTENT',
@@ -46,19 +46,7 @@ def validate_bindings(values):
     prefix = f'{HOST}:5432:postgres:postgres.{PROJECT}:'
     if not password.startswith(prefix) or not password[len(prefix):] or '\n' in password or '\r' in password:
         raise ValueError('one exact project-bound pgpass entry required')
-    config = configparser.ConfigParser(interpolation=None)
-    config.read_string(values['BT_BACKUP_DRIVE_CONFIG_CONTENT'])
-    allowed = {'type', 'client_id', 'client_secret', 'scope', 'token', 'root_folder_id'}
-    if config.defaults() or config.sections() != [REMOTE]:
-        raise ValueError('one approved Drive remote required')
-    section = config[REMOTE]
-    if (set(section) - allowed or section.get('type') != 'drive' or
-            section.get('root_folder_id') != FOLDER or
-            section.get('scope') not in ('drive', 'drive.file')):
-        raise ValueError('approved private Drive destination required')
-    token = json.loads(section.get('token', '{}'))
-    if not isinstance(token, dict) or not token.get('access_token') or not token.get('refresh_token'):
-        raise ValueError('refreshable OAuth required')
+    validate_config(values['BT_BACKUP_DRIVE_CONFIG_CONTENT'])
     return fingerprint
 
 
