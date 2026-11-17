@@ -1,4 +1,5 @@
--- BT-PLAN-04A candidate ONLY. Do not run on hosted Supabase without explicit authorization.
+-- BT-PLAN-04A additive migration; authorized by Director on 17/11/2026.
+-- Scope only to new personal entitlement tables and RPCs; no data migration, grants or billing.
 -- Additive: the existing workshop subscriptions, memberships and all CP03-CP05 records stay untouched.
 CREATE SCHEMA IF NOT EXISTS bt_platform_private;
 REVOKE ALL ON SCHEMA bt_platform_private FROM PUBLIC, anon, authenticated;
@@ -35,8 +36,9 @@ ALTER TABLE bt_platform_private.account_entitlements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bt_platform_private.account_entitlements FORCE ROW LEVEL SECURITY;
 ALTER TABLE bt_platform_private.account_entitlement_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bt_platform_private.account_entitlement_events FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON ALL TABLES IN SCHEMA bt_platform_private FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA bt_platform_private FROM PUBLIC, anon, authenticated;
+-- Scope permissions strictly to the new 04A tables: avoid changing legacy Creator grants.
+REVOKE ALL ON TABLE bt_platform_private.account_entitlements,
+  bt_platform_private.account_entitlement_events FROM PUBLIC, anon, authenticated;
 
 -- Self-only plan lookup. A workshop plan is only returned after verifying the caller's active membership.
 -- No user-supplied ID can impersonate another account or obtain another workshop's plan.
