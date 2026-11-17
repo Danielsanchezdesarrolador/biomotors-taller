@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 from drive_destination import PrivateDrive, FOLDER_ID, REMOTE
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
+# Only approved fixed labels; never publish a provider error or secret value.
+_STAGE = 'EXPORT_PREFLIGHT'
 
 
 def digest(path):
@@ -70,6 +72,7 @@ def upload_verify(destination, directory, paths, temp):
 
 
 def main():
+    global _STAGE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project-ref', required=True)
     parser.add_argument('--service', default='bytetorque_backup')
@@ -103,11 +106,13 @@ def main():
                   PGSSLMODE='verify-full', PGCONNECT_TIMEOUT='20',
                   PGOPTIONS='-c default_transaction_read_only=on')
     # Read-only probe, no migration or business data mutation.
+    _STAGE = 'POSTGRES_TLS_CONNECT'
     probe = subprocess.run(['psql', '-X', '-A', '-t', '--dbname=service=' + args.service,
                             '-c', "SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()"],
                            env=pg_env, capture_output=True, text=True)
     if probe.returncode or probe.stdout.strip() != 't':
         raise RuntimeError('Authenticated PostgreSQL TLS connection not verified')
+    _STAGE = 'DRIVE_ACCESS_CHECK'
     destination = inspect_drive(drive, args.drive_remote, args.drive_folder_id)
     os.umask(0o077)
     name = 'bytetorque-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-') + uuid.uuid4().hex
@@ -115,6 +120,7 @@ def main():
         temp = Path(directory)
         gnupg = temp / 'gnupg'
         gnupg.mkdir(mode=0o700)
+        _STAGE = 'GPG_IMPORT_PUBLIC'
         subprocess.run(['gpg', '--homedir', str(gnupg), '--batch', '--import', recipient],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         commands = [
@@ -123,9 +129,11 @@ def main():
                                '--roles-only', '--no-role-passwords'])]
         paths = []
         for filename, command in commands:
+            _STAGE = 'PG_DUMP_ENCRYPT' if filename == 'database.dump.gpg' else 'ROLES_DUMP_ENCRYPT'
             path = temp / filename
             encrypt_export(command, path, args.recipient_fingerprint, str(gnupg), pg_env)
             paths.append(path)
+        _STAGE = 'MANIFEST_WRITE'
         manifest = temp / 'manifest.json'
         manifest.write_text(json.dumps({'project_ref': PROJECT, 'backup_id': name,
             'scope': 'whole PostgreSQL database including auth/storage metadata and roles without role passwords',
@@ -134,6 +142,7 @@ def main():
             'drive_folder_id': FOLDER_ID,
             'files': [{'name': p.name, 'sha256': digest(p), 'bytes': p.stat().st_size} for p in paths]}, indent=2))
         paths.append(manifest)
+        _STAGE = 'DRIVE_UPLOAD_VERIFY'
         directory = destination.backup_directory(name, create=True)
         upload_verify(destination, directory, paths, temp)
         print(json.dumps({'backup_id': name, 'encrypted_external_readback_verified': True,
@@ -145,7 +154,11 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as error:
-        # No command/credential/provider body in error output.
-        print('BACKUP_NOT_COMPLETE: ' + (str(error) if isinstance(error, RuntimeError)
-                                        else 'Cloud export/transfer failed; inspect secure runner privately'))
+        # In the GitHub export, emit ONLY a compile-time fixed stage label.
+        # Never include exception text, HTTP responses or SQL/GPG output.
+        if os.environ.get('BT_BACKUP_STAGE_DIAGNOSTICS') == '1':
+            print('BACKUP_STAGE_FAILURE:' + _STAGE)
+        else:
+            print('BACKUP_NOT_COMPLETE: ' + (str(error) if isinstance(error, RuntimeError)
+                                            else 'Cloud export/transfer failed; inspect secure runner privately'))
         raise SystemExit(1)

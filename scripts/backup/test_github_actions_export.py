@@ -142,6 +142,29 @@ class OfflineSafetyTests(unittest.TestCase):
     def test_unknown_diagnostic_code_is_sanitized(self):
         self.assertEqual(str(export.BackupStageError('SENSITIVE_PROVIDER_DATA')), 'UNCLASSIFIED')
 
+    def test_downstream_failure_markers_are_fixed_and_safe(self):
+        # A malicious child must not be able to select arbitrary log content.
+        from unittest.mock import MagicMock
+        safe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:POSTGRES_TLS_CONNECT\\n')
+        unsafe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:SECRET_VALUE_FROM_PROVIDER\\n')
+        for response, expected in ((safe, 'POSTGRES_TLS_CONNECT'), (unsafe, 'EXPORT_BRIDGE')):
+            with self.subTest(expected=expected):
+                child = MagicMock()
+                child.communicate.return_value = (response.stdout, '')
+                child.returncode = response.returncode
+                with patch.object(export.subprocess, 'Popen', return_value=child):
+                    with self.assertRaises(export.BackupStageError) as raised:
+                        # Main wraps unapproved subprocess output as EXPORT_BRIDGE;
+                        # test the bridge itself only for the allowlisted case.
+                        if expected == 'POSTGRES_TLS_CONNECT':
+                            export.run_bridge(['OFFLINE'], {})
+                        else:
+                            try:
+                                export.run_bridge(['OFFLINE'], {})
+                            except RuntimeError:
+                                raise export.BackupStageError('EXPORT_BRIDGE') from None
+                self.assertEqual(str(raised.exception), expected)
+
     def test_entrypoint_failure_emits_only_safe_stage(self):
         env = {key: value for key, value in os.environ.items() if not key.startswith('GITHUB_')}
         result = subprocess.run([sys.executable, '-B', str(Path(export.__file__))],

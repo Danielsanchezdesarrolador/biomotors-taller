@@ -34,6 +34,9 @@ SAFE_DIAGNOSTICS = frozenset({
     'GPG_RECIPIENT_CHECK', 'POSTGRES_CA_FORMAT', 'POSTGRES_CA_PARSE',
     'POSTGRES_PGPASS_FORMAT', 'DRIVE_CONFIG_FORMAT', 'LOCAL_PREPARATION',
     'EXPORT_BRIDGE', 'EXPORT_RECEIPT', 'UNCLASSIFIED',
+    'EXPORT_PREFLIGHT', 'POSTGRES_TLS_CONNECT', 'DRIVE_ACCESS_CHECK',
+    'GPG_IMPORT_PUBLIC', 'PG_DUMP_ENCRYPT', 'ROLES_DUMP_ENCRYPT',
+    'MANIFEST_WRITE', 'DRIVE_UPLOAD_VERIFY',
 })
 
 
@@ -107,6 +110,13 @@ def run_bridge(command, env):
         process.communicate()
         raise
     if process.returncode:
+        # Accept only exact, fixed stage markers from the approved child export.
+        # No error text, provider response or data content can enter the logs.
+        prefix = 'BACKUP_STAGE_FAILURE:'
+        if output.startswith(prefix):
+            stage = output[len(prefix):].strip()
+            if stage in SAFE_DIAGNOSTICS:
+                raise BackupStageError(stage)
         raise RuntimeError('export failed')
     return output
 
@@ -159,7 +169,8 @@ def main():
                 'BT_BACKUP_PGPASS_CONTENT', 'BT_BACKUP_DRIVE_CONFIG_CONTENT',
                 'BT_BACKUP_RECIPIENT_CONTENT',
             )})
-            env.update(BT_BACKUP_PGSERVICE_CONTENT=buffer.getvalue(), TMPDIR=str(folder))
+            env.update(BT_BACKUP_PGSERVICE_CONTENT=buffer.getvalue(), TMPDIR=str(folder),
+                   BT_BACKUP_STAGE_DIAGNOSTICS='1')
             command = [sys.executable, '-B', str(Path(__file__).with_name('run_with_bindings.py')),
                        'export', '--project-ref', PROJECT, '--service', REMOTE,
                        '--drive-remote', REMOTE, '--drive-folder-id', FOLDER,
@@ -168,6 +179,8 @@ def main():
             raise BackupStageError('LOCAL_PREPARATION') from None
         try:
             output = run_bridge(command, env)
+        except BackupStageError:
+            raise
         except Exception:
             # Includes authenticated PostgreSQL TLS, Drive identity/permissions,
             # pg_dump, encryption and ciphertext readback. No provider output.

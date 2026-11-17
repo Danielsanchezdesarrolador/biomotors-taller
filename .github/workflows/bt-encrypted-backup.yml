@@ -45,6 +45,11 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y --no-install-recommends python3 ca-certificates gnupg rclone
+      - name: Offline safety checks before loading any secrets
+        timeout-minutes: 2
+        run: |
+          python3 -B scripts/backup/test_github_actions_export.py
+          python3 -B scripts/backup/test_drive_destination.py
       - name: Validate bindings and export encrypted data with external readback
         timeout-minutes: 14
         env:
