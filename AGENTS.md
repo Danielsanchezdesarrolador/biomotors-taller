@@ -1,3 +1,9 @@
+## Decisión permanente CP05 · PDF R3 + checkpoints (17/11/2026)
+
+- PDF oficial predeterminado: el diseño visual ByteTorque de la captura aportada por el Director, con encabezado, cotización/revisión/fecha/vigencia, cliente/vehículo, tabla, costos, condiciones, observaciones, marca y espacio de conformidad. Usar datos reales de snapshot, jamás datos de QA incrustados ni teléfonos/QR ficticios. PDF de borrador no es revisión emitida ni aceptación.
+- Plus y Full vigentes: pueden seleccionar **papelería PDF propia A4 privada** de una página, con espacio reservado para campos dinámicos. Básico usa la oficial. El control de acceso se valida en SQL/Storage, no por frontend; `VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED` apagado mientras su migración siga sin instalar. No autorizar por accidente a mecánicos de otros talleres.
+- **Cada tarea terminada debe dejar un checkpoint en `docs/checkpoints/`** con commit, pruebas comprobadas, despliegue/flags, migraciones aplicadas o candidatas y próximo paso para mudanza de chat. Ver `docs/BT_CP05_PDF_DEFAULT_AND_CUSTOM_TEMPLATES.md`.
+
 # ByteTorque — AGENTS.md
 
 **Versión documental:** BT-UI-02-R2-OFICIAL / 2026-11-11  
