@@ -30,7 +30,7 @@ Deno.serve(
       archiveApproved,
       emailApproved,
       allowedOrigin:
-        Deno.env.get('BT_CP05_ALLOWED_ORIGIN') || 'https://biomotors-taller-demo.onrender.com'
+        Deno.env.get('BT_CP05_ALLOWED_ORIGIN') || 'https://bytetorque.cl'
     },
     {
       userClient: (authorization) =>
