@@ -476,7 +476,7 @@ describe('Cancellation recovery metadata', () => {
           data: null,
           error: { context: new Response(null, { status: 503 }) }
         })),
-        client = Object.assign({}, f.userClient, { functions: { invoke } }) as SupabaseClient
+        client = Object.assign({}, f.userClient, { functions: { invoke } }) as unknown as SupabaseClient
       await expect(
         documentClient(client, context, { archive: true, email: false }).cancel(quote, before)
       ).rejects.toMatchObject({ kind: 'blocked' })
