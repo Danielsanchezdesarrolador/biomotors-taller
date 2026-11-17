@@ -44,47 +44,10 @@ class NoRedirect(HTTPRedirectHandler):
         raise RuntimeError('Drive redirect refused')
 
 
-class PrivateDrive:
-    def __init__(self, config_path, remote, folder, *, stage_hook=None, expected_owner=None):
-        # Optional fixed-code stage callback for read-only diagnosis. No secrets passed.
-        self._preflight_stage_hook = stage_hook
-        self._mark_preflight('DRIVE_DESTINATION_VALIDATE')
-        if remote != REMOTE or folder != FOLDER_ID:
-            raise RuntimeError('Unapproved Drive destination')
-        config_path = Path(config_path)
-        if config_path.stat().st_mode & 0o077:
-            raise RuntimeError('Owner-only Drive binding required')
-        self._mark_preflight('DRIVE_CONFIG_VALIDATE')
-        validate_config(config_path.read_text())
-        self._mark_preflight('DRIVE_ROOT_LIST')
-        # Read only. Never create a missing path or set --drive-root-folder-id.
-        entries = rclone_json(
-            ['rclone', '--config', str(config_path), 'lsjson', '--dirs-only', REMOTE + ':'],
-            env={k: v for k, v in os.environ.items() if not k.startswith(('RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))})
-        if not isinstance(entries, list) or any(not isinstance(row, dict) for row in entries):
-            raise DriveFailure('DRIVE_LIST_SCHEMA_INVALID')
-        # Optional owner assertion is supplied privately, never logged or persisted.
-        # Use the token after rclone has refreshed it with its original OAuth client.
-        self._token = validate_config(config_path.read_text())
-        if expected_owner is not None:
-            if not isinstance(expected_owner, str) or not re.fullmatch(r'[^\s@]+@[^\s@]+', expected_owner):
-                raise DriveFailure('DRIVE_OWNER_INPUT_INVALID')
-            self._mark_preflight('DRIVE_OAUTH_IDENTITY')
-            identity = self._json('about', {'fields': 'user(emailAddress)'})
-            actual = identity.get('user', {}).get('emailAddress') if isinstance(identity, dict) else None
-            if not isinstance(actual, str) or not actual:
-                raise DriveFailure('DRIVE_OWNER_UNAVAILABLE')
-            if actual.casefold() != expected_owner.casefold():
-                raise DriveFailure('DRIVE_OWNER_MISMATCH')
-            self._mark_preflight('DRIVE_OWNER_MATCHED')
-        # Names are not identities. Root listing is used ONLY to refresh OAuth;
-        # empty lists, homonyms and shortcut IDs cannot select a destination.
-        self._directories = {}
-        self.check_root()
-
-    def _mark_preflight(self, stage):
-        if self._preflight_stage_hook is not None:
-            self._preflight_stage_hook(stage)
+class DriveAPI:
+    """Shared HTTPS metadata transport; no export or destination selection."""
+    def __init__(self, token):
+        self._token = token
 
     def _open(self, request):
         # Normal system CA validation and inherited proxy; never follow redirects
@@ -138,6 +101,49 @@ class PrivateDrive:
                 any(not p.get('id') or p.get('deleted') or p.get('type') != 'user' or
                     p.get('role') not in ('owner', 'writer', 'reader', 'commenter') for p in permissions)):
             raise RuntimeError('Private individual-only Drive permissions required')
+
+
+class PrivateDrive(DriveAPI):
+    def __init__(self, config_path, remote, folder, *, stage_hook=None, expected_owner=None):
+        # Optional fixed-code stage callback for read-only diagnosis. No secrets passed.
+        self._preflight_stage_hook = stage_hook
+        self._mark_preflight('DRIVE_DESTINATION_VALIDATE')
+        if remote != REMOTE or folder != FOLDER_ID:
+            raise RuntimeError('Unapproved Drive destination')
+        config_path = Path(config_path)
+        if config_path.stat().st_mode & 0o077:
+            raise RuntimeError('Owner-only Drive binding required')
+        self._mark_preflight('DRIVE_CONFIG_VALIDATE')
+        validate_config(config_path.read_text())
+        self._mark_preflight('DRIVE_ROOT_LIST')
+        # Read only. Never create a missing path or set --drive-root-folder-id.
+        entries = rclone_json(
+            ['rclone', '--config', str(config_path), 'lsjson', '--dirs-only', REMOTE + ':'],
+            env={k: v for k, v in os.environ.items() if not k.startswith(('RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))})
+        if not isinstance(entries, list) or any(not isinstance(row, dict) for row in entries):
+            raise DriveFailure('DRIVE_LIST_SCHEMA_INVALID')
+        # Optional owner assertion is supplied privately, never logged or persisted.
+        # Use the token after rclone has refreshed it with its original OAuth client.
+        self._token = validate_config(config_path.read_text())
+        if expected_owner is not None:
+            if not isinstance(expected_owner, str) or not re.fullmatch(r'[^\s@]+@[^\s@]+', expected_owner):
+                raise DriveFailure('DRIVE_OWNER_INPUT_INVALID')
+            self._mark_preflight('DRIVE_OAUTH_IDENTITY')
+            identity = self._json('about', {'fields': 'user(emailAddress)'})
+            actual = identity.get('user', {}).get('emailAddress') if isinstance(identity, dict) else None
+            if not isinstance(actual, str) or not actual:
+                raise DriveFailure('DRIVE_OWNER_UNAVAILABLE')
+            if actual.casefold() != expected_owner.casefold():
+                raise DriveFailure('DRIVE_OWNER_MISMATCH')
+            self._mark_preflight('DRIVE_OWNER_MATCHED')
+        # Names are not identities. Root listing is used ONLY to refresh OAuth;
+        # empty lists, homonyms and shortcut IDs cannot select a destination.
+        self._directories = {}
+        self.check_root()
+
+    def _mark_preflight(self, stage):
+        if self._preflight_stage_hook is not None:
+            self._preflight_stage_hook(stage)
 
     def check_root(self):
         self._mark_preflight('DRIVE_ROOT_METADATA')

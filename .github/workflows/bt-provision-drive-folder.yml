@@ -1,0 +1,54 @@
+name: BT-DRIVE-PROVISION - Create one private empty candidate (no backup)
+
+# No automatic execution; publishing this workflow does not authorize a Drive write.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_create_empty_folder:
+        description: Authorize one new empty owner-only folder using existing drive.file OAuth; no activation or backup
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-drive-folder-provision
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          github.repository == 'Danielsanchezdesarrolador/biomotors-taller' &&
+          github.actor == 'Danielsanchezdesarrolador' &&
+          github.triggering_actor == 'Danielsanchezdesarrolador' &&
+          github.ref == 'refs/heads/main' && github.run_attempt == 1 &&
+          inputs.confirm_create_empty_folder == true }}
+    runs-on: ubuntu-latest
+    environment: bytetorque-backup-export
+    timeout-minutes: 7
+    steps:
+      - name: Checkout dispatched main without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install rclone before loading secrets
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Offline creation and security tests
+        run: |
+          python3 -B scripts/backup/test_provision_drive_folder.py
+          python3 -B scripts/backup/test_drive_destination.py
+          python3 -B scripts/backup/test_drive_errors.py
+      - name: Create and verify one candidate without activating it
+        timeout-minutes: 3
+        env:
+          BT_DRIVE_CREATE_APPROVED: ${{ inputs.confirm_create_empty_folder }}
+          BT_BACKUP_DRIVE_CONFIG_CONTENT: ${{ secrets.BT_BACKUP_DRIVE_CONFIG_CONTENT }}
+          BT_BACKUP_DRIVE_EXPECTED_OWNER: ${{ secrets.BT_BACKUP_DRIVE_EXPECTED_OWNER }}
+        run: python3 -B scripts/backup/provision_drive_folder.py
