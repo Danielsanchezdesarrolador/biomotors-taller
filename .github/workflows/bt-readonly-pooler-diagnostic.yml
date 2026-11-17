@@ -44,7 +44,9 @@ jobs:
           apt-get update -qq
           apt-get install -y --no-install-recommends python3
       - name: Offline diagnostic tests before secrets
-        run: python3 -B scripts/backup/test_postgres_preflight.py
+        run: |
+          python3 -B scripts/backup/test_postgres_preflight.py
+          python3 -B scripts/backup/test_readonly_pooler_diagnostic.py
       - name: Compare two read-only authenticated TLS probes
         timeout-minutes: 2
         env:

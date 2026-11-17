@@ -15,23 +15,42 @@ PROJECT = "suxcqqnmcjoezfxltoms"
 HOST = "aws-0-sa-east-1.pooler.supabase.com"
 PREFIX = f"{HOST}:5432:postgres:postgres.{PROJECT}:"
 
+# Never render a secret, a provider error or an exception from third-party code.
+# Only these fixed labels may leave the preparation step.
+PREPARATION_CODES = frozenset({
+    "GUARD_REJECTED", "PGPASS_MISSING", "PGPASS_FORMAT_INVALID",
+    "CA_MISSING", "CA_FORMAT_INVALID", "CA_PARSE_INVALID",
+})
+
+
+class PreparationFailure(ValueError):
+    def __init__(self, code):
+        self.code = code if code in PREPARATION_CODES else "GUARD_REJECTED"
+        super().__init__(self.code)
+
+
 def main():
     if not (os.getenv("GITHUB_ACTIONS") == "true"
             and os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
             and os.getenv("GITHUB_REF") == "refs/heads/main"
             and os.getenv("GITHUB_REPOSITORY") == "Danielsanchezdesarrolador/biomotors-taller"):
-        raise ValueError("GUARD_REJECTED")
-    pgpass = os.getenv("BT_BACKUP_PGPASS_CONTENT", "").strip("\r\n")
+        raise PreparationFailure("GUARD_REJECTED")
+    pgpass_value = os.getenv("BT_BACKUP_PGPASS_CONTENT", "")
     ca = os.getenv("BT_BACKUP_PG_CA_PEM", "")
+    if not pgpass_value:
+        raise PreparationFailure("PGPASS_MISSING")
+    pgpass = pgpass_value.strip("\r\n")
     if (not pgpass.startswith(PREFIX) or not pgpass[len(PREFIX):]
             or "\n" in pgpass or "\r" in pgpass):
-        raise ValueError("BINDING_INVALID")
+        raise PreparationFailure("PGPASS_FORMAT_INVALID")
+    if not ca:
+        raise PreparationFailure("CA_MISSING")
     if "PRIVATE KEY" in ca or "-----BEGIN CERTIFICATE-----" not in ca:
-        raise ValueError("CA_INVALID")
+        raise PreparationFailure("CA_FORMAT_INVALID")
     try:
         ssl.create_default_context(cadata=ca)
     except Exception:
-        raise ValueError("CA_INVALID") from None
+        raise PreparationFailure("CA_PARSE_INVALID") from None
     os.umask(0o077)
     with tempfile.TemporaryDirectory(prefix="bt-probe-") as temp:
         root = Path(temp)
@@ -76,6 +95,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except PreparationFailure as error:
+        print("DIAGNOSTIC_NOT_COMPLETE: " + error.code)
+        raise SystemExit(1)
     except Exception:
         print("DIAGNOSTIC_NOT_COMPLETE: SAFE_PREPARATION_FAILURE")
         raise SystemExit(1)
