@@ -30,7 +30,7 @@ def classify(result):
     message = (result.stderr or '').lower()
     # psql VERBOSITY=verbose emits PostgreSQL SQLSTATE. Only fixed codes are
     # reported; raw server messages and credentials never leave this process.
-    states = set(re.findall(r'(?m)^\\s*(?:psql:[^\\n]*?:\\s*)?(?:fatal|error):\\s+([0-9a-z]{5}):', message))
+    states = set(re.findall(r'(?m)^\s*(?:psql:[^\n]*?:\s*)?(?:fatal|error):\s+([0-9a-z]{5}):', message))
     if '28p01' in states:
         return 'POSTGRES_AUTH_REJECTED'
     if '0a000' in states and ('startup' in message or 'options' in message):
