@@ -60,6 +60,15 @@ jobs:
             sleep 1
           done
           CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-cp04-redesign.cjs
+      - name: CP05 móvil · Tarjetas compactas, acciones R2 y total (HTTP simulado)
+        run: |
+          VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_BT_CP05_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp05-mobile-build
+          node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-cp05-mobile-build --port 5181 --strictPort > /tmp/bt-cp05-mobile.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5181/ > /dev/null; then break; fi
+            sleep 1
+          done
+          CP04_BASE_URL=http://127.0.0.1:5181 OUTPUT_DIR=artifacts/cp05-mobile node scripts/verify-cp05-browser.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
         env:
           BT_INVITE_BROWSER: webkit
@@ -80,6 +89,7 @@ jobs:
           name: BT-OFICIAL-01A-Estados-vacios-Capturas
           path: |
             artifacts/cp04-redesign/
+            artifacts/cp05-mobile/
             artifacts/bt-oficial-01a/
             artifacts/bt-auth-01a/
             artifacts/bt-auth-01b-r1/
