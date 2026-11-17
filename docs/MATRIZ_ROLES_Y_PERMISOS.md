@@ -1,6 +1,6 @@
 # ByteTorque — Matriz de roles de taller
 
-Diseño para backend futuro. BT-UI-06 solo representa roles ficticios y algunas guardas locales; no activa permisos de servidor.
+**Actualización 17/11/2026:** las secciones DEMO y BT-PLAN-03 siguientes son históricas. PLAN04 vigente: Básico personal sin taller nuevo; Plus 4 y Full 8 mecánicos más extras confirmadas. El backend candidato 04B/04C permite a owner/admin gestionar únicamente mecánicos propios; propietario/admin no ocupan cupo. El mecánico conserva cuenta personal gratuita y usa CP04 autorizado del taller. Creador necesita permiso privado + AAL2 para concesiones y no recibe datos operativos ajenos. Invitaciones no conceden admin/owner. Ver [estado probado, flags y SQL sin instalar](BT_PLAN_04_IMPLEMENTACION_20261117.md). No confundir código probado localmente con activación alojada.
 
 | Operación | Propietario | Administrador de taller | Mecánico / Operario | Recepción |
 | --- | --- | --- | --- | --- |

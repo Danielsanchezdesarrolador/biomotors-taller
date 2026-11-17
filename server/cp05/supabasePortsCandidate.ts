@@ -57,9 +57,21 @@ export function issuancePortsCandidate(
       if (reservation.payload.quote.workshop_id !== wid) throw Error('INVALID_TENANT')
       return reservation
     },
-    render: (snapshot) => {
+    render: async (snapshot) => {
       gate()
-      return quotePdf(snapshot, assets)
+      let workshopLogo: Uint8Array | undefined
+      const path = snapshot.workshop.logoPath
+      if (path) {
+        if (snapshot.workshop.id !== wid || !new RegExp('^'+wid+'/[a-f0-9-]{36}\\.png$').test(path)) throw Error('INVALID_BRANDING_PATH')
+        const result = await userClient.storage.from('bt-workshop-branding').download(path)
+        if (result.error || !result.data || result.data.size>2097152) throw Error('PRIVATE_BRANDING_UNAVAILABLE')
+        workshopLogo = new Uint8Array(await result.data.arrayBuffer())
+        if (workshopLogo.length<33 || ![137,80,78,71,13,10,26,10].every((b,i)=>workshopLogo![i]===b) ||
+            String.fromCharCode(...workshopLogo.slice(12,16))!=='IHDR') throw Error('INVALID_PRIVATE_PNG')
+        const header=new DataView(workshopLogo.buffer,workshopLogo.byteOffset,workshopLogo.byteLength)
+        if (![header.getUint32(16),header.getUint32(20)].every(n=>n>=1&&n<=1024)) throw Error('PRIVATE_PNG_DIMENSIONS')
+      }
+      return quotePdf(snapshot, {...assets,workshopLogo})
     },
     archive: (path, bytes) => {
       gate()

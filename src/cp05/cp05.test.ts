@@ -119,6 +119,14 @@ describe('CP05 importe y documentos', () => {
     mkdirSync('artifacts/cp05', { recursive: true })
     writeFileSync('artifacts/cp05/borrador-qa.pdf', bytes)
   })
+  it('incorpora marca y contacto capturados sin modificar la revisión histórica', async () => {
+    const before = JSON.stringify(snapshot)
+    const branded = {...snapshot,workshop:{...snapshot.workshop,contactEmail:'qa@invalid.test',phone:'123',address:'Dirección sintética'}}
+    const bytes = await quotePdf(branded,{...assets,workshopLogo:assets.logo})
+    expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1)
+    expect(JSON.stringify(snapshot)).toBe(before)
+    expect(Buffer.from(bytes).equals(Buffer.from(await quotePdf(snapshot,assets)))).toBe(false)
+  })
   it('pagina 200 partidas sin perder el total histórico', async () => {
     const long = {
       ...snapshot,

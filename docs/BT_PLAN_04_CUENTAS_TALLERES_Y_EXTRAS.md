@@ -1,6 +1,6 @@
 # ByteTorque — BT-PLAN-04 · Cuentas personales, talleres y mecánicos adicionales
 
-Fecha: 17/11/2026. Fuente vigente de requisitos comerciales; sustituye BT-PLAN-03. **Aprobado para diseño, NO implementado en backend/pagos.**
+Fecha: 17/11/2026. Fuente vigente de requisitos comerciales; sustituye BT-PLAN-03. **04A instalado; 04B/04C y preparación 04D implementados como candidatos sin instalar. Pagos reales apagados.** Ver [implementación y pendientes](BT_PLAN_04_IMPLEMENTACION_20261117.md).
 
 ## Tarifas y titularidad
 

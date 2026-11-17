@@ -46,6 +46,21 @@ jobs:
         run: npm test
       - name: Build PWA
         run: npm run build
+      - name: Validar cuentas, talleres y cupos en PostgreSQL local sin red
+        run: bash scripts/security/verify-plan04-local.sh
+      - name: Compilar PLAN04 candidato sin activar servicios
+        env:
+          VITE_BT_AUTH_R1_ENABLED: 'true'
+          VITE_BT_CREATOR_PRIVATE_ENABLED: 'true'
+          VITE_BT_PLAN04_PRIVATE_ENABLED: 'true'
+          VITE_BT_PLAN04_WORKSHOPS_ENABLED: 'true'
+          VITE_BT_CP03_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP04_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP05_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP06_PRIVATE_ENABLED: 'true'
+          VITE_SUPABASE_URL: 'https://suxcqqnmcjoezfxltoms.supabase.co'
+          VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_build_only'
+        run: npm run build
       - name: Comprobar build de directorio CP03 privado sin publicarlo
         env:
           VITE_BT_AUTH_R1_ENABLED: 'true'

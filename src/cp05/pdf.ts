@@ -4,7 +4,7 @@ import { quoteNumber, type Snapshot } from './contracts'
 import { clp } from '../ordenes/orderMoney'
 export async function quotePdf(
   snapshot: Snapshot,
-  assets: { font: Uint8Array; logo: Uint8Array },
+  assets: { font: Uint8Array; logo: Uint8Array; workshopLogo?: Uint8Array },
   draft = false
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
@@ -85,7 +85,11 @@ export async function quotePdf(
     }
   }
   page.drawImage(logo, { x: width - 175, y: height - 74, width: 30, height: 30 })
-  text('Software ByteTorque', width - 140, height - 62, 8, blue)
+  text('Powered by ByteTorque', width - 140, height - 62, 8, blue)
+  if (assets.workshopLogo) {
+    const own = await doc.embedPng(assets.workshopLogo), fit = own.scaleToFit(80, 40)
+    page.drawImage(own,{x:margin,y:height-margin-40,width:fit.width,height:fit.height}); y -= 48
+  }
   paragraph(snapshot.workshop.name, 17, available - 155)
   paragraph('Cotización de trabajos mecánicos', 12, available - 150)
   y = Math.min(y, height - 100)
@@ -96,6 +100,8 @@ export async function quotePdf(
   paragraph(
     `Fecha: ${date.toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })} · Vigencia: ${snapshot.quote.valid_days} días`
   )
+  const contact = [snapshot.workshop.contactEmail,snapshot.workshop.phone,snapshot.workshop.address].filter(Boolean).join(' · ')
+  if (contact) paragraph(contact,9)
   paragraph(`Cliente: ${snapshot.customer.full_name}`)
   paragraph(
     `Contacto: ${snapshot.customer.email || 'No configurado'} · ${snapshot.customer.mobile_e164 || 'Sin teléfono'}`
@@ -133,11 +139,11 @@ export async function quotePdf(
   y -= 8
   paragraph(snapshot.notice, 9)
   paragraph(
-    'No es documento tributario, firma ni aceptación contractual del cliente. Datos comerciales adicionales del taller: no configurados.',
+    'No es documento tributario, firma ni aceptación contractual del cliente.' + (contact ? '' : ' Datos comerciales adicionales del taller: no configurados.'),
     8
   )
   for (const [i, p] of doc.getPages().entries()) {
-    p.drawText(`Software ByteTorque · ${i + 1}/${doc.getPageCount()}`, {
+    p.drawText(`Powered by ByteTorque · ${i + 1}/${doc.getPageCount()}`, {
       x: margin,
       y: 24,
       size: 8,
