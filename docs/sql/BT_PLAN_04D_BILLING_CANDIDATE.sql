@@ -55,6 +55,8 @@ BEGIN
    IF entitlement.bound_workshop_id IS NULL OR NOT EXISTS(SELECT 1 FROM public.workshop_memberships
      WHERE workshop_id=entitlement.bound_workshop_id AND user_id=customer.user_id AND role='owner' AND status='active') THEN
     RAISE EXCEPTION 'Bound license holder required for extras' USING ERRCODE='42501'; END IF;
+   -- Serialize extra-seat changes with reservations and membership acceptance.
+   PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('bt_workshop:'||entitlement.bound_workshop_id::text,0));
    IF p_kind IN('activated','renewed','reconciled') THEN
     IF control.max_extra_seats IS NULL OR p_extras>control.max_extra_seats OR p_period_end<=now()
       OR p_plan<>entitlement.plan OR p_subtotal<>p_extras*200 THEN RAISE EXCEPTION 'Manual extra subtotal or policy mismatch' USING ERRCODE='22023'; END IF;
