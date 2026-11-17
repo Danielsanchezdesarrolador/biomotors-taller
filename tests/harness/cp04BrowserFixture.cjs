@@ -90,6 +90,11 @@ async function cp04Page(browser, width, options = {}) {
       })
     if (url.pathname === '/auth/v1/user') return reply(user)
     if (url.pathname === '/auth/v1/logout') return reply({})
+    if (url.pathname === '/rest/v1/profiles') {
+      assert.equal(method, 'GET')
+      assert.equal(url.searchParams.get('user_id'), 'eq.' + userId)
+      return reply({ display_name: 'Operador QA' })
+    }
     if (url.pathname === '/rest/v1/workshop_memberships')
       return reply(
         state.revoked
