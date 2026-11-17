@@ -13,7 +13,7 @@ const wid = id(1),
   qid = id(3),
   rid = id(4),
   requestId = id(5),
-  origin = 'https://biomotors-taller-demo.onrender.com'
+  origin = 'https://bytetorque.cl'
 const pdf = new TextEncoder().encode('%PDF-1.7\nSynthetic archived PDF bytes\n%%EOF')
 const policy: DocumentPolicy = { archiveApproved: true, emailApproved: true, allowedOrigin: origin }
 function fixture() {
