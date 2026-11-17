@@ -151,6 +151,29 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
       assert.match(await p.getByLabel('Totales netos').innerText(), /154.879/)
       assert.equal(items.length, 3)
       assert.equal(quotes.length, 1)
+      // CP05 mobile: no six-line oversized item cards, no browser-grey buttons,
+      // and both actions remain inside each visible card at 375/390px.
+      if (width <= 390) {
+        const backStyle = await p.getByRole('button', { name: 'Volver al panel anterior' })
+          .evaluate(el => ({
+            bg: getComputedStyle(el).backgroundColor,
+            color: getComputedStyle(el).color,
+            radius: parseFloat(getComputedStyle(el).borderRadius)
+          }))
+        assert.notEqual(backStyle.bg, 'rgb(239, 239, 239)', 'native grey back button')
+        assert.ok(backStyle.radius >= 8, 'back button uses premium rounded R2 style')
+        const cards = p.locator('.cp05-panel .wt-items tbody tr')
+        for (let i = 0; i < 3; i++) {
+          const row = await cards.nth(i).boundingBox()
+          const del = await cards.nth(i).getByRole('button', { name: /Eliminar ítem/ }).boundingBox()
+          assert.ok(row && del, 'missing quote item or delete control')
+          assert.ok(row.height < 205, 'oversized mobile quote card: ' + row.height)
+          assert.ok(del.x >= row.x && del.x + del.width <= row.x + row.width + 1,
+            'delete button spills outside quote card')
+        }
+        const floating = await p.getByLabel('Total siempre visible').boundingBox()
+        assert.ok(floating && floating.height <= 55, 'floating total obscures quote cards')
+      }
       assert.ok(
         await p.getByRole('button', { name: 'Emitir revisión archivada · pendiente' }).isDisabled()
       )

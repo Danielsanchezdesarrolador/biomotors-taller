@@ -336,3 +336,248 @@
   .cp05-panel .cp05-floating-total span { font-size: 11px; }
   .cp05-panel { padding-bottom: 76px; }
 }
+
+/* CP05-MOBILE-R3 · Private quote buttons use the official R2 palette even when
+ * CP04's stylesheet has not been loaded (direct entry into Informes). */
+.cp05-panel button.cp04-secondary,
+.cp05-panel button.cp04-primary {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 11px;
+  border: 1px solid #bfd5f2;
+  background: #f0f6ff;
+  color: #174a85;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15,45,88,.06);
+}
+.cp05-panel button.cp04-secondary:hover:not(:disabled) {
+  border-color: #70adf4;
+  background: #e5f0ff;
+}
+.cp05-panel button.cp04-primary {
+  border-color: #0662e2;
+  background: linear-gradient(115deg,#0d8afa,#075de3);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(5,91,234,.13);
+}
+.cp05-panel button.cp04-primary:hover:not(:disabled) {
+  background: #0655d1;
+}
+.cp05-panel .cp05-heading > button.cp04-secondary {
+  width: fit-content;
+  justify-content: flex-start;
+}
+.cp05-panel .cp05-list > button.cp04-secondary {
+  width: 100%;
+  justify-content: flex-start;
+}
+.cp05-panel .cp05-list > button.cp04-primary { width: 100%; }
+.cp05-panel .wt-items > button.rp-inline {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 3px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #075fe7;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cp05-panel .wt-items > button.rp-inline:hover:not(:disabled) {
+  background: #f0f6ff;
+}
+.cp05-panel .wt-item-form button.rp-primary {
+  border: 1px solid #0869e9;
+  border-radius: 11px;
+  background: #0568ed;
+  color: white;
+  min-height: 44px;
+  padding: 11px 15px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* On narrow screens quote-only items are compact four-row cards. The DEMO
+ * WorkItemsTable and mechanic's work-mode table remain unchanged. */
+@media screen and (max-width: 760px) {
+  .cp05-panel .cp05-heading { margin: 12px 0 15px; gap: 10px; }
+  .cp05-panel .cp05-heading h1 { font-size: 25px; }
+  .cp05-panel .cp05-heading > button.cp04-secondary {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+  .cp05-panel .cp05-notice { padding: 10px 12px; line-height: 1.4; }
+  .cp05-panel .cp05-list { gap: 10px; }
+  .cp05-panel .wt-items { padding: 12px !important; }
+  .cp05-panel .wt-items table { width: 100%; table-layout: auto; }
+  .cp05-panel .wt-items tbody { display: grid; gap: 9px; }
+  .cp05-panel .wt-items tbody tr {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto;
+    grid-template-areas:
+      "number type"
+      "description description"
+      "quantity unit"
+      "total actions";
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 5px;
+    padding: 11px 12px !important;
+    border: 1px solid #d6e4f6;
+    border-radius: 12px;
+    background: #f9fbff;
+    box-shadow: 0 1px 3px rgba(13,51,95,.04);
+  }
+  .cp05-panel .wt-items tbody tr td {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0;
+    box-sizing: border-box;
+    align-items: center;
+    border: 0;
+    padding: 2px 0;
+    gap: 6px;
+    font-size: 12px !important;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .cp05-panel .wt-items tbody tr td::before {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: #637997;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(1) {
+    grid-area: number;
+    justify-content: flex-start;
+    color: #637997;
+    font-weight: 650;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(2) {
+    grid-area: description;
+    display: block !important;
+    font-size: 14px !important;
+    color: #173759;
+    font-weight: 750;
+    line-height: 1.32;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(2)::before { display: none; }
+  .cp05-panel .wt-items tbody tr td:nth-child(3) {
+    grid-area: type;
+    justify-self: end;
+    justify-content: flex-end;
+    max-width: 100%;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(3)::before { display: none; }
+  .cp05-panel .wt-items tbody tr td:nth-child(3) .wt-type {
+    max-width: 100%;
+    font-size: 10px;
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(4) {
+    grid-area: quantity;
+    justify-content: flex-start;
+    white-space: nowrap;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(4)::before { content: "Cant."; }
+  .cp05-panel .wt-items tbody tr td:nth-child(5) {
+    grid-area: unit;
+    justify-content: flex-end;
+    text-align: right !important;
+    white-space: nowrap;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(5)::before { content: "Unit."; }
+  .cp05-panel .wt-items tbody tr td:nth-child(6) {
+    grid-area: total;
+    justify-content: flex-start;
+  }
+  .cp05-panel .wt-items tbody tr td:nth-child(6)::before { content: "Total"; }
+  .cp05-panel .wt-items tbody tr td:nth-child(6) strong {
+    color: #0d356c;
+    font-size: 13px;
+  }
+  .cp05-panel .wt-items tbody tr td.wt-row-actions {
+    grid-area: actions;
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+    padding: 0;
+    gap: 7px;
+  }
+  .cp05-panel .wt-items tbody tr td.wt-row-actions::before { display: none; }
+  .cp05-panel .wt-items tbody tr td.wt-row-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #d2e1f4;
+    border-radius: 9px;
+    background: #e9f2ff;
+    color: #17549c;
+  }
+  .cp05-panel .wt-items tbody tr td.wt-row-actions button svg {
+    width: 17px;
+    height: 17px;
+  }
+  .cp05-panel .wt-items tbody tr td.wt-row-actions button:hover:not(:disabled) {
+    background: #d7eaff;
+    border-color: #7db4fa;
+  }
+
+  /* Breakdown stays in document flow and cannot stick over line items.
+     Only a small total pill floats above the navigation dock. */
+  .cp05-panel .cp05-totals {
+    position: static !important;
+    z-index: auto;
+    width: 100%;
+    padding: 9px 12px !important;
+    gap: 3px;
+    font-size: 12px;
+  }
+  .cp05-panel .cp05-totals > div:nth-child(3) {
+    font-size: 14px;
+    padding-top: 4px;
+  }
+  .cp05-panel .cp05-totals small { font-size: 10px; }
+  .cp05-panel .cp05-floating-total {
+    left: auto;
+    right: 10px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100vw - 20px);
+    min-height: 38px;
+    padding: 7px 11px;
+    gap: 8px;
+    border-radius: 11px;
+    box-shadow: 0 3px 12px rgba(15,55,103,.14);
+  }
+  .cp05-panel .cp05-floating-total span { font-size: 11px; }
+  .cp05-panel .cp05-floating-total strong { font-size: 14px; }
+}
