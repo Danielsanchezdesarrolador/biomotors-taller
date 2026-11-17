@@ -4,8 +4,6 @@
 Never prints provider errors, key identities, configurations or customer content.
 No authenticated operation occurs until all local preflight checks pass.
 """
-import configparser
-import io
 import json
 import os
 from pathlib import Path
@@ -15,6 +13,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
+from postgres_config import normalize_pgpass, service_content
 from drive_destination import FOLDER_ID as FOLDER, validate_config
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
@@ -37,7 +36,7 @@ SAFE_DIAGNOSTICS = frozenset({
     'EXPORT_PREFLIGHT', 'POSTGRES_TLS_CONNECT', 'DRIVE_ACCESS_CHECK',
     'GPG_IMPORT_PUBLIC', 'PG_DUMP_ENCRYPT', 'ROLES_DUMP_ENCRYPT',
     'MANIFEST_WRITE', 'DRIVE_UPLOAD_VERIFY',
-    'POSTGRES_CERTIFICATE_REJECTED', 'POSTGRES_TLS_REJECTED',
+    'POSTGRES_SERVICE_FILE_INVALID', 'POSTGRES_CERTIFICATE_REJECTED', 'POSTGRES_TLS_REJECTED',
     'POSTGRES_AUTH_REJECTED', 'POSTGRES_POOLER_STARTUP_REJECTED',
     'POSTGRES_POOLER_IDENTITY_REJECTED', 'POSTGRES_DNS_FAILED',
     'POSTGRES_NETWORK_FAILED', 'POSTGRES_NETWORK_TIMEOUT',
@@ -75,10 +74,10 @@ def validate_bindings(values):
         ssl.create_default_context(cadata=ca)  # Parse locally; no network connection.
     except Exception:
         raise BackupStageError('POSTGRES_CA_PARSE') from None
-    password = values['BT_BACKUP_PGPASS_CONTENT'].strip('\r\n')
-    prefix = f'{HOST}:5432:postgres:postgres.{PROJECT}:'
-    if not password.startswith(prefix) or not password[len(prefix):] or '\n' in password or '\r' in password:
-        raise BackupStageError('POSTGRES_PGPASS_FORMAT')
+    try:
+        normalize_pgpass(values['BT_BACKUP_PGPASS_CONTENT'])
+    except ValueError:
+        raise BackupStageError('POSTGRES_PGPASS_FORMAT') from None
     try:
         validate_config(values['BT_BACKUP_DRIVE_CONFIG_CONTENT'])
     except Exception:
@@ -166,12 +165,6 @@ def main():
         try:
             ca = folder / 'postgres-ca.pem'
             write_private(ca, values['BT_BACKUP_PG_CA_PEM'])
-            service = configparser.ConfigParser(interpolation=None)
-            service[REMOTE] = {'host': HOST, 'port': '5432', 'dbname': 'postgres',
-                               'user': 'postgres.' + PROJECT, 'sslmode': 'verify-full',
-                               'sslrootcert': str(ca)}
-            buffer = io.StringIO()
-            service.write(buffer)
             # Discard unrelated libpq/rclone bindings and all original backup secrets.
             env = {key: value for key, value in os.environ.items()
                    if not key.startswith(('PG', 'RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))}
@@ -179,7 +172,8 @@ def main():
                 'BT_BACKUP_PGPASS_CONTENT', 'BT_BACKUP_DRIVE_CONFIG_CONTENT',
                 'BT_BACKUP_RECIPIENT_CONTENT',
             )})
-            env.update(BT_BACKUP_PGSERVICE_CONTENT=buffer.getvalue(), TMPDIR=str(folder),
+            env['BT_BACKUP_PGPASS_CONTENT'] = normalize_pgpass(values['BT_BACKUP_PGPASS_CONTENT'])
+            env.update(BT_BACKUP_PGSERVICE_CONTENT=service_content(ca), TMPDIR=str(folder),
                    BT_BACKUP_STAGE_DIAGNOSTICS='1')
             command = [sys.executable, '-B', str(Path(__file__).with_name('run_with_bindings.py')),
                        'export', '--project-ref', PROJECT, '--service', REMOTE,

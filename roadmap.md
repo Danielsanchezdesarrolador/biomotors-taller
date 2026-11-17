@@ -1,3 +1,5 @@
+> **Auditoría de respaldo 17/11/2026:** causa reproducida en el generador `pg_service.conf` (espacios incompatibles con libpq), corregida y cubierta con prueba de biblioteca real sin conexión. 52 pruebas offline PASS. Autenticación, exportación cifrada a Drive y recuperación real siguen pendientes; no habilita datos de Ignacio. [Informe y siguiente paso](docs/checkpoints/CHECKPOINT_BT_BACKUP_AUDIT_20261117.md).
+
 # ByteTorque — ROADMAP OFICIAL
 
 - **BT-LEGAL-01 (16/11/2026):** borradores públicos de privacidad y términos en `/privacidad` y `/terminos`, con enlaces en acceso/registro, sin cambiar Auth ni activar funciones. Revisión jurídica, identidad/contacto y políticas definitivas pendientes. [Checkpoint y validaciones](docs/checkpoints/CHECKPOINT_BT_LEGAL_01_20261116.md).

@@ -41,6 +41,19 @@ class PreparationTests(unittest.TestCase):
     def test_no_unapproved_code_can_be_logged(self):
         self.assertEqual(diagnostic.PreparationFailure("SYNTHETIC_SECRET").code, "GUARD_REJECTED")
 
+    def test_failed_probes_return_failure_and_never_print_provider_text(self):
+        import contextlib
+        import io
+        import subprocess
+        for status, stdout, expected in ((0, '1\n', 0), (1, '', 1), (0, 'unexpected', 1)):
+            result = subprocess.CompletedProcess([], status, stdout, 'PRIVATE_PROVIDER_TEXT')
+            output = io.StringIO()
+            with patch.dict(os.environ, self.settings(), clear=True), patch.object(diagnostic.ssl, 'create_default_context'), patch.object(diagnostic.subprocess, 'run', return_value=result) as run, contextlib.redirect_stdout(output):
+                self.assertEqual(diagnostic.main(), expected)
+            self.assertEqual(run.call_count, 2)
+            self.assertNotIn('PRIVATE_PROVIDER_TEXT', output.getvalue())
+            self.assertNotIn('SYNTHETIC', output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

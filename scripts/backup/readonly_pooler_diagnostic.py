@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Manually dispatched, read-only Supabase pooler diagnostic. No backup/export."""
-import configparser
-import io
 import os
 from pathlib import Path
 import re
@@ -10,6 +8,7 @@ import subprocess
 import tempfile
 
 from postgres_preflight import classify
+from postgres_config import normalize_pgpass, service_content
 
 PROJECT = "suxcqqnmcjoezfxltoms"
 HOST = "aws-0-sa-east-1.pooler.supabase.com"
@@ -39,10 +38,10 @@ def main():
     ca = os.getenv("BT_BACKUP_PG_CA_PEM", "")
     if not pgpass_value:
         raise PreparationFailure("PGPASS_MISSING")
-    pgpass = pgpass_value.strip("\r\n")
-    if (not pgpass.startswith(PREFIX) or not pgpass[len(PREFIX):]
-            or "\n" in pgpass or "\r" in pgpass):
-        raise PreparationFailure("PGPASS_FORMAT_INVALID")
+    try:
+        pgpass = normalize_pgpass(pgpass_value)
+    except ValueError:
+        raise PreparationFailure("PGPASS_FORMAT_INVALID") from None
     if not ca:
         raise PreparationFailure("CA_MISSING")
     if "PRIVATE KEY" in ca or "-----BEGIN CERTIFICATE-----" not in ca:
@@ -55,15 +54,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix="bt-probe-") as temp:
         root = Path(temp)
         (root / "ca.pem").write_text(ca)
-        (root / "pgpass").write_text(pgpass + "\n")
-        config = configparser.ConfigParser(interpolation=None)
-        config["bytetorque_backup"] = {
-            "host": HOST, "port": "5432", "dbname": "postgres",
-            "user": "postgres." + PROJECT, "sslmode": "verify-full",
-            "sslrootcert": str(root / "ca.pem"),
-        }
-        with (root / "service").open("w") as stream:
-            config.write(stream)
+        (root / "pgpass").write_text(pgpass)
+        (root / "service").write_text(service_content(root / "ca.pem"))
         base = {k: v for k, v in os.environ.items()
                 if not k.startswith(("PG", "BT_BACKUP_", "RCLONE_"))}
         base.update(PGSERVICEFILE=str(root / "service"),
@@ -73,6 +65,7 @@ def main():
         command = ["psql", "-X", "-w", "-A", "-t",
                    "-v", "ON_ERROR_STOP=1", "-v", "VERBOSITY=verbose",
                    "--dbname=service=bytetorque_backup", "-c", "SELECT 1"]
+        all_ok = True
         for label, options in (("WITH_STARTUP_OPTIONS", True),
                                ("WITHOUT_STARTUP_OPTIONS", False)):
             env = dict(base)
@@ -90,11 +83,13 @@ def main():
             # Fixed codes only. Never expose stderr, stdout, credentials or host details.
             if not re.fullmatch(r"[A-Z_]+", code):
                 code = "UNCLASSIFIED"
+            all_ok = all_ok and code == "OK"
             print(f"{label}: {code}", flush=True)
+        return 0 if all_ok else 1
 
 if __name__ == "__main__":
     try:
-        main()
+        raise SystemExit(main())
     except PreparationFailure as error:
         print("DIAGNOSTIC_NOT_COMPLETE: " + error.code)
         raise SystemExit(1)

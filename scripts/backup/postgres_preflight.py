@@ -8,7 +8,7 @@ import subprocess
 import re
 
 CODES = frozenset({
-    'POSTGRES_CERTIFICATE_REJECTED', 'POSTGRES_TLS_REJECTED',
+    'POSTGRES_SERVICE_FILE_INVALID', 'POSTGRES_CERTIFICATE_REJECTED', 'POSTGRES_TLS_REJECTED',
     'POSTGRES_AUTH_REJECTED', 'POSTGRES_POOLER_STARTUP_REJECTED',
     'POSTGRES_POOLER_IDENTITY_REJECTED', 'POSTGRES_DNS_FAILED',
     'POSTGRES_NETWORK_FAILED', 'POSTGRES_NETWORK_TIMEOUT',
@@ -31,6 +31,8 @@ def classify(result):
     if result.returncode == 0:
         return 'POSTGRES_PROBE_OUTPUT_INVALID'
     message = (result.stderr or '').lower()
+    if any(part in message for part in ('syntax error in service file', 'definition of service', 'service file contains')):
+        return 'POSTGRES_SERVICE_FILE_INVALID'
     # psql VERBOSITY=verbose emits PostgreSQL SQLSTATE. Only fixed codes are
     # reported; raw server messages and credentials never leave this process.
     # libpq startup failures can be wrapped as 'psql: error: ... FATAL: CODE:'.
