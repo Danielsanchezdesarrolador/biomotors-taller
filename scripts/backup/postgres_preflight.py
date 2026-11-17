@@ -15,6 +15,9 @@ CODES = frozenset({
     'POSTGRES_ACCESS_REJECTED', 'POSTGRES_CLIENT_LAUNCH_FAILED',
     'POSTGRES_PROBE_UNEXPECTED', 'POSTGRES_SERVER_REJECTED',
     'POSTGRES_PROBE_OUTPUT_INVALID', 'POSTGRES_CLIENT_EXIT_UNEXPECTED',
+    'POSTGRES_POOLER_CIRCUIT_OPEN', 'POSTGRES_POOLER_SECRET_INVALID',
+    'POSTGRES_PASSWORD_NOT_SUPPLIED', 'POSTGRES_CONNECTION_LIMIT',
+    'POSTGRES_DATABASE_REJECTED', 'POSTGRES_POOLER_BACKEND_UNAVAILABLE',
 })
 
 
@@ -30,13 +33,23 @@ def classify(result):
     message = (result.stderr or '').lower()
     # psql VERBOSITY=verbose emits PostgreSQL SQLSTATE. Only fixed codes are
     # reported; raw server messages and credentials never leave this process.
-    states = set(re.findall(r'(?m)^\s*(?:psql:[^\n]*?:\s*)?(?:fatal|error):\s+([0-9a-z]{5}):', message))
+    # libpq startup failures can be wrapped as 'psql: error: ... FATAL: CODE:'.
+    # The SQLSTATE is a fixed classification hint, never printed verbatim.
+    states = set(re.findall(r'\b(?:fatal|error):\s+(?:sqlstate\s+)?([0-9a-z]{5}):', message))
     if '28p01' in states:
         return 'POSTGRES_AUTH_REJECTED'
     if '0a000' in states and ('startup' in message or 'options' in message):
         return 'POSTGRES_POOLER_STARTUP_REJECTED'
     if '42501' in states:
         return 'POSTGRES_ACCESS_REJECTED'
+    if '28000' in states:
+        return 'POSTGRES_AUTH_REJECTED'
+    if '53300' in states:
+        return 'POSTGRES_CONNECTION_LIMIT'
+    if '3d000' in states:
+        return 'POSTGRES_DATABASE_REJECTED'
+    if '57p03' in states:
+        return 'POSTGRES_POOLER_BACKEND_UNAVAILABLE'
     patterns = (
         ('POSTGRES_CERTIFICATE_REJECTED', (
             'certificate verify failed', 'certificate verification failed',
@@ -48,9 +61,31 @@ def classify(result):
             'ssl error', 'ssl negotiation', 'server does not support ssl',
             'tls handshake', 'ssl connection has been closed',
         )),
+        ('POSTGRES_POOLER_CIRCUIT_OPEN', (
+            'circuit breaker open', 'circuit breaker is open',
+        )),
+        ('POSTGRES_POOLER_SECRET_INVALID', (
+            '(eauthquery)', 'unsupported or invalid secret format',
+        )),
+        ('POSTGRES_PASSWORD_NOT_SUPPLIED', (
+            'no password supplied', 'fe_sendauth: no password supplied',
+        )),
         ('POSTGRES_AUTH_REJECTED', (
             'password authentication failed', 'authentication failed',
-            'invalid password', 'no password supplied',
+            'invalid password', 'scram authentication failed',
+            'sasl authentication failed', 'invalid scram response',
+        )),
+        ('POSTGRES_CONNECTION_LIMIT', (
+            'too many connections', 'remaining connection slots are reserved',
+            'connection limit exceeded', 'max client connections reached',
+        )),
+        ('POSTGRES_DATABASE_REJECTED', (
+            'database "postgres" does not exist',
+            'database "postgres" is not currently accepting connections',
+        )),
+        ('POSTGRES_POOLER_BACKEND_UNAVAILABLE', (
+            'the database system is starting up',
+            'the database system is in recovery mode',
         )),
         ('POSTGRES_POOLER_STARTUP_REJECTED', (
             'unsupported startup parameter', 'unsupported startup message',
@@ -58,6 +93,7 @@ def classify(result):
         )),
         ('POSTGRES_POOLER_IDENTITY_REJECTED', (
             'tenant or user not found', 'unknown tenant', 'tenant not found',
+            '(enotfound)', 'tenant/user', 'tenant user not found',
         )),
         ('POSTGRES_DNS_FAILED', (
             'could not translate host name', 'temporary failure in name resolution',
