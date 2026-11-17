@@ -51,7 +51,8 @@ class Tests(unittest.TestCase):
             ('connection timed out', 'POSTGRES_NETWORK_TIMEOUT'),
             ('connection refused', 'POSTGRES_NETWORK_FAILED'),
             ('no pg_hba.conf entry', 'POSTGRES_ACCESS_REJECTED'),
-            ('PRIVATE_PROVIDER_DETAIL', 'POSTGRES_PROBE_UNEXPECTED'),
+            ('PRIVATE_PROVIDER_DETAIL', 'POSTGRES_CLIENT_EXIT_UNEXPECTED'),
+            ('FATAL: PRIVATE_PROVIDER_DETAIL', 'POSTGRES_SERVER_REJECTED'),
         )
         for stderr, expected in examples:
             response = subprocess.CompletedProcess([], 2, stdout='', stderr=stderr)
@@ -66,7 +67,7 @@ class Tests(unittest.TestCase):
         with patch.object(check.subprocess, 'run', return_value=response):
             with self.assertRaises(check.ProbeFailure) as failure:
                 check.verify_connection('bytetorque_backup', fixture())
-            self.assertEqual(failure.exception.code, 'POSTGRES_PROBE_UNEXPECTED')
+            self.assertEqual(failure.exception.code, 'POSTGRES_PROBE_OUTPUT_INVALID')
 
     def test_timeout_and_process_error_hide_source(self):
         for error, expected in (
