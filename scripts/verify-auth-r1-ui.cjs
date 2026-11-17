@@ -77,6 +77,11 @@ async function stubPage(browser, width, options = {}) {
       })
     }
     if (url.pathname === '/auth/v1/logout') return reply({})
+    if (url.pathname === '/rest/v1/profiles') {
+      assert.equal(req.method(), 'GET')
+      assert.equal(url.searchParams.get('user_id'), 'eq.' + userId)
+      return reply({ display_name: 'Operador QA' })
+    }
     if (url.pathname === '/rest/v1/workshop_memberships') {
       assert.equal(req.method(), 'GET')
       assert.equal(url.searchParams.get('user_id'), 'eq.' + userId)
@@ -132,6 +137,7 @@ async function shot(p, name) {
       await shot(p, `login-enabled-mock-${width}`)
       await login(p)
       await p.locator('.dashboard-main').waitFor()
+      assert.match(await p.locator('.account-trigger').innerText(), /Operador QA/)
       assert.match(
         await p.locator('.sidebar-workshop, .sidebar').innerText(),
         /Taller autorizado A/
