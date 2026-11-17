@@ -71,7 +71,73 @@ export function issuancePortsCandidate(
         const header=new DataView(workshopLogo.buffer,workshopLogo.byteOffset,workshopLogo.byteLength)
         if (![header.getUint32(16),header.getUint32(20)].every(n=>n>=1&&n<=1024)) throw Error('PRIVATE_PNG_DIMENSIONS')
       }
-      return quotePdf(snapshot, {...assets,workshopLogo})
+      let templatePdf: Uint8Array | undefined
+      const templatePath = snapshot.workshop.templatePath
+      if (templatePath) {
+        // Paid-plan validation must come from an authenticated server RPC,
+        // not from a browser path, workshop profile metadata or user claims.
+        if (!new RegExp('^'+wid+
+            '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\.pdf
+    },
+    archive: (path, bytes) => {
+      gate()
+      return archive.putIfAbsent(path, bytes)
+    },
+    finish: (actorId, requestId, receipt) =>
+      rpc<Revision>('bt_cp05_finish_issue', {
+        p_request_id: requestId,
+        p_actor_id: actorId,
+        p_path: receipt.path,
+        p_pdf_sha256: receipt.sha256,
+        p_pdf_size: receipt.size
+      })
+  }
+}
+/** Restore only a revision visible through caller's RLS; never accept a browser path. */
+export async function restoreRevisionCandidate(
+  userClient: SupabaseClient,
+  trustedClient: SupabaseClient,
+  policy: { approved: boolean },
+  workshopId: string,
+  revisionId: string
+) {
+  if (!policy.approved) throw Error('PRIVATE_ARCHIVE_DISABLED')
+  const user = await userClient.auth.getUser()
+  if (user.error || !user.data.user?.email_confirmed_at) throw Error('VERIFIED_USER_REQUIRED')
+  const wid = quoteId(workshopId),
+    rid = quoteId(revisionId)
+  const r = await userClient
+    .from('quote_revisions')
+    .select('*')
+    .eq('workshop_id', wid)
+    .eq('id', rid)
+    .maybeSingle()
+  if (r.error || !r.data || r.data.workshop_id !== wid || r.data.id !== rid)
+    throw Error('REVISION_NOT_AUTHORIZED')
+  const expected = `${wid}/quotes/${quoteId(r.data.quote_id)}/r${r.data.revision}/${r.data.payload_sha256}.pdf`
+  if (r.data.pdf_object_path !== expected) throw Error('ARCHIVE_PATH_MISMATCH')
+  return privateArchiveCandidate(trustedClient, policy).restore(
+    r.data.pdf_object_path,
+    r.data.pdf_sha256
+  )
+}
+).test(templatePath))
+          throw Error('INVALID_PRIVATE_TEMPLATE_PATH')
+        const selected = await userClient.rpc('bt_plan04_pdf_template_status',
+          { p_workshop_id: wid })
+        if (selected.error || !selected.data || selected.data.eligible !== true ||
+            !['plus','full'].includes(selected.data.plan) ||
+            selected.data.templatePath !== templatePath ||
+            selected.data.workshopId !== wid) throw Error('TEMPLATE_NOT_AUTHORIZED')
+        const downloaded = await userClient.storage
+          .from('bt-workshop-quote-templates').download(templatePath)
+        if (downloaded.error || !downloaded.data ||
+            downloaded.data.size > 4194304) throw Error('PRIVATE_TEMPLATE_UNAVAILABLE')
+        templatePdf = new Uint8Array(await downloaded.data.arrayBuffer())
+        if (![37,80,68,70,45].every((n,i)=>templatePdf![i]===n))
+          throw Error('INVALID_PRIVATE_TEMPLATE')
+      }
+      return quotePdf(snapshot, {...assets,workshopLogo,templatePdf})
     },
     archive: (path, bytes) => {
       gate()

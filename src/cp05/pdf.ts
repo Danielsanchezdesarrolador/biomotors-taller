@@ -379,7 +379,7 @@ export async function quotePdf(
   return doc.save({ useObjectStreams: false })
 }
 
-export async function browserQuotePdf(snapshot: Snapshot, draft = true) {
+export async function browserQuotePdf(snapshot: Snapshot, draft = true, templatePdf?: Uint8Array) {
   const [font, logo] = await Promise.all([
     fetch('/cp05/DejaVuSans.ttf'),
     fetch('/icon-192.png')
@@ -389,7 +389,8 @@ export async function browserQuotePdf(snapshot: Snapshot, draft = true) {
     snapshot,
     {
       font: new Uint8Array(await font.arrayBuffer()),
-      logo: new Uint8Array(await logo.arrayBuffer())
+      logo: new Uint8Array(await logo.arrayBuffer()),
+      templatePdf
     },
     draft
   )

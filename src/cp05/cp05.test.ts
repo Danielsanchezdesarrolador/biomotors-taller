@@ -127,6 +127,17 @@ describe('CP05 importe y documentos', () => {
     expect(JSON.stringify(snapshot)).toBe(before)
     expect(Buffer.from(bytes).equals(Buffer.from(await quotePdf(snapshot,assets)))).toBe(false)
   })
+  it('compone papelería A4 privada sin modificar los datos del documento', async () => {
+    const clean = await PDFDocument.create()
+    clean.addPage([595.28,841.89])
+    const paper = new Uint8Array(await clean.save())
+    const original = JSON.stringify(snapshot)
+    const withPaper = await quotePdf(snapshot,{...assets,templatePdf:paper},true)
+    const pdf = await PDFDocument.load(withPaper)
+    expect(pdf.getPageCount()).toBe(1)
+    expect(pdf.getPage(0).getSize().width).toBeCloseTo(595.28)
+    expect(JSON.stringify(snapshot)).toBe(original)
+  })
   it('pagina 200 partidas sin perder el total histórico', async () => {
     const long = {
       ...snapshot,

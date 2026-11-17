@@ -34,6 +34,7 @@ function VerifiedOrderScreen({
   return (
     <QuotePanel
       repository={repository}
+      privateClient={client}
       context={context}
       onBack={onBack}
       initialVehicleId={initialVehicleId}
