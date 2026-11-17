@@ -15,6 +15,15 @@
 - **Diagnóstico de la regresión:** primero comparar acceso desde red Wi-Fi y datos móviles, consultar estado Custom Domains/certificados en Render y DNS Cloudflare, y contrastar con URL técnica; verificar configuración existente antes de cambiarla. Supabase Auth ya se configuró para el dominio el 16/11: **no cambiar Site URL, Redirect URLs ni flujos de correo sin un diagnóstico y autorización concretos**. Evitar cortes de sesión y enlaces rotos.
 - El dominio debe mantenerse registrado y renovarse a tiempo: la decisión de usarlo indefinidamente no garantiza su disponibilidad si vence el registro o falla DNS.
 
+## Regla permanente — cuenta Creador y suscripciones (17/11/2026)
+
+- **Plataforma de dos niveles:** cuentas corrientes con correo verificado administrarán exclusivamente su taller y mecánicos; la cuenta **Creador**, exclusiva del titular del software, tiene panel propio para conceder, extender o revocar suscripciones sin ser dueño de talleres ajenos.
+- **Planes aprobados:** Básico gratis sin publicidad en lanzamiento (2 mecánicos); Plus USD 5/mes (8 mecánicos); Full USD 15/mes (8 mecánicos); prueba Full 3 días con método de pago y posible cancelación, aún no implementada. Creador puede dar Plus/Full por días, extender, restablecer Básico, revocar o dar permanente, siempre con motivo y auditoría.
+- **Ignacio:** después de registrar/verificar su cuenta y ligarse como propietario a su **propio taller Biomotors**, el Creador le concederá **Full permanente sin cobro**. No confundir con talleres QA A/B; Ignacio no recibe permisos globales, código ni acceso a otros talleres.
+- **Seguridad del Creador:** permiso privado en bt_platform_private.creators, asociado al UUID de Auth y jamás a user_metadata o selector visual. RPC bt_creator_is_creator, bt_creator_overview y bt_creator_manage_subscription validan el acceso en servidor. Toda modificación manual requiere JWT aal2 (TOTP MFA), idempotencia y auditoría. No exponer historiales/clientes ajenos al panel global.
+- **Estado BT-CREATOR-01:** esquema privado aditivo instalado y rol del Director vinculado; su cuenta es además admin SOLO en Taller ByteTorque de Pruebas. Panel de React src/creator/CreatorConsole.tsx bajo VITE_BT_CREATOR_PRIVATE_ENABLED=true. Sin pagos reales. Las concesiones manuales aún deben vincularse a límites/beneficios de cada plan y el alta autónoma de talleres sigue pendiente. Ver docs/BT_CREATOR_01_ESTADO_Y_PLAN.md.
+- **Prioridades:** la infraestructura del Creador se prepara ahora por nueva instrucción, pero CP05/CP06 y el piloto de Ignacio siguen antes de activar pagos, suscripciones públicas o comercialización.
+
 ## 1. Misión y fuentes de verdad
 
 Crear ByteTorque, una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
