@@ -1,7 +1,7 @@
 """Pinned private Drive destination. No root_folder_id and no path-based writes.
 
-rclone resolves the owner's verified path and refreshes OAuth. Transfer requests
-use the validated IDs so a duplicate/renamed path cannot redirect a write.
+rclone refreshes OAuth without selecting a destination by name. The approved
+ID, ownership, root parent and private permissions authorize all transfers.
 """
 import configparser
 import hashlib
@@ -77,28 +77,8 @@ class PrivateDrive:
             if actual.casefold() != expected_owner.casefold():
                 raise DriveFailure('DRIVE_OWNER_MISMATCH')
             self._mark_preflight('DRIVE_OWNER_MATCHED')
-        self._mark_preflight('DRIVE_ROOT_LIST')
-        matches = [row for row in entries if row.get('Name') == FOLDER_NAME or row.get('Path') == FOLDER_NAME]
-        if not matches:
-            # Diagnose visibility by the approved ID, without allowing a write or
-            # bypassing the path checks. 404 remains inaccessible, not 'deleted'.
-            self._mark_preflight('DRIVE_ROOT_METADATA')
-            self._metadata(FOLDER_ID)
-            raise DriveFailure('DRIVE_FOLDER_NOT_LISTED')
-        if len(matches) != 1:
-            raise DriveFailure('DRIVE_FOLDER_NAME_AMBIGUOUS')
-        if matches[0].get('ID') != FOLDER_ID:
-            raise DriveFailure('DRIVE_FOLDER_ID_MISMATCH')
-        if matches[0].get('IsDir') is not True or matches[0].get('Path') != FOLDER_NAME:
-            raise DriveFailure('DRIVE_FOLDER_PATH_MISMATCH')
-        self._mark_preflight('DRIVE_ROOT_STAT')
-        row = rclone_json(
-            ['rclone', '--config', str(config_path), 'lsjson', '--stat', REMOTE + ':' + FOLDER_NAME],
-            env={k: v for k, v in os.environ.items() if not k.startswith(('RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))})
-        if not isinstance(row, dict) or row.get('ID') != FOLDER_ID or row.get('IsDir') is not True or row.get('Name') != FOLDER_NAME:
-            raise DriveFailure('DRIVE_STAT_MISMATCH')
-        # rclone may refresh the token in the temporary binding; read it again.
-        self._token = validate_config(config_path.read_text())
+        # Names are not identities. Root listing is used ONLY to refresh OAuth;
+        # empty lists, homonyms and shortcut IDs cannot select a destination.
         self._directories = {}
         self.check_root()
 
@@ -166,6 +146,15 @@ class PrivateDrive:
                 row.get('mimeType') != MIME_FOLDER or row.get('trashed') is not False or
                 row.get('ownedByMe') is not True):
             raise RuntimeError('Approved Drive folder metadata not verified')
+        self._mark_preflight('DRIVE_ROOT_LOCATION')
+        root = self._json('files/root', {'fields': 'id,mimeType,ownedByMe,trashed'})
+        if (not isinstance(root, dict) or
+                not re.fullmatch(r'[A-Za-z0-9_-]{10,120}', root.get('id', '')) or
+                root.get('mimeType') != MIME_FOLDER or root.get('ownedByMe') is not True or
+                root.get('trashed') is not False):
+            raise DriveFailure('DRIVE_ROOT_LOCATION_UNVERIFIED')
+        if row.get('parents') != [root['id']]:
+            raise DriveFailure('DRIVE_FOLDER_LOCATION_MISMATCH')
         self._mark_preflight('DRIVE_ROOT_PERMISSIONS')
         self._private(FOLDER_ID)
 

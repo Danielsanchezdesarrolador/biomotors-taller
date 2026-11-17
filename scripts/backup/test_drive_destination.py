@@ -54,6 +54,8 @@ class OfflineDriveTests(unittest.TestCase):
         self.requests.append((resource, params, body, upload))
         if resource.endswith('/permissions'):
             return copy.deepcopy(self.permissions)
+        if resource == 'files/root':
+            return metadata('offline_root_12345', 'My Drive')
         if resource.startswith('files/'):
             return copy.deepcopy(self.rows[resource.split('/')[1]])
         if resource == 'files' and body:
@@ -70,7 +72,8 @@ class OfflineDriveTests(unittest.TestCase):
             args = runner.call_args_list[0]
             self.assertEqual(args.args[0][-3:], ['lsjson', '--dirs-only', 'bytetorque_backup:'])
             self.assertFalse(any(k.startswith('RCLONE_') for k in args.kwargs['env']))
-            self.assertEqual(runner.call_args.args[0][-1], 'bytetorque_backup:Respaldos ByteTorque')
+            runner.assert_called_once()
+            self.assertNotIn('--stat', runner.call_args.args[0])
         return destination
 
     def mocked_api(self):
@@ -94,19 +97,17 @@ class OfflineDriveTests(unittest.TestCase):
                                    stage_hook=stages.append)
         self.assertEqual(stages, [
             'DRIVE_DESTINATION_VALIDATE', 'DRIVE_CONFIG_VALIDATE',
-            'DRIVE_ROOT_LIST', 'DRIVE_ROOT_LIST', 'DRIVE_ROOT_STAT',
-            'DRIVE_ROOT_METADATA', 'DRIVE_ROOT_PERMISSIONS'])
+            'DRIVE_ROOT_LIST', 'DRIVE_ROOT_METADATA',
+            'DRIVE_ROOT_LOCATION', 'DRIVE_ROOT_PERMISSIONS'])
 
-    def test_readonly_stage_hook_stops_before_network_when_root_unlisted(self):
+    def test_empty_root_listing_still_validates_exact_id(self):
         stages = []
         listing = subprocess.CompletedProcess([], 0, stdout='[]')
-        with patch.object(drive.subprocess, 'run', return_value=listing) as runner, \
-             self.mocked_api() as api, self.assertRaises(RuntimeError):
-            drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID,
-                               stage_hook=stages.append)
-        self.assertEqual(stages[-1], 'DRIVE_ROOT_METADATA')
-        api.assert_called_once()
+        with patch.object(drive.subprocess, 'run', return_value=listing) as runner, self.mocked_api():
+            drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID, stage_hook=stages.append)
+        self.assertEqual(stages[-1], 'DRIVE_ROOT_PERMISSIONS')
         runner.assert_called_once()
+        self.assertEqual(self.requests[0][0], 'files/' + drive.FOLDER_ID)
 
     def test_valid_unrooted_config_and_destination(self):
         self.assertEqual(drive.validate_config(config()), 'OFFLINE')
@@ -127,27 +128,51 @@ class OfflineDriveTests(unittest.TestCase):
                 drive.PrivateDrive(self.path, drive.REMOTE, 'unapproved_folder_12345')
             runner.assert_not_called()
 
-    def test_missing_duplicate_wrong_id_and_shortcut_rejected_before_api(self):
+    def test_homonyms_shortcuts_and_missing_listing_never_choose_destination(self):
         valid = copy.deepcopy(self.listing[0])
         for listing in ([], [valid, valid], [dict(valid, ID='unapproved_folder_12345')],
                         [dict(valid, IsDir=False)], [dict(valid, Path='another path')]):
             self.listing = listing
-            with self.subTest(listing=listing), self.mocked_api() as api, self.assertRaises(RuntimeError):
+            self.requests.clear()
+            with self.subTest(listing=listing), self.mocked_api():
                 self.connect()
-            if listing:
-                api.assert_not_called()
-            else:
-                api.assert_called_once()
+            self.assertEqual(self.requests[0][0], 'files/' + drive.FOLDER_ID)
+            self.assertFalse(any('unapproved_folder' in resource for resource, *_ in self.requests))
 
-    def test_functional_path_cannot_resolve_to_another_id(self):
-        listed = subprocess.CompletedProcess([], 0, stdout=json.dumps(self.listing))
-        resolved = subprocess.CompletedProcess([], 0, stdout=json.dumps(dict(self.listing[0], ID='unapproved_folder_12345')))
-        with patch.object(drive.subprocess, 'run', side_effect=[listed, resolved]), self.mocked_api() as api, self.assertRaises(RuntimeError):
-            drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID)
-        api.assert_not_called()
+    def test_no_fallback_to_homonym_when_approved_id_inaccessible(self):
+        self.listing[0]['ID'] = 'unapproved_folder_12345'
+        from drive_errors import DriveFailure
+        with patch.object(drive.PrivateDrive, '_json', side_effect=DriveFailure('DRIVE_FOLDER_INACCESSIBLE')) as api:
+            with self.assertRaisesRegex(DriveFailure, 'DRIVE_FOLDER_INACCESSIBLE'):
+                self.connect()
+        api.assert_called_once()
+        self.assertEqual(api.call_args.args[0], 'files/' + drive.FOLDER_ID)
+
+    def test_location_must_be_account_root_and_is_rechecked(self):
+        for parents in (None, [], ['unapproved_parent_12345'], ['offline_root_12345', 'other']):
+            self.rows[drive.FOLDER_ID] = dict(self.root, parents=parents)
+            with self.subTest(parents=parents), self.mocked_api(), self.assertRaisesRegex(RuntimeError, 'DRIVE_FOLDER_LOCATION_MISMATCH'):
+                self.connect()
+        self.rows[drive.FOLDER_ID] = dict(self.root)
+        with self.mocked_api():
+            destination = self.connect()
+            self.rows[drive.FOLDER_ID]['parents'] = ['moved_parent_12345']
+            with self.assertRaisesRegex(RuntimeError, 'DRIVE_FOLDER_LOCATION_MISMATCH'):
+                destination.backup_directory(BACKUP, create=True)
+        self.assertFalse(any(body for _, _, body, _ in self.requests))
+
+    def test_root_identity_cannot_be_missing_unowned_or_invalid(self):
+        for root in ({}, {'id':'bad'}, dict(metadata('offline_root_12345', 'My Drive'), ownedByMe=False),
+                     dict(metadata('offline_root_12345', 'My Drive'), trashed=True)):
+            def api(instance, resource, params=None, **kwargs):
+                if resource == 'files/root':
+                    return root
+                return self.api(instance, resource, params, **kwargs)
+            with patch.object(drive.PrivateDrive, '_json', autospec=True, side_effect=api), self.assertRaisesRegex(RuntimeError, 'DRIVE_ROOT_LOCATION_UNVERIFIED'):
+                self.connect()
 
     def test_metadata_missing_wrong_name_trashed_or_unowned_rejected(self):
-        for mutation in ({'name': 'Other'}, {'mimeType': 'application/vnd.google-apps.shortcut'},
+        for mutation in ({'id': 'unapproved_folder_12345'}, {'id': None}, {'name': 'Other'}, {'mimeType': 'application/vnd.google-apps.shortcut'},
                          {'trashed': True}, {'trashed': None}, {'ownedByMe': False}):
             self.rows[drive.FOLDER_ID] = dict(self.root, **mutation)
             with self.subTest(mutation=mutation), self.mocked_api(), self.assertRaises(RuntimeError):

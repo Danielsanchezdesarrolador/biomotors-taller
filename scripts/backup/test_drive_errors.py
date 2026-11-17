@@ -76,13 +76,20 @@ class DiagnosticsTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code, code)
                 self.assertEqual('DRIVE_OWNER_MATCHED' in stages, actual == expected)
 
-    def test_visible_by_id_but_not_in_root_does_not_bypass_guard(self):
+    def test_visible_by_id_and_private_root_folder_passes_without_name_lookup(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / 'rclone.conf'
             path.write_text(config()); path.chmod(0o600)
-            with patch.object(errors.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '[]', '')), patch.object(drive.PrivateDrive, '_json', return_value=metadata(drive.FOLDER_ID, drive.FOLDER_NAME)) as api, self.assertRaisesRegex(errors.DriveFailure, '^DRIVE_FOLDER_NOT_LISTED$'):
+            def api(resource, params=None):
+                if resource == 'files/' + drive.FOLDER_ID:
+                    return metadata(drive.FOLDER_ID, drive.FOLDER_NAME)
+                if resource == 'files/root':
+                    return metadata('offline_root_12345', 'My Drive')
+                if resource.endswith('/permissions'):
+                    return {'permissions':[{'id':'owner', 'type':'user', 'role':'owner'}]}
+                raise AssertionError('Unexpected request')
+            with patch.object(errors.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '[]', '')), patch.object(drive.PrivateDrive, '_json', side_effect=api):
                 drive.PrivateDrive(path, drive.REMOTE, drive.FOLDER_ID)
-            self.assertEqual(api.call_args.args[0], 'files/' + drive.FOLDER_ID)
 
     def test_readonly_entrypoint_never_emits_provider_or_owner(self):
         env = {'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'workflow_dispatch',
