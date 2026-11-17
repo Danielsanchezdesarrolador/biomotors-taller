@@ -36,6 +36,13 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 1
+      - name: Install Python before loading any secrets
+        timeout-minutes: 5
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends python3
       - name: Offline diagnostic tests before secrets
         run: python3 -B scripts/backup/test_postgres_preflight.py
       - name: Compare two read-only authenticated TLS probes
