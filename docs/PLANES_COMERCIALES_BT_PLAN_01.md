@@ -4,6 +4,8 @@
 **Estado:** política comercial y requisitos de diseño aprobados; sin facturación ni trial operativo.
 **Precios por taller y por mes**, no por cada trabajador.
 
+> **ACTUALIZACIÓN VINCULANTE BT-PLAN-04 · 17/11/2026.** **BT-PLAN-04 · decisión vigente 17/11/2026:** Cualquier persona confirmada empieza con **Básico personal gratuito, sin creación de taller nuevo**. Puede recibir/comprar Plus o Full **antes** de registrar su propio taller. **Plus USD 5/mes incluye 4 mecánicos; Full USD 15/mes incluye 8; cada mecánico adicional cuesta USD 2/mes al titular del plan**, nunca al trabajador. Propietarios/administradores no ocupan cupos. Ignacio recibirá Full permanente sin cobro, creará Biomotors e invitará a sus 2 mecánicos (2/8). Esta decisión **reemplaza los cupos BT-PLAN-03 (Básico 2, Plus 8, Full 8)**; preserva talleres QA existentes, datos e historiales. No están implementados todavía derechos personales, alta autónoma, cobros de extras o límites aplicados en backend. Ver `docs/BT_PLAN_04_CUENTAS_TALLERES_Y_EXTRAS.md`. Los apartados históricos con cifras distintas quedan expresamente superados. Los mecánicos no pagan individualmente. El pago de adicionales no funciona aún.
+
 ## 1. Tarifas decididas
 
 | Plan | Precio mensual | Publicidad en lanzamiento |
@@ -37,18 +39,18 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 - Impresión/descarga de documentos cuando la función PDF exista realmente; NO envío automatizado de PDF por correo.
 - NO generación de enlaces de registro del cliente: el taller captura sus antecedentes manualmente.
 - Gratis sin publicidad durante el lanzamiento.
-- **Hasta 2 mecánicos por taller** (BT-PLAN-03). Los cupos de otros roles, nuevas OT, almacenamiento y demás cuotas siguen pendientes. Nunca bloquear acceso al historial propio ni su exportación por descenso de plan.
+- **Básico es cuenta personal sin taller nuevo** (BT-PLAN-04). El uso gratuito debe incluir funciones reales por definir, sin fingir guardado de taller. Nunca borrar datos históricos por descenso de plan.
 
 **Plus — USD 5/mes:**
 - Básico completo.
 - Enlaces seguros de registro: datos del cliente, marca, modelo, año, kilometraje y motivo de visita; solicitud pendiente de revisión por taller.
 - Envío automatizado de informes PDF a clientes con dirección confirmada y seguimiento del estado del envío, al contar con backend seguro.
-- Personalización de documentos y **hasta 8 mecánicos por taller** (BT-PLAN-03); otras cuotas aún por definir.
+- Personalización de documentos y **4 mecánicos incluidos por taller** (BT-PLAN-04), más plazas confirmadas de USD 2/mes c/u pagadas por el titular; otras cuotas aún por definir.
 
 **Full — USD 15/mes:**
 - Plus completo.
 - Roles avanzados, reportes y métricas detalladas, recordatorios de mantenciones, automatizaciones y controles superiores sujetos a implementación. No presentar funciones futuras como ya disponibles.
-- **Hasta 8 mecánicos por taller**, igual que Plus (BT-PLAN-03). Capacidades superiores de otro tipo, por ejemplo almacenamiento o funciones avanzadas, aún pendientes de definición.
+- **8 mecánicos incluidos por taller** (BT-PLAN-04), más plazas confirmadas de USD 2/mes c/u pagadas por el titular. Capacidades superiores adicionales aún pendientes de definición.
 - Prueba Full de 3 días conforme a sección 2.
 
 **Innegociable para TODOS:** protección de datos, autorización por taller, RLS, acceso a su propia información, integridad de historial y posibilidad de exportar. Seguridad no es un beneficio exclusivo de Full.
@@ -66,7 +68,7 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 
 ## 5. Trabajo pendiente
 
-- **Cupo de mecánicos decidido en BT-PLAN-03** (2 Básico; 8 Plus/Full). Ratificar cupos de otros roles, límites de OT/correos/enlaces, gestión de reducciones de plan y alcance exacto de Plus/Full.
+- **Cupos vigentes BT-PLAN-04**: Básico personal sin taller nuevo; Plus 4 incluidos; Full 8 incluidos; adicionales USD 2/mes por mecánico cobrados al titular. Ratificar reglas de reducción de cupos, límite absoluto de extras, prorrateo e impuestos.
 - Definir IVA/impuestos, conversión CLP, pasarela elegible, términos, política de reembolsos y costos de operación.
 - Diseñar posteriormente el panel «Plan y suscripción» con fecha exacta del primer cobro, estado y botón de desactivar renovación.
 - Implementar posteriormente suscripción real solo con autorización específica del Director.
@@ -98,7 +100,9 @@ El Director aprobó que Básico NO mostrará publicidad durante el lanzamiento. 
 **Estado de implementación:** **requisito aprobado y documentado, NO implementado**. No se ha habilitado subida real, conversión, storage ni políticas. Codex trabaja en la digitalización interactiva BT-INS-01: **no modificar código ni alcance de Codex en paralelo** sin nueva indicación.
 
 
-## BT-PLAN-03 — Cupos de mecánicos por taller (decisión aprobada 14/11/2026)
+## BT-PLAN-03 — Cupos históricos del 14/11/2026 (SUSTITUIDOS por BT-PLAN-04)
+
+> **Histórico, no usar para implementar.** La matriz antigua de Básico 2 / Plus 8 / Full 8 queda sustituida por BT-PLAN-04. Los detalles sobre seguridad de invitaciones, roles y preservación de historiales siguen vigentes.
 
 **Decisión expresa del Director:** en `Configuración → Usuarios y permisos`, el administrador del taller podrá incorporar mecánicos hasta el cupo de su plan. El cupo se refiere a **mecánicos**, no al total combinado de usuarios. **No incluir al propietario ni al administrador de taller dentro de estos cupos.** Las cuotas de propietarios/administradores adicionales siguen sujetas a diseño específico y nunca se pueden crear mediante el botón de mecánicos.
 
