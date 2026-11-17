@@ -1,0 +1,49 @@
+name: BT-DRIVE-DIAG - Owner-only read-only destination validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_readonly_drive_probe:
+        description: Check pinned Drive folder identity and private permissions; no upload or export
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-readonly-drive-diagnostic
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          github.repository == 'Danielsanchezdesarrolador/biomotors-taller' &&
+          github.actor == 'Danielsanchezdesarrolador' &&
+          github.ref == 'refs/heads/main' &&
+          inputs.confirm_readonly_drive_probe == true }}
+    runs-on: ubuntu-latest
+    environment: bytetorque-backup-export
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pinned main commit without persisting credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install offline test and read-only Drive tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Offline safety validation before loading secrets
+        run: |
+          python3 -B scripts/backup/test_drive_destination.py
+          python3 -B scripts/backup/test_github_actions_export.py
+      - name: Validate Drive destination without writes
+        timeout-minutes: 3
+        env:
+          BT_BACKUP_DRIVE_CONFIG_CONTENT: ${{ secrets.BT_BACKUP_DRIVE_CONFIG_CONTENT }}
+        run: python3 -B scripts/backup/readonly_drive_probe.py

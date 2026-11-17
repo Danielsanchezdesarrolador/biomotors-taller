@@ -84,6 +84,30 @@ class OfflineDriveTests(unittest.TestCase):
                 drive.PrivateDrive(self.path, drive.REMOTE, '1JRAJr08EP9Ql04a7VniBcS4f4rZkNVEd')
             runner.assert_not_called()
 
+    def test_readonly_stage_hook_reports_fixed_codes_in_order(self):
+        stages = []
+        with self.mocked_api():
+            result = subprocess.CompletedProcess([], 0, stdout=json.dumps(self.listing))
+            stat = subprocess.CompletedProcess([], 0, stdout=json.dumps(self.listing[0]))
+            with patch.object(drive.subprocess, 'run', side_effect=[result, stat]):
+                drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID,
+                                   stage_hook=stages.append)
+        self.assertEqual(stages, [
+            'DRIVE_DESTINATION_VALIDATE', 'DRIVE_CONFIG_VALIDATE',
+            'DRIVE_ROOT_LIST', 'DRIVE_ROOT_STAT',
+            'DRIVE_ROOT_METADATA', 'DRIVE_ROOT_PERMISSIONS'])
+
+    def test_readonly_stage_hook_stops_before_network_when_root_unlisted(self):
+        stages = []
+        listing = subprocess.CompletedProcess([], 0, stdout='[]')
+        with patch.object(drive.subprocess, 'run', return_value=listing) as runner, \
+             self.mocked_api() as api, self.assertRaises(RuntimeError):
+            drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID,
+                               stage_hook=stages.append)
+        self.assertEqual(stages[-1], 'DRIVE_ROOT_LIST')
+        api.assert_not_called()
+        runner.assert_called_once()
+
     def test_valid_unrooted_config_and_destination(self):
         self.assertEqual(drive.validate_config(config()), 'OFFLINE')
         with self.mocked_api():

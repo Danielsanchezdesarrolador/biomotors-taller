@@ -44,13 +44,18 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 class PrivateDrive:
-    def __init__(self, config_path, remote, folder):
+    def __init__(self, config_path, remote, folder, *, stage_hook=None):
+        # Optional fixed-code stage callback for read-only diagnosis. No secrets passed.
+        self._preflight_stage_hook = stage_hook
+        self._mark_preflight('DRIVE_DESTINATION_VALIDATE')
         if remote != REMOTE or folder != FOLDER_ID:
             raise RuntimeError('Unapproved Drive destination')
         config_path = Path(config_path)
         if config_path.stat().st_mode & 0o077:
             raise RuntimeError('Owner-only Drive binding required')
+        self._mark_preflight('DRIVE_CONFIG_VALIDATE')
         validate_config(config_path.read_text())
+        self._mark_preflight('DRIVE_ROOT_LIST')
         # Read only. Never create a missing path or set --drive-root-folder-id.
         listing = subprocess.run(
             ['rclone', '--config', str(config_path), 'lsjson', '--dirs-only', REMOTE + ':'],
@@ -61,6 +66,7 @@ class PrivateDrive:
         if (len(matches) != 1 or matches[0].get('ID') != FOLDER_ID or
                 matches[0].get('IsDir') is not True or matches[0].get('Path') != FOLDER_NAME):
             raise RuntimeError('Drive path identity ambiguous or mismatched')
+        self._mark_preflight('DRIVE_ROOT_STAT')
         resolved = subprocess.run(
             ['rclone', '--config', str(config_path), 'lsjson', '--stat', REMOTE + ':' + FOLDER_NAME],
             check=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=45,
@@ -72,6 +78,10 @@ class PrivateDrive:
         self._token = validate_config(config_path.read_text())
         self._directories = {}
         self.check_root()
+
+    def _mark_preflight(self, stage):
+        if self._preflight_stage_hook is not None:
+            self._preflight_stage_hook(stage)
 
     def _open(self, request):
         # Normal system CA validation and inherited proxy; never follow redirects
@@ -122,11 +132,13 @@ class PrivateDrive:
             raise RuntimeError('Private individual-only Drive permissions required')
 
     def check_root(self):
+        self._mark_preflight('DRIVE_ROOT_METADATA')
         row = self._metadata(FOLDER_ID)
         if (row.get('id') != FOLDER_ID or row.get('name') != FOLDER_NAME or
                 row.get('mimeType') != MIME_FOLDER or row.get('trashed') is not False or
                 row.get('ownedByMe') is not True):
             raise RuntimeError('Approved Drive folder metadata not verified')
+        self._mark_preflight('DRIVE_ROOT_PERMISSIONS')
         self._private(FOLDER_ID)
 
     def _find(self, parent, name):
