@@ -232,3 +232,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2c83ff; outline-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* BT-PLAN-04A: server-validated plan indicators, not decorative claims. */
+.account-plan-badge,.mobile-plan-indicator{align-self:flex-start;display:inline-block;border-radius:999px;font-size:11px;font-weight:750;padding:3px 9px;white-space:nowrap;background:#edf1f6;color:#52637d}
+.plan-badge-plus{background:#e0f0ff;color:#07549e}
+.plan-badge-full{background:#e8e5ff;color:#4034aa}
+.plan-badge-basic{background:#edf1f6;color:#475b78}
+.mobile-plan-indicator{display:none}
+.personal-plan-status{font-weight:700;color:#184b90!important}
+@media(max-width:760px){.mobile-plan-indicator{display:inline-block;align-self:center;max-width:125px;overflow:hidden;text-overflow:ellipsis;font-size:10px}}

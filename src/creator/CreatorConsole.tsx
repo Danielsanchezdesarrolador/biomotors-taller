@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Crown, LockKeyhole, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { AuthController } from '../auth/controller'
+import { PersonalAccounts } from './PersonalAccounts'
 import './creator.css'
 type Plan = 'basic' | 'plus' | 'full'
 type Mode = 'grant_days' | 'extend_days' | 'lifetime' | 'revoke' | 'basic'
@@ -198,6 +199,8 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
             <div><span>Plus</span><strong>{overview.workshops.filter(w=>w.effectivePlan==='plus').length}</strong></div>
             <div><span>Full</span><strong>{overview.workshops.filter(w=>w.effectivePlan==='full').length}</strong></div>
           </section>
+          {import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true' &&
+            <PersonalAccounts controller={controller} mfa={mfa}/>}
           <section className="creator-section">
             <h2>Talleres y planes efectivos</h2>
             <div className="creator-table-wrap"><table className="creator-table">
