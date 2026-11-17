@@ -46,7 +46,7 @@ export function resolveAccessPath(
 export const reviewNotice = 'Vista de revisión — sin autenticación real'
 export const reviewLimit =
   'No ingreses credenciales reales. No se crean cuentas, no se envían correos y no hay sesión autenticada.'
-export const mechanicLimits = Object.freeze({ Básico: 2, Plus: 8, Full: 8 })
+export const mechanicLimits = Object.freeze({ Básico: 0, Plus: 4, Full: 8 })
 export const technicalAreas = Object.freeze([
   'Mis órdenes asignadas',
   'Inspección multipunto',

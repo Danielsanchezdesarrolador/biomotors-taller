@@ -19,6 +19,12 @@ import {
   publicEntryPath,
   resolveAccessPath
 } from './access/accessContract'
+function PrivateWorkshopSettings({controller}:{controller:AuthController}) {
+ const [Panel,setPanel]=useState<ComponentType<{controller:AuthController}>|null>(null)
+ const [failed,setFailed]=useState(false)
+ useEffect(()=>{let active=true;void import('./workshops/WorkshopSettings').then(m=>{if(active)setPanel(()=>m.WorkshopSettings)}).catch(()=>{if(active)setFailed(true)});return()=>{active=false}},[controller])
+ return failed?<p role="alert">No se pudo cargar la configuración del taller.</p>:Panel?<Panel controller={controller}/>:<p role="status">Cargando configuración autorizada…</p>
+}
 /** A separately approved private R1 rollout. No public-review route can mount it. */
 function PrivateWorkOrders({
   controller,
@@ -207,7 +213,9 @@ export function OfficialWorkspaceView({
         </div>
         {privateOrders && session?.controls}
       </div>
-      {screen === 'ordenes' &&
+      {screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
+        <PrivateWorkshopSettings controller={session.directoryController}/>
+      ) : screen === 'ordenes' &&
       session?.directoryController &&
       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
         <PrivateWorkOrders
@@ -310,7 +318,9 @@ export default function App({ authController }: { authController?: AuthControlle
   const route = resolveAccessPath(path)
   if (route)
     return <RealAccess key={path} {...route} onNavigate={navigate} controller={authController} />
-  if (path === inviteAcceptancePath) return <InviteAcceptancePreview onNavigate={navigate} />
+  if (path === inviteAcceptancePath) return import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true'
+    ? <RealAccess page="login" presentation="mecanico" onNavigate={navigate} controller={authController}/>
+    : <InviteAcceptancePreview onNavigate={navigate} />
   if (path === accessPaths.mechanicReview) return <TechnicianReview onNavigate={navigate} />
   if (path === accessPaths.administratorReview || path === accessPaths.publicPreview)
     return <OfficialWorkspaceView review onReviewExit={() => navigate(accessPaths.login)} />

@@ -1,10 +1,10 @@
 /**
  * BT-AUTH-R2-A6-7 · OFFLINE memory-only invitation handoff candidate.
- * Not imported by App, main, the public bundle or any Edge entrypoint.
- * The public PWA currently discards tokens synchronously, unchanged.
+ * Reused only behind VITE_BT_PLAN04_WORKSHOPS_ENABLED by the PLAN04 runtime.
+ * Excluded from the default public bundle and all Edge entrypoints.
  *
  * This is NOT authentication, authorization, database verification, or a
- * session manager. Future use needs a separately authorized secure handler.
+ * session manager. Acceptance requires the live-session, email-bound PLAN04 RPC.
  * No global instance, localStorage, sessionStorage, network or analytics.
  */
 import {

@@ -5,11 +5,17 @@ import { scrubInviteLocation } from './auth/inviteLinkRouting'
 import './styles.css'
 import './premium.css'
 
-// A5: discard invite tokens from hash/query synchronously before React mounts.
-// Preview cannot consume tokens, so never keep them in app state or storage.
-scrubInviteLocation(window.location, (url) => {
-  window.history.replaceState(window.history.state, '', url)
-})
+async function boot() {
+ const receivedAt=Date.now()
+ let entry = import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true'
+   ? {pathname:window.location.pathname,search:window.location.search,hash:window.location.hash} : null
+ // Scrub before any asynchronous import, SDK initialization or React rendering.
+ scrubInviteLocation(window.location,url=>window.history.replaceState(window.history.state,'',url))
+ if (import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' && entry) {
+   try {const {captureInvitation,watchInvitationNavigation}=await import('./workshops/invitationRuntime');captureInvitation(entry,receivedAt);watchInvitationNavigation()}
+   catch { /* The redacted app still boots; no token or provider error is logged. */ }
+   finally {entry=null}
+ }
 
 const root = document.getElementById('root')
 if (!root) throw new Error('No se encontró el contenedor principal')
@@ -27,3 +33,6 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     })
   })
 }
+
+}
+void boot()

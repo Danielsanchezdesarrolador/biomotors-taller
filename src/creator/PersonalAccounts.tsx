@@ -40,26 +40,30 @@ export function PersonalAccounts({controller,mfa}:{controller:AuthController;mfa
   const [mode,setMode] = useState<Mode>('grant_days')
   const [days,setDays] = useState(30)
   const [reason,setReason] = useState('')
+  const loadEpoch = useRef(0)
   const requestIdRef = useRef<{signature:string;id:string}|null>(null)
   const load = useCallback(async (search: string) => {
+    const epoch=++loadEpoch.current
     setLoading(true);setError('')
     try {
-      const client=await controller.directoryClient()
+      const client=await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const {data,error:requestError}=await client.rpc('bt_creator04_accounts',{
         p_query:search.trim(),p_limit:25
       })
       if (requestError || !Array.isArray(data)) throw new Error('QUERY')
+      if(epoch!==loadEpoch.current)return
       const rows=data.map(parseAccount)
       if (rows.some(row=>row===null)) throw new Error('INVALID')
       setAccounts(rows as Account[])
       setSelectedId(prev=>rows.some(row=>row?.userId===prev)?prev:'')
     } catch {
+      if(epoch!==loadEpoch.current)return
       setError('No se pudo consultar las cuentas verificadas. Comprueba tu sesión y permisos.')
       setAccounts([]);setSelectedId('')
-    } finally {setLoading(false)}
+    } finally {if(epoch===loadEpoch.current)setLoading(false)}
   },[controller])
-  useEffect(()=>{void load('')},[load])
+  useEffect(()=>{void load('');return()=>{loadEpoch.current++}},[load])
   const selected=accounts.find(a=>a.userId===selectedId)
   async function submit(event: FormEvent) {
     event.preventDefault();setError('');setNotice('')
@@ -80,7 +84,7 @@ export function PersonalAccounts({controller,mfa}:{controller:AuthController;mfa
     const requestId=requestIdRef.current.id
     setBusy(true)
     try {
-      const client=await controller.directoryClient()
+      const client=await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const result=await client.rpc('bt_creator04_manage_account',{
         p_user_id:selected.userId,p_plan:effective,p_mode:mode,

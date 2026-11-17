@@ -1,10 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import assert from 'node:assert/strict'
+const workshopsEnabled = process.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true'
+if (workshopsEnabled) assert.equal(process.env.VITE_BT_PLAN04_PRIVATE_ENABLED,'true','Workshop management requires confirmed account plans')
 const modules = JSON.parse(readFileSync('dist/.vite/public-modules.json', 'utf8'))
 assert.ok(modules.length > 0)
 // The offline handoff cannot enter the publicly deployed PWA until a separate
 // authenticated, server-backed invitation rollout is explicitly authorized.
-assert.ok(
+if (!workshopsEnabled) assert.ok(
   modules.every((id) => !/inviteHandoffCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden dormant invite handoff was bundled into public PWA'
 )
@@ -18,6 +20,7 @@ assert.ok(
   modules.every((id) => !/inviteBrowserLifecycleCandidate\.(?:ts|tsx|js)/.test(id)),
   'Forbidden invite lifecycle candidate was bundled into public PWA'
 )
+if (!workshopsEnabled) assert.ok(modules.every(id=>!id.includes('src/workshops/')),'Workshop candidates must stay excluded until rollout')
 const cp06PrivateEnabled=process.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'
 if(cp06PrivateEnabled)assert.equal(process.env.VITE_BT_CP04_PRIVATE_ENABLED,'true','CP06 requires CP04')
 if(!cp06PrivateEnabled)assert.ok(modules.every(id=>!id.includes('src/historial/')),'CP06 must remain excluded by default')
@@ -83,6 +86,7 @@ assert.ok(
     (id) =>
       id.endsWith('.css') ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
+      (workshopsEnabled && /src\/workshops\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||
       (cp05PrivateEnabled &&
         /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(

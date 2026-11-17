@@ -47,7 +47,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
   const refresh = useCallback(async () => {
     setLoading(true); setError('')
     try {
-      const client = await controller.directoryClient()
+      const client = await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const [auth, query] = await Promise.all([
         client.auth.mfa.getAuthenticatorAssuranceLevel(),
@@ -69,7 +69,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
     if (factorBusy) return
     setFactorBusy(true);setError('')
     try {
-      const client=await controller.directoryClient()
+      const client=await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const list=await client.auth.mfa.listFactors()
       if (list.error) throw list.error
@@ -100,7 +100,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
     }
     setFactorBusy(true);setError('')
     try {
-      const client=await controller.directoryClient()
+      const client=await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const challenge=await client.auth.mfa.challenge({factorId})
       if (challenge.error || !challenge.data?.id) throw new Error('CHALLENGE')
@@ -138,7 +138,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
     const requestId = requestIdRef.current.id
     setBusy(true)
     try {
-      const client=await controller.directoryClient()
+      const client=await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
       const result=await client.rpc('bt_creator_manage_subscription',{
         p_workshop_id:workshop,p_plan:effective,p_mode:mode,

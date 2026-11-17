@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore, type ComponentType } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
 import { AccessScreens } from '../access/AccessScreens'
 import { TechnicianReview } from '../access/TechnicianReview'
 import type { AccessPage, AccessPresentation } from '../access/accessContract'
@@ -10,6 +10,7 @@ import { parsePlanStatus, planDetail, planLabel, type PlanStatus } from '../plan
 import { clearPrivateScreen, clearOperationalDrafts } from '../official/privateScreen'
 import { clearCp03Draft } from '../official/privateDraft'
 import './auth.css'
+import { PersonalHome } from './PersonalHome'
 const roleNames: Record<Role, string> = {
   owner: 'Propietario',
   admin: 'Administrador',
@@ -46,10 +47,21 @@ export function RealAccess({
     controller.getSnapshot,
     controller.getSnapshot
   )
+  const [Mechanic,setMechanic]=useState<ComponentType<{controller:AuthController;plan:PlanStatus|null;controls:ReactNode}>|null>(null)
+  useEffect(()=>{let active=true;if(import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true')void import('../workshops/MechanicWorkspace').then(m=>{if(active)setMechanic(()=>m.MechanicWorkspace)}).catch(()=>{});return()=>{active=false}},[])
+  const [Invitation,setInvitation]=useState<ComponentType<{controller:AuthController}>|null>(null)
+  useEffect(()=>{let active=true;if(import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true')
+    void import('../workshops/AcceptInvitation').then(m=>{if(active)setInvitation(()=>m.AcceptInvitation)}).catch(()=>{});
+    return()=>{active=false}},[])
   const [creatorOpen, setCreatorOpen] = useState(false)
   const [CreatorPanel, setCreatorPanel] = useState<ComponentType<{controller:AuthController;onBack:()=>void}> | null>(null)
   const [creatorLoadError,setCreatorLoadError] = useState(false)
   const [creatorAccess, setCreatorAccess] = useState(false)
+  const [planRevision, setPlanRevision] = useState(0)
+  useEffect(() => {
+    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') setPlanRevision(v => v + 1) }, 30_000)
+    return () => window.clearInterval(timer)
+  }, [])
   const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null)
   useEffect(() => {
     let active = true
@@ -65,14 +77,13 @@ export function RealAccess({
     }).then(plan => { if (active) setPlanStatus(plan) })
       .catch(() => { if (active) setPlanStatus(null) })
     return () => { active = false }
-  }, [controller, state.phase, state.context?.userId, state.context?.workshop.id])
+  }, [controller, state.phase, state.context?.userId, state.context?.workshop.id, planRevision])
   useEffect(() => {
     let active = true
     setCreatorAccess(false)
     if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' &&
-        state.phase === 'authorized' && state.context &&
-        (state.context.role === 'owner' || state.context.role === 'admin')) {
-      void controller.directoryClient().then(async (client) => {
+        ['authorized', 'restricted', 'no-membership'].includes(state.phase)) {
+      void controller.personalPlanClient().then(async (client) => {
         if (!client) return false
         const { data, error } = await client.rpc('bt_creator_is_creator')
         return !error && data === true
@@ -81,7 +92,7 @@ export function RealAccess({
     }
     return () => { active = false }
   }, [controller, state.phase, state.context?.userId])
-  useEffect(() => { if (state.phase !== 'authorized') setCreatorOpen(false) }, [state.phase])
+  useEffect(() => { if (!['authorized', 'restricted', 'no-membership'].includes(state.phase)) setCreatorOpen(false) }, [state.phase])
   useEffect(() => {
     if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED !== 'true' ||
         !creatorOpen || !creatorAccess) return
@@ -131,8 +142,7 @@ export function RealAccess({
       <button type="button" onClick={logout}>
         Cerrar sesión
       </button>
-      {import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' && creatorAccess &&
-       (state.context?.role === 'owner' || state.context?.role === 'admin') && (
+      {import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' && creatorAccess && (
         <button type="button" onClick={() => setCreatorOpen(true)}>
           Panel del creador
         </button>
@@ -149,9 +159,22 @@ export function RealAccess({
       )}
     </div>
   )
+  if (page==='login' && creatorOpen && creatorAccess && ['authorized','restricted','no-membership'].includes(state.phase)) return CreatorPanel
+    ? <CreatorPanel controller={controller} onBack={()=>{setCreatorOpen(false);void controller.validate()}}/>
+    : <p role="status">{creatorLoadError?'No se pudo cargar el panel del creador.':'Cargando panel privado del creador…'}</p>
+  if (page==='login' && ['authorized','restricted','no-membership'].includes(state.phase) &&
+      typeof window !== 'undefined' && window.location.hash==='#/auth/aceptar-invitacion' && Invitation) return <main className="personal-home"><Invitation controller={controller}/><button onClick={()=>onNavigate('/acceso')}>Volver a mi cuenta</button></main>
+  if (page === 'login' && state.phase === 'no-membership' && import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true') {
+    if (creatorOpen && creatorAccess) return CreatorPanel
+      ? <CreatorPanel controller={controller} onBack={() => { setCreatorOpen(false); void controller.validate() }} />
+      : <p role="status">{creatorLoadError ? 'No se pudo cargar el panel del creador.' : 'Cargando panel privado del creador…'}</p>
+    return <PersonalHome controller={controller} plan={planStatus} name={state.identityName}
+      onCreator={creatorAccess ? () => setCreatorOpen(true) : undefined} />
+  }
   // The only private entry is the login route; public review routes never render this component.
   if (page === 'login' && state.phase === 'authorized' && state.context) {
     const { workshop, role } = state.context
+    if(role==='mechanic' && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && Mechanic) return <Mechanic controller={controller} plan={planStatus} controls={controls}/>
     if (role === 'mechanic')
       return (
         <TechnicianReview

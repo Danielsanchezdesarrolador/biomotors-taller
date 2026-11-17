@@ -45,7 +45,7 @@ describe('R1 UI boundary · synthetic authorized contexts only', () => {
     for (const c of [controller('reception'), controller('owner', false)]) {
       await c.validate()
       expect(html(c)).not.toMatch(/dashboard-main|Tu espacio de trabajo técnico/)
-      expect(html(c)).toMatch(/Acceso restringido|Sin taller autorizado/)
+      expect(html(c)).toMatch(/Acceso restringido|Cuenta personal verificada/)
     }
   })
   it('presents actual email confirmation without DEMO, a false pending label, or unverified success', () => {

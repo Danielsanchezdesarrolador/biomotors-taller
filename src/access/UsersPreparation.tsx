@@ -21,12 +21,12 @@ export function UsersPreparation() {
         {Object.entries(mechanicLimits).map(([plan, limit]) => (
           <div key={plan}>
             <dt>{plan}</dt>
-            <dd>Mecánicos 0/{limit}</dd>
+            <dd>{limit===0?'Cuenta personal sin taller nuevo':`Mecánicos 0/${limit}`}</dd>
           </div>
         ))}
       </dl>
       <small>
-        Referencia de cupos, sin plan activo. El propietario y los administradores no ocupan cupos
+        Referencia BT-PLAN-04, sin plan activo. Básico es personal y no permite crear taller. El propietario y los administradores no ocupan cupos
         de mecánico. Las invitaciones vigentes reservarán una plaza al habilitar el servicio.
       </small>
       <button

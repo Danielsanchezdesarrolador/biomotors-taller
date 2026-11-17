@@ -1,0 +1,12 @@
+.workshop-settings { display: grid; gap: 20px; }
+.workshop-settings .dashboard-card { padding: 24px; }
+.workshop-settings form { display: grid; gap: 14px; max-width: 680px; }
+.workshop-settings label,.personal-home form label { display: grid; gap: 6px; }
+.workshop-settings input,.personal-home input { padding: 12px; border: 1px solid #bacde7; border-radius: 10px; width: 100%; font: inherit; }
+.workshop-settings button { min-height: 44px; margin: 4px; padding: 10px 16px; border: 1px solid #b7cbea; border-radius: 10px; background: #eef5ff; color: #164a92; font: inherit; font-weight: 600; cursor: pointer; }
+.workshop-settings button:disabled { opacity: .55; cursor: not-allowed; }
+.workshop-settings button:focus-visible { outline: 3px solid #2488ff; outline-offset: 3px; }
+.workshop-settings .rp-primary { background: linear-gradient(110deg,#00a9f4,#0560f4); color: white; border-color: transparent; }
+.workshop-settings li { padding: 10px 0; overflow-wrap: anywhere; }
+.workshop-settings [role=alert] { color: #8f3020; background: #fff3ed; padding: 16px; border-radius: 10px; }
+@media(max-width:760px) { .workshop-settings .dashboard-card { padding: 18px; } }

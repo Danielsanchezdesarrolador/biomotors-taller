@@ -69,6 +69,9 @@ export class AuthController {
   async personalPlanClient(): Promise<SupabaseClient | null> {
     if (!this.gateway?.getDataClient ||
         !['authorized', 'restricted', 'no-membership'].includes(this.state.phase)) return null
+    const epoch = this.epoch
+    const user = await this.gateway.getUser()
+    if (!user?.confirmed || epoch !== this.epoch || !['authorized','restricted','no-membership'].includes(this.state.phase)) return null
     return this.gateway.getDataClient()
   }
   async directoryClient(): Promise<SupabaseClient | null> {
@@ -183,7 +186,7 @@ export class AuthController {
         this.selected = undefined
         this.set({
           phase: 'no-membership',
-          message: 'Sin taller autorizado. Tu correo está confirmado, pero esta cuenta todavía no tiene una membresía activa en un taller. Un administrador debe asignarla antes de ingresar.',
+          message: 'Cuenta personal verificada. Todavía no tienes un taller autorizado. Tu plan y las invitaciones se verifican en el servidor.',
           identityName: user.displayName
         })
         return

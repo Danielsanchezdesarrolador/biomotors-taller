@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
     if (/SECRET|SERVICE_ROLE|PASSWORD/i.test(name) || value.startsWith('sb_secret_'))
       throw new Error('Unsafe public environment configuration; no build was generated.')
   }
+  if (env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' && env.VITE_BT_PLAN04_PRIVATE_ENABLED !== 'true')
+    throw new Error('Workshop candidates require verified personal plans.')
   if (env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true' &&
       (env.VITE_BT_CREATOR_PRIVATE_ENABLED !== 'true' || env.VITE_BT_AUTH_R1_ENABLED !== 'true'))
     throw new Error('Personal plans require verified R1 Auth and private Creator permissions.')
@@ -48,6 +50,7 @@ export default defineConfig(({ mode }) => {
             (id) =>
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
+                !(env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && /\/src\/workshops\//.test(id)) &&
                 !(env.VITE_BT_CP06_PRIVATE_ENABLED==='true' && /\/src\/historial\//.test(id)) &&
                 !(env.VITE_BT_CREATOR_PRIVATE_ENABLED==='true' && /\/src\/creator\//.test(id)) &&
                 !(
