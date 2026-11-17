@@ -211,7 +211,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
                 </select>
               </label>
               <label>Operación
-                <select value={mode} onChange={e=>setMode(e.target.value)}>
+                <select value={mode} onChange={e=>setMode(e.target.value as Mode)}>
                   {modes.map(m=><option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
               </label>
