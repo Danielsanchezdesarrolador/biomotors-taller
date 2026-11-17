@@ -1,9 +1,8 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ComponentType } from 'react'
 import { AccessScreens } from '../access/AccessScreens'
 import { TechnicianReview } from '../access/TechnicianReview'
 import type { AccessPage, AccessPresentation } from '../access/accessContract'
 import { OfficialWorkspaceView } from '../App'
-import { CreatorConsole } from '../creator/CreatorConsole'
 import { authConfig } from './config'
 import { AuthController, type AuthState, type Role } from './controller'
 import { lazyGateway } from './lazyGateway'
@@ -47,6 +46,8 @@ export function RealAccess({
     controller.getSnapshot
   )
   const [creatorOpen, setCreatorOpen] = useState(false)
+  const [CreatorPanel, setCreatorPanel] = useState<ComponentType<{controller:AuthController;onBack:()=>void}> | null>(null)
+  const [creatorLoadError,setCreatorLoadError] = useState(false)
   const [creatorAccess, setCreatorAccess] = useState(false)
   useEffect(() => {
     let active = true
@@ -63,6 +64,16 @@ export function RealAccess({
     return () => { active = false }
   }, [controller, state.phase, state.context?.userId])
   useEffect(() => { if (state.phase !== 'authorized') setCreatorOpen(false) }, [state.phase])
+  useEffect(() => {
+    if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED !== 'true' ||
+        !creatorOpen || !creatorAccess) return
+    let active = true
+    setCreatorLoadError(false)
+    void import('../creator/CreatorConsole').then(mod => {
+      if (active) setCreatorPanel(() => mod.CreatorConsole)
+    }).catch(() => { if (active) setCreatorLoadError(true) })
+    return () => { active = false }
+  }, [creatorOpen, creatorAccess])
   useEffect(() => {
     const stop = controller.start()
     const verify = () => {
@@ -102,7 +113,8 @@ export function RealAccess({
       <button type="button" onClick={logout}>
         Cerrar sesión
       </button>
-      {creatorAccess && (state.context?.role === 'owner' || state.context?.role === 'admin') && (
+      {import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' && creatorAccess &&
+       (state.context?.role === 'owner' || state.context?.role === 'admin') && (
         <button type="button" onClick={() => setCreatorOpen(true)}>
           Panel del creador
         </button>
@@ -142,8 +154,12 @@ export function RealAccess({
         />
       )
     if (role === 'owner' || role === 'admin') {
-      if (creatorOpen && creatorAccess)
-        return <CreatorConsole controller={controller} onBack={() => setCreatorOpen(false)} />
+      if (creatorOpen && creatorAccess) {
+        if (creatorLoadError) return <p role="alert">No se pudo cargar el panel del creador. Vuelve al inicio.</p>
+        return CreatorPanel
+          ? <CreatorPanel controller={controller} onBack={() => setCreatorOpen(false)} />
+          : <p role="status">Cargando panel privado del creador…</p>
+      }
       return (
         <OfficialWorkspaceView
           session={{ workshop: workshop.name, role: roleNames[role],
