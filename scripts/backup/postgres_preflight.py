@@ -5,6 +5,7 @@ A PostgreSQL server's pg_stat_ssl describes its own backend connection, which
 need not be the GitHub-to-pooler TLS session. libpq with verify-full does.
 """
 import subprocess
+import re
 
 CODES = frozenset({
     'POSTGRES_CERTIFICATE_REJECTED', 'POSTGRES_TLS_REJECTED',
@@ -27,6 +28,15 @@ def classify(result):
     if result.returncode == 0:
         return 'POSTGRES_PROBE_OUTPUT_INVALID'
     message = (result.stderr or '').lower()
+    # psql VERBOSITY=verbose emits PostgreSQL SQLSTATE. Only fixed codes are
+    # reported; raw server messages and credentials never leave this process.
+    states = set(re.findall(r'(?m)^\\s*(?:psql:[^\\n]*?:\\s*)?(?:fatal|error):\\s+([0-9a-z]{5}):', message))
+    if '28p01' in states:
+        return 'POSTGRES_AUTH_REJECTED'
+    if '0a000' in states and ('startup' in message or 'options' in message):
+        return 'POSTGRES_POOLER_STARTUP_REJECTED'
+    if '42501' in states:
+        return 'POSTGRES_ACCESS_REJECTED'
     patterns = (
         ('POSTGRES_CERTIFICATE_REJECTED', (
             'certificate verify failed', 'certificate verification failed',
@@ -84,6 +94,7 @@ def verify_connection(service, env):
         raise ProbeFailure('POSTGRES_PROBE_UNEXPECTED')
     command = [
         'psql', '-X', '-w', '-A', '-t', '-v', 'ON_ERROR_STOP=1',
+        '-v', 'VERBOSITY=verbose',
         '--dbname=service=' + service, '-c', 'SELECT 1',
     ]
     try:
