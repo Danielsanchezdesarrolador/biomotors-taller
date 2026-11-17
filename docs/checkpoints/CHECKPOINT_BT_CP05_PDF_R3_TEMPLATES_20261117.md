@@ -41,7 +41,7 @@
 
 - La ejecución visual `44171119094` falló **antes de validar el diseño**, por una prueba de sobre de invitaciones que ocasionalmente alteraba un byte aleatorio sin modificar su valor. No fue un error de PDF ni un envío externo.
 - Corrección acotada a la prueba, no al código de autenticación real: `0daf5bb06d472076a5ffd1178f35957cd9a37c50` selecciona un prefijo distinto del original. Conserva la misma expectativa de rechazo ante corrupción.
-- Nueva ronda de workflows: `44171616745` Web/PWA y Android, `44171616949` interfaz/visual y `44171617156` PostgreSQL aislado. PostgreSQL aislado confirmó SUCCESS; Android SUCCESS. Los demás estaban ejecutándose en la última consulta. Consultar resultados de este SHA al iniciar el siguiente chat antes de afirmar PASS completo.
+- Nueva ronda de workflows: `44171616745` Web/PWA y Android, `44171616949` interfaz/visual y `44171617156` PostgreSQL aislado. PostgreSQL aislado confirmó SUCCESS; **workflow general 44171616745 terminó SUCCESS para Web/iOS PWA y Android**. La verificación visual 44171616949 seguía en curso al último chequeo. El despliegue 1532aefc de código PDF ya figuraba LIVE en Render; el commit posterior 0daf5bb (solo una prueba) estaba recompilándose en el último chequeo. Consultar resultados de este SHA al iniciar el siguiente chat antes de afirmar PASS completo.
 - El último código activo en `main` es el commit `0daf5bb` (posterior a `1532aefc` y solo prueba de autenticación), sin alterar datos, roles ni facturación.
 
 ## Siguiente chat: qué hacer
