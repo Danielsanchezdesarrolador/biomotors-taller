@@ -52,7 +52,8 @@ export function RealAccess({
   useEffect(() => {
     let active = true
     setCreatorAccess(false)
-    if (state.phase === 'authorized' && state.context &&
+    if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' &&
+        state.phase === 'authorized' && state.context &&
         (state.context.role === 'owner' || state.context.role === 'admin')) {
       void controller.directoryClient().then(async (client) => {
         if (!client) return false
