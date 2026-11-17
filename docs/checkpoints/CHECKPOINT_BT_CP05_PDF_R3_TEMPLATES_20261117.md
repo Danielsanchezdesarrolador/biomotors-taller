@@ -27,6 +27,16 @@
 - La imagen de muestra contiene detalles de contacto y un QR que no son datos comerciales verificados. El generador no debe reproducir teléfonos/correos/enlaces ficticios.
 - Mantener el repositorio en la visibilidad autorizada temporalmente por el usuario; **no publicar secretos**, proteger datos reales y no reconstruir.
 
+## Cierre técnico y validaciones posteriores (17/11/2026)
+
+- Se corrigió un error de sustitución en las rutas de vista previa/emisión de plantillas privadas en `b6a04303745f1f2e098b8fd856da14e853d24d60`; el reemplazo se reconstruyó desde el último fuente sano y se verificó TypeScript.
+- Se corrigió la composición PDF de papelería A4 en blanco (sin objeto `/Contents`) en `1532aefc4528986e50bb272e2c492e2a26232e69`. El generador vuelve a validar una página A4 en el propio render y crea un trazado invisible cuando haga falta. No toca el documento oficial si no se seleccionó plantilla propia.
+- **GitHub Verificación ByteTorque `44171119007`: SUCCESS**, trabajo Web/iOS PWA y Android, TypeScript, Vitest, build y candidatos de compilación según workflow. Vitest mantiene los casos de PDF Unicode/A4, paginación 200 partidas, hash/determinismo y nuevo PDF A4 como fondo.
+- **Render `dep-dbublmdg1s2s73cfros0`: LIVE**, asociado al commit `1532aefc`. Estas actualizaciones no activan el feature flag premium.
+- Verificación visual adicional GitHub `44171119094`: en ejecución en el último chequeo; no declarar PASS hasta consultar su resultado.
+- **Pendiente de QA:** el Director debe descargar otra vez `COT-000001-borrador.pdf` desde ByteTorque y confirmar visualmente el nuevo diseño R3. El PDF anterior adjunto no es el nuevo archivo.
+- **No instalado:** `docs/sql/BT_CP05_PLUS_FULL_PDF_TEMPLATES_CANDIDATE.sql`; **flag OFF** `VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED`. Plus/Full solo tiene el código preparado, no subida operativa. No se han emitido, enviado ni cobrado documentos.
+
 ## Siguiente chat: qué hacer
 
 1. Confirmar en Github CI el SHA actual. Si falla, corregir antes de nueva activación.
