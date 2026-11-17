@@ -71,11 +71,15 @@ describe('BT-AUTH-R2-A6-P2 · sobre inmutable y HTTP exclusivamente simulado', (
   })
   it('rechaza v1 en el worker y cualquier corrupción o cruce de taller', async () => {
     const { job, key } = await fixture()
+    // The first ciphertext byte is random: prefixing '00' can occasionally
+    // leave it unchanged and produce a flaky false negative in the tamper test.
+    const firstByte = job.ciphertext_hex.slice(0, 2)
+    const tampered = (firstByte === '00' ? 'ff' : '00') + job.ciphertext_hex.slice(2)
     for (const bad of [
       { ...job, workshop_id: other },
       { ...job, recipient_email: 'wrong@example.com' },
       { ...job, token_sha256_hex: 'b'.repeat(64) },
-      { ...job, ciphertext_hex: '00' + job.ciphertext_hex.slice(2) }
+      { ...job, ciphertext_hex: tampered }
     ]) {
       await expect(prepareImmutableInviteDelivery(bad, key, now))
         .rejects.toThrow('could not be verified')
