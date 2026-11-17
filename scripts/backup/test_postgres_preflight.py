@@ -66,6 +66,45 @@ class Tests(unittest.TestCase):
                 self.assertEqual(failure.exception.code, expected)
                 self.assertNotIn(stderr, str(failure.exception))
 
+    def test_wrapped_pooler_rejections_are_specific_and_secret_safe(self):
+        # Actual psql connection errors may include a transport prefix before FATAL.
+        # Strings here are synthetic and intentionally contain no real credentials.
+        cases = (
+            ('psql: error: connection to server at "example.invalid" failed: '
+             'FATAL: 28P01: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_AUTH_REJECTED'),
+            ('psql: error: connection failed: FATAL: SQLSTATE 28P01: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_AUTH_REJECTED'),
+            ('psql: error: connection failed: FATAL: (ENOTFOUND) '
+             'tenant/user postgres.FAKE not found',
+             'POSTGRES_POOLER_IDENTITY_REJECTED'),
+            ('psql: error: connection failed: FATAL: Circuit breaker open',
+             'POSTGRES_POOLER_CIRCUIT_OPEN'),
+            ('psql: error: connection failed: FATAL: (EAUTHQUERY) '
+             'unsupported or invalid secret format',
+             'POSTGRES_POOLER_SECRET_INVALID'),
+            ('psql: error: fe_sendauth: no password supplied',
+             'POSTGRES_PASSWORD_NOT_SUPPLIED'),
+            ('psql: error: connection failed: FATAL: 53300: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_CONNECTION_LIMIT'),
+            ('psql: error: connection failed: FATAL: 3D000: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_DATABASE_REJECTED'),
+            ('psql: error: connection failed: FATAL: 57P03: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_POOLER_BACKEND_UNAVAILABLE'),
+            ('psql: error: connection failed: FATAL: PRIVATE_PROVIDER_DETAIL',
+             'POSTGRES_SERVER_REJECTED'),
+        )
+        for stderr, expected in cases:
+            response = subprocess.CompletedProcess([], 2, stdout='', stderr=stderr)
+            with self.subTest(expected=expected):
+                with patch.object(check.subprocess, 'run', return_value=response):
+                    with self.assertRaises(check.ProbeFailure) as failure:
+                        check.verify_connection('bytetorque_backup', fixture())
+                    self.assertEqual(failure.exception.code, expected)
+                    self.assertIn(expected, check.CODES)
+                    self.assertNotIn('PRIVATE_PROVIDER_DETAIL', str(failure.exception))
+                    self.assertNotIn('FAKE', str(failure.exception))
+
     def test_unexpected_success_response_fails_closed(self):
         response = subprocess.CompletedProcess([], 0, stdout='0\n', stderr='')
         with patch.object(check.subprocess, 'run', return_value=response):
