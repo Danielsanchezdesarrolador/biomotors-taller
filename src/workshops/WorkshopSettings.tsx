@@ -3,9 +3,14 @@ import type { AuthController } from '../auth/controller'
 import { parseTeam,requestIdentity,workshopRpc,type Team } from './client'
 import './workshops.css'
 import {uploadWorkshopLogo} from './logo'
+import {
+  validPdfTemplateStatus, uploadWorkshopPdfTemplate, restoreOfficialPdfTemplate,
+  type PdfTemplateStatus
+} from './pdfTemplate'
 export function WorkshopSettings({controller}:{controller:AuthController}) {
   const wid=controller.getSnapshot().context?.workshop.id
   const [logoUrl,setLogoUrl]=useState('')
+  const [pdfTemplate,setPdfTemplate]=useState<PdfTemplateStatus|null>(null)
   const [team,setTeam]=useState<Team|null>(null),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false)
   const [profile,setProfile]=useState({name:'',email:'',phone:'',address:''}),[email,setEmail]=useState(''),[link,setLink]=useState('')
   const locked=useRef(false),identity=useRef(requestIdentity()),revision=useRef(0)
@@ -17,6 +22,11 @@ export function WorkshopSettings({controller}:{controller:AuthController}) {
       if(row.workshopId!==wid||!['name','email','phone','address'].every(k=>typeof row[k]==='string'))throw Error('INVALID_PROFILE')
       setProfile({name:row.name as string,email:row.email as string,phone:row.phone as string,address:row.address as string})
       setLogoUrl('')
+      if(import.meta.env.VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED==='true') {
+        void workshopRpc(controller,'bt_plan04_pdf_template_status',{p_workshop_id:wid})
+          .then(row=>{if(rev===revision.current)setPdfTemplate(validPdfTemplateStatus(row,wid))})
+          .catch(()=>{if(rev===revision.current)setPdfTemplate(null)})
+      }
       if(typeof row.logoPath==='string' && new RegExp('^'+wid+'/[a-f0-9-]{36}\\.png$').test(row.logoPath)) {
         const client=await controller.directoryClient()
         const signed=await client?.storage.from('bt-workshop-branding').createSignedUrl(row.logoPath,60)
@@ -51,6 +61,36 @@ export function WorkshopSettings({controller}:{controller:AuthController}) {
     <section className="dashboard-card"><h2>Identidad comercial</h2>{logoUrl&&<img src={logoUrl} alt="Logo de mi taller" style={{maxWidth:220,maxHeight:80,objectFit:'contain'}}/>}<form onSubmit={e=>void save(e)}>{(['name','email','phone','address'] as const).map((key,i)=><label key={key}>{['Nombre comercial','Correo del taller','Teléfono','Dirección'][i]}<input disabled={busy||!team} value={profile[key]} maxLength={[120,254,30,240][i]} type={key==='email'?'email':'text'} required={key==='name'} onChange={e=>setProfile({...profile,[key]:e.target.value})}/></label>)}<button disabled={busy||!team} className="rp-primary">Guardar datos comerciales</button></form>
       <label>Logo propio (PNG o JPEG, máximo 2 MiB)<input type="file" accept="image/png,image/jpeg" disabled={busy||!team} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(!file||locked.current)return;locked.current=true;setBusy(true);void uploadWorkshopLogo(controller,file).then(()=>setNotice('Logo privado guardado para este taller.')).catch(()=>setNotice('No se pudo guardar. Usa PNG/JPEG válido, revisa tamaño y permisos; no se reemplazó el logo anterior.')).finally(()=>{locked.current=false;setBusy(false)})}}/></label>
       <p>El logo se conserva en almacenamiento privado. El arte oficial ByteTorque no se modifica.</p></section>
+    {import.meta.env.VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED==='true' && 
+    <section className="dashboard-card"><h2>Plantilla PDF de cotizaciones</h2>
+      <p>El formato oficial premium de ByteTorque viene incluido. Plus y Full pueden usar una hoja base PDF A4 privada de su propio taller, dejando libres las zonas donde se imprimen cliente, vehículo, partidas y totales. No se aceptan PDF con datos de clientes reales.</p>
+      {!pdfTemplate ? <p role="status">No se pudo verificar un plan habilitado; la carga está bloqueada.</p> :
+        !pdfTemplate.eligible ? <p>Esta opción requiere Plus o Full activo. El formato oficial sigue disponible.</p> :
+        <>
+          <p role="status">{pdfTemplate.templatePath ? 'Plantilla propia vinculada a este taller.' : 'Usando plantilla oficial ByteTorque.'}</p>
+          <label>Subir una hoja base A4 (PDF, una página, máximo 4 MiB)
+            <input type="file" accept="application/pdf" disabled={busy||!team}
+              onChange={e=>{const file=e.target.files?.[0];e.target.value='';
+                if(!file||locked.current)return;
+                if(!window.confirm('¿Subir esta hoja base privada como plantilla de cotizaciones de tu taller? Debe dejar espacio libre para la información dinámica.'))return;
+                locked.current=true;setBusy(true);setNotice('');
+                void uploadWorkshopPdfTemplate(controller,file)
+                  .then(()=>{setNotice('Plantilla privada guardada. Previsualiza una cotización antes de emitir.');return load()})
+                  .catch(()=>setNotice('No se guardó la plantilla. Verifica el PDF A4 y el plan de tu taller.'))
+                  .finally(()=>{locked.current=false;setBusy(false)})
+              }} />
+          </label>
+          <button type="button" disabled={busy||!pdfTemplate.templatePath}
+            onClick={()=>{if(locked.current)return;locked.current=true;setBusy(true);
+              void restoreOfficialPdfTemplate(controller).then(()=>{setNotice('Restaurada la plantilla oficial.');return load()})
+                .catch(()=>setNotice('No se pudo restaurar la plantilla oficial.'))
+                .finally(()=>{locked.current=false;setBusy(false)})}}>
+            Usar nuevamente el PDF oficial ByteTorque
+          </button>
+          <p>La plantilla es privada, no reemplaza cotizaciones históricas y no autoriza facturación ni aceptación del cliente.</p>
+        </>
+      }
+    </section>}
     <section className="dashboard-card"><h2>Usuarios y permisos</h2>{team&&<><p><strong>{team.active}/{team.capacity} mecánicos activos</strong> · {team.pending} invitaciones reservadas.</p>
       <p>Propietarios y administradores no ocupan cupos. Los mecánicos no pagan por trabajar aquí.</p>
       {team.overCapacity&&<p role="alert">Hay más plazas ocupadas o reservadas que las disponibles. Regulariza el equipo; no se borró ni desactivó a nadie automáticamente.</p>}

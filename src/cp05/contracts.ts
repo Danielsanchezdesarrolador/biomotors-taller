@@ -32,7 +32,7 @@ export type QuoteItem = {
   line_net: number
 }
 export type Source = {
-  workshop: { id: string; name: string; logoPath?: string | null; contactEmail?: string | null; phone?: string | null; address?: string | null }
+  workshop: { id: string; name: string; logoPath?: string | null; templatePath?: string | null; contactEmail?: string | null; phone?: string | null; address?: string | null }
   customer: { id: string; full_name: string; email: string | null; mobile_e164: string | null }
   vehicle: {
     id: string

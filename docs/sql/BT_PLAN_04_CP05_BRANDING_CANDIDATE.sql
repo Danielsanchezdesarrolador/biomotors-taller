@@ -16,7 +16,7 @@ BEGIN
  SELECT jsonb_agg(to_jsonb(i) ORDER BY i.position),sum(i.line_net) INTO lines,net FROM public.quote_items i WHERE workshop_id=wid AND quote_id=qid;
  IF lines IS NULL THEN RAISE EXCEPTION 'CP05_ITEMS_REQUIRED' USING ERRCODE='22023'; END IF;
  rev:=q.issued_revision+1;
- SELECT jsonb_build_object('quote',to_jsonb(q)||jsonb_build_object('status','issued','revision',rev),'workshop',jsonb_build_object('id',w.id,'name',w.name,'logoPath',p.logo_path,'contactEmail',p.contact_email,'phone',p.phone,'address',p.address),
+ SELECT jsonb_build_object('quote',to_jsonb(q)||jsonb_build_object('status','issued','revision',rev),'workshop',jsonb_build_object('id',w.id,'name',w.name,'logoPath',p.logo_path,'templatePath',p.quote_template_path,'contactEmail',p.contact_email,'phone',p.phone,'address',p.address),
  'customer',jsonb_build_object('id',c.id,'full_name',c.full_name,'email',c.email,'mobile_e164',c.mobile_e164),
  'vehicle',jsonb_build_object('id',v.id,'plate',v.plate,'make',v.make,'model',v.model,'model_year',v.model_year),
  'order',jsonb_build_object('id',o.id,'complaint',o.complaint,'opened_at',o.opened_at,'intake_odometer',o.intake_odometer),

@@ -13,7 +13,7 @@ import { clp } from '../ordenes/orderMoney'
  */
 export async function quotePdf(
   snapshot: Snapshot,
-  assets: { font: Uint8Array; logo: Uint8Array; workshopLogo?: Uint8Array },
+  assets: { font: Uint8Array; logo: Uint8Array; workshopLogo?: Uint8Array; templatePdf?: Uint8Array },
   draft = false
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
@@ -21,6 +21,9 @@ export async function quotePdf(
   const font = await doc.embedFont(assets.font, { subset: true })
   const icon = await doc.embedPng(assets.logo)
   const ownLogo = assets.workshopLogo ? await doc.embedPng(assets.workshopLogo) : null
+  // Optional private one-page A4 stationery. The uploaded PDF is sanitized
+  // on upload. Dynamic quote data is drawn on top, never trusted from it.
+  const background = assets.templatePdf ? (await doc.embedPdf(assets.templatePdf))[0] : null
   const charset = new Set(font.getCharacterSet())
   const date = new Date(snapshot.document_date)
   if (!Number.isFinite(date.valueOf())) throw Error('Invalid document date')
@@ -46,6 +49,7 @@ export async function quotePdf(
   const border = rgb(0.76, 0.82, 0.9)
   const white = rgb(1, 1, 1)
   let page = doc.addPage([W, H])
+  if (background) page.drawPage(background,{x:0,y:0,width:W,height:H})
   let cursor = 0
 
   function box(x: number, y: number, w: number, h: number, color = white, stroke = border) {
@@ -199,6 +203,7 @@ export async function quotePdf(
   }
   function nextPage() {
     page = doc.addPage([W, H])
+    if (background) page.drawPage(background,{x:0,y:0,width:W,height:H})
     renderHeader(false)
   }
   function tableHeader() {
