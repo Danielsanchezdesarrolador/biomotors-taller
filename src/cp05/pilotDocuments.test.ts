@@ -456,4 +456,35 @@ describe('Cancellation recovery metadata', () => {
       vi.unstubAllGlobals()
     }
   })
+  it('conserva el identificador de cancelación si el servidor no confirma', async () => {
+    const store = new Map<string, string>()
+    vi.stubGlobal('sessionStorage', {
+      getItem: (k: string) => store.get(k) || null,
+      setItem: (k: string, v: string) => store.set(k, v),
+      removeItem: (k: string) => store.delete(k)
+    })
+    try {
+      const f = setup(),
+        context = {
+          userId: uid,
+          workshop: { id: wid, name: 'QA', status: 'active' },
+          role: 'owner' as const
+        },
+        quote = { id: qid, version: 1 } as any,
+        before = documentOperation(context, quote),
+        invoke = vi.fn(async () => ({
+          data: null,
+          error: { context: new Response(null, { status: 503 }) }
+        })),
+        client = Object.assign({}, f.userClient, { functions: { invoke } }) as SupabaseClient
+      await expect(
+        documentClient(client, context, { archive: true, email: false }).cancel(quote, before)
+      ).rejects.toMatchObject({ kind: 'blocked' })
+      expect(invoke).toHaveBeenCalledOnce()
+      expect(documentOperation(context, quote)).toBe(before)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
 })
