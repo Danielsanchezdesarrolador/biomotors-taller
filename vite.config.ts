@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
     if (/SECRET|SERVICE_ROLE|PASSWORD/i.test(name) || value.startsWith('sb_secret_'))
       throw new Error('Unsafe public environment configuration; no build was generated.')
   }
+  if (env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true' &&
+      (env.VITE_BT_CREATOR_PRIVATE_ENABLED !== 'true' || env.VITE_BT_AUTH_R1_ENABLED !== 'true'))
+    throw new Error('Personal plans require verified R1 Auth and private Creator permissions.')
   if (env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
     throw new Error('Creator private console requires verified R1 Auth.')
   if (env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
@@ -71,6 +74,7 @@ export default defineConfig(({ mode }) => {
                     id
                   )
                 ) &&
+                !/\/src\/plans\/planStatus\.ts$/.test(id) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
                   id
                 ))

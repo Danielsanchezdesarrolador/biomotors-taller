@@ -27,6 +27,13 @@ if (creatorPrivateEnabled)
 else
   assert.ok(modules.every(id => !id.includes('src/creator/')),
     'Creator privileged console must be absent from the public/off build')
+const plan04PrivateEnabled = process.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true'
+if (plan04PrivateEnabled) {
+  assert.equal(process.env.VITE_BT_CREATOR_PRIVATE_ENABLED,'true','Personal plan UI needs private creator gate')
+  assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED,'true','Personal plan UI needs Auth')
+}
+assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/planStatus\.ts$/.test(id)),
+  'Only the pure plan status formatter may enter the public app')
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
 const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
 if (cp05PrivateEnabled)
@@ -81,6 +88,7 @@ assert.ok(
         /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
           id
         )) ||
+      /src\/plans\/planStatus\.ts$/.test(id) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&
         /src\/clientes\/(?:Cp06HistoryLoader|Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(
