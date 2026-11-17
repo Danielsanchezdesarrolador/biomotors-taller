@@ -31,6 +31,10 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
   const [busy,setBusy] = useState(false)
   const [loading,setLoading] = useState(true)
   const [mfa,setMfa] = useState(false)
+  const [factorId,setFactorId] = useState('')
+  const [qrCode,setQrCode] = useState('')
+  const [verificationCode,setVerificationCode] = useState('')
+  const [factorBusy,setFactorBusy] = useState(false)
   const [error,setError] = useState('')
   const [notice,setNotice] = useState('')
   const [workshop,setWorkshop] = useState('')
@@ -59,6 +63,52 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
     } finally { setLoading(false) }
   },[controller])
   useEffect(()=>{void refresh()},[refresh])
+  async function setupMfa() {
+    if (factorBusy) return
+    setFactorBusy(true);setError('')
+    try {
+      const client=await controller.directoryClient()
+      if (!client) throw new Error('SESSION')
+      const list=await client.auth.mfa.listFactors()
+      if (list.error) throw list.error
+      const active=list.data?.totp?.find(f=>f.status==='verified')
+      if (active) {
+        setFactorId(active.id)
+        setQrCode('')
+      } else {
+        const enrollment=await client.auth.mfa.enroll({
+          factorType:'totp',friendlyName:'ByteTorque Creador'
+        })
+        if (enrollment.error || !enrollment.data?.id) throw new Error('ENROLL')
+        setFactorId(enrollment.data.id)
+        setQrCode(enrollment.data.totp?.qr_code || '')
+      }
+    } catch {
+      setError('No fue posible iniciar la configuración de MFA. Revisa los permisos de autenticación.')
+    } finally {setFactorBusy(false)}
+  }
+  async function confirmMfa(event:FormEvent) {
+    event.preventDefault()
+    if (factorBusy || !factorId || !/^\d{6}$/.test(verificationCode)) {
+      setError('Ingresa los seis dígitos vigentes de tu aplicación autenticadora.')
+      return
+    }
+    setFactorBusy(true);setError('')
+    try {
+      const client=await controller.directoryClient()
+      if (!client) throw new Error('SESSION')
+      const challenge=await client.auth.mfa.challenge({factorId})
+      if (challenge.error || !challenge.data?.id) throw new Error('CHALLENGE')
+      const result=await client.auth.mfa.verify({
+        factorId,challengeId:challenge.data.id,code:verificationCode
+      })
+      if (result.error) throw result.error
+      setVerificationCode('');setFactorId('');setQrCode('')
+      await refresh()
+    } catch {
+      setError('No fue posible validar el código MFA. Comprueba el reloj del teléfono y reintenta.')
+    } finally {setFactorBusy(false)}
+  }
   async function submit(event:FormEvent) {
     event.preventDefault();setError('');setNotice('')
     if (busy || !overview || !mfa || !workshop) {
@@ -112,6 +162,24 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
           <span><strong>{mfa?'Doble factor verificado':'Segundo factor requerido para modificar planes'}</strong>
           <small>Las acciones de suscripción exigen MFA (AAL2) y dejan un registro auditable.</small></span>
         </div>
+        {!mfa && !loading && <section className="creator-section creator-mfa">
+          <h2>Activar protección de dos factores</h2>
+          <p className="creator-help">Necesitas una aplicación autenticadora para conceder, extender o revocar planes. El código se verifica directamente con Supabase Auth.</p>
+          {!factorId && <button type="button" className="creator-refresh" disabled={factorBusy} onClick={()=>void setupMfa()}>
+            {factorBusy?'Preparando…':'Configurar o verificar MFA'}
+          </button>}
+          {factorId && <>
+            {qrCode && qrCode.startsWith('data:image/') && <img className="creator-qr" src={qrCode} alt="Código QR privado para configurar tu aplicación autenticadora"/>}
+            <p className="creator-help">{qrCode?'Escanea el QR con tu autenticador y escribe el código generado.':'Introduce el código de tu aplicación autenticadora ya configurada.'}</p>
+            <form className="creator-factor-form" onSubmit={e=>void confirmMfa(e)}>
+              <label>Código de seis dígitos<input value={verificationCode} onChange={e=>setVerificationCode(e.target.value.replace(/\D/g,'').slice(0,6))}
+                type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required /></label>
+              <button type="submit" className="creator-submit" disabled={factorBusy||verificationCode.length!==6}>
+                {factorBusy?'Verificando…':'Verificar segundo factor'}
+              </button>
+            </form>
+          </>}
+        </section>}
         {error&&<p className="creator-error" role="alert">{error}</p>}
         {notice&&<p className="creator-notice" role="status">{notice}</p>}
         {loading&&<p role="status">Cargando talleres autorizados…</p>}
