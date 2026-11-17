@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createGateway, supabaseGateway } from './supabaseGateway'
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }))
 function fixture() {
-  const query = { select: vi.fn(), eq: vi.fn(), in: vi.fn(), maybeSingle: vi.fn(async () => ({ data: null, error: null })), then: undefined }
+  const query = { select: vi.fn(), eq: vi.fn(), in: vi.fn(), maybeSingle: vi.fn(async () => ({ data: null as { display_name: string } | null, error: null })), then: undefined }
   query.select.mockReturnValue(query)
   query.in.mockReturnValue(query)
   query.eq.mockReturnValue(query)
