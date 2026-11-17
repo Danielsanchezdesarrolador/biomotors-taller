@@ -23,7 +23,20 @@ export async function quotePdf(
   const ownLogo = assets.workshopLogo ? await doc.embedPng(assets.workshopLogo) : null
   // Optional private one-page A4 stationery. The uploaded PDF is sanitized
   // on upload. Dynamic quote data is drawn on top, never trusted from it.
-  const background = assets.templatePdf ? (await doc.embedPdf(assets.templatePdf))[0] : null
+  let background: Awaited<ReturnType<typeof doc.embedPdf>>[number] | null = null
+  if (assets.templatePdf) {
+    // A blank stationery page may have no /Contents stream. Re-serialize it
+    // with an invisible paint instruction before embedding into this document.
+    // This also validates A4 orientation in the renderer, not just the UI.
+    const source = await PDFDocument.load(assets.templatePdf, { ignoreEncryption: false })
+    if (source.getPageCount() !== 1) throw Error('INVALID_PDF_STATIONERY_PAGE_COUNT')
+    const stationery = source.getPage(0)
+    const size = stationery.getSize()
+    if (Math.abs(size.width - 595.28) > 2 || Math.abs(size.height - 841.89) > 2)
+      throw Error('INVALID_PDF_STATIONERY_A4')
+    stationery.drawRectangle({ x:0,y:0,width:1,height:1,opacity:0 })
+    background = (await doc.embedPdf(await source.save({useObjectStreams:false})))[0]
+  }
   const charset = new Set(font.getCharacterSet())
   const date = new Date(snapshot.document_date)
   if (!Number.isFinite(date.valueOf())) throw Error('Invalid document date')

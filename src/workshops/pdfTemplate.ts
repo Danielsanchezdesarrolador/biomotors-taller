@@ -61,6 +61,9 @@ export async function uploadWorkshopPdfTemplate(controller: AuthController, file
   for (const attribute of ['Annots','AA','PresSteps','Metadata'])
     copied.node.delete(PDFName.of(attribute))
   safe.addPage(copied)
+  // pdf-lib cannot embed a page with no /Contents stream.
+  // An invisible drawing instruction makes blank A4 stationery valid.
+  copied.drawRectangle({x:0,y:0,width:1,height:1,opacity:0})
   const clean = await safe.save({ useObjectStreams: false })
   if (clean.length > PDF_TEMPLATE_MAX_BYTES ||
       before !== controller.getSnapshot()) throw Error('TEMPLATE_VALIDATION_FAILED')
