@@ -76,6 +76,14 @@ class OfflineDriveTests(unittest.TestCase):
     def mocked_api(self):
         return patch.object(drive.PrivateDrive, '_json', autospec=True, side_effect=self.api)
 
+    def test_approved_folder_id_is_verified_and_previous_id_rejected(self):
+        # User-verified private Drive folder, checked on 2026-11-17.
+        self.assertEqual(drive.FOLDER_ID, '1FPD-Bnfbf8m0vxnYCOtT0yald7mCi9pT')
+        with patch.object(drive.subprocess, 'run') as runner:
+            with self.assertRaises(RuntimeError):
+                drive.PrivateDrive(self.path, drive.REMOTE, '1JRAJr08EP9Ql04a7VniBcS4f4rZkNVEd')
+            runner.assert_not_called()
+
     def test_valid_unrooted_config_and_destination(self):
         self.assertEqual(drive.validate_config(config()), 'OFFLINE')
         with self.mocked_api():

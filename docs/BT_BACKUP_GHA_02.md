@@ -57,10 +57,16 @@ de exportación**. La ruta y el ID fijan el destino de este flujo; no se configu
 `root_folder_id`. No modificar ni ampliar el consentimiento OAuth para sortear errores. Usar identidad Drive dedicada/aislada cuando
 corresponda y revisar permisos individuales/heredados de la carpeta.
 
+## Corrección del destino (17/11/2026)
+
+La referencia de carpeta anterior ya no era accesible desde la cuenta Google Drive conectada al propietario (404). El propietario confirmó que puede abrir la carpeta privada **Respaldos ByteTorque** con ID `1FPD-Bnfbf8m0vxnYCOtT0yald7mCi9pT`. El código activo apunta ahora únicamente a ese ID. La evidencia histórica en los checkpoints del 16/11 conserva el ID anterior para trazabilidad; sus instrucciones operativas quedan reemplazadas por este documento.
+
+**Límite:** que la carpeta sea accesible desde Drive conectado no demuestra que el token OAuth de `BT_BACKUP_DRIVE_CONFIG_CONTENT` pertenezca a la misma identidad o tenga alcance sobre ella. La ejecución real debe validar la identidad, propiedad, permisos individuales, OAuth y lectura posterior antes de considerar un respaldo exitoso. No reemplazar el token, ampliar el alcance ni cambiar protecciones automáticamente. El repositorio está temporalmente público a solicitud del propietario; el workflow conserva acceso solo del propietario y doble confirmación manual, como excepción temporal. La privacidad completa de los datos solo quedará acreditada tras verificar cifrado, readback y recuperación aislada.
+
 ## Destino y recibos
 
 Único destino permitido: **`bytetorque_backup:Respaldos ByteTorque`**, ID
-**`1JRAJr08EP9Ql04a7VniBcS4f4rZkNVEd`**, aportado por el propietario mediante
+**`1FPD-Bnfbf8m0vxnYCOtT0yald7mCi9pT`**, aportado por el propietario mediante
 `rclone lsjson --dirs-only bytetorque_backup:`. Sustituye el ID antiguo.
 El código verifica listado único, resolución de esa ruta, nombre/tipo/propiedad,
 permisos individuales privados completos y relación padre-hijo. Grupos, acceso
@@ -109,7 +115,7 @@ considerarse respaldo completo ni borrarse evidencia automáticamente.
    ```sh
    python3 -B scripts/backup/run_with_bindings.py verify \
      --drive-remote bytetorque_backup \
-     --drive-folder-id 1JRAJr08EP9Ql04a7VniBcS4f4rZkNVEd \
+     --drive-folder-id 1FPD-Bnfbf8m0vxnYCOtT0yald7mCi9pT \
      --backup-id ID_DEL_RECIBO \
      --image IMAGEN_COMPATIBLE_APROBADA
    ```
