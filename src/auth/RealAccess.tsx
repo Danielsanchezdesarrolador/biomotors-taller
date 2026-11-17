@@ -1,8 +1,9 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { AccessScreens } from '../access/AccessScreens'
 import { TechnicianReview } from '../access/TechnicianReview'
 import type { AccessPage, AccessPresentation } from '../access/accessContract'
 import { OfficialWorkspaceView } from '../App'
+import { CreatorConsole } from '../creator/CreatorConsole'
 import { authConfig } from './config'
 import { AuthController, type AuthState, type Role } from './controller'
 import { lazyGateway } from './lazyGateway'
@@ -45,6 +46,23 @@ export function RealAccess({
     controller.getSnapshot,
     controller.getSnapshot
   )
+  const [creatorOpen, setCreatorOpen] = useState(false)
+  const [creatorAccess, setCreatorAccess] = useState(false)
+  useEffect(() => {
+    let active = true
+    setCreatorAccess(false)
+    if (state.phase === 'authorized' && state.context &&
+        (state.context.role === 'owner' || state.context.role === 'admin')) {
+      void controller.directoryClient().then(async (client) => {
+        if (!client) return false
+        const { data, error } = await client.rpc('bt_creator_is_creator')
+        return !error && data === true
+      }).then((allowed) => { if (active) setCreatorAccess(allowed) })
+        .catch(() => { if (active) setCreatorAccess(false) })
+    }
+    return () => { active = false }
+  }, [controller, state.phase, state.context?.userId])
+  useEffect(() => { if (state.phase !== 'authorized') setCreatorOpen(false) }, [state.phase])
   useEffect(() => {
     const stop = controller.start()
     const verify = () => {
@@ -84,6 +102,11 @@ export function RealAccess({
       <button type="button" onClick={logout}>
         Cerrar sesión
       </button>
+      {creatorAccess && (state.context?.role === 'owner' || state.context?.role === 'admin') && (
+        <button type="button" onClick={() => setCreatorOpen(true)}>
+          Panel del creador
+        </button>
+      )}
       {(state.choices?.length || 0) > 1 && (
         <button type="button" onClick={() => {
           clearPrivateScreen()
@@ -118,7 +141,9 @@ export function RealAccess({
           }
         />
       )
-    if (role === 'owner' || role === 'admin')
+    if (role === 'owner' || role === 'admin') {
+      if (creatorOpen && creatorAccess)
+        return <CreatorConsole controller={controller} onBack={() => setCreatorOpen(false)} />
       return (
         <OfficialWorkspaceView
           session={{ workshop: workshop.name, role: roleNames[role],
@@ -127,6 +152,7 @@ export function RealAccess({
               ? controller : undefined }}
         />
       )
+    }
   }
   const real = state.phase !== 'disabled'
   const busy = ['checking', 'signing-in', 'registering', 'signing-out'].includes(state.phase)
