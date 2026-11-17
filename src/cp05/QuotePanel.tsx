@@ -31,6 +31,7 @@ import {
 import type { Cp05Port } from './repository'
 import { documentOperation } from './documentClient'
 import { localDraft, rememberDraft, clearLocalDraft } from './temporaryDraft'
+import { readQuoteSelection, rememberQuoteSelection } from './quoteSelection'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
 const empty: Draft = { price_basis: 'net', valid_days: 10, terms: '', comments: '', items: [] }
@@ -91,10 +92,16 @@ export function QuotePanel({
           initialVehicleId ? source.filter((o) => o.vehicle.id === initialVehicleId) : source
         )
         const cached = localDraft(context.userId, context.workshop.id)
+        const selected = readQuoteSelection(context.userId, context.workshop.id)
         if (initialOrderId) {
+          // A specific OT always takes priority over a remembered selection.
           const q = await repository.forOrder(initialOrderId)
           if (q) await open(q.id)
-        } else if (cached && !initialVehicleId) {
+        } else if (selected && list.some(q => q.id === selected)) {
+          // Restore the active quote after navigation/revalidation, not just
+          // when there happen to be unsaved changes.
+          await open(selected)
+        } else if (cached && list.some(q => q.id === cached.quoteId) && !initialVehicleId) {
           await open(cached.quoteId)
         }
       } catch (e) {
@@ -110,6 +117,9 @@ export function QuotePanel({
       sequence.current++
     }
   }, [repository])
+  useEffect(() => {
+    if (bundle) rememberQuoteSelection(context.userId, context.workshop.id, bundle.quote.id)
+  }, [bundle?.quote.id, context.userId, context.workshop.id])
   useEffect(() => {
     if (!bundle || !dirty || !canWrite) return
     const fingerprint =

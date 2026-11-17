@@ -243,3 +243,96 @@
     padding-bottom: 100px;
   }
 }
+
+/* CP05-R2C: keep both edit/delete controls inside the quote table. */
+.cp05-panel .wt-items {
+  padding: 14px 16px !important;
+  min-width: 0;
+  overflow: hidden;
+}
+.cp05-panel .wt-items table {
+  width: 100%;
+  table-layout: fixed;
+}
+.cp05-panel .wt-items th:last-child {
+  width: 106px;
+  min-width: 106px;
+}
+.cp05-panel .wt-items .wt-row-actions {
+  width: 106px;
+  min-width: 106px;
+  padding-right: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+.cp05-panel .wt-row-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0 1px;
+  vertical-align: middle;
+}
+.cp05-panel .wt-row-actions button svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* A compact review card replaces the oversized sticky totals panel.
+ * The small fixed amount remains visible during long quote editing. */
+.cp05-panel .cp05-totals {
+  position: static;
+  justify-self: end;
+  box-sizing: border-box;
+  width: min(100%, 490px);
+  padding: 12px 16px;
+  gap: 4px;
+  border-radius: 12px;
+  box-shadow: none;
+  font-size: 13px;
+}
+.cp05-panel .cp05-totals > div:nth-child(3) {
+  padding-top: 5px;
+  border-top: 1px solid #cfdef0;
+  font-size: 16px;
+}
+.cp05-panel .cp05-totals small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+.cp05-panel .cp05-floating-total {
+  padding: 8px 12px;
+  gap: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  max-width: min(260px, calc(100vw - 28px));
+}
+.cp05-panel .cp05-floating-total strong {
+  font-size: 15px;
+}
+.cp05-panel { padding-bottom: 60px; }
+
+@media (max-width: 760px) {
+  .cp05-panel .wt-items { padding: 12px !important; overflow: visible; }
+  .cp05-panel .wt-items .wt-row-actions {
+    display: flex;
+    width: auto !important;
+    min-width: 0;
+    padding-right: 0;
+    gap: 8px;
+    justify-content: flex-end !important;
+  }
+  .cp05-panel .cp05-totals { width: 100%; padding: 12px 14px; }
+  .cp05-panel .cp05-floating-total {
+    left: auto;
+    right: 12px;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 12px;
+  }
+  .cp05-panel .cp05-floating-total span { font-size: 11px; }
+  .cp05-panel { padding-bottom: 76px; }
+}
