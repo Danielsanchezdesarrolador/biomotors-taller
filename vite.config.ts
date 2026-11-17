@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
     if (/SECRET|SERVICE_ROLE|PASSWORD/i.test(name) || value.startsWith('sb_secret_'))
       throw new Error('Unsafe public environment configuration; no build was generated.')
   }
+  if (env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
+    throw new Error('Creator private console requires verified R1 Auth.')
   if (env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' && env.VITE_BT_AUTH_R1_ENABLED !== 'true')
     throw new Error('CP03 private access requires R1 authentication; refusing build.')
   if (
@@ -44,6 +46,7 @@ export default defineConfig(({ mode }) => {
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
                 !(env.VITE_BT_CP06_PRIVATE_ENABLED==='true' && /\/src\/historial\//.test(id)) &&
+                !(env.VITE_BT_CREATOR_PRIVATE_ENABLED==='true' && /\/src\/creator\//.test(id)) &&
                 !(
                   env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' &&
                   /\/src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
