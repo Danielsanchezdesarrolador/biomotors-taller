@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Crown, LockKeyhole, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { AuthController } from '../auth/controller'
 import './creator.css'
@@ -42,6 +42,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
   const [mode,setMode] = useState<Mode>('grant_days')
   const [days,setDays] = useState(30)
   const [reason,setReason] = useState('')
+  const requestIdRef = useRef<{signature:string; id:string}|null>(null)
   const refresh = useCallback(async () => {
     setLoading(true); setError('')
     try {
@@ -81,7 +82,10 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
         })
         if (enrollment.error || !enrollment.data?.id) throw new Error('ENROLL')
         setFactorId(enrollment.data.id)
-        setQrCode(enrollment.data.totp?.qr_code || '')
+        const code = enrollment.data.totp?.qr_code || ''
+        setQrCode(code.trim().startsWith('<svg')
+          ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(code)
+          : code)
       }
     } catch {
       setError('No fue posible iniciar la configuración de MFA. Revisa los permisos de autenticación.')
@@ -127,6 +131,10 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
     const description = modes.find(m=>m.value===mode)?.label || mode
     if (!window.confirm(description+' · '+names[effective]+' · '+selected.name+
       '\n¿Confirmas la operación manual para este taller?')) return
+    const signature = [workshop,effective,mode,String(days),reason.trim()].join('|')
+    if (requestIdRef.current?.signature !== signature)
+      requestIdRef.current = {signature,id:crypto.randomUUID()}
+    const requestId = requestIdRef.current.id
     setBusy(true)
     try {
       const client=await controller.directoryClient()
@@ -134,10 +142,11 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
       const result=await client.rpc('bt_creator_manage_subscription',{
         p_workshop_id:workshop,p_plan:effective,p_mode:mode,
         p_days:['grant_days','extend_days'].includes(mode)?days:null,
-        p_reason:reason.trim(),p_request_id:crypto.randomUUID()
+        p_reason:reason.trim(),p_request_id:requestId
       })
       if (result.error) throw result.error
       setReason('')
+      requestIdRef.current = null
       await refresh()
       setNotice('Cambio de plan registrado en la auditoría. No se efectuaron cobros ni correos.')
     } catch {
