@@ -1,5 +1,8 @@
 # Checkpoint ByteTorque — BT-PLAN-04A
 
+> **ACTUALIZACIÓN 17/11/2026 · BT-PLAN-04A INSTALADO Y ACTIVADO:** el Director autorizó la migración aditiva al proyecto Supabase `biomotors-taller`. Versión de migración registrada `20261117184100`, nombre `bt_plan04a_personal_entitlements_creator_mfa`. La instalación finalizó `success:true`. Se comprobaron 2 tablas privadas con RLS + FORCE sin permisos directos de `anon`/`authenticated`, 3 RPC con `anon` denegado, `search_path` vacío y comprobaciones internas de membresía, Creador y MFA/AAL2. Pruebas SQL de lectura con JWT simulado: cuenta válida ve Básico personal/taller propio, otro taller denegado, no-Creador no puede listar/modificar planes, Creador con AAL1 no puede conceder; llamadas sin sesión confirmada rechazan con 42501. Los registros persistentes se mantienen: 2 talleres, 5 membresías, 5 usuarios, 1 Creador, **cero derechos personales y cero eventos**; no hubo concesiones ni pagos. `VITE_BT_PLAN04_PRIVATE_ENABLED=true` activado en Render en el servicio existente mediante merge de variables, despliegue `dep-dbua0ru1egvs73fulchg` **LIVE** sobre `d83907f`. La prueba UI real desde navegador del Director y MFA real **sigue pendiente**. 04B (creación de taller), 04C (invitación/cupos), cobros por extras y 04D siguen sin implementar. Advertencias Supabase: funciones SECURITY DEFINER visibles a `authenticated` de forma intencional y protegidas dentro de RPC, tablas privadas sin políticas por denegación explícita; detección de contraseñas filtradas continúa desactivada (previo, sin cambiar). No utilizar datos reales sin completar respaldos.
+
+
 Fecha: 17/11/2026 · rama única main · repositorio privado.
 
 ## Entrega implementada
