@@ -1,4 +1,5 @@
 import { BrandLogo } from '../brand/BrandLogo'
+import { planDetail, planLabel, type PlanStatus } from '../plans/planStatus'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowRight,
@@ -30,6 +31,7 @@ type ShellCopy = {
   version: string
   accountTitle: string
   accountSubtitle: string
+  accountPlan?: PlanStatus | null
   notifications: string
   avatarText?: string
   notificationDot?: boolean
@@ -189,6 +191,13 @@ export function AppShell({
             ) : null}
           </div>
           <div className="topbar-controls">
+            {copy.accountPlan !== undefined && (
+              <span className={'mobile-plan-indicator plan-badge-' +
+                (copy.accountPlan?.effectivePlan || 'unknown')}
+                title={planDetail(copy.accountPlan)}>
+                {planLabel(copy.accountPlan)}
+              </span>
+            )}
             <div className="popover-anchor">
               <button
                 type="button"
@@ -225,6 +234,13 @@ export function AppShell({
                 <span className="account-copy">
                   <strong>{copy.accountTitle}</strong>
                   <small>{copy.accountSubtitle}</small>
+                  {copy.accountPlan !== undefined && (
+                    <span className={'account-plan-badge plan-badge-' +
+                      (copy.accountPlan?.effectivePlan || 'unknown')}
+                      title={planDetail(copy.accountPlan)}>
+                      {planLabel(copy.accountPlan)}
+                    </span>
+                  )}
                 </span>
                 <ChevronDown size={16} />
               </button>

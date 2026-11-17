@@ -6,6 +6,7 @@ import { OfficialWorkspaceView } from '../App'
 import { authConfig } from './config'
 import { AuthController, type AuthState, type Role } from './controller'
 import { lazyGateway } from './lazyGateway'
+import { parsePlanStatus, planDetail, planLabel, type PlanStatus } from '../plans/planStatus'
 import { clearPrivateScreen, clearOperationalDrafts } from '../official/privateScreen'
 import { clearCp03Draft } from '../official/privateDraft'
 import './auth.css'
@@ -49,6 +50,22 @@ export function RealAccess({
   const [CreatorPanel, setCreatorPanel] = useState<ComponentType<{controller:AuthController;onBack:()=>void}> | null>(null)
   const [creatorLoadError,setCreatorLoadError] = useState(false)
   const [creatorAccess, setCreatorAccess] = useState(false)
+  const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null)
+  useEffect(() => {
+    let active = true
+    setPlanStatus(null)
+    if (import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED !== 'true' ||
+        !['authorized', 'restricted', 'no-membership'].includes(state.phase)) return
+    void controller.personalPlanClient().then(async (client) => {
+      if (!client) return null
+      const { data, error } = await client.rpc('bt_plan04_my_status', {
+        p_workshop_id: state.context?.workshop.id ?? null
+      })
+      return !error ? parsePlanStatus(data) : null
+    }).then(plan => { if (active) setPlanStatus(plan) })
+      .catch(() => { if (active) setPlanStatus(null) })
+    return () => { active = false }
+  }, [controller, state.phase, state.context?.userId, state.context?.workshop.id])
   useEffect(() => {
     let active = true
     setCreatorAccess(false)
@@ -158,13 +175,15 @@ export function RealAccess({
       if (creatorOpen && creatorAccess) {
         if (creatorLoadError) return <p role="alert">No se pudo cargar el panel del creador. Vuelve al inicio.</p>
         return CreatorPanel
-          ? <CreatorPanel controller={controller} onBack={() => setCreatorOpen(false)} />
+          ? <CreatorPanel controller={controller} onBack={() => { setCreatorOpen(false); void controller.validate() }} />
           : <p role="status">Cargando panel privado del creador…</p>
       }
       return (
         <OfficialWorkspaceView
           session={{ workshop: workshop.name, role: roleNames[role],
             displayName: state.context.displayName, controls,
+            planStatus: import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true'
+              ? planStatus : undefined,
             directoryController: import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
               ? controller : undefined }}
         />
@@ -195,7 +214,7 @@ export function RealAccess({
           void controller.login(email, password)
         },
         content: needsPanel ? (
-          <AuthStatus state={state} controller={controller} busy={busy} />
+          <AuthStatus state={state} controller={controller} busy={busy} planStatus={planStatus} />
         ) : undefined
       }}
     />
@@ -204,11 +223,13 @@ export function RealAccess({
 function AuthStatus({
   state,
   controller,
-  busy
+  busy,
+  planStatus
 }: {
   state: AuthState
   controller: AuthController
   busy: boolean
+  planStatus: PlanStatus | null
 }) {
   return (
     <section className="auth-status" aria-label="Estado del acceso" aria-busy={busy}>
@@ -223,6 +244,13 @@ function AuthStatus({
         {state.message}
       </p>
       {state.identityName && <p>Cuenta: {state.identityName}</p>}
+      {import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true' &&
+        state.phase === 'no-membership' && (
+          <p className="personal-plan-status" role="status">
+            {planLabel(planStatus)}
+            {planDetail(planStatus) ? ' · ' + planDetail(planStatus) : ''}
+          </p>
+        )}
       {state.phase === 'choose' &&
         state.choices?.map((choice) => (
           <button

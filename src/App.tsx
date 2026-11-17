@@ -3,6 +3,7 @@ import { RealAccess } from './auth/RealAccess'
 import { InviteAcceptancePreview } from './auth/InviteAcceptancePreview'
 import { inviteAcceptancePath, scrubInviteLocation } from './auth/inviteLinkRouting'
 import type { AuthController } from './auth/controller'
+import type { PlanStatus } from './plans/planStatus'
 import { ShieldCheck } from 'lucide-react'
 import { AppShell, type Screen } from './layout/AppShell'
 import { OfficialPanel } from './official/OfficialPanels'
@@ -125,6 +126,7 @@ export function OfficialWorkspaceView({
     workshop: string
     role: string
     displayName?: string
+    planStatus?: PlanStatus | null
     controls: ReactNode
     directoryController?: AuthController
   }
@@ -164,6 +166,7 @@ export function OfficialWorkspaceView({
               version: 'ByteTorque · Gestión de talleres',
               accountTitle: session.displayName || session.workshop,
               accountSubtitle: session.role,
+              accountPlan: session.planStatus,
               avatarText: session.displayName
                 ? session.displayName.split(' ').slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('')
                 : undefined,
