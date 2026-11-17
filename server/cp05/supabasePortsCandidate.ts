@@ -74,54 +74,10 @@ export function issuancePortsCandidate(
       let templatePdf: Uint8Array | undefined
       const templatePath = snapshot.workshop.templatePath
       if (templatePath) {
-        // Paid-plan validation must come from an authenticated server RPC,
-        // not from a browser path, workshop profile metadata or user claims.
-        if (!new RegExp('^'+wid+
-            '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\.pdf
-    },
-    archive: (path, bytes) => {
-      gate()
-      return archive.putIfAbsent(path, bytes)
-    },
-    finish: (actorId, requestId, receipt) =>
-      rpc<Revision>('bt_cp05_finish_issue', {
-        p_request_id: requestId,
-        p_actor_id: actorId,
-        p_path: receipt.path,
-        p_pdf_sha256: receipt.sha256,
-        p_pdf_size: receipt.size
-      })
-  }
-}
-/** Restore only a revision visible through caller's RLS; never accept a browser path. */
-export async function restoreRevisionCandidate(
-  userClient: SupabaseClient,
-  trustedClient: SupabaseClient,
-  policy: { approved: boolean },
-  workshopId: string,
-  revisionId: string
-) {
-  if (!policy.approved) throw Error('PRIVATE_ARCHIVE_DISABLED')
-  const user = await userClient.auth.getUser()
-  if (user.error || !user.data.user?.email_confirmed_at) throw Error('VERIFIED_USER_REQUIRED')
-  const wid = quoteId(workshopId),
-    rid = quoteId(revisionId)
-  const r = await userClient
-    .from('quote_revisions')
-    .select('*')
-    .eq('workshop_id', wid)
-    .eq('id', rid)
-    .maybeSingle()
-  if (r.error || !r.data || r.data.workshop_id !== wid || r.data.id !== rid)
-    throw Error('REVISION_NOT_AUTHORIZED')
-  const expected = `${wid}/quotes/${quoteId(r.data.quote_id)}/r${r.data.revision}/${r.data.payload_sha256}.pdf`
-  if (r.data.pdf_object_path !== expected) throw Error('ARCHIVE_PATH_MISMATCH')
-  return privateArchiveCandidate(trustedClient, policy).restore(
-    r.data.pdf_object_path,
-    r.data.pdf_sha256
-  )
-}
-).test(templatePath))
+        const prefix = wid + '/'
+        const filename = templatePath.slice(prefix.length)
+        if (!templatePath.startsWith(prefix) ||
+            !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.pdf$/.test(filename))
           throw Error('INVALID_PRIVATE_TEMPLATE_PATH')
         const selected = await userClient.rpc('bt_plan04_pdf_template_status',
           { p_workshop_id: wid })
