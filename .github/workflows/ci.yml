@@ -22,6 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validar seguridad de respaldos sin credenciales ni acceso externo
+        run: |
+          python3 -B scripts/backup/test_github_actions_export.py
+          python3 -B scripts/backup/test_drive_destination.py
+          python3 -B scripts/backup/test_postgres_preflight.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
