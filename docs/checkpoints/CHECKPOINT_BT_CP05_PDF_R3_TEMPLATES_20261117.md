@@ -37,6 +37,13 @@
 - **Pendiente de QA:** el Director debe descargar otra vez `COT-000001-borrador.pdf` desde ByteTorque y confirmar visualmente el nuevo diseño R3. El PDF anterior adjunto no es el nuevo archivo.
 - **No instalado:** `docs/sql/BT_CP05_PLUS_FULL_PDF_TEMPLATES_CANDIDATE.sql`; **flag OFF** `VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED`. Plus/Full solo tiene el código preparado, no subida operativa. No se han emitido, enviado ni cobrado documentos.
 
+## Seguimiento de regresión visual y de seguridad
+
+- La ejecución visual `44171119094` falló **antes de validar el diseño**, por una prueba de sobre de invitaciones que ocasionalmente alteraba un byte aleatorio sin modificar su valor. No fue un error de PDF ni un envío externo.
+- Corrección acotada a la prueba, no al código de autenticación real: `0daf5bb06d472076a5ffd1178f35957cd9a37c50` selecciona un prefijo distinto del original. Conserva la misma expectativa de rechazo ante corrupción.
+- Nueva ronda de workflows: `44171616745` Web/PWA y Android, `44171616949` interfaz/visual y `44171617156` PostgreSQL aislado. PostgreSQL aislado confirmó SUCCESS; Android SUCCESS. Los demás estaban ejecutándose en la última consulta. Consultar resultados de este SHA al iniciar el siguiente chat antes de afirmar PASS completo.
+- El último código activo en `main` es el commit `0daf5bb` (posterior a `1532aefc` y solo prueba de autenticación), sin alterar datos, roles ni facturación.
+
 ## Siguiente chat: qué hacer
 
 1. Confirmar en Github CI el SHA actual. Si falla, corregir antes de nueva activación.
