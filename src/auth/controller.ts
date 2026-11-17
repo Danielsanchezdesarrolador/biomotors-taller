@@ -65,6 +65,12 @@ export class AuthController {
       ? { phase: 'checking', message: 'Verificando sesión y autorización…' }
       : { phase: 'disabled', message: disabledReason }
   }
+  /** A confirmed personal account may query self-only RPCs without workshop membership. */
+  async personalPlanClient(): Promise<SupabaseClient | null> {
+    if (!this.gateway?.getDataClient ||
+        !['authorized', 'restricted', 'no-membership'].includes(this.state.phase)) return null
+    return this.gateway.getDataClient()
+  }
   async directoryClient(): Promise<SupabaseClient | null> {
     if (!this.gateway?.getDataClient ||
         !['authorized', 'restricted'].includes(this.state.phase)) return null

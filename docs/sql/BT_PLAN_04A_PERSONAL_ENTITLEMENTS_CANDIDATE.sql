@@ -207,7 +207,7 @@ BEGIN
         IF v_old.user_id IS NULL OR v_old.state<>'active' OR v_old.plan<>p_plan
            OR v_old.is_lifetime OR v_old.expires_at IS NULL THEN
           RAISE EXCEPTION 'Only same active temporary plan may extend' USING ERRCODE='22023'; END IF;
-        v_expiry:=pg_catalog.greatest(now(),v_old.expires_at)+pg_catalog.make_interval(days=>p_days);
+        v_expiry:=GREATEST(now(),v_old.expires_at)+pg_catalog.make_interval(days=>p_days);
       ELSE v_expiry:=now()+pg_catalog.make_interval(days=>p_days);
       END IF;
     END IF;

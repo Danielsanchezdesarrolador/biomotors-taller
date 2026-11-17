@@ -24,7 +24,14 @@ export function parsePlanStatus(value: unknown): PlanStatus | null {
   if (row.scope === 'personal' && row.workshopId !== null) return null
   if (row.scope === 'workshop' && !row.workshopId) return null
   if (row.isLifetime && row.expiresAt !== null) return null
-  return row as PlanStatus
+  return {
+    scope: row.scope,
+    effectivePlan: row.effectivePlan,
+    personalPlan: row.personalPlan,
+    isLifetime: row.isLifetime,
+    expiresAt: row.expiresAt,
+    workshopId: row.workshopId
+  }
 }
 export function planLabel(value: PlanStatus | null): string {
   if (!value) return 'Plan no disponible'
