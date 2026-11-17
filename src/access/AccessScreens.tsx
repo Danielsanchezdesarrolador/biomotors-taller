@@ -85,7 +85,8 @@ export function AccessScreens({
     [registrationRole, setRegistrationRole] = useState<AccessPresentation>(presentation)
   const realLogin = !!auth?.enabled && page === 'login'
   const realRegistration = !!auth?.enabled && !!auth?.registrationEnabled && page === 'register'
-  const realPage = realLogin || realRegistration
+  const realVerification = !!auth?.enabled && page === 'verify'
+  const realPage = realLogin || realRegistration || realVerification
   const interactive = !!onReviewSubmit ||
     (realPage && !auth?.busy && !(realRegistration && auth?.completed))
   const patch = <K extends keyof AccessDraft>(key: K, value: AccessDraft[K]) =>
@@ -305,7 +306,9 @@ export function AccessScreens({
                 <span>
                   {realRegistration
                     ? 'Registro con correo verificado. Crear una cuenta no concede acceso a ningún taller.'
-                    : 'El taller y el rol se verifican en el servidor. El acceso no concede permisos sin membresía.'}
+                    : realVerification
+                      ? 'El enlace de confirmación no concede acceso a talleres. Inicia sesión para comprobar tu cuenta.'
+                      : 'El taller y el rol se verifican en el servidor. El acceso no concede permisos sin membresía.'}
                 </span>
               </div>
             </div>
@@ -323,10 +326,12 @@ export function AccessScreens({
             </div>
           )}
           <header className="access-card-heading">
-            <h1>{titles[page][0]}</h1>
+            <h1>{realVerification ? 'Confirmación de correo' : titles[page][0]}</h1>
             <p>{realRegistration
               ? 'Registra tu correo y una contraseña. La confirmación es obligatoria y el acceso al taller requiere autorización posterior.'
-              : titles[page][1]}</p>
+              : realVerification
+                ? 'Continúa a tu cuenta para comprobar la verificación de correo.'
+                : titles[page][1]}</p>
           </header>
           {auth?.content}
           {!auth?.content && (page === 'login' || (page === 'register' && !realRegistration)) && (
@@ -573,7 +578,30 @@ export function AccessScreens({
               </button>
             </p>
           )}
-          {(page === 'verify' || page === 'recoveryNotice') && (
+          {realVerification && (
+            <div className="access-mail-state" aria-label="Confirmación de cuenta">
+              <div className="access-envelope verification" aria-hidden="true">
+                <Mail />
+                <span><Check /></span>
+              </div>
+              <p>
+                Si abriste el enlace recibido por correo, inicia sesión para comprobar que
+                tu dirección quedó confirmada.
+              </p>
+              <div className="access-address">
+                <ShieldCheck />
+                <strong>Confirmación mediante tu cuenta</strong>
+              </div>
+              <span className="access-state-reference">
+                Crear una cuenta no concede acceso a un taller: se requiere una membresía autorizada.
+              </span>
+              <button type="button" className="access-primary" onClick={() => navigate(accessPaths.login)}>
+                <LogIn />
+                Ir a iniciar sesión
+              </button>
+            </div>
+          )}
+          {!realVerification && (page === 'verify' || page === 'recoveryNotice') && (
             <div className="access-mail-state">
               <div
                 className={'access-envelope ' + (page === 'verify' ? 'verification' : '')}

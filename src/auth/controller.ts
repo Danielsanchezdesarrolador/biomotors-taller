@@ -177,7 +177,7 @@ export class AuthController {
         this.selected = undefined
         this.set({
           phase: 'no-membership',
-          message: 'Sin taller autorizado. No existe una membresía activa válida para este acceso.',
+          message: 'Sin taller autorizado. Tu correo está confirmado, pero esta cuenta todavía no tiene una membresía activa en un taller. Un administrador debe asignarla antes de ingresar.',
           identityName: user.displayName
         })
         return

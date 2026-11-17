@@ -48,6 +48,26 @@ describe('R1 UI boundary · synthetic authorized contexts only', () => {
       expect(html(c)).toMatch(/Acceso restringido|Sin taller autorizado/)
     }
   })
+  it('presents actual email confirmation without DEMO, a false pending label, or unverified success', () => {
+    const view = renderToStaticMarkup(
+      <AccessScreens
+        page="verify"
+        presentation="administrador"
+        onNavigate={() => {}}
+        auth={{ enabled: true, busy: false, message: 'Sin taller autorizado.',
+          registrationEnabled: true, onLogin: () => {} }}
+      />
+    )
+    expect(view).toContain('Confirmación de correo')
+    expect(view).toContain('Ir a iniciar sesión')
+    expect(view).toContain('Confirmación mediante tu cuenta')
+    expect(view).not.toContain('Vista de revisión')
+    expect(view).not.toContain('DEMO')
+    expect(view).not.toContain('Dirección pendiente de verificación')
+    expect(view).not.toContain('La verificación de la cuenta estará disponible')
+    expect(view).not.toContain('Sin taller autorizado')
+    expect(view).not.toContain('Correo confirmado correctamente')
+  })
   it('real login has correct autocomplete, busy states and distinct notice', () => {
     const view = renderToStaticMarkup(
       <AccessScreens
