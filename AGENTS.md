@@ -6,6 +6,15 @@
 
 **Estado:** Inicio **BT-UI-02-R2 aprobado visualmente como sistema premium OFICIAL** por el Director el 11/11/2026; Android Expo BT-UI-01 preservado; sin backend ni APK real. Próximo panel: Órdenes de trabajo BT-UI-03.
 
+
+## Regla permanente — dominio web oficial (17/11/2026)
+
+- **Dirección canónica definitiva elegida por el Director:** `https://bytetorque.cl` (raíz, sin `www`). Todos los nuevos enlaces dirigidos a clientes, manuales, textos de marca y futuras comunicaciones deben priorizar esta dirección; `www.bytetorque.cl` será alias con redirección a la raíz una vez configurado.
+- `https://biomotors-taller-demo.onrender.com` es **solo la dirección técnica del mismo servicio** `srv-dbqe4quc6qcc73f275jg`, no el dominio comercial ni un segundo sitio. **No crear otro Render** para realizar el cambio; mantener `main`.
+- **Estado comprobado al solicitarlo:** el Director mostró `ERR_CONNECTION_CLOSED` para `bytetorque.cl`; su DNS/TLS y enlace como Custom Domain en Render **siguen pendientes de verificación**. La selección de la URL oficial no equivale a disponibilidad operativa. Mantener acceso técnico de contingencia mientras se corrige el dominio.
+- **Puerta antes de reemplazar orígenes/redirects reales:** verificar que Render reconozca ambos hosts, DNS correspondiente y certificado HTTPS válido; revisar Supabase Auth Site URL y Redirect URLs, confirmaciones por correo, OAuth/CORS si aplica, PWA y navegación móvil, solo con autorización para cada ajuste. Evitar cortar sesiones o generar enlaces rotos al cambiar rutas de autenticación prematuramente.
+- El dominio debe mantenerse registrado y renovarse a tiempo: la decisión de usarlo indefinidamente no garantiza su disponibilidad si vence el registro o falla DNS.
+
 ## 1. Misión y fuentes de verdad
 
 Crear ByteTorque, una aplicación de gestión para talleres mecánicos con enfoque **SaaS multiempresa (multitenant)**. El primer taller piloto será el de Ignacio; el producto debe servir posteriormente a múltiples talleres suscritos, con aislamiento estricto de datos. Conservar todos los requerimientos de la nota de voz del 11/11/2026: inspección multipunto, presupuesto formal, correos al cliente, fichas de clientes y vehículos, historial técnico y observaciones pendientes.
