@@ -22,7 +22,7 @@ jobs:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' &&
           github.repository == 'Danielsanchezdesarrolador/biomotors-taller' &&
-          github.event.repository.private == true &&
+          github.actor == 'Danielsanchezdesarrolador' &&
           github.ref == 'refs/heads/main' && inputs.confirm_readonly_probe == true }}
     runs-on: ubuntu-latest
     environment: bytetorque-backup-export
