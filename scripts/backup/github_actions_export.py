@@ -27,28 +27,50 @@ SECRET_NAMES = (
 )
 
 
+# Diagnostic codes are fixed strings only. Never print the source exception or a
+# configuration value: GitHub logs may be visible to other repository readers.
+SAFE_DIAGNOSTICS = frozenset({
+    'WORKFLOW_GUARD', 'GPG_FINGERPRINT_FORMAT', 'GPG_PUBLIC_ARMOR',
+    'GPG_RECIPIENT_CHECK', 'POSTGRES_CA_FORMAT', 'POSTGRES_CA_PARSE',
+    'POSTGRES_PGPASS_FORMAT', 'DRIVE_CONFIG_FORMAT', 'LOCAL_PREPARATION',
+    'EXPORT_BRIDGE', 'EXPORT_RECEIPT', 'UNCLASSIFIED',
+})
+
+
+class BackupStageError(ValueError):
+    def __init__(self, code):
+        allowed_missing = code.startswith('SECRET_MISSING_') and code[len('SECRET_MISSING_'):] in SECRET_NAMES
+        super().__init__(code if code in SAFE_DIAGNOSTICS or allowed_missing else 'UNCLASSIFIED')
+
+
 def validate_bindings(values):
-    if any(not values.get(name, '').strip() for name in SECRET_NAMES):
-        raise ValueError('missing binding')
+    for name in SECRET_NAMES:
+        if not values.get(name, '').strip():
+            raise BackupStageError('SECRET_MISSING_' + name)
     fingerprint = values['BT_BACKUP_RECIPIENT_FINGERPRINT'].strip().upper()
     if not re.fullmatch(r'[A-F0-9]{40}|[A-F0-9]{64}', fingerprint):
-        raise ValueError('invalid fingerprint')
+        raise BackupStageError('GPG_FINGERPRINT_FORMAT')
     public = values['BT_BACKUP_RECIPIENT_CONTENT'].strip()
     if (not public.startswith('-----BEGIN PGP PUBLIC KEY BLOCK-----') or
             not public.endswith('-----END PGP PUBLIC KEY BLOCK-----') or
             'PRIVATE KEY' in public or 'SECRET KEY' in public):
-        raise ValueError('public key only')
+        raise BackupStageError('GPG_PUBLIC_ARMOR')
     ca = values['BT_BACKUP_PG_CA_PEM']
     if 'PRIVATE KEY' in ca or '-----BEGIN CERTIFICATE-----' not in ca:
-        raise ValueError('CA certificates only')
-    ssl.create_default_context(cadata=ca)  # Parse CA locally; no network connection.
+        raise BackupStageError('POSTGRES_CA_FORMAT')
+    try:
+        ssl.create_default_context(cadata=ca)  # Parse locally; no network connection.
+    except Exception:
+        raise BackupStageError('POSTGRES_CA_PARSE') from None
     password = values['BT_BACKUP_PGPASS_CONTENT'].strip('\r\n')
     prefix = f'{HOST}:5432:postgres:postgres.{PROJECT}:'
     if not password.startswith(prefix) or not password[len(prefix):] or '\n' in password or '\r' in password:
-        raise ValueError('one exact project-bound pgpass entry required')
-    validate_config(values['BT_BACKUP_DRIVE_CONFIG_CONTENT'])
+        raise BackupStageError('POSTGRES_PGPASS_FORMAT')
+    try:
+        validate_config(values['BT_BACKUP_DRIVE_CONFIG_CONTENT'])
+    except Exception:
+        raise BackupStageError('DRIVE_CONFIG_FORMAT') from None
     return fingerprint
-
 
 def write_private(path, content):
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -108,7 +130,7 @@ def main():
             os.environ.get('GITHUB_EVENT_NAME') != 'workflow_dispatch' or
             os.environ.get('GITHUB_REF') != 'refs/heads/main' or
             os.environ.get('GITHUB_REPOSITORY') != 'Danielsanchezdesarrolador/biomotors-taller'):
-        raise ValueError('manual main execution only')
+        raise BackupStageError('WORKFLOW_GUARD')
     values = {name: os.environ.get(name, '') for name in SECRET_NAMES}
     fingerprint = validate_bindings(values)
     os.umask(0o077)
@@ -116,36 +138,53 @@ def main():
         folder = Path(directory).resolve()
         checkout = Path(__file__).resolve().parents[2]
         if checkout == folder or checkout in folder.parents:
-            raise ValueError('temporary files must be outside checkout')
-        check_public_key(folder, values['BT_BACKUP_RECIPIENT_CONTENT'], fingerprint)
-        ca = folder / 'postgres-ca.pem'
-        write_private(ca, values['BT_BACKUP_PG_CA_PEM'])
-        service = configparser.ConfigParser(interpolation=None)
-        service[REMOTE] = {'host': HOST, 'port': '5432', 'dbname': 'postgres',
-                           'user': 'postgres.' + PROJECT, 'sslmode': 'verify-full',
-                           'sslrootcert': str(ca)}
-        buffer = io.StringIO()
-        service.write(buffer)
-        # Discard unrelated libpq/rclone bindings and all original backup secrets.
-        env = {key: value for key, value in os.environ.items()
-               if not key.startswith(('PG', 'RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))}
-        env.update({name: values[name] for name in (
-            'BT_BACKUP_PGPASS_CONTENT', 'BT_BACKUP_DRIVE_CONFIG_CONTENT',
-            'BT_BACKUP_RECIPIENT_CONTENT',
-        )})
-        env.update(BT_BACKUP_PGSERVICE_CONTENT=buffer.getvalue(), TMPDIR=str(folder))
-        command = [sys.executable, '-B', str(Path(__file__).with_name('run_with_bindings.py')),
-                   'export', '--project-ref', PROJECT, '--service', REMOTE,
-                   '--drive-remote', REMOTE, '--drive-folder-id', FOLDER,
-                   '--recipient-fingerprint', fingerprint]
-        receipt = safe_receipt(run_bridge(command, env))
+            raise BackupStageError('LOCAL_PREPARATION')
+        try:
+            check_public_key(folder, values['BT_BACKUP_RECIPIENT_CONTENT'], fingerprint)
+        except Exception:
+            raise BackupStageError('GPG_RECIPIENT_CHECK') from None
+        try:
+            ca = folder / 'postgres-ca.pem'
+            write_private(ca, values['BT_BACKUP_PG_CA_PEM'])
+            service = configparser.ConfigParser(interpolation=None)
+            service[REMOTE] = {'host': HOST, 'port': '5432', 'dbname': 'postgres',
+                               'user': 'postgres.' + PROJECT, 'sslmode': 'verify-full',
+                               'sslrootcert': str(ca)}
+            buffer = io.StringIO()
+            service.write(buffer)
+            # Discard unrelated libpq/rclone bindings and all original backup secrets.
+            env = {key: value for key, value in os.environ.items()
+                   if not key.startswith(('PG', 'RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))}
+            env.update({name: values[name] for name in (
+                'BT_BACKUP_PGPASS_CONTENT', 'BT_BACKUP_DRIVE_CONFIG_CONTENT',
+                'BT_BACKUP_RECIPIENT_CONTENT',
+            )})
+            env.update(BT_BACKUP_PGSERVICE_CONTENT=buffer.getvalue(), TMPDIR=str(folder))
+            command = [sys.executable, '-B', str(Path(__file__).with_name('run_with_bindings.py')),
+                       'export', '--project-ref', PROJECT, '--service', REMOTE,
+                       '--drive-remote', REMOTE, '--drive-folder-id', FOLDER,
+                       '--recipient-fingerprint', fingerprint]
+        except Exception:
+            raise BackupStageError('LOCAL_PREPARATION') from None
+        try:
+            output = run_bridge(command, env)
+        except Exception:
+            # Includes authenticated PostgreSQL TLS, Drive identity/permissions,
+            # pg_dump, encryption and ciphertext readback. No provider output.
+            raise BackupStageError('EXPORT_BRIDGE') from None
+        try:
+            receipt = safe_receipt(output)
+        except Exception:
+            raise BackupStageError('EXPORT_RECEIPT') from None
     print(json.dumps(receipt))
-
 
 if __name__ == '__main__':
     try:
         main()
+    except BackupStageError as error:
+        # Only fixed/allowlisted codes, never source exceptions or configuration.
+        print('BACKUP_NOT_COMPLETE: ' + str(error))
+        raise SystemExit(1)
     except (Exception, KeyboardInterrupt):
-        # Deliberately omit exception text/tracebacks and raw subprocess streams.
-        print('BACKUP_NOT_COMPLETE: configuration, TLS, encryption or external verification failed.')
+        print('BACKUP_NOT_COMPLETE: UNCLASSIFIED')
         raise SystemExit(1)

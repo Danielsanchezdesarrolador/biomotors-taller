@@ -114,13 +114,41 @@ class OfflineSafetyTests(unittest.TestCase):
                 export.main()
             bridge.assert_not_called()
 
-    def test_entrypoint_failure_emits_only_generic_message(self):
+    def test_diagnostics_for_invalid_local_bindings_are_fixed_and_safe(self):
+        cases = (
+            ('BT_BACKUP_PGPASS_CONTENT', '', 'SECRET_MISSING_BT_BACKUP_PGPASS_CONTENT'),
+            ('BT_BACKUP_RECIPIENT_FINGERPRINT', 'BAD', 'GPG_FINGERPRINT_FORMAT'),
+            ('BT_BACKUP_RECIPIENT_CONTENT', '-----BEGIN PGP PRIVATE KEY BLOCK-----', 'GPG_PUBLIC_ARMOR'),
+            ('BT_BACKUP_PG_CA_PEM', '-----BEGIN PRIVATE KEY-----', 'POSTGRES_CA_FORMAT'),
+            ('BT_BACKUP_PGPASS_CONTENT', 'WRONG_SECRET_VALUE', 'POSTGRES_PGPASS_FORMAT'),
+            ('BT_BACKUP_DRIVE_CONFIG_CONTENT',
+             bindings()['BT_BACKUP_DRIVE_CONFIG_CONTENT'] + 'root_folder_id=UNAPPROVED\\n',
+             'DRIVE_CONFIG_FORMAT'),
+        )
+        for name, bad, expected in cases:
+            values = bindings()
+            values[name] = bad
+            with self.subTest(stage=expected), self.assertRaises(export.BackupStageError) as error:
+                self.validate(values)
+            self.assertEqual(str(error.exception), expected)
+            self.assertNotIn('WRONG_SECRET_VALUE', str(error.exception))
+            self.assertNotIn('UNAPPROVED', str(error.exception))
+
+    def test_ca_parser_failure_has_only_safe_code(self):
+        with self.assertRaises(export.BackupStageError) as error:
+            export.validate_bindings(bindings())
+        self.assertEqual(str(error.exception), 'POSTGRES_CA_PARSE')
+
+    def test_unknown_diagnostic_code_is_sanitized(self):
+        self.assertEqual(str(export.BackupStageError('SENSITIVE_PROVIDER_DATA')), 'UNCLASSIFIED')
+
+    def test_entrypoint_failure_emits_only_safe_stage(self):
         env = {key: value for key, value in os.environ.items() if not key.startswith('GITHUB_')}
         result = subprocess.run([sys.executable, '-B', str(Path(export.__file__))],
                                 env=env, capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 1)
         self.assertEqual(result.stderr, '')
-        self.assertEqual(result.stdout, 'BACKUP_NOT_COMPLETE: configuration, TLS, encryption or external verification failed.\n')
+        self.assertEqual(result.stdout, 'BACKUP_NOT_COMPLETE: WORKFLOW_GUARD\n')
 
 
 if __name__ == '__main__':
