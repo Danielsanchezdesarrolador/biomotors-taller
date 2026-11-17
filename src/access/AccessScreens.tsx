@@ -5,6 +5,7 @@ import {
   ArrowRight,
   BarChart3,
   CarFront,
+  CalendarDays,
   Check,
   ExternalLink,
   Eye,
@@ -30,12 +31,14 @@ import {
   type AccessPresentation
 } from './accessContract'
 import { ReviewBanner } from './ReviewBanner'
+import { parseRegistrationProfile, type RegistrationProfile } from '../auth/registrationProfile'
 import './access.css'
 export type AccessDraft = {
   email: string
   password: string
   confirmPassword: string
   name: string
+  birthDate: string
   phone: string
   workshop: string
   terms: boolean
@@ -46,6 +49,7 @@ const blank: AccessDraft = {
   password: '',
   confirmPassword: '',
   name: '',
+  birthDate: '',
   phone: '',
   workshop: '',
   terms: false,
@@ -68,7 +72,7 @@ export function AccessScreens({
     onLogin: (email: string, password: string) => void
     registrationEnabled?: boolean
     completed?: boolean
-    onRegister?: (email: string, password: string) => void
+    onRegister?: (email: string, password: string, profile: RegistrationProfile) => void
     content?: ReactNode
   }
   onReviewSubmit?: (draft: AccessDraft, presentation: AccessPresentation) => string | void
@@ -134,6 +138,8 @@ export function AccessScreens({
             placeholder={placeholder}
             value={String(draft[key])}
             disabled={!interactive}
+            min={type === 'date' ? '1900-01-01' : undefined}
+            max={type === 'date' ? new Date().toISOString().slice(0, 10) : undefined}
             autoComplete={
               realLogin
                 ? key === 'email'
@@ -141,7 +147,9 @@ export function AccessScreens({
                   : key === 'password'
                     ? 'current-password'
                     : 'off'
-                : 'off'
+                : realRegistration
+                  ? key === 'name' ? 'name' : key === 'birthDate' ? 'bday' : key === 'email' ? 'email' : secret ? 'new-password' : 'off'
+                  : 'off'
             }
             autoCapitalize={type === 'email' ? 'none' : undefined}
             spellCheck={false}
@@ -207,6 +215,13 @@ export function AccessScreens({
         setMessage('Ingresa un correo electrónico válido.')
         return
       }
+      let profile: RegistrationProfile
+      try {
+        profile = parseRegistrationProfile({ fullName: draft.name, dateOfBirth: draft.birthDate })
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : 'Revisa tus datos personales.')
+        return
+      }
       if (!Object.values(passwordCriteria(draft.password)).every(Boolean)) {
         setMessage('Utiliza 8 o más caracteres, mayúscula, número y símbolo.')
         return
@@ -217,7 +232,7 @@ export function AccessScreens({
       }
       const password = draft.password
       setDraft((current) => ({ ...current, password: '', confirmPassword: '' }))
-      auth.onRegister(email, password)
+      auth.onRegister(email, password, profile)
       return
     }
     if (!onReviewSubmit) return
@@ -368,8 +383,17 @@ export function AccessScreens({
                         solicitar un enlace de recuperación.
                       </p>
                     )}
-                    {page === 'register' && !realRegistration &&
-                      field('name', 'Nombre completo', 'Ingresa tu nombre completo')}
+                    {page === 'register' && (
+                      <>
+                        {field('name', 'Nombre completo', 'Ingresa tu nombre y apellido')}
+                        {realRegistration && (
+                          <>
+                            {field('birthDate', 'Fecha de nacimiento', 'Selecciona tu fecha de nacimiento', 'date', <CalendarDays />)}
+                            <p className="access-profile-notice">Tu fecha de nacimiento se guarda en tu cuenta y no concede acceso a talleres.</p>
+                          </>
+                        )}
+                      </>
+                    )}
                     {page !== 'newPassword' &&
                       field(
                         'email',

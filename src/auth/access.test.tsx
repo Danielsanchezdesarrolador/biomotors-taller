@@ -63,6 +63,22 @@ describe('R1 UI boundary · synthetic authorized contexts only', () => {
     expect(view).not.toContain('Vista de revisión — sin autenticación real')
     for (const input of view.match(/<input[^>]*>/g) || []) expect(input).toContain('disabled=""')
   })
+  it('shows personal fields on the real signup form without collecting roles', () => {
+    const html = renderToStaticMarkup(
+      <AccessScreens
+        page="register"
+        presentation="administrador"
+        onNavigate={() => {}}
+        auth={{ enabled: true, busy: false, message: '', registrationEnabled: true,
+          onLogin: () => {}, onRegister: () => {} }}
+      />
+    )
+    expect(html).toContain('Nombre completo')
+    expect(html).toContain('Fecha de nacimiento')
+    expect(html).toContain('name="birthDate"')
+    expect(html).toContain('type="date"')
+    expect(html).toContain('no concede acceso a talleres')
+  })
   it.each(['register', 'recover', 'newPassword'] as const)(
     'keeps %s inactive even with a real session',
     async (page) => {

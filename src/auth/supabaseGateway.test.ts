@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createGateway, supabaseGateway } from './supabaseGateway'
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }))
 function fixture() {
-  const query = { select: vi.fn(), eq: vi.fn(), in: vi.fn(), then: undefined }
+  const query = { select: vi.fn(), eq: vi.fn(), in: vi.fn(), maybeSingle: vi.fn(async () => ({ data: null, error: null })), then: undefined }
   query.select.mockReturnValue(query)
   query.in.mockReturnValue(query)
   query.eq.mockReturnValue(query)
@@ -21,6 +21,7 @@ function fixture() {
         error: null
       })),
       signInWithPassword: vi.fn(async () => ({ error: null })),
+      signUp: vi.fn(async () => ({ data: { session: null }, error: null })),
       signOut: vi.fn(async () => ({ error: null })),
       onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe } } }))
     },
@@ -68,6 +69,31 @@ describe('Official Supabase SDK adapter · mocked client only', () => {
     expect(await g.getUser()).toEqual({ id: 'a', confirmed: true })
     await g.signOut()
     expect(c.auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
+  })
+  it('stores name and birth date only as account metadata at signup, never roles', async () => {
+    const { gateway: g, client: c } = fixture()
+    await g.register?.('qa@example.invalid', 'synthetic-password', {
+      fullName: '  Paula   González ', dateOfBirth: '1997-06-27'
+    })
+    expect(c.auth.signUp).toHaveBeenCalledWith({
+      email: 'qa@example.invalid', password: 'synthetic-password',
+      options: {
+        emailRedirectTo: 'https://bytetorque.cl/#/auth/confirmacion',
+        data: { full_name: 'Paula González', date_of_birth: '1997-06-27' }
+      }
+    })
+  })
+  it('prefers the own RLS profile name, falling back to private Auth metadata', async () => {
+    const { gateway: g, client: c, query: q } = fixture()
+    c.auth.getUser.mockResolvedValue({ data: { user: {
+      id: 'a', email_confirmed_at: 'confirmed',
+      user_metadata: { full_name: 'Paula González', role: 'owner' }
+    } }, error: null } as never)
+    expect(await g.getUser()).toEqual({ id: 'a', confirmed: true, displayName: 'Paula González' })
+    q.maybeSingle.mockResolvedValue({ data: { display_name: 'María Pérez' }, error: null })
+    expect(await g.getUser()).toEqual({ id: 'a', confirmed: true, displayName: 'María Pérez' })
+    expect(c.from).toHaveBeenCalledWith('profiles')
+    expect(q.eq).toHaveBeenCalledWith('user_id', 'a')
   })
   it('uses read-only filtered queries for own active memberships and active workshop IDs', async () => {
     const { gateway: g, client: c, query: q } = fixture()

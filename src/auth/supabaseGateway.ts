@@ -2,6 +2,7 @@ import { fetchWithTimeout } from './fetchWithTimeout'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { AuthFailure, type AuthGateway, type Membership, type Workshop } from './controller'
 import type { AuthConfig } from './config'
+import { parseRegistrationProfile, visibleAccountName } from './registrationProfile'
 function check(error: unknown): void {
   if (!error) return
   const e = error as { status?: number; name?: string; code?: string }
@@ -36,19 +37,30 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
     async getUser() {
       const { data, error } = await client.auth.getUser()
       check(error)
-      return data.user ? { id: data.user.id, confirmed: !!data.user.email_confirmed_at } : null
+      if (!data.user) return null
+      // Private profile data is display-only; authorization still comes from RLS memberships.
+      let displayName = visibleAccountName(data.user.user_metadata?.full_name)
+      try {
+        const profile = await client.from('profiles').select('display_name')
+          .eq('user_id', data.user.id).maybeSingle()
+        if (!profile.error) displayName = visibleAccountName(profile.data?.display_name) ?? displayName
+      } catch { /* A missing profile must not invalidate a confirmed session. */ }
+      return { id: data.user.id, confirmed: !!data.user.email_confirmed_at,
+        ...(displayName ? { displayName } : {}) }
     },
     async signIn(email, password) {
       const { error } = await client.auth.signInWithPassword({ email, password })
       check(error)
     },
-    async register(email, password) {
+    async register(email, password, profile) {
+      const personal = parseRegistrationProfile(profile)
       // Approved production destination, never taken from query strings.
       const { data, error } = await client.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: 'https://bytetorque.cl/#/auth/confirmacion'
+          emailRedirectTo: 'https://bytetorque.cl/#/auth/confirmacion',
+          data: { full_name: personal.fullName, date_of_birth: personal.dateOfBirth }
         }
       })
       check(error)

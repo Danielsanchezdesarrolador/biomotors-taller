@@ -65,6 +65,20 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
       expect(c.getSnapshot().context?.role).toBe(role)
     }
   )
+  it('carries a display name without changing the server-authorized role', async () => {
+    const { controller: c, gateway: g } = fixture('owner')
+    vi.mocked(g.getUser).mockResolvedValue({
+      id: 'user-a', confirmed: true, displayName: 'Paula González'
+    })
+    await c.validate()
+    expect(c.getSnapshot().context?.displayName).toBe('Paula González')
+    expect(c.getSnapshot().context?.role).toBe('owner')
+    vi.mocked(g.memberships).mockResolvedValue([])
+    await c.validate()
+    expect(c.getSnapshot().phase).toBe('no-membership')
+    expect(c.getSnapshot().identityName).toBe('Paula González')
+    expect(c.getSnapshot().context).toBeUndefined()
+  })
   it('no session stays anonymous without querying memberships', async () => {
     const { controller: c, gateway: g } = fixture()
     vi.mocked(g.hasSession).mockResolvedValue(false)

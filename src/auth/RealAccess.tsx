@@ -106,7 +106,7 @@ export function RealAccess({
           session={
             <div className="official-readiness">
               <div>
-                <strong>{workshop.name} · Mecánico</strong>
+                <strong>{state.context.displayName || workshop.name} · Mecánico</strong>
                 <p>
                   {state.message}{' '}
                   {presentation === 'administrador' &&
@@ -121,7 +121,8 @@ export function RealAccess({
     if (role === 'owner' || role === 'admin')
       return (
         <OfficialWorkspaceView
-          session={{ workshop: workshop.name, role: roleNames[role], controls,
+          session={{ workshop: workshop.name, role: roleNames[role],
+            displayName: state.context.displayName, controls,
             directoryController: import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
               ? controller : undefined }}
         />
@@ -143,8 +144,8 @@ export function RealAccess({
         busy,
         registrationEnabled,
         completed: state.phase === 'registration-sent',
-        onRegister: (email, password) => {
-          if (registrationEnabled) void controller.register(email, password)
+        onRegister: (email, password, profile) => {
+          if (registrationEnabled) void controller.register(email, password, profile)
         },
         message: state.message,
         onLogin: (email, password) => {
@@ -178,6 +179,7 @@ function AuthStatus({
       >
         {state.message}
       </p>
+      {state.identityName && <p>Cuenta: {state.identityName}</p>}
       {state.phase === 'choose' &&
         state.choices?.map((choice) => (
           <button

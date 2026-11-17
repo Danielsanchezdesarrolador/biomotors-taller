@@ -124,6 +124,7 @@ export function OfficialWorkspaceView({
   session?: {
     workshop: string
     role: string
+    displayName?: string
     controls: ReactNode
     directoryController?: AuthController
   }
@@ -161,8 +162,11 @@ export function OfficialWorkspaceView({
               workshopSubtitle: 'Sesión verificada',
               workshopStatus: session.role,
               version: 'ByteTorque · Gestión de talleres',
-              accountTitle: session.workshop,
+              accountTitle: session.displayName || session.workshop,
               accountSubtitle: session.role,
+              avatarText: session.displayName
+                ? session.displayName.split(' ').slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('')
+                : undefined,
               notifications: 'Sin notificaciones. Operaciones aún no habilitadas.'
             }
           : undefined

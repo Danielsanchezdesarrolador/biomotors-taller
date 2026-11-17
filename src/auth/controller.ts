@@ -1,19 +1,20 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { RegistrationProfile } from './registrationProfile'
 
 export const roles = ['owner', 'admin', 'mechanic', 'reception'] as const
 export type Role = (typeof roles)[number]
-export type Identity = { id: string; confirmed: boolean }
+export type Identity = { id: string; confirmed: boolean; displayName?: string }
 export type Membership = { user_id: string; workshop_id: string; role: string; status: string }
 export type Workshop = { id: string; name: string; status: string }
 export type Choice = { workshop: Workshop; role: Role }
-export type Context = Choice & { userId: string }
+export type Context = Choice & { userId: string; displayName?: string }
 export interface AuthGateway {
   /** Obtain the same SDK instance used for login, not a second browser session. */
   getDataClient?(): Promise<SupabaseClient | null>
   hasSession(): Promise<boolean>
   getUser(): Promise<Identity | null>
   signIn(email: string, password: string): Promise<void>
-  register?(email: string, password: string): Promise<void>
+  register?(email: string, password: string, profile: RegistrationProfile): Promise<void>
   signOut(): Promise<void>
   memberships(userId: string): Promise<Membership[]>
   workshops(ids: string[]): Promise<Workshop[]>
@@ -36,6 +37,7 @@ export type AuthState = {
     | 'error'
     | 'signing-out'
   message: string
+  identityName?: string
   choices?: Choice[]
   context?: Context
 }
@@ -175,7 +177,8 @@ export class AuthController {
         this.selected = undefined
         this.set({
           phase: 'no-membership',
-          message: 'Sin taller autorizado. No existe una membresía activa válida para este acceso.'
+          message: 'Sin taller autorizado. No existe una membresía activa válida para este acceso.',
+          identityName: user.displayName
         })
         return
       }
@@ -183,6 +186,7 @@ export class AuthController {
         this.set({
           phase: 'choose',
           message: 'Selecciona un taller autorizado. Se verificará nuevamente la membresía.',
+          identityName: user.displayName,
           choices
         })
         return
@@ -196,7 +200,7 @@ export class AuthController {
             ? 'Acceso restringido. Las funciones de recepción están pendientes de definición.'
             : 'Sesión y membresía verificadas. Operaciones de negocio aún no habilitadas.',
         choices,
-        context: { ...choice, userId: user.id }
+        context: { ...choice, userId: user.id, displayName: user.displayName }
       })
     } catch (error) {
       if (epoch === this.epoch) this.fail(error)
@@ -225,13 +229,13 @@ export class AuthController {
         void this.validate()
     }
   }
-  async register(email: string, password: string) {
+  async register(email: string, password: string, profile: RegistrationProfile) {
     if (!this.gateway?.register || this.registering || this.signingIn || this.blocked) return
     this.registering = true
     const epoch = ++this.epoch
     this.set({ phase: 'registering', message: 'Solicitando confirmación de correo…' })
     try {
-      await this.gateway.register(email.trim().toLowerCase(), password)
+      await this.gateway.register(email.trim().toLowerCase(), password, profile)
       if (epoch === this.epoch) {
         this.set({
           phase: 'registration-sent',
