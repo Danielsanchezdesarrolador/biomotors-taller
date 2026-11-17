@@ -145,8 +145,8 @@ class OfflineSafetyTests(unittest.TestCase):
     def test_downstream_failure_markers_are_fixed_and_safe(self):
         # A malicious child must not be able to select arbitrary log content.
         from unittest.mock import MagicMock
-        safe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:POSTGRES_TLS_CONNECT\\n')
-        unsafe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:SECRET_VALUE_FROM_PROVIDER\\n')
+        safe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:POSTGRES_TLS_CONNECT' + chr(10))
+        unsafe = subprocess.CompletedProcess([], 1, stdout='BACKUP_STAGE_FAILURE:SECRET_VALUE_FROM_PROVIDER' + chr(10))
         for response, expected in ((safe, 'POSTGRES_TLS_CONNECT'), (unsafe, 'EXPORT_BRIDGE')):
             with self.subTest(expected=expected):
                 child = MagicMock()
