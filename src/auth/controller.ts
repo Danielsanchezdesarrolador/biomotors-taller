@@ -136,14 +136,16 @@ export class AuthController {
         }, 0)
       }
     })
-    void this.validate()
+    // Explicit sign-out remains blocked across route changes; do not replace
+    // its anonymous/error state with a checking screen validate cannot finish.
+    if (!this.blocked) void this.validate()
     return () => {
       this.epoch++
       if (this.eventTimer) clearTimeout(this.eventTimer)
       this.cleanup?.()
       this.cleanup = undefined
       this.selected = undefined
-      this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
+      if (!this.blocked) this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
     }
   }
   async validate(selection?: string) {
@@ -263,16 +265,17 @@ export class AuthController {
     }
   }
   async logout() {
-    if (!this.gateway) return
+    if (!this.gateway || this.state.phase === 'signing-out') return
     const epoch = ++this.epoch
     this.blocked = true
     this.selected = undefined
     this.set({ phase: 'signing-out', message: 'Cerrando sesión…' })
     try {
       await this.gateway.signOut()
-      if (epoch === this.epoch) this.set({ phase: 'anonymous', message: 'Sesión cerrada.' })
+      if (epoch === this.epoch || (this.blocked && this.getSnapshot().phase === 'signing-out'))
+        this.set({ phase: 'anonymous', message: 'Sesión cerrada.' })
     } catch {
-      if (epoch === this.epoch)
+      if (epoch === this.epoch || (this.blocked && this.getSnapshot().phase === 'signing-out'))
         this.set({
           phase: 'error',
           message:

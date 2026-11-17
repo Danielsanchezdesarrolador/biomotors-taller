@@ -179,6 +179,28 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     await c.validate()
     expect(c.getSnapshot().phase).toBe('anonymous')
   })
+  it('can log in after sign-out and route remount, without restoring old access', async () => {
+    const {controller:c,gateway:g}=fixture()
+    const stop=c.start();await flush();await c.logout();stop()
+    const stopAgain=c.start();await flush()
+    expect(c.getSnapshot().phase).toBe('anonymous')
+    expect(c.getSnapshot().context).toBeUndefined()
+    await c.login('synthetic@invalid.test','synthetic')
+    expect(g.signIn).toHaveBeenCalledOnce()
+    expect(c.getSnapshot().phase).toBe('authorized')
+    stopAgain()
+  })
+  it('finishes a pending sign-out after a route remount', async () => {
+    const {controller:c,gateway:g}=fixture()
+    const stop=c.start();await flush()
+    let finish!:()=>void
+    vi.mocked(g.signOut).mockImplementation(()=>new Promise<void>(resolve=>{finish=resolve}))
+    const signingOut=c.logout();stop();const stopAgain=c.start()
+    expect(c.getSnapshot().phase).toBe('signing-out')
+    finish();await signingOut
+    expect(c.getSnapshot().phase).toBe('anonymous')
+    stopAgain()
+  })
   it('keeps access blocked after failed server logout', async () => {
     const { controller: c, gateway: g } = fixture()
     await c.validate()

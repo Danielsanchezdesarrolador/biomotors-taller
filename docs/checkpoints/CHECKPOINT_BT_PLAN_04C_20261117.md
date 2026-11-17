@@ -21,6 +21,6 @@ expiración, 2/8 mecánicos, downgrade y carreras por la última plaza/taller ú
 HTTP/browser con SDK simulado no equivale a QA alojado. No se creó Ignacio ni se
 concedió suscripción real. No se enviaron invitaciones por correo.
 
-Publicación bloqueada por visibilidad pública detectada en GitHub: no hacer push
-hasta confirmar repositorio privado. Estado final y reproducción en
+Tras detectar acceso público, el propietario autorizó expresamente mantener esa
+visibilidad temporal y continuar el push a main, sin secretos ni datos personales. Estado final y reproducción en
 `docs/BT_PLAN_04_IMPLEMENTACION_20261117.md`.
