@@ -9,6 +9,11 @@ on:
         type: boolean
         required: true
         default: false
+      confirm_public_repository_export:
+        description: Explicitly authorize the temporary encrypted export while this repository is public
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
@@ -22,8 +27,12 @@ jobs:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' &&
           github.repository == 'Danielsanchezdesarrolador/biomotors-taller' &&
-          github.event.repository.private == true &&
-          github.ref == 'refs/heads/main' && inputs.confirm_database_export == true }}
+          github.actor == 'Danielsanchezdesarrolador' &&
+          github.ref == 'refs/heads/main' &&
+          inputs.confirm_database_export == true &&
+          (github.event.repository.private == true ||
+           (github.event.repository.private == false &&
+            inputs.confirm_public_repository_export == true)) }}
     runs-on: ubuntu-latest
     environment: bytetorque-backup-export
     timeout-minutes: 20
