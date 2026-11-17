@@ -16,6 +16,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from drive_destination import PrivateDrive, FOLDER_ID, REMOTE
+from postgres_preflight import ProbeFailure, verify_connection
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
 # Only approved fixed labels; never publish a provider error or secret value.
@@ -105,13 +106,14 @@ def main():
     pg_env = dict(os.environ, PGSERVICEFILE=service, PGPASSFILE=password,
                   PGSSLMODE='verify-full', PGCONNECT_TIMEOUT='20',
                   PGOPTIONS='-c default_transaction_read_only=on')
-    # Read-only probe, no migration or business data mutation.
+    # libpq verify-full validates the GitHub-to-pooler TLS session.
+    # pg_stat_ssl can reflect the separate pooler-to-Postgres connection.
     _STAGE = 'POSTGRES_TLS_CONNECT'
-    probe = subprocess.run(['psql', '-X', '-A', '-t', '--dbname=service=' + args.service,
-                            '-c', "SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()"],
-                           env=pg_env, capture_output=True, text=True)
-    if probe.returncode or probe.stdout.strip() != 't':
-        raise RuntimeError('Authenticated PostgreSQL TLS connection not verified')
+    try:
+        verify_connection(args.service, pg_env)
+    except ProbeFailure as error:
+        _STAGE = error.code
+        raise
     _STAGE = 'DRIVE_ACCESS_CHECK'
     destination = inspect_drive(drive, args.drive_remote, args.drive_folder_id)
     os.umask(0o077)
