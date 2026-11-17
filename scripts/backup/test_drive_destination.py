@@ -94,7 +94,7 @@ class OfflineDriveTests(unittest.TestCase):
                                    stage_hook=stages.append)
         self.assertEqual(stages, [
             'DRIVE_DESTINATION_VALIDATE', 'DRIVE_CONFIG_VALIDATE',
-            'DRIVE_ROOT_LIST', 'DRIVE_ROOT_STAT',
+            'DRIVE_ROOT_LIST', 'DRIVE_ROOT_LIST', 'DRIVE_ROOT_STAT',
             'DRIVE_ROOT_METADATA', 'DRIVE_ROOT_PERMISSIONS'])
 
     def test_readonly_stage_hook_stops_before_network_when_root_unlisted(self):
@@ -104,8 +104,8 @@ class OfflineDriveTests(unittest.TestCase):
              self.mocked_api() as api, self.assertRaises(RuntimeError):
             drive.PrivateDrive(self.path, drive.REMOTE, drive.FOLDER_ID,
                                stage_hook=stages.append)
-        self.assertEqual(stages[-1], 'DRIVE_ROOT_LIST')
-        api.assert_not_called()
+        self.assertEqual(stages[-1], 'DRIVE_ROOT_METADATA')
+        api.assert_called_once()
         runner.assert_called_once()
 
     def test_valid_unrooted_config_and_destination(self):
@@ -134,7 +134,10 @@ class OfflineDriveTests(unittest.TestCase):
             self.listing = listing
             with self.subTest(listing=listing), self.mocked_api() as api, self.assertRaises(RuntimeError):
                 self.connect()
-            api.assert_not_called()
+            if listing:
+                api.assert_not_called()
+            else:
+                api.assert_called_once()
 
     def test_functional_path_cannot_resolve_to_another_id(self):
         listed = subprocess.CompletedProcess([], 0, stdout=json.dumps(self.listing))

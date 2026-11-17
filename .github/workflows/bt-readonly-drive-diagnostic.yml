@@ -41,9 +41,11 @@ jobs:
       - name: Offline safety validation before loading secrets
         run: |
           python3 -B scripts/backup/test_drive_destination.py
+          python3 -B scripts/backup/test_drive_errors.py
           python3 -B scripts/backup/test_github_actions_export.py
       - name: Validate Drive destination without writes
         timeout-minutes: 3
         env:
+          BT_BACKUP_DRIVE_EXPECTED_OWNER: ${{ secrets.BT_BACKUP_DRIVE_EXPECTED_OWNER }}
           BT_BACKUP_DRIVE_CONFIG_CONTENT: ${{ secrets.BT_BACKUP_DRIVE_CONFIG_CONTENT }}
         run: python3 -B scripts/backup/readonly_drive_probe.py

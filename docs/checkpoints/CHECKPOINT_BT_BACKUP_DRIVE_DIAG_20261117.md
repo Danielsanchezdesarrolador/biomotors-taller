@@ -16,3 +16,7 @@ Una falla de lista puede significar token OAuth equivocado, carpeta no visible b
 
 ## Después
 Obtener una sola ejecución de BT-DRIVE-DIAG, leer el código fijo y resolver esa etapa concreta. Solo después volver a autorizar una exportación real y una recuperación aislada. Mantener `[skip render]` en este commit, solo `main`.
+
+
+## Auditoría posterior
+La etapa ROOT_LIST no distinguía fallo de proceso de carpeta ausente en una lista válida. Ver [auditoría y procedimiento único](CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md). No interpretar el run 44087756245 como evidencia suficiente de token inválido.

@@ -16,6 +16,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from drive_destination import PrivateDrive, FOLDER_ID, REMOTE
+from drive_errors import DriveFailure
 from postgres_preflight import ProbeFailure, verify_connection
 
 PROJECT = 'suxcqqnmcjoezfxltoms'
@@ -159,7 +160,7 @@ if __name__ == '__main__':
         # In the GitHub export, emit ONLY a compile-time fixed stage label.
         # Never include exception text, HTTP responses or SQL/GPG output.
         if os.environ.get('BT_BACKUP_STAGE_DIAGNOSTICS') == '1':
-            print('BACKUP_STAGE_FAILURE:' + _STAGE)
+            print('BACKUP_STAGE_FAILURE:' + (error.code if isinstance(error, DriveFailure) else _STAGE))
         else:
             print('BACKUP_NOT_COMPLETE: ' + (str(error) if isinstance(error, RuntimeError)
                                             else 'Cloud export/transfer failed; inspect secure runner privately'))

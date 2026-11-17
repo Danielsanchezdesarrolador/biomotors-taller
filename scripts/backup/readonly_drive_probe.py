@@ -8,12 +8,14 @@ from pathlib import Path
 import re
 import tempfile
 
+from drive_errors import DriveFailure
 from drive_destination import FOLDER_ID, REMOTE, PrivateDrive
 
 STAGES = frozenset({
     'DRIVE_DESTINATION_VALIDATE', 'DRIVE_CONFIG_VALIDATE',
     'DRIVE_ROOT_LIST', 'DRIVE_ROOT_STAT',
     'DRIVE_ROOT_METADATA', 'DRIVE_ROOT_PERMISSIONS',
+    'DRIVE_OAUTH_IDENTITY', 'DRIVE_OWNER_MATCHED',
 })
 
 
@@ -33,6 +35,11 @@ def main():
         print('DRIVE_READONLY_DIAG: DRIVE_CONFIG_MISSING')
         return 1
 
+    expected_owner = os.environ.get('BT_BACKUP_DRIVE_EXPECTED_OWNER', '')
+    if not expected_owner:
+        print('DRIVE_READONLY_DIAG: DRIVE_EXPECTED_OWNER_MISSING')
+        return 1
+
     stage = 'DRIVE_DESTINATION_VALIDATE'
 
     def record(value):
@@ -40,6 +47,8 @@ def main():
         if value not in STAGES:
             raise ValueError('Unapproved diagnostic stage')
         stage = value
+        if value == 'DRIVE_OWNER_MATCHED':
+            print('DRIVE_READONLY_DIAG: DRIVE_OWNER_MATCHED')
 
     # Secret exists only in environment and a private temporary file, never checkout.
     os.umask(0o077)
@@ -48,7 +57,11 @@ def main():
             path = Path(root) / 'rclone.conf'
             with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w') as stream:
                 stream.write(content)
-            PrivateDrive(path, REMOTE, FOLDER_ID, stage_hook=record)
+            PrivateDrive(path, REMOTE, FOLDER_ID, stage_hook=record,
+                         expected_owner=expected_owner)
+    except DriveFailure as error:
+        print('DRIVE_READONLY_DIAG: ' + error.code)
+        return 1
     except Exception:
         # Never emit errors from rclone, Google API, urllib, configparser, or secrets.
         print('DRIVE_READONLY_DIAG: ' + stage + '_FAILED')

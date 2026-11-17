@@ -13,6 +13,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
+from drive_errors import CODES as DRIVE_CODES
 from postgres_config import normalize_pgpass, service_content
 from drive_destination import FOLDER_ID as FOLDER, validate_config
 
@@ -48,6 +49,7 @@ SAFE_DIAGNOSTICS = frozenset({
     'POSTGRES_DATABASE_REJECTED', 'POSTGRES_POOLER_BACKEND_UNAVAILABLE',
 })
 
+SAFE_DIAGNOSTICS = SAFE_DIAGNOSTICS | DRIVE_CODES
 
 class BackupStageError(ValueError):
     def __init__(self, code):

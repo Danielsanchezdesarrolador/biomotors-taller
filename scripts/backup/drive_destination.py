@@ -13,6 +13,7 @@ import subprocess
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 from urllib.error import HTTPError
+from drive_errors import DriveFailure, rclone_json, http_failure
 
 REMOTE = 'bytetorque_backup'
 FOLDER_NAME = 'Respaldos ByteTorque'
@@ -44,7 +45,7 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 class PrivateDrive:
-    def __init__(self, config_path, remote, folder, *, stage_hook=None):
+    def __init__(self, config_path, remote, folder, *, stage_hook=None, expected_owner=None):
         # Optional fixed-code stage callback for read-only diagnosis. No secrets passed.
         self._preflight_stage_hook = stage_hook
         self._mark_preflight('DRIVE_DESTINATION_VALIDATE')
@@ -57,23 +58,45 @@ class PrivateDrive:
         validate_config(config_path.read_text())
         self._mark_preflight('DRIVE_ROOT_LIST')
         # Read only. Never create a missing path or set --drive-root-folder-id.
-        listing = subprocess.run(
+        entries = rclone_json(
             ['rclone', '--config', str(config_path), 'lsjson', '--dirs-only', REMOTE + ':'],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=45,
-            env={k: v for k, v in os.environ.items() if not k.startswith('RCLONE_')})
-        entries = json.loads(listing.stdout)
+            env={k: v for k, v in os.environ.items() if not k.startswith(('RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))})
+        if not isinstance(entries, list) or any(not isinstance(row, dict) for row in entries):
+            raise DriveFailure('DRIVE_LIST_SCHEMA_INVALID')
+        # Optional owner assertion is supplied privately, never logged or persisted.
+        # Use the token after rclone has refreshed it with its original OAuth client.
+        self._token = validate_config(config_path.read_text())
+        if expected_owner is not None:
+            if not isinstance(expected_owner, str) or not re.fullmatch(r'[^\s@]+@[^\s@]+', expected_owner):
+                raise DriveFailure('DRIVE_OWNER_INPUT_INVALID')
+            self._mark_preflight('DRIVE_OAUTH_IDENTITY')
+            identity = self._json('about', {'fields': 'user(emailAddress)'})
+            actual = identity.get('user', {}).get('emailAddress') if isinstance(identity, dict) else None
+            if not isinstance(actual, str) or not actual:
+                raise DriveFailure('DRIVE_OWNER_UNAVAILABLE')
+            if actual.casefold() != expected_owner.casefold():
+                raise DriveFailure('DRIVE_OWNER_MISMATCH')
+            self._mark_preflight('DRIVE_OWNER_MATCHED')
+        self._mark_preflight('DRIVE_ROOT_LIST')
         matches = [row for row in entries if row.get('Name') == FOLDER_NAME or row.get('Path') == FOLDER_NAME]
-        if (len(matches) != 1 or matches[0].get('ID') != FOLDER_ID or
-                matches[0].get('IsDir') is not True or matches[0].get('Path') != FOLDER_NAME):
-            raise RuntimeError('Drive path identity ambiguous or mismatched')
+        if not matches:
+            # Diagnose visibility by the approved ID, without allowing a write or
+            # bypassing the path checks. 404 remains inaccessible, not 'deleted'.
+            self._mark_preflight('DRIVE_ROOT_METADATA')
+            self._metadata(FOLDER_ID)
+            raise DriveFailure('DRIVE_FOLDER_NOT_LISTED')
+        if len(matches) != 1:
+            raise DriveFailure('DRIVE_FOLDER_NAME_AMBIGUOUS')
+        if matches[0].get('ID') != FOLDER_ID:
+            raise DriveFailure('DRIVE_FOLDER_ID_MISMATCH')
+        if matches[0].get('IsDir') is not True or matches[0].get('Path') != FOLDER_NAME:
+            raise DriveFailure('DRIVE_FOLDER_PATH_MISMATCH')
         self._mark_preflight('DRIVE_ROOT_STAT')
-        resolved = subprocess.run(
+        row = rclone_json(
             ['rclone', '--config', str(config_path), 'lsjson', '--stat', REMOTE + ':' + FOLDER_NAME],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=45,
-            env={k: v for k, v in os.environ.items() if not k.startswith('RCLONE_')})
-        row = json.loads(resolved.stdout)
-        if row.get('ID') != FOLDER_ID or row.get('IsDir') is not True or row.get('Name') != FOLDER_NAME:
-            raise RuntimeError('Resolved Drive path identity mismatch')
+            env={k: v for k, v in os.environ.items() if not k.startswith(('RCLONE_', 'BT_BACKUP_', 'BT_RESTORE_'))})
+        if not isinstance(row, dict) or row.get('ID') != FOLDER_ID or row.get('IsDir') is not True or row.get('Name') != FOLDER_NAME:
+            raise DriveFailure('DRIVE_STAT_MISMATCH')
         # rclone may refresh the token in the temporary binding; read it again.
         self._token = validate_config(config_path.read_text())
         self._directories = {}
@@ -99,8 +122,13 @@ class PrivateDrive:
             request_headers['Content-Type'] = 'application/json'
         request = Request(url, data=data, headers=request_headers,
                           method='POST' if data is not None else 'GET')
-        with self._open(request) as response:
-            return json.load(response)
+        try:
+            with self._open(request) as response:
+                return json.load(response)
+        except HTTPError as error:
+            failure = http_failure(error)
+            error.close()
+            raise failure from None
 
     def _metadata(self, identifier):
         if not re.fullmatch(r'[A-Za-z0-9_-]{10,120}', identifier):
