@@ -12,7 +12,8 @@ CODES = frozenset({
     'POSTGRES_POOLER_IDENTITY_REJECTED', 'POSTGRES_DNS_FAILED',
     'POSTGRES_NETWORK_FAILED', 'POSTGRES_NETWORK_TIMEOUT',
     'POSTGRES_ACCESS_REJECTED', 'POSTGRES_CLIENT_LAUNCH_FAILED',
-    'POSTGRES_PROBE_UNEXPECTED',
+    'POSTGRES_PROBE_UNEXPECTED', 'POSTGRES_SERVER_REJECTED',
+    'POSTGRES_PROBE_OUTPUT_INVALID', 'POSTGRES_CLIENT_EXIT_UNEXPECTED',
 })
 
 
@@ -24,7 +25,7 @@ class ProbeFailure(RuntimeError):
 
 def classify(result):
     if result.returncode == 0:
-        return 'POSTGRES_PROBE_UNEXPECTED'
+        return 'POSTGRES_PROBE_OUTPUT_INVALID'
     message = (result.stderr or '').lower()
     patterns = (
         ('POSTGRES_CERTIFICATE_REJECTED', (
@@ -66,7 +67,11 @@ def classify(result):
     for code, fragments in patterns:
         if any(fragment in message for fragment in fragments):
             return code
-    return 'POSTGRES_PROBE_UNEXPECTED'
+    # Distinguish unrecognized server rejection from a client process failure,
+    # without ever emitting stderr, credentials, hostnames, or query output.
+    if 'fatal:' in message or 'error:' in message:
+        return 'POSTGRES_SERVER_REJECTED'
+    return 'POSTGRES_CLIENT_EXIT_UNEXPECTED'
 
 
 def verify_connection(service, env):
