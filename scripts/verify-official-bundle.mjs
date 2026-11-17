@@ -21,6 +21,12 @@ assert.ok(
 const cp06PrivateEnabled=process.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'
 if(cp06PrivateEnabled)assert.equal(process.env.VITE_BT_CP04_PRIVATE_ENABLED,'true','CP06 requires CP04')
 if(!cp06PrivateEnabled)assert.ok(modules.every(id=>!id.includes('src/historial/')),'CP06 must remain excluded by default')
+const creatorPrivateEnabled = process.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true'
+if (creatorPrivateEnabled)
+  assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED, 'true', 'Creator private entry requires Auth')
+else
+  assert.ok(modules.every(id => !id.includes('src/creator/')),
+    'Creator privileged console must be absent from the public/off build')
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
 const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
 if (cp05PrivateEnabled)
@@ -69,6 +75,7 @@ assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
+      (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||
       (cp05PrivateEnabled &&
         /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
