@@ -181,7 +181,7 @@ async function shot(p, name) {
       await p.locator('.dashboard-main').waitFor()
       state.revoked = true
       await p.evaluate(() => window.dispatchEvent(new Event('focus')))
-      await p.getByText('Sin taller autorizado.', { exact: false }).waitFor()
+      await p.getByText('Cuenta personal verificada.', { exact: false }).waitFor()
       assert.equal(await p.locator('.dashboard-main').count(), 0)
       await shot(p, `revoked-mock-${width}`)
       await p.getByRole('button', { name: 'Cerrar sesión', exact: true }).click()
@@ -253,7 +253,7 @@ async function shot(p, name) {
         await p.getByText('No se pudo iniciar sesión.', { exact: false }).waitFor()
         assert.equal(await p.locator('input[name=password]').inputValue(), '')
       } else if (['no-member', 'disabled'].includes(scenario))
-        await p.getByText('Sin taller autorizado.', { exact: false }).waitFor()
+        await p.getByText('Cuenta personal verificada.', { exact: false }).waitFor()
       else if (scenario === 'unconfirmed')
         await p.getByText('Se requiere correo confirmado.', { exact: false }).waitFor()
       else if (scenario === 'mechanic') {

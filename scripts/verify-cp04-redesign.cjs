@@ -202,7 +202,7 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
           await p.locator('.cp04-order').first().waitFor()
           state.revoked = true
           await p.evaluate(() => window.dispatchEvent(new Event('focus')))
-          await p.getByText('Sin taller autorizado.', { exact: false }).waitFor()
+          await p.getByText('Cuenta personal verificada.', { exact: false }).waitFor()
           assert.equal(await p.locator('.cp04-private').count(), 0)
         }
         assert.equal(errors.length, 0, errors.join('\n'))

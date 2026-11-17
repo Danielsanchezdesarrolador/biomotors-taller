@@ -7,6 +7,16 @@
 **Estado:** Inicio **BT-UI-02-R2 aprobado visualmente como sistema premium OFICIAL** por el Director el 11/11/2026; Android Expo BT-UI-01 preservado; sin backend ni APK real. Próximo panel: Órdenes de trabajo BT-UI-03.
 
 
+## Excepción temporal de visibilidad — autorización expresa 17/11/2026
+
+Al comprobar GitHub `visibility: public` y acceso anónimo, el propietario autorizó
+expresamente que `Danielsanchezdesarrolador/biomotors-taller` permanezca **público
+temporalmente** y continuar commits/push a main. No cambiar la visibilidad ni
+bloquear otra vez solo por esta condición mientras siga vigente su autorización.
+El propietario decidirá cuándo volverlo privado. Nunca publicar contraseñas,
+claves privadas, tokens, credenciales o datos sensibles de usuarios/clientes.
+Las demás restricciones de Supabase, migraciones, cobros y usuarios reales siguen.
+
 ## Regla permanente — dominio web oficial (17/11/2026)
 
 - **Dirección canónica definitiva elegida por el Director:** `https://bytetorque.cl` (raíz, sin `www`). Todos los nuevos enlaces dirigidos a clientes, manuales, textos de marca y futuras comunicaciones deben priorizar esta dirección; `www.bytetorque.cl` será alias con redirección a la raíz una vez configurado.
