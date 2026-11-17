@@ -24,6 +24,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(args[-1], 'SELECT 1')
         self.assertNotIn('pg_stat_ssl', ' '.join(args))
         self.assertIn('-w', args)
+        self.assertIn('VERBOSITY=verbose', args)
         self.assertEqual(run.call_args.kwargs['env']['PGSSLMODE'], 'verify-full')
         self.assertTrue(run.call_args.kwargs['capture_output'])
 
@@ -53,6 +54,9 @@ class Tests(unittest.TestCase):
             ('no pg_hba.conf entry', 'POSTGRES_ACCESS_REJECTED'),
             ('PRIVATE_PROVIDER_DETAIL', 'POSTGRES_CLIENT_EXIT_UNEXPECTED'),
             ('FATAL: PRIVATE_PROVIDER_DETAIL', 'POSTGRES_SERVER_REJECTED'),
+            ('FATAL: 28P01: PRIVATE_PROVIDER_DETAIL', 'POSTGRES_AUTH_REJECTED'),
+            ('FATAL: 0A000: unsupported startup parameter: options', 'POSTGRES_POOLER_STARTUP_REJECTED'),
+            ('ERROR: 42501: PRIVATE_PROVIDER_DETAIL', 'POSTGRES_ACCESS_REJECTED'),
         )
         for stderr, expected in examples:
             response = subprocess.CompletedProcess([], 2, stdout='', stderr=stderr)
