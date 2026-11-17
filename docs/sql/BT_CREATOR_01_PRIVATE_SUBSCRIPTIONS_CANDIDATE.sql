@@ -130,7 +130,8 @@ BEGIN
      p_reason IS NULL OR length(btrim(p_reason)) < 5 OR length(btrim(p_reason)) > 240 THEN
     RAISE EXCEPTION 'Solicitud inválida' USING ERRCODE='22023';
   END IF;
-  IF p_mode NOT IN ('basic','grant_days','extend_days','lifetime','revoke') OR
+  IF p_mode IS NULL OR p_plan IS NULL OR
+     p_mode NOT IN ('basic','grant_days','extend_days','lifetime','revoke') OR
      p_plan NOT IN ('basic','plus','full') THEN
     RAISE EXCEPTION 'Plan o modo inválido' USING ERRCODE='22023';
   END IF;
@@ -176,7 +177,7 @@ BEGIN
            v_old.plan<>p_plan OR v_old.is_lifetime OR v_old.expires_at IS NULL THEN
           RAISE EXCEPTION 'Solo se puede extender un plan temporal del mismo tipo' USING ERRCODE='22023';
         END IF;
-        v_expiry:=pg_catalog.greatest(now(),v_old.expires_at)
+        v_expiry:=GREATEST(now(),v_old.expires_at)
           + pg_catalog.make_interval(days=>p_days);
       ELSE
         v_expiry:=now()+pg_catalog.make_interval(days=>p_days);
