@@ -114,12 +114,14 @@ export function documentClient(
     },
     async cancel(quote: Quote, requestId: string) {
       alive()
-      if (flags.archive) clearDocumentOperation()
       const data = await call('cancel', {
         quoteId: quoteId(quote.id),
         requestId: quoteId(requestId)
       })
       if (data.cancelled !== true) throw new QuoteFailure('unavailable')
+      // Keep the same request ID after a timeout or ambiguous response so a
+      // retry reconciles the original cancellation instead of starting a new one.
+      clearDocumentOperation()
     },
     dispose() {
       disposed = true
