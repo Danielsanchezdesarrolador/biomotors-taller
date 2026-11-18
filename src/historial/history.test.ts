@@ -227,6 +227,50 @@ describe('CP06 chronology and existing history semantics', () => {
     expect(p.quotes.status).toBe('unavailable')
     expect(p.quotes.revisions).toEqual([])
   })
+  it('does not drop historical quotes when more than 20 records belong to loaded visits', async () => {
+    // The deployed CP05 schema currently permits one quote per OT. This
+    // defensive pagination test also covers future amendments/imports.
+    const f = fake()
+    f.rows.quotes = Array.from({ length: 45 }, (_, index) => ({
+      id: uuid(300 + index),
+      workshop_id: wid,
+      vehicle_id: vid,
+      customer_id: uuid(4),
+      order_id: oid,
+      number: index + 1,
+      status: 'draft',
+      created_at: '2026-11-16T12:10:00.123456Z'
+    }))
+    const page = await historyRepository(f.client, context, { cp05Enabled: true }).visits(vid)
+    expect(page.quotes.status).toBe('ready')
+    expect(page.quotes.quotes).toHaveLength(45)
+    expect(new Set(page.quotes.quotes.map((quote) => quote.id)).size).toBe(45)
+    expect(f.calls.filter((c) => c.table === 'quotes')).toHaveLength(1)
+    const query = f.calls.find((c) => c.table === 'quotes')!
+    expect(query.eq).toMatchObject({ workshop_id: wid, vehicle_id: vid })
+    expect(query.inside.order_id).toEqual([oid])
+    expect(query.orders).toEqual(['created_at', 'id'])
+    expect(query.limit).toBe(201)
+  })
+  it('pages large quote histories without losing equal-timestamp records', async () => {
+    const f = fake()
+    f.rows.quotes = Array.from({ length: 225 }, (_, index) => ({
+      id: uuid(500 + index),
+      workshop_id: wid,
+      vehicle_id: vid,
+      customer_id: uuid(4),
+      order_id: oid,
+      number: index + 1,
+      status: 'issued',
+      created_at: '2026-11-16T12:10:00.123456Z'
+    }))
+    const page = await historyRepository(f.client, context, { cp05Enabled: true }).visits(vid)
+    expect(page.quotes.status).toBe('ready')
+    expect(page.quotes.quotes).toHaveLength(225)
+    const quoteCalls = f.calls.filter((c) => c.table === 'quotes')
+    expect(quoteCalls).toHaveLength(2)
+    expect(quoteCalls[1].or).toContain('id.lt.')
+  })
   it('retains immutable quote snapshots apart from the current draft and audit', async () => {
     const f = fake(),
       qid = uuid(40)
@@ -237,7 +281,8 @@ describe('CP06 chronology and existing history semantics', () => {
         vehicle_id: vid,
         customer_id: uuid(4),
         order_id: oid,
-        status: 'draft'
+        status: 'draft',
+        created_at: '2026-11-16T12:10:00Z'
       }
     ]
     f.rows.quote_revisions = [
