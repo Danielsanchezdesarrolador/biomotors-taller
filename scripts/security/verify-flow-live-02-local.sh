@@ -29,8 +29,8 @@ for file in \
   docs/sql/BT_CP05_QUOTES_CANDIDATE.sql \
   docs/sql/BT_FLOW_LIVE_02_CANDIDATE.sql \
   scripts/security/bt-cp05-lab-fixtures.sql \
-  scripts/security/bt-flow-live-02-lab-assertions.sql
-  docs/sql/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.sql
+  scripts/security/bt-flow-live-02-lab-assertions.sql \
+  docs/sql/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.sql \
   scripts/security/bt-com-01c-lab-assertions.sql; do
   psql_lab < "$file" >/dev/null
 done
