@@ -257,7 +257,7 @@ describe('CP05 backend candidato sin activación', () => {
     const receipt = await p.putIfAbsent(path, bytes)
     await p.putIfAbsent(path, bytes)
     expect(await p.restore(path, receipt.sha256)).toEqual(bytes)
-    await expect(p.putIfAbsent(path, new Uint8Array([1, 2, 3]))).rejects.toThrow('ARCHIVE_CONFLICT')
+    await expect(p.putIfAbsent(path, new Uint8Array([1, 2, 3]))).rejects.toThrow('INVALID_PDF')
   })
   const delivery = (): DeliveryPorts => ({
     authorize: vi.fn(async () => revision),
