@@ -123,7 +123,7 @@ function verifySnapshot(
       !validName(p.handover.fileName) ||
       !snapshot.quoteArchive ||
       !isArchivePath(snapshot.quoteArchive.path) ||
-      !snapshot.quoteArchive.path.startsWith(request.workshopId+'/quotes/'+p.quote.id+'/r'+p.quote.revision+'/') ||
+      snapshot.quoteArchive.path !== request.workshopId+'/quotes/'+p.quote.id+'/r'+p.quote.revision+'/'+p.quote.payloadSha256+'.pdf' ||
       !validDigest(snapshot.quoteArchive.sha256) ||
       snapshot.quoteArchive.sha256 !== p.quote.pdfSha256 ||
       !Number.isSafeInteger(snapshot.quoteArchive.byteLength) ||
