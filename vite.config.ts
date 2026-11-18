@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
   if(env.VITE_BT_CP06_PRIVATE_ENABLED==='true'&&env.VITE_BT_CP04_PRIVATE_ENABLED!=='true')throw new Error('CP06 requires verified CP03/CP04 private rollout.')
   if(env.VITE_BT_CP05_DOCUMENTS_ENABLED==='true'&&env.VITE_BT_CP05_PRIVATE_ENABLED!=='true')throw new Error('CP05 documents require private CP05.')
   if(env.VITE_BT_CP05_EMAIL_ENABLED==='true'&&env.VITE_BT_CP05_DOCUMENTS_ENABLED!=='true')throw new Error('CP05 email requires approved private documents.')
+  if (env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
+      (env.VITE_BT_CP05_PRIVATE_ENABLED !== 'true' ||
+       env.VITE_BT_CP05_DOCUMENTS_ENABLED !== 'true' ||
+       env.VITE_BT_AUTH_R1_ENABLED !== 'true'))
+    throw new Error('BT-FLOW-LIVE-02 requires private CP05, documents and R1 Auth.');
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')
@@ -58,6 +63,10 @@ export default defineConfig(({ mode }) => {
                   /\/src\/(?:cp05\/|entrega\/(?:WorkExecutionDraft|executionPreview|executionPdf)\.|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
                     id
                   )
+                ) &&
+                !(
+                  env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
+                  /\/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\.(?:ts|tsx|js)$/.test(id)
                 ) &&
                 !(
                   env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
