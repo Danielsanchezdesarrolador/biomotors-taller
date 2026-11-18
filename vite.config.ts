@@ -66,7 +66,7 @@ export default defineConfig(({ mode }) => {
                 ) &&
                 !(
                   env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
-                  /\/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\.(?:ts|tsx|js)$/.test(id)
+                  /\/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate|finalPackage|finalPdf)\.(?:ts|tsx|js)$/.test(id)
                 ) &&
                 !(
                   env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
