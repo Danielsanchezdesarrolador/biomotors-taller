@@ -51,6 +51,7 @@ jobs:
           node scripts/verify-brand-ui.cjs
           node scripts/verify-brand-02-ui.cjs
           node scripts/verify-r2-invite-ui.cjs
+          node scripts/verify-ui-polish.cjs
       - name: CP04 · Rediseño y autoguardado con HTTP simulado (sin datos alojados)
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp04-design-build
@@ -90,6 +91,7 @@ jobs:
           path: |
             artifacts/cp04-redesign/
             artifacts/cp05-mobile/
+            artifacts/bt-ui-polish/
             artifacts/bt-oficial-01a/
             artifacts/bt-auth-01a/
             artifacts/bt-auth-01b-r1/
