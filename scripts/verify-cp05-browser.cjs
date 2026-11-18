@@ -174,6 +174,22 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
         const floating = await p.getByLabel('Total siempre visible').boundingBox()
         assert.ok(floating && floating.height <= 55, 'floating total obscures quote cards')
       }
+      // BT-UI-POLISH-01: action hierarchy must be visible and contained
+      // without altering its original enabled/disabled behavior.
+      const board = p.locator('.cp05-action-board')
+      assert.equal(await board.count(), 1)
+      assert.equal(await board.locator('.cp05-action-group-main > button').count(), 2)
+      assert.equal(await board.locator('.cp05-action-group-main > button.cp04-primary').count(), 1)
+      assert.equal(await board.locator('.cp05-action-group-advanced > button').count(), 2)
+      const boardBounds = await board.boundingBox()
+      for (const button of await board.locator('button').all()) {
+        const bounds = await button.boundingBox()
+        assert.ok(boardBounds && bounds && bounds.x >= boardBounds.x - 1 &&
+          bounds.x + bounds.width <= boardBounds.x + boardBounds.width + 1,
+          'quote action escapes board at ' + width)
+      }
+      assert.ok(await p.locator('.cp05-history-empty').count() >= 2,
+        'compact history/dispatch empty states missing')
       assert.ok(
         await p.getByRole('button', { name: 'Emitir revisión archivada · pendiente' }).isDisabled()
       )
