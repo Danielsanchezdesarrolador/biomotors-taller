@@ -9,7 +9,9 @@
  * A future trusted adapter MUST implement atomic/unique manifest commits,
  * actor/membership checks, private Storage and revocation rechecks.
  */
-import type { PreparedClosing } from '../../src/entrega/finalPackage'
+import { prepareClosingPacket, type PreparedClosing } from '../../src/entrega/finalPackage'
+import type { Quote, Revision } from '../../src/cp05/contracts'
+import type { FlowEvidence } from '../../src/historial/contracts'
 import { CP05_MAX_PDF_BYTES, isArchivePath, isArchivedPdf } from '../cp05/archiveCandidate'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -50,8 +52,9 @@ export type ClosingArchiveManifest = {
   documents: [ArchivePdf, ArchivePdf, ArchivePdf]
 }
 export type VerifiedClosingSnapshot = {
-  packet: PreparedClosing
-  approvalId: string
+  quote: Quote
+  revision: Revision
+  evidence: FlowEvidence
   quoteArchive: { path: string; sha256: string; byteLength: number }
   /** Derived only from the authenticated trusted database, NEVER browser state. */
   currentIssuedRevision: boolean
@@ -99,13 +102,12 @@ const checkReceipt = (bytes: Uint8Array, length: number, hash: string) => {
   })
 }
 function verifySnapshot(
-  request: ClosingArchiveRequest, snapshot: VerifiedClosingSnapshot
+  request: ClosingArchiveRequest, snapshot: VerifiedClosingSnapshot, p: PreparedClosing
 ) {
-  if (!snapshot?.packet || snapshot.currentIssuedRevision !== true ||
+  if (!snapshot || snapshot.currentIssuedRevision !== true ||
       snapshot.confirmedDelivery !== true || snapshot.workshopActive !== true ||
       !['owner', 'admin', 'reception'].includes(snapshot.actorRole))
     deny('CLOSING_ARCHIVE_NOT_AUTHORIZED')
-  const p = snapshot.packet
   if (p.state !== 'prepared_locally_not_archived_or_emailed' ||
       p.workshop.id !== request.workshopId ||
       p.order.id !== request.orderId ||
@@ -113,7 +115,8 @@ function verifySnapshot(
       p.handover.id !== request.deliveryId ||
       p.bundleId !== [request.revisionId, p.report.id, request.deliveryId].join(':') ||
       !validId(p.quote.id) || !validId(p.report.id) ||
-      !validId(snapshot.approvalId) ||
+      snapshot.evidence.approvals.filter(a => a.revision_id === request.revisionId).length !== 1 ||
+      !validId(snapshot.evidence.approvals.find(a => a.revision_id === request.revisionId)!.id) ||
       !Number.isSafeInteger(p.quote.revision) || p.quote.revision < 1 ||
       !validDigest(p.quote.pdfSha256) || !validDigest(p.quote.payloadSha256) ||
       !validName(p.quote.fileName) || !validName(p.report.fileName) ||
@@ -152,8 +155,10 @@ export async function archiveClosingCandidate(
   if (!user || !validId(user.id) || user.confirmed !== true)
     deny('CLOSING_ARCHIVE_SESSION_REQUIRED')
   const snapshot = await ports.load(request, user.id)
-  verifySnapshot(request, snapshot)
-  const packet = snapshot.packet
+  // Always reconstruct and validate from immutable server rows, never accept
+  // precomputed monetary fields or document identities from HTTP input.
+  const packet = prepareClosingPacket(snapshot.quote, snapshot.revision, snapshot.evidence)
+  verifySnapshot(request, snapshot, packet)
 
   // Never regenerate the quoted/approved PDF from current editable state.
   const quoteBytes = await ports.originalPdf(snapshot.quoteArchive.path)
@@ -197,7 +202,7 @@ export async function archiveClosingCandidate(
     workshopId: request.workshopId, orderId: request.orderId,
     quoteId: packet.quote.id, revisionId: request.revisionId,
     revisionNumber: packet.quote.revision,
-    approvalId: snapshot.approvalId,
+    approvalId: snapshot.evidence.approvals.find(a => a.revision_id === request.revisionId)!.id,
     reportId: packet.report.id, deliveryId: request.deliveryId,
     sourceBundleId: packet.bundleId,
     sourcePayloadSha256: packet.quote.payloadSha256,
