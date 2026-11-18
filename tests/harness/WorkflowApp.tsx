@@ -121,6 +121,10 @@ function App() {
         })
     }
   }
+  // Visual-only harness fixture, never included in the official Render bundle.
+  const requestedPlan = new URLSearchParams(window.location.search).get('uiPolishPlan')
+  const visualPlan = requestedPlan === 'basic' || requestedPlan === 'plus' ||
+    requestedPlan === 'full' ? requestedPlan : null
   const formattedDate = new Intl.DateTimeFormat('es-CL', {
     day: 'numeric',
     month: 'long',
