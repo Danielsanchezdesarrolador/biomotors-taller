@@ -471,6 +471,7 @@ body { background: #f0f6ff; }
 }
 .app-shell .topbar .account-popover { top: calc(100% + 10px); }
 @media (min-width: 761px) {
+  .app-shell .mobile-plan-indicator { display: none; }
   .app-shell .topbar {
     box-sizing: border-box;
     height: auto;
