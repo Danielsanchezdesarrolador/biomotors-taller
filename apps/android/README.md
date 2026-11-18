@@ -76,3 +76,14 @@ La prueba `npm run verify-config` valida ahora también que existen los cuatro m
 - **Pendiente de aceptación:** CI del commit final, prueba en Android físico, accesibilidad y funcionamiento con la sesión real tras respaldos/restauración y migraciones aprobados. No confundir bundle Expo con APK.
 
 Para ejecutar localmente: `cd apps/android && npm install && npm run test:contracts && npm run typecheck && npm run verify-config`. No añadir variables/credenciales de producción al paquete DEMO.
+
+
+## BT-PILOT-QA-02 — rutas protegidas en laboratorio (18/11/2026)
+
+- Se añade `navigation/demoRoutes.ts`, una función **puramente local** para verificar que el enlace desde Inicio/Historial a OT o cotizaciones ficticias corresponde al taller y rol simulados. Los IDs de otros talleres, inexistentes, sin cotización, sesiones vencidas y modo offline no abren detalles ajenos. Navegar por pestañas sin ID descarta el foco anterior.
+- `App.tsx` consume este resolutor para las aperturas desde las cinco secciones y muestra un error explícito si se rechaza una consulta. **Esto no es Auth/RLS real:** solo protege la navegación del laboratorio; el servidor debe repetir todos los controles cuando se implemente la integración productiva.
+- `scripts/test-demo-routes.mjs` cubre ida/vuelta entre órdenes, cotizaciones e historial, separación A/B, rol mecánico, sesión vencida, enlace vacío, desconexión y recuperación. Se ejecuta junto con `test-demo-gateway.mjs` por `npm run test:contracts` en CI.
+- `tsconfig.json` permite importar tipos `.ts` explícitos desde el ejecutor Node de pruebas. No agrega paquetes, permisos ni módulos nativos.
+- Guía transversal de 18 recorridos / 55 pasos con registro en blanco: [BT-PILOT-QA-02](../../docs/qa/BT_PILOT_QA_02_RECORRIDOS_20261118.md).
+- CI [44318146031](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44318146031): **SUCCESS** Web/PWA y Android Expo. Bundle exportado ≠ APK firmada ni prueba en celular.
+- **Ninguna conexión productiva, dato verdadero, actualización OTA o cambio de permisos.** En la matriz P01–P38 las puertas G-* permanecen cerradas.
