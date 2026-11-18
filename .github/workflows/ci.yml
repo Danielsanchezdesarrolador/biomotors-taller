@@ -40,6 +40,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Matriz de aceptación BT-PILOT-QA-01 (consistencia offline; NO certifica piloto)
         run: node scripts/qa/verify-pilot-matrix.mjs --check
+      - name: Recorridos BT-PILOT-QA-02 (cobertura y hoja sin resultados)
+        run: node scripts/qa/verify-pilot-journeys.mjs --check
       - name: Validar sintaxis de prueba de seguridad A/B (sin ejecutar acceso real)
         run: node --check scripts/security/bt-cp02-ab.mjs
       - name: Verificar TypeScript web
