@@ -7,7 +7,7 @@
 
 Una revisión histórica CP05 emitida, acompañada de las tres declaraciones **persistidas** de BT-FLOW-LIVE-02, permite reconstruir tres piezas documentales en orden:
 
-1. `01_Cotizacion_*.pdf`: archivo **original de la revisión histórica CP05**, recuperable por el cliente de almacenamiento privado con sus verificaciones de SHA-256; este bloque **no vuelve a emitir la cotización** ni altera revisión o importes.
+1. `01_Cotizacion_*.pdf`: **nombre previsto para el futuro paquete consolidado**. En CP06 actualmente se descarga por separado el archivo original de la revisión histórica CP05 como `COT-xxxxxx-Rn.pdf`, recuperable del almacenamiento privado con verificaciones de SHA-256; este bloque **no vuelve a emitir la cotización** ni altera revisión o importes.
 2. `02_Informe_*.pdf`: copia A4 generada en el navegador desde la revisión congelada y el registro de ejecución `bt_flow_execution_reports`. Muestra partidas realizadas **según declaración del operador**, no realizadas, pendientes, importes neto/IVA/total históricos y valores solo declarados como realizados.
 3. `03_Entrega_*.pdf`: copia A4 generada en el navegador desde la declaración `bt_flow_visit_deliveries`, con operador, momento, método, cuatro comprobaciones y observaciones; referenciada a la misma OT, revisión e informe.
 
