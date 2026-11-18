@@ -34,9 +34,11 @@ export type DemoVisit = Readonly<{
 }>
 export type DemoWorkshop = Readonly<{id: DemoWorkshopId; name: string; plan: string}>
 export class DemoReadError extends Error {
-  constructor(public readonly code: DemoErrorCode) {
+  readonly code: DemoErrorCode
+  constructor(code: DemoErrorCode) {
     super(code)
     this.name = 'DemoReadError'
+    this.code = code
   }
 }
 export function demoErrorText(error: unknown): string {
