@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ArchivePdf, ClosingArchiveManifest } from '../../server/com/closingArchiveCandidate'
+import type { ClosingArchiveManifest } from '../../server/com/closingArchiveCandidate'
 import {
   prepareClosingMailReviewCandidate, confirmClosingMailReviewCandidate,
   type MailReviewCandidatePorts, type ClosingMailRead, type ImmutableMailReview
