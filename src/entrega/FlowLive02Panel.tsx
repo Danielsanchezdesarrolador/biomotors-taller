@@ -64,6 +64,8 @@ export function FlowLive02Panel({
   const lock = useRef(false)
   const requestIds = useRef<Record<string, { key: string; id: string }>>({})
   const alive = useRef(true)
+  const generation = useRef(0)
+  const current = (version: number) => alive.current && generation.current === version
 
   function requestId(kind: string, payload: unknown) {
     const key = JSON.stringify(payload)
@@ -73,33 +75,36 @@ export function FlowLive02Panel({
   }
   useEffect(() => {
     alive.current = true
+    const version = ++generation.current
     const connection = flowLiveCandidate(client, context, { explicitlyApproved: true })
     setPort(connection)
     setRecords(null)
     setLoading(true)
     setError('')
     void connection.history(quote, revision)
-      .then(result => { if (alive.current) setRecords(result) })
+      .then(result => { if (current(version)) setRecords(result) })
       .catch(() => {
-        if (alive.current) setError('El registro persistente no está disponible o no tienes acceso. No se realizó ninguna operación.')
+        if (current(version)) setError('El registro persistente no está disponible o no tienes acceso. No se realizó ninguna operación.')
       })
-      .finally(() => { if (alive.current) setLoading(false) })
+      .finally(() => { if (current(version)) setLoading(false) })
     return () => {
       alive.current = false
+      generation.current++
       connection.dispose()
     }
   }, [client, context, quote.id, revision.id])
   async function reload() {
     if (!port || lock.current) return
+    const version = generation.current
     setLoading(true)
     setError('')
     try {
       const response = await port.history(quote, revision)
-      if (alive.current) setRecords(response)
+      if (current(version)) setRecords(response)
     } catch {
-      if (alive.current) setError('No se pudo recuperar el registro del servidor. No registres una entrega sin comprobarlo.')
+      if (current(version)) setError('No se pudo recuperar el registro del servidor. No registres una entrega sin comprobarlo.')
     } finally {
-      if (alive.current) setLoading(false)
+      if (current(version)) setLoading(false)
     }
   }
   async function write<T>(
@@ -108,20 +113,21 @@ export function FlowLive02Panel({
     confirmationMessage: string
   ) {
     if (!port || lock.current || !records) return
+    const version = generation.current
     lock.current = true
     setBusy(true)
     setError('')
     setMessage('')
     try {
       const response = await task()
-      if (!alive.current) return
+      if (!current(version)) return
       onConfirmed(response)
       setMessage(confirmationMessage)
     } catch {
-      if (alive.current) setError(errorText)
+      if (current(version)) setError(errorText)
     } finally {
       lock.current = false
-      if (alive.current) setBusy(false)
+      if (current(version)) setBusy(false)
     }
   }
   const recordApproval = () => write(
