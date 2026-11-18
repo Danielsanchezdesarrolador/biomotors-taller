@@ -99,9 +99,9 @@ const cleanLabel=(input:string,max=110)=>{
   return input.replace(/[\x00-\x1f\x7f\u2028\u2029]/g,' ')
     .replace(/\s+/g,' ').trim().slice(0,max)
 }
-const recipient=(raw:string|null)=>{
-  if(!raw || typeof raw!=='string'||raw.length>254||raw.trim()!==raw)
-    deny('REVIEW_RECIPIENT_UNAVAILABLE')
+const recipient=(raw:string|null):string=>{
+  if(typeof raw!=='string'||!raw||raw.length>254||raw.trim()!==raw)
+    throw new Error('REVIEW_RECIPIENT_UNAVAILABLE')
   if(!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/.test(raw) ||
       raw.split('@')[0].length>64 || raw.includes('..') ||
       raw.split('@')[1].split('.').some(label=>label.startsWith('-')||label.endsWith('-')))
