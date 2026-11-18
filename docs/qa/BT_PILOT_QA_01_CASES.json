@@ -129,7 +129,7 @@
         "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
       ],
       "gate": [
-        "G-ROLES",
+        "G-AUTH",
         "G-RLS"
       ]
     },
