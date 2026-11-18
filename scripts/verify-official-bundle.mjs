@@ -46,7 +46,7 @@ if (flowLiveEnabled) {
   assert.equal(process.env.VITE_BT_CP05_PRIVATE_ENABLED,'true',
     'Flow live requires authenticated CP05')
 } else {
-  assert.ok(modules.every(id => !/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\./.test(id)),
+  assert.ok(modules.every(id => !/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate|finalPackage|finalPdf)\./.test(id)),
     'Flow live candidate must remain absent from OFF/public builds')
 }
 if (cp05PrivateEnabled)
