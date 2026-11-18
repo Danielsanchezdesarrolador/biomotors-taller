@@ -63,3 +63,16 @@ La navegación conserva las cinco pestañas R2 y enlaza una orden tocada desde I
 La prueba `npm run verify-config` valida ahora también que existen los cuatro módulos, su contenido de demostración y que no se hayan incorporado WebView, `fetch()` ni un cliente SDK de datos. `npm run typecheck` y `expo export --platform android` siguen en CI.
 
 **Pendientes para Android operativo:** autenticación verificada; aislamiento de talleres, roles y RLS; conexión a los repositorios CP03/CP04/CP05/CP06 con control de acceso; persistencia/retorno a la ficha; fotos/documentos solo tras Storage y backups verificables; QA móvil físico; APK interna firmada con autorización. No confundir la paridad visual con paridad de backend.
+
+
+## BT-ANDROID-02 — contrato offline y flujo nativo simulado (18/11/2026)
+
+- **Entrada de laboratorio:** selector explícito «Administrador Taller A», «Mecánico Taller A» y «Administrador Taller B», sin login, claves, red ni token. La sesión existe **solo en memoria** y expira lógicamente; salir borra la selección.
+- **Fuente única de datos sintéticos:** `data/demoGateway.ts`, adaptador de **solo lectura** con tipos para órdenes, clientes, vehículos, cotizaciones con partidas/totales, historial y ficha del taller. Incluye identificadores ficticios A/B y evita mezclar vistas del taller en la simulación. No es un servicio ni un mecanismo de autenticación seguro.
+- **Flujos preparados:** Inicio → detalle OT → cotizaciones relacionadas → detalle OT, Clientes/vehículos → historial filtrado por vehículo → detalle OT. Búsqueda y filtros operan sobre consultas de muestra del taller seleccionado. El rol mecánico consulta únicamente órdenes asignadas; el resto de módulos se bloquea con mensaje claro.
+- **Estados de error comprobables:** sin sesión, sesión vencida, sin conexión simulada, fallo de lectura, falta de permisos e ID ajeno/inexistente. En Configuración se puede alternar conexión falsa y simular vencimiento; no hay reintento automático ni llamadas a red.
+- **Pruebas:** `npm run test:contracts` (Node 22.13+, sin red) prueba aislamiento A/B para cada recurso, accesos directos prohibidos, historial, roles, integridad de relaciones, expiración, fallos y recuperación. `npm run verify-config` impide introducir fetch, SDK cliente de Supabase o WebView en el shell, adaptador y pantallas.
+- **Desactivado deliberadamente:** Auth real, RLS productiva, actualización de OT o multipunto, Storage/PDF/email, registro de clientes, persistencia local, pagos, despliegues OTA y APK firmada. Simular una comprobación de permisos no sustituye verificar seguridad real de servidor.
+- **Pendiente de aceptación:** CI del commit final, prueba en Android físico, accesibilidad y funcionamiento con la sesión real tras respaldos/restauración y migraciones aprobados. No confundir bundle Expo con APK.
+
+Para ejecutar localmente: `cd apps/android && npm install && npm run test:contracts && npm run typecheck && npm run verify-config`. No añadir variables/credenciales de producción al paquete DEMO.
