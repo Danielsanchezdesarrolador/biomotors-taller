@@ -36,16 +36,27 @@ assert.equal(app.splash.resizeMode, 'contain')
 assert.ok(code.includes('./assets/brand/logo-horizontal-dark.png'))
 console.log('BT-BRAND-01: native icon, adaptive foreground, splash and horizontal artwork PASS')
 
-const native = readFileSync('screens/NativeModules.tsx', 'utf8')
-for (const label of ['Órdenes de trabajo','Clientes y vehículos',
-  'Informes y cotizaciones','Configuración','Descargar PDF archivado']) {
-  assert.ok(native.includes(label), 'Falta pantalla nativa: ' + label)
+// BT-ANDROID-02: supervisar que todo el cliente de prueba permanezca offline.
+const native = readFileSync('screens/NativeModules.tsx','utf8')
+const gateway = readFileSync('data/demoGateway.ts','utf8')
+const combined = code + native + gateway
+for (const label of ['Órdenes de trabajo','Clientes y vehículos','Informes y cotizaciones',
+  'Configuración','Descargar PDF archivado','Historial de visitas de ejemplo']) {
+  assert.ok(native.includes(label),'Falta módulo nativo: '+label)
 }
 for (const marker of ['DATOS FICTICIOS','DEMO-01','COT-DEMO-001',
-  'No se han guardado datos']) {
-  assert.ok(native.includes(marker), 'Debe indicarse demo sin persistencia: ' + marker)
+  'No se han guardado datos','SESSION_EXPIRED','FORBIDDEN','OFFLINE','NOT_FOUND']) {
+  assert.ok(combined.includes(marker),'Falta verificación de laboratorio: '+marker)
 }
-assert.ok(!/WebView\b|fetch\s*\(|\.from\s*\(|createClient\s*\(/.test(native),
-  'BT-ANDROID-01 no puede abrir WebView ni consultar backend real')
-assert.ok(code.includes("section={section}"), 'Las 5 pestañas deben usar la navegación nativa')
-console.log('BT-ANDROID-01: 4 módulos R2, navegación y límites DEMO verificados (sin Auth/Storage)')
+assert.ok(!/WebView\b|fetch\s*\(|\.from\s*\(|createClient\s*\(/.test(combined),
+  'Android DEMO no debe consultar red, SDK Supabase ni WebView')
+for (const name of ['listOrders','getOrder','listCustomers','listVehicles','listHistory',
+  'listQuotes','getQuote','getWorkshop']) {
+  assert.ok(gateway.includes(name+' =') || gateway.includes(name+'('),
+    'Falta contrato de lectura: '+name)
+}
+assert.ok(code.includes('openDemoSession'), 'Acceso de prueba explícito obligatorio')
+assert.ok(code.includes('key={section+demoSession.workshopId'), 'Reinicio por taller/rol al navegar')
+assert.ok(native.includes('gateway.listHistory(session'), 'Historial debe consultar por sesión')
+assert.ok(native.includes('gateway.listQuotes(session'), 'Cotizaciones deben consultar por sesión')
+console.log('BT-ANDROID-02: vistas R2, solo lectura, sesión demo y barreras OFFLINE verificadas')
