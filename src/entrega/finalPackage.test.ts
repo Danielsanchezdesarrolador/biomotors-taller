@@ -60,7 +60,7 @@ const delivery={
 }
 const state=():FlowEvidence=>({
   status:'ready',approvals:[{...approval}],executions:[{...report}],
-  deliveries:[{...delivery}]
+  deliveries:[{...delivery,checklist:{...delivery.checklist}}]
 })
 describe('BT-COM-01 local document copies (not archived, sent or signed)',()=>{
   it('requires all three operator declarations, not merely a closed OT',()=>{
