@@ -19,7 +19,7 @@ function checkEvidence(paths) {
   assert.ok(Array.isArray(paths) && paths.length>0, 'Caso sin evidencia histórica/código')
   for(const p of paths){
     assert.equal(typeof p,'string')
-    assert.ok(!p.includes('..')&&!p.startsWith('/')&&!p.includes('\\\\'),'Ruta no segura: '+p)
+    assert.ok(!p.includes('..')&&!p.startsWith('/')&&!p.includes(String.fromCharCode(92)),'Ruta no segura: '+p)
     assert.ok(existsSync(resolve(root,p)),'No existe la evidencia: '+p)
   }
 }
