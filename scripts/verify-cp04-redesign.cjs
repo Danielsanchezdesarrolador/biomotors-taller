@@ -158,6 +158,49 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
       }
       await p.close()
     }
+    // Focused BT-UI-POLISH-01 snapshots: selected OT with historical findings
+    // and a pending observation from an older closed visit, HTTP-only fixture.
+    if (!before) {
+      for (const width of [390, 1440]) {
+        const { p, state, errors } = await cp04Page(browser, width)
+        const at = '2026-11-15T14:30:00Z'
+        const base = {
+          workshop_id: tenant, vehicle_id: uuid(100),
+          recorded_by: uuid(1), created_at: at, updated_at: at
+        }
+        state.findings.push(
+          { ...base, id: uuid(710), order_id: uuid(200), category: 'Frenos',
+            result: 'attention', note: 'Sistema revisado y reparación registrada.',
+            resolution: 'resolved', resolved_at: '2026-11-15T16:00:00Z' },
+          { ...base, id: uuid(711), order_id: uuid(200), category: 'Luces',
+            result: 'not_checked', note: '', resolution: 'not_applicable',
+            resolved_at: null },
+          { ...base, id: uuid(712), order_id: uuid(999), category: 'Luces de neblina',
+            result: 'attention', note: 'Pendiente de revisar foco izquierdo.',
+            resolution: 'pending', resolved_at: null }
+        )
+        await p.locator('.cp04-order').first().click()
+        await p.locator('.cp04-finding').first().waitFor()
+        await p.locator('.cp04-pending').first().waitFor()
+        assert.equal(await p.locator('.cp04-finding').count(), 2)
+        assert.equal(await p.locator('.cp04-pending').count(), 1,
+          'closed prior visit must remain visible as pending')
+        const size = await p.locator('.cp04-finding').first().boundingBox()
+        assert.ok(size && size.height < 150, 'oversized inspection row')
+        const action = await p.getByRole('button', { name: 'Marcar resuelto' }).boundingBox()
+        assert.ok(action && action.width >= 135 && action.height >= 43,
+          'resolve button must stay usable')
+        if (width > 820) assert.ok(action.width < 200, 'oversized desktop resolve button')
+        assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          'inspection/pending detail overflow: ' + width)
+        assert.deepEqual(errors, [])
+        await p.screenshot({
+          path: `${out}/detalle-inspeccion-pendientes-${width}.png`,
+          fullPage: true
+        })
+        await p.close()
+      }
+    }
     if (!before)
       for (const scenario of ['error', 'empty', 'loading', 'revoked']) {
         const { p, state, errors } = await cp04Page(
