@@ -19,7 +19,7 @@
 
 - **[GitHub Actions #44424124792 — Verificación ByteTorque](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44424124792): SUCCESS**, commit `177e32af`. Web/iOS PWA y Android Expo **PASS**, **717/717 Vitest en 82 archivos**, TypeScript, PWA pública/privada y PostgreSQL 17 aislado.
 - Laboratorio: `BT_FLOW_LIVE_02_LOCAL_FRESH_CONNECTION_PASS` y `BT_COM_01C_LOCAL_FRESH_CONNECTION_NO_MAIL_PASS`.
-- **[GitHub Actions #44424124729 — QA de interfaz existente](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44424124729):** en curso al documentar. Es regresión de UI existente; no hay interfaz de correo activada en esta etapa.
+- **[GitHub Actions #44424124729 — QA de interfaz existente](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44424124729):** **SUCCESS**. Fue una regresión de UI existente con navegador simulado; no existe interfaz de correo activada en esta etapa.
 - Las pruebas negativas iniciales identificaron un error de continuación de Bash y una aserción sobre UPDATE de tabla vacía (el trigger por fila no se ejecuta sin filas); se corrigieron. Únicamente el workflow final SUCCESS se considera aprobación del candidato.
 
 ## Puertas que permanecen cerradas
