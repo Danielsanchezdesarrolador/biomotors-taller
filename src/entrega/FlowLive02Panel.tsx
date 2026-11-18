@@ -77,8 +77,11 @@ export function FlowLive02Panel({
     alive.current = true
     const version = ++generation.current
     const connection = flowLiveCandidate(client, context, { explicitlyApproved: true })
+    lock.current = false
     setPort(connection)
     setRecords(null)
+    setBusy(false)
+    setMessage('')
     setLoading(true)
     setError('')
     void connection.history(quote, revision)
@@ -126,8 +129,10 @@ export function FlowLive02Panel({
     } catch {
       if (current(version)) setError(errorText)
     } finally {
-      lock.current = false
-      if (current(version)) setBusy(false)
+      if (current(version)) {
+        lock.current = false
+        setBusy(false)
+      }
     }
   }
   const recordApproval = () => write(
