@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ComponentType } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
 import { workStatusLabel, type Finding } from '../ordenes/cp04Contracts'
+import { QuoteFailure, type Revision } from '../cp05/contracts'
+import { archivedRevisionPdf } from './archiveDownload'
 import { cp04Repository } from '../ordenes/cp04Repository'
 import { Cp04OrdersView } from '../ordenes/Cp04OrdersView'
 import { historyRepository, type HistoryPort } from './repository'
@@ -141,6 +143,7 @@ export function HistoryView({
   onBack,
   onOrder,
   onQuote,
+  onDownload,
   onAccessLost
 }: {
   repository: HistoryPort
@@ -149,6 +152,7 @@ export function HistoryView({
   onOrder: (id: string) => void
   onAccessLost?: () => void
   onQuote?: (id: string) => void
+  onDownload?: (revision: Revision) => Promise<void>
 }) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null),
     [visits, setVisits] = useState<Visit[]>([]),
@@ -163,7 +167,9 @@ export function HistoryView({
     [nextPending, setNextPending] = useState<Cursor | null>(null),
     [busy, setBusy] = useState(true),
     [error, setError] = useState(''),
-    [retryKind, setRetryKind] = useState<'refresh' | 'visits' | 'pending'>('refresh')
+    [retryKind, setRetryKind] = useState<'refresh' | 'visits' | 'pending'>('refresh'),
+    [downloading, setDownloading] = useState<string | null>(null),
+    [downloadError, setDownloadError] = useState('')
   const active = useRef(true),
     sequence = useRef(0),
     lock = useRef(false)
@@ -261,6 +267,22 @@ export function HistoryView({
       }
     }
   }
+  async function downloadArchived(revision: Revision) {
+    if (!onDownload || downloading) return
+    setDownloading(revision.id)
+    setDownloadError('')
+    try {
+      await onDownload(revision)
+    } catch (e) {
+      if (e instanceof QuoteFailure && e.kind === 'denied') {
+        failure(new HistoryFailure('denied'))
+      } else {
+        setDownloadError('No se pudo recuperar el PDF archivado. Verifica la conexión e inténtalo nuevamente.')
+      }
+    } finally {
+      setDownloading(null)
+    }
+  }
   return (
     <section className="cp03-pilot cp06-history" aria-label="Historial del vehículo">
       <header>
@@ -271,6 +293,7 @@ export function HistoryView({
         <p>Visitas, inspecciones y observaciones del taller autorizado.</p>
       </header>
       {busy && <p role="status">Consultando historial…</p>}
+      {downloadError && <p className="cp06-error" role="alert">{downloadError}</p>}
       {error && (
         <div className="cp06-error" role="alert">
           <p>{error}</p>
@@ -397,6 +420,18 @@ export function HistoryView({
                                 {r.payload.vehicle.plate || 'Sin patente'} · Total histórico:{' '}
                                 {money(r.payload.totals.total)}
                               </p>
+                              {onDownload && (
+                                <button
+                                  type="button"
+                                  className="cp03-secondary"
+                                  disabled={!!downloading || busy}
+                                  onClick={() => void downloadArchived(r)}
+                                >
+                                  {downloading === r.id
+                                    ? 'Verificando PDF archivado…'
+                                    : 'Descargar PDF de esta revisión'}
+                                </button>
+                              )}
                             </article>
                           ))}
                         {!quotes.revisions.some((r) => r.quote_id === q.id) && (
@@ -455,7 +490,12 @@ export function VehicleHistory({
   onBack: () => void
 }) {
   const [repository, setRepository] = useState<HistoryPort | null>(null),
-    [document, setDocument] = useState<{ kind: 'order' | 'quote'; id: string } | null>(null)
+    [document, setDocument] = useState<{ kind: 'order' | 'quote'; id: string } | null>(null),
+    [archive, setArchive] = useState<{
+      scope: string
+      port: Pick<ReturnType<typeof import('../cp05/documentClient').documentClient>, 'download' | 'dispose'>
+    } | null>(null)
+  const scope = context.userId + ':' + context.workshop.id + ':' + context.role
   useEffect(() => {
     const repo = historyRepository(client, context, {
       cp05Enabled: import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -463,6 +503,22 @@ export function VehicleHistory({
     setRepository(repo)
     return () => repo.dispose()
   }, [client, context])
+  useEffect(() => {
+    // Dynamic import is allowed only when both CP05 private history and
+    // the archive's independent rollout gate are enabled.
+    if (import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED !== 'true' ||
+        import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED !== 'true') return
+    let cancelled = false
+    let port: ReturnType<typeof import('../cp05/documentClient').documentClient> | null = null
+    void import('../cp05/documentClient')
+      .then(({ documentClient }) => {
+        if (cancelled) return
+        port = documentClient(client, context, { archive: true, email: false })
+        setArchive({ scope, port })
+      })
+      .catch(() => { if (!cancelled) setArchive(null) })
+    return () => { cancelled = true; port?.dispose() }
+  }, [client, context, scope])
   if (document?.kind === 'order')
     return (
       <ExistingOrder
@@ -486,6 +542,10 @@ export function VehicleHistory({
       onAccessLost={onAccessLost}
       repository={repository}
       vehicleId={vehicleId}
+      onDownload={archive?.scope === scope ? async (revision) => {
+        const { downloadPdf } = await import('../cp05/pdf')
+        await archivedRevisionPdf(revision, vehicleId, context.workshop.id, archive.port, downloadPdf)
+      } : undefined}
       onBack={onBack}
       onOrder={(id) => setDocument({ kind: 'order', id })}
       onQuote={
