@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck",
     "verify-config": "node scripts/verify-config.mjs",
-    "test:contracts": "node --experimental-strip-types --test scripts/test-demo-gateway.mjs"
+    "test:contracts": "node --experimental-strip-types --test scripts/test-demo-gateway.mjs scripts/test-demo-routes.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
