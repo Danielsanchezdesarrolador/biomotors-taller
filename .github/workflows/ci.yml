@@ -108,6 +108,9 @@ jobs:
       - name: Generar bundle Android para validación (no APK)
         run: npx expo export --platform android --output-dir dist-android
         working-directory: apps/android
+      - name: Contratos y aislamiento offline BT-ANDROID-02
+        run: npm run test:contracts
+        working-directory: apps/android
       - name: Verificar configuración nativa y perfil APK
         run: npm run verify-config
         working-directory: apps/android
