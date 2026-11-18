@@ -19,7 +19,7 @@ Se detectó que CP06 mostraba revisiones históricas, pero no ofrecía una recup
 - `VITE_BT_CP05_DOCUMENTS_ENABLED` permanece OFF; el botón **no debe aparecer todavía a los usuarios**, y esta funcionalidad es **CANDIDATA, no operativa** hasta terminar los respaldos, instalar Storage/RLS bajo autorización y desplegar Edge CP05.
 - No se hizo ningún respaldo desde el PC laboral y no se solicitaron ni manipularon contraseñas ni claves de cifrado.
 - El proyecto web en Render permanece en el despliegue previo; los commits se publicaron en `main` con `[skip render]`.
-- **CI para SHA 932a81c:** `44307885401` Verificación Web/iOS PWA + Android y `44307885443` interfaz visual estaban ejecutándose cuando se creó este checkpoint. Consultar la conclusión antes de declararlos verdes. La primera corrida de código detectó error TS de un fixture malformado, corregido en el segundo commit.
+- **CI para SHA 932a81c:** `44307885401` **SUCCESS** (Web/iOS PWA y Android). La comprobación visual `44307885443` seguía en ejecución en la última consulta, sin errores reportados hasta ese punto; no afirmar PASS visual antes de su conclusión. La primera corrida detectó un error TS de un fixture malformado, corregido en el segundo commit.
 
 ## Próximos pasos
 
