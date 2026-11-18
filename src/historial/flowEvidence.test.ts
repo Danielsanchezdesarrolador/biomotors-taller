@@ -60,7 +60,7 @@ function setup(ignoreServerFilters = false) {
   }
   const load=vi.fn(async (table: string, ids: string[], _column: string,
     _foreign?: string, _vehicle?: string) =>
-    rows[table].filter(x => ids.includes(x.revision_id)))
+    rows[table].filter(x => ignoreServerFilters || ids.includes(x.revision_id)))
   const read=async <T extends { workshop_id: string; id: string }>(
     table: string, ids: string[], column: string,
     foreign?: string, vehicle?: string
