@@ -14,12 +14,12 @@ END $$;
 -- Data comes from FLOW-LIVE-02 synthetic rows. The preceding lab intentionally
 -- left the quote in draft after a revision, demonstrating stale review refusal.
 INSERT INTO bt_com_private.closing_manifests (
- workshop_id,request_id,order_id,quote_id,revision_id,
+ workshop_id,id,request_id,order_id,quote_id,revision_id,
  approval_id,report_id,delivery_id,actor_id,revision_number,
  payload_sha256,documents
 )
-SELECT q.workshop_id,'eeeeeeee-0000-4000-8000-000000000001'::uuid,
- q.order_id,q.id,r.id,a.id,x.id,d.id,
+SELECT q.workshop_id,'eeeeeeee-0000-4000-8000-000000000003'::uuid,
+ 'eeeeeeee-0000-4000-8000-000000000001'::uuid, q.order_id,q.id,r.id,a.id,x.id,d.id,
  '11111111-1111-4111-8111-111111111111'::uuid,r.revision,
  r.payload_sha256,
  jsonb_build_array(
@@ -76,7 +76,6 @@ SELECT public.com01c_expect('SELECT * FROM bt_com_private.mail_reviews','42501')
 SELECT public.com01c_expect('INSERT INTO bt_com_private.mail_provider_events DEFAULT VALUES','42501');
 RESET ROLE;
 
-UPDATE bt_com_private.rollout SET review_enabled=true;
 -- No row exists yet: installing candidate SQL alone is not activation.
 INSERT INTO bt_com_private.rollout(workshop_id,review_enabled,approval_note)
 VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',true,'LAB ONLY: never authorize hosted mail');
@@ -111,7 +110,6 @@ UPDATE public.quotes
 
 -- Private function gets a manifest ID from trusted server input; authenticated
 -- actor is checked in SQL, not derived from a browser-submitted name.
-CREATE TABLE public.com01c_lab_state (key text PRIMARY KEY,value jsonb NOT NULL);
 SET ROLE service_role;
 DO $$
 DECLARE wid uuid:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -129,7 +127,6 @@ BEGIN
  IF first_answer IS DISTINCT FROM repeat_answer OR
     first_answer->>'review_state' IS DISTINCT FROM 'operator_reviewed_not_sent'
  THEN RAISE EXCEPTION 'COM01C_REVIEW_NOT_IDEMPOTENT'; END IF;
- INSERT INTO public.com01c_lab_state(key,value) VALUES('review',first_answer);
 END $$;
 SELECT public.com01c_expect(
  $cmd$SELECT bt_com_private.record_review(
