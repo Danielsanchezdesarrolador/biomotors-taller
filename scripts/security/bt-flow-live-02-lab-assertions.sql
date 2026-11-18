@@ -11,7 +11,20 @@ BEGIN
   RAISE EXCEPTION 'Unexpected state % on %; expected %',SQLSTATE,cmd,expected;
  END;
  RAISE EXCEPTION 'Expected % denial: %',expected,cmd;
-END $$;
+END $;
+-- Independent server-side activation is DENY by default, even for an active
+-- owner with a legitimate JWT. No browser controls this private gate.
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+SELECT public.flow_expect($call$SELECT public.bt_flow_record_quote_approval(
+ 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',gen_random_uuid(),gen_random_uuid(),
+ gen_random_uuid(),'in_person','Autorización simulada sin habilitar')$call$,'42501');
+SELECT public.flow_expect('SELECT * FROM bt_flow_live_private.rollout','42501');
+RESET ROLE;
+-- TEST/LAB ONLY: emulate a later explicit server-authorized workshop rollout.
+INSERT INTO bt_flow_live_private.rollout(workshop_id,enabled,enabled_at,approval_note)
+ VALUES('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',true,statement_timestamp(),
+ 'LAB ONLY -- never enables hosted workshop data');
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
 INSERT INTO public.flow_lab_state VALUES('quote',
