@@ -140,7 +140,14 @@ function FindingDetails({ finding: f }: { finding: Finding }) {
   )
 }
 /** Only server-returned BT-FLOW-LIVE-02 rows can appear as historical evidence. */
-function EvidenceDetails({ evidence, revision }: { evidence: FlowEvidence; revision: Revision }) {
+function EvidenceDetails({
+  evidence, revision, onDownload, downloading
+}: {
+  evidence: FlowEvidence
+  revision: Revision
+  onDownload?: (kind: 'report' | 'handover') => void
+  downloading: boolean
+}) {
   if (evidence.status !== 'ready') return null
   const approval = evidence.approvals.find(x => x.revision_id === revision.id)
   const execution = evidence.executions.find(x => x.revision_id === revision.id)
@@ -185,6 +192,16 @@ function EvidenceDetails({ evidence, revision }: { evidence: FlowEvidence; revis
           Las cuatro comprobaciones fueron declaradas por el responsable.
           No se verificó recepción ni conformidad del cliente.</p>
       ) : <p>Sin constancia registrada.</p>}
+      {approval && execution && delivery && onDownload && (
+        <div className="cp06-evidence-downloads">
+          <p>Copias PDF generadas localmente desde registros históricos.
+            No son originales archivados, documentos firmados ni correos enviados.</p>
+          <button className="cp03-secondary" type="button" disabled={downloading}
+            onClick={() => onDownload('report')}>Descargar copia PDF del informe</button>
+          <button className="cp03-secondary" type="button" disabled={downloading}
+            onClick={() => onDownload('handover')}>Descargar copia PDF de entrega</button>
+        </div>
+      )}
     </details>
   )
 }
@@ -195,6 +212,7 @@ export function HistoryView({
   onOrder,
   onQuote,
   onDownload,
+  onFinalDownload,
   onAccessLost
 }: {
   repository: HistoryPort
@@ -204,6 +222,10 @@ export function HistoryView({
   onAccessLost?: () => void
   onQuote?: (id: string) => void
   onDownload?: (revision: Revision) => Promise<void>
+  onFinalDownload?: (
+    quote: QuoteHistory['quotes'][number], revision: Revision,
+    evidence: FlowEvidence, kind: 'report' | 'handover'
+  ) => Promise<void>
 }) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null),
     [visits, setVisits] = useState<Visit[]>([]),
@@ -339,6 +361,21 @@ export function HistoryView({
       } else {
         setDownloadError('No se pudo recuperar el PDF archivado. Verifica la conexión e inténtalo nuevamente.')
       }
+    } finally {
+      setDownloading(null)
+    }
+  }
+  async function downloadFinal(revision: Revision, kind: 'report' | 'handover') {
+    if (!onFinalDownload || downloading || busy) return
+    const q = quotes.quotes.find(x => x.id === revision.quote_id)
+    if (!q || quotes.evidence.status !== 'ready') return
+    setDownloading(revision.id + ':' + kind)
+    setDownloadError('')
+    try {
+      await onFinalDownload(q, revision, quotes.evidence, kind)
+    } catch (e) {
+      if (e instanceof HistoryFailure && e.kind === 'denied') failure(e)
+      else setDownloadError('No fue posible validar y preparar la copia PDF. Revisa tu sesión y vuelve a intentarlo.')
     } finally {
       setDownloading(null)
     }
@@ -480,7 +517,11 @@ export function HistoryView({
                                 {r.payload.vehicle.plate || 'Sin patente'} · Total histórico:{' '}
                                 {money(r.payload.totals.total)}
                               </p>
-                              <EvidenceDetails evidence={quotes.evidence} revision={r} />
+                              <EvidenceDetails evidence={quotes.evidence} revision={r}
+                                downloading={!!downloading || busy}
+                                onDownload={onFinalDownload
+                                  ? (kind) => void downloadFinal(r, kind)
+                                  : undefined} />
                               {onDownload && (
                                 <button
                                   type="button"
@@ -617,6 +658,22 @@ export function VehicleHistory({
               )
             } : undefined}
             onBack={onBack}
+            onFinalDownload={
+              import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
+              import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true'
+                ? async (quote, revision, evidence, kind) => {
+                    await repository.vehicle(vehicleId)
+                    const { prepareClosingPacket } = await import('../entrega/finalPackage')
+                    const { browserClosingDocumentPdf } = await import('../entrega/finalPdf')
+                    const { downloadPdf } = await import('../cp05/pdf')
+                    const packet = prepareClosingPacket(quote, revision, evidence)
+                    const bytes = await browserClosingDocumentPdf(packet, kind)
+                    await repository.vehicle(vehicleId)
+                    downloadPdf(bytes, kind === 'report'
+                      ? packet.report.fileName : packet.handover.fileName)
+                  }
+                : undefined
+            }
             onOrder={(id) => enterDocument('order', id)}
             onQuote={
               import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
