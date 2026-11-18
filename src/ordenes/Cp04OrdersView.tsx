@@ -826,29 +826,31 @@ export function Cp04OrdersView({
                 {findings.length === 0 && <p>Todavía no se han registrado puntos de inspección.</p>}
                 {findings.map((item) => (
                   <div key={item.id} className="cp04-finding">
-                    <strong>{item.category}</strong>
-                    <span>
-                      Diagnóstico:{' '}
-                      {item.result === 'ok'
-                        ? 'Correcto'
-                        : item.result === 'attention'
-                          ? 'Requiere atención'
-                          : 'No revisado'}
-                    </span>
-                    {item.result === 'attention' && (
-                      <span
-                        className={
-                          'cp04-resolution ' +
-                          (item.resolution === 'resolved' ? 'is-resolved' : 'is-pending')
-                        }
-                      >
-                        {inspectionResolutionLabel(item)}
-                        {item.resolution === 'resolved' && item.resolved_at
-                          ? ' · ' + safeDate(item.resolved_at)
-                          : ''}
+                    <div className="cp04-finding-heading">
+                      <strong>{item.category}</strong>
+                      <span className={'cp04-finding-diagnosis result-' + item.result}>
+                        Diagnóstico:{' '}
+                        {item.result === 'ok'
+                          ? 'Correcto'
+                          : item.result === 'attention'
+                            ? 'Requiere atención'
+                            : 'No revisado'}
                       </span>
-                    )}
-                    {item.note && <p>{item.note}</p>}
+                      {item.result === 'attention' && (
+                        <span
+                          className={
+                            'cp04-resolution ' +
+                            (item.resolution === 'resolved' ? 'is-resolved' : 'is-pending')
+                          }
+                        >
+                          {inspectionResolutionLabel(item)}
+                          {item.resolution === 'resolved' && item.resolved_at
+                            ? ' · ' + safeDate(item.resolved_at)
+                            : ''}
+                        </span>
+                      )}
+                    </div>
+                    {item.note && <p className="cp04-finding-note">{item.note}</p>}
                     <small>Registrado: {safeDate(item.created_at)}</small>
                   </div>
                 ))}
@@ -903,9 +905,11 @@ export function Cp04OrdersView({
                 {pending.length === 0 && <p>No hay problemas técnicos pendientes registrados.</p>}
                 {pending.map((item) => (
                   <div key={item.id} className="cp04-pending">
-                    <strong>{item.category}</strong>
-                    <p>{item.note}</p>
-                    <small>Detectado el {safeDate(item.created_at)}</small>
+                    <div className="cp04-pending-content">
+                      <strong>{item.category}</strong>
+                      <p>{item.note}</p>
+                      <small>Detectado el {safeDate(item.created_at)}</small>
+                    </div>
                     {canInspect && (
                       <button
                         className="cp04-secondary"
