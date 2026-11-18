@@ -14,6 +14,8 @@ import {
   type Vehicle,
   type VisitPage,
   type QuoteHistory,
+  type FlowEvidence,
+  emptyEvidence,
   type Page
 } from './contracts'
 const orderCols =
@@ -180,7 +182,7 @@ export function historyRepository(
     return result
   }
   async function quoteHistory(vid: string, orders: WorkOrder[]): Promise<QuoteHistory> {
-    const empty = { quotes: [], revisions: [], events: [] }
+    const empty = { quotes: [], revisions: [], events: [], evidence: emptyEvidence() }
     if (!options.cp05Enabled) return { status: 'off', ...empty }
     if (!orders.length) return { status: 'ready', ...empty }
     try {
@@ -241,7 +243,23 @@ export function historyRepository(
         )
       )
         throw new HistoryFailure('denied')
-      return { status: 'ready', quotes, revisions, events }
+      let evidence: FlowEvidence = emptyEvidence()
+      // Statically eliminated from the OFF build. CP06 remains usable when
+      // the separately authorized SQL has not been installed.
+      if (import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true') {
+        try {
+          const { readFlowEvidence } = await import('./flowEvidence')
+          evidence = await readFlowEvidence(wid, vid, quotes, revisions, allRows)
+        } catch (error) {
+          alive()
+          if (error instanceof HistoryFailure && error.kind === 'denied') {
+            dispose()
+            throw error
+          }
+          evidence = { ...emptyEvidence(), status: 'unavailable' }
+        }
+      }
+      return { status: 'ready', quotes, revisions, events, evidence }
     } catch (error) {
       alive()
       if (error instanceof HistoryFailure && error.kind === 'denied') throw error
