@@ -65,3 +65,19 @@
   .cp05-execution-choices button { flex: 1 1 140px; }
   .cp05-execution-totals { grid-template-columns: 1fr; }
 }
+
+/* BT-FLOW-LIVE-02 private candidate forms; no public/admin bypass. */
+.cp05-execution-form { display: grid; gap: 13px; min-width: 0; }
+.cp05-execution-form > label:not(.cp05-execution-confirm) {
+  display: grid; gap: 7px; min-width: 0; font-weight: 500;
+}
+.cp05-execution-form select, .cp05-execution-form textarea {
+  border: 1px solid #aabbd0; border-radius: 9px; background: #fff;
+  padding: 11px; color: #0a1c3a; font: inherit; width: 100%; min-width: 0;
+}
+.cp05-execution-form select { min-height: 44px; }
+.cp05-execution-form button { min-height: 44px; }
+.cp05-execution h4 {
+  color: #0a1c3a; margin: 10px 0 0;
+  padding-top: 12px; border-top: 1px solid #e2e9f2;
+}
