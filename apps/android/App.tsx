@@ -1,6 +1,7 @@
 import { useMemo, useState, type ComponentProps } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { NativeModule } from './screens/NativeModules'
+import { resolveDemoRoute, type DemoSection } from './navigation/demoRoutes'
 import {
   createDemoGateway, demoErrorText, openDemoSession,
   type DemoSession, type DemoFailureMode, type DemoRole, type DemoWorkshopId,
@@ -10,7 +11,7 @@ import {
 } from 'react-native'
 
 type IconName = ComponentProps<typeof Ionicons>['name']
-type Section = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
+type Section = DemoSection
 type StatusKey = 'diagnostico' | 'servicio' | 'repuestos' | 'entrega'
 type Status = { key: StatusKey; label: string; color: string; light: string; count: number; icon: IconName }
 type WorkOrder = { id: string; vehicle: string; service: string; plate: string; status: StatusKey }
@@ -83,9 +84,17 @@ export default function App() {
   const today = useMemo(() => new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date()), [])
 
   function go(target: Section, orderId?: string) {
-    setFocusedOrderId(orderId)
-    setSection(target)
-    setMenuOpen(false)
+    try {
+      const destination=resolveDemoRoute(demoSession,gateway,target,orderId)
+      setFocusedOrderId(destination.focusedOrderId)
+      setSection(destination.section)
+      setMenuOpen(false)
+    } catch(error) {
+      // Nunca abrir una ficha cruzada o vencida a partir de un deep link.
+      setFocusedOrderId(undefined)
+      setMenuOpen(false)
+      Alert.alert('Consulta de ejemplo no disponible',demoErrorText(error))
+    }
   }
   function enterDemo(workshopId:DemoWorkshopId,role:DemoRole) {
     setDemoSession(openDemoSession(workshopId,role))
