@@ -97,7 +97,7 @@ export async function executionDraftPdf(
   section('Partidas revisadas por el operador (solo selección local)')
   for (const { item, decision } of review.rows) {
     pageIfNeeded(55)
-    wrapped((decision === 'performed' ? '[MARCAD0 REALIZADO]' : '[NO REALIZADO]') +
+    wrapped((decision === 'performed' ? '[MARCADO REALIZADO]' : '[NO REALIZADO]') +
       ' ' + item.type + ': ' + item.description, 9, M + 5, W - 2*M - 10)
     line('Cantidad ' + (item.quantity100 / 100).toLocaleString('es-CL') +
       ' · Neto cotizado: ' + clp(item.line_net), 8, muted, M + 5)
