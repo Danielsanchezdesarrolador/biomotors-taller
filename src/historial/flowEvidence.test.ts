@@ -92,7 +92,7 @@ describe('CP06 LIVE-02 immutable evidence reader (build gated)', () => {
     const b=setup()
     b.rows.bt_flow_execution_reports=[{ ...execution, vehicle_id: id(99) }]
     await expect(b.run()).rejects.toMatchObject({ kind:'denied' })
-    const c=setup()
+    const c=setup(true)
     c.rows.bt_flow_visit_deliveries=[{ ...delivery, revision_id: id(99) }]
     await expect(c.run()).rejects.toMatchObject({ kind:'denied' })
   })
