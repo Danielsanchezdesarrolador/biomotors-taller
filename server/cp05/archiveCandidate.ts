@@ -20,7 +20,7 @@ export function isArchivedPdf(bytes: Uint8Array): boolean {
       bytes.byteLength > CP05_MAX_PDF_BYTES) return false
   const head = new TextDecoder('ascii').decode(bytes.subarray(0, 8))
   const tail = new TextDecoder('ascii').decode(bytes.subarray(Math.max(0, bytes.length - 2048)))
-  return /^%PDF-[1-2]\\.[0-9]/.test(head) && tail.includes('%%EOF')
+  return /^%PDF-[1-2]\.[0-9]/.test(head) && tail.includes('%%EOF')
 }
 export function isArchivePath(path: string): boolean {
   return typeof path === 'string' && pathPattern.test(path)
