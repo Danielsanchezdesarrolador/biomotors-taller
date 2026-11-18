@@ -1,7 +1,7 @@
 /** BT-PILOT-QA-01: validador de matriz OFFLINE. No confirma pruebas de producto. */
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync, writeFileSync } from 'node:fs'
-import { resolve, dirname, relative } from 'node:path'
+import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..')
 const manifestPath=resolve(root,'docs/qa/BT_PILOT_QA_01_CASES.json')
@@ -32,7 +32,7 @@ for (const gate of data.gates){
 }
 assert.deepEqual(gates,required,'Falta una puerta de lanzamiento')
 for (const c of data.cases) {
-  assert.match(c.id,/^P\\d{2}$/)
+  assert.match(c.id,/^P\d{2}$/)
   assert.ok(!ids.has(c.id),'Caso duplicado: '+c.id)
   ids.add(c.id)
   assert.ok(['P0','P1','P2'].includes(c.priority))
