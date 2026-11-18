@@ -38,6 +38,10 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Instalar dependencias web
         run: npm install --no-audit --no-fund
+      - name: CP05 empaquetado Edge offline listo para revisar (NO despliegue)
+        run: |
+          node scripts/package-cp05-edge.mjs /tmp/bytetorque-cp05-edge-ci
+          node scripts/verify-cp05-edge-package.mjs /tmp/bytetorque-cp05-edge-ci
       - name: Matriz de aceptación BT-PILOT-QA-01 (consistencia offline; NO certifica piloto)
         run: node scripts/qa/verify-pilot-matrix.mjs --check
       - name: Recorridos BT-PILOT-QA-02 (cobertura y hoja sin resultados)
