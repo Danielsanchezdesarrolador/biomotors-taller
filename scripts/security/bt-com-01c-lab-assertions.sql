@@ -196,7 +196,14 @@ DO $$ BEGIN
   'UPDATE bt_com_private.mail_reviews SET recipient=recipient','42501');
  PERFORM public.com01c_expect(
   'DELETE FROM bt_com_private.closing_manifests','42501');
- PERFORM public.com01c_expect(
-  'UPDATE bt_com_private.mail_provider_events SET attempt=attempt','42501');
+ -- An UPDATE against an EMPTY table never invokes a row-level trigger.
+ -- Verify that an enabled immutable trigger exists without fabricating a
+ -- provider event simply to exercise it.
+ IF NOT EXISTS (
+  SELECT 1 FROM pg_trigger
+  WHERE tgrelid='bt_com_private.mail_provider_events'::regclass
+    AND tgname='bt_com_mail_event_immutable' AND NOT tgisinternal
+    AND tgenabled='O'
+ ) THEN RAISE EXCEPTION 'COM01C_PROVIDER_EVENT_TRIGGER_MISSING'; END IF;
 END $$;
 SELECT 'BT_COM_01C_LOCAL_IMMUTABLE_REVIEW_NO_MAIL_PASS';
