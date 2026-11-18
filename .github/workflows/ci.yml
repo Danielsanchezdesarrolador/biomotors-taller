@@ -56,6 +56,8 @@ jobs:
         run: npm run build
       - name: Validar cuentas, talleres y cupos en PostgreSQL local sin red
         run: bash scripts/security/verify-plan04-local.sh
+      - name: Validar BT-FLOW-LIVE-02 en PostgreSQL 17 aislado (sin Supabase alojado)
+        run: bash scripts/security/verify-flow-live-02-local.sh
       - name: Compilar PLAN04 candidato sin activar servicios
         env:
           VITE_BT_AUTH_R1_ENABLED: 'true'
