@@ -180,7 +180,7 @@ describe('CP04 X multipoint autosave queue',()=>{
      await vi.advanceTimersByTimeAsync(150)
      expect(rows).toHaveLength(1) // Committed, response delayed.
      engine.stop()
-     expect(engine.snapshot()[template[0].id].phase).toBe('saving') // snapshot of old generation
+     expect(engine.snapshot()[template[0].id].phase).toBe('queued') // interrupted writes are not "saving"
      engine.start()
      release?.()
      await Promise.resolve()
