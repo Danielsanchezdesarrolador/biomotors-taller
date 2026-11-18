@@ -325,12 +325,12 @@ GRANT EXECUTE ON FUNCTION
  TO authenticated;
 REVOKE ALL ON FUNCTION
  public.bt_flow_record_quote_approval(uuid,uuid,uuid,uuid,text,text),
- public.bt_flow_record_execution(uuid,uuid,uuid,uuid,uuid,jsonb,text,boolean),
+ public.bt_flow_record_execution(uuid,uuid,uuid,uuid,jsonb,text,boolean),
  public.bt_flow_record_handover(uuid,uuid,uuid,jsonb,text,text,boolean)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION
  public.bt_flow_record_quote_approval(uuid,uuid,uuid,uuid,text,text),
- public.bt_flow_record_execution(uuid,uuid,uuid,uuid,uuid,jsonb,text,boolean),
+ public.bt_flow_record_execution(uuid,uuid,uuid,uuid,jsonb,text,boolean),
  public.bt_flow_record_handover(uuid,uuid,uuid,jsonb,text,text,boolean)
  TO authenticated;
 COMMIT;
