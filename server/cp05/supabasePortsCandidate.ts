@@ -134,6 +134,7 @@ export async function restoreRevisionCandidate(
   if (r.data.pdf_object_path !== expected) throw Error('ARCHIVE_PATH_MISMATCH')
   return privateArchiveCandidate(trustedClient, policy).restore(
     r.data.pdf_object_path,
-    r.data.pdf_sha256
+    r.data.pdf_sha256,
+    r.data.pdf_size
   )
 }

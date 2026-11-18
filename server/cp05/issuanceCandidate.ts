@@ -1,5 +1,6 @@
 /** Backend-only injected candidate. NOT imported by the PWA; no endpoint or credentials. */
 import { quoteId } from '../../src/cp05/contracts'
+import { isArchivedPdf } from './archiveCandidate'
 import type { Snapshot, Revision, Quote } from '../../src/cp05/contracts'
 export type Reservation = {
   request_id: string
@@ -51,7 +52,7 @@ export async function issueQuoteCandidate(
     throw Error('INVALID_RESERVATION')
   const path = `${snapshot.quote.workshop_id}/quotes/${quote.id}/r${frozen.revision}/${frozen.payload_sha256}.pdf`
   const pdf = await ports.render(snapshot)
-  if (new TextDecoder().decode(pdf.slice(0, 5)) !== '%PDF-' || pdf.length > 20000000)
+  if (!isArchivedPdf(pdf))
     throw Error('INVALID_PDF')
   const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', pdf.slice().buffer))]
     .map((x) => x.toString(16).padStart(2, '0'))
