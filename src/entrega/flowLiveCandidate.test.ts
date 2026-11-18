@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
 import type { Quote, Revision, Snapshot } from '../cp05/contracts'
-import { FlowLiveFailure, flowLiveCandidate } from './flowLiveCandidate'
+import { FlowLiveFailure, flowLiveCandidate, type ApprovalRecord, type ExecutionRecord, type HandoverRecord } from './flowLiveCandidate'
 
 const id = (n: number) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0')
 const wid = id(1), uid = id(2), qid = id(3), revid = id(4), oid = id(5)
@@ -46,19 +46,19 @@ const note = 'Revisión autorizada declarada por el operador; no constituye firm
 const pendingNote = 'Servicio de mano de obra pendiente para otra visita'
 const decisions = { [id(10)]: 'performed' as const, [id(11)]: 'not_performed' as const }
 const input = { decisions, pendingExplanation: pendingNote, operatorReviewed: true }
-const approval = {
+const approval: ApprovalRecord = {
   id: id(60), workshop_id: wid, order_id: oid, quote_id: qid,
   revision_id: revid, request_id: rid, recorded_by: uid,
   evidence_status: 'operator_attested', method: 'in_person'
 }
-const report = {
+const report: ExecutionRecord = {
   id: id(70), workshop_id: wid, order_id: oid, vehicle_id: vid,
   quote_id: qid, revision_id: revid, approval_id: approval.id,
   request_id: rid, reviewed_by: uid, quoted_total: 179,
   performed_net: 100, performed_tax: 19, performed_total: 119,
   evidence_status: 'operator_attested'
 }
-const handover = {
+const handover: HandoverRecord = {
   id: id(80), workshop_id: wid, order_id: oid, vehicle_id: vid,
   quote_id: qid, revision_id: revid, report_id: report.id,
   request_id: rid, recorded_by: uid, evidence_status: 'operator_attested',
@@ -73,7 +73,7 @@ function setup() {
     data: { user: { id: uid, email_confirmed_at: '2026-11-18T12:00:00Z' } },
     error: null
   }))
-  const rpc = vi.fn(async (name: string) => ({
+  const rpc = vi.fn(async (name: string): Promise<{ data: unknown; error: null | { code?: string } }> => ({
     data: name === 'bt_flow_record_quote_approval' ? approval :
       name === 'bt_flow_record_execution' ? report : handover,
     error: null as null | { code?: string }
