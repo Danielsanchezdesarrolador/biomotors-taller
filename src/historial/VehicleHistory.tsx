@@ -14,7 +14,9 @@ import {
   type Cursor,
   type Vehicle,
   type Visit,
-  type QuoteHistory
+  type QuoteHistory,
+  type FlowEvidence,
+  emptyEvidence
 } from './contracts'
 import './history.css'
 const date = (value: string) =>
@@ -137,6 +139,55 @@ function FindingDetails({ finding: f }: { finding: Finding }) {
     </li>
   )
 }
+/** Only server-returned BT-FLOW-LIVE-02 rows can appear as historical evidence. */
+function EvidenceDetails({ evidence, revision }: { evidence: FlowEvidence; revision: Revision }) {
+  if (evidence.status !== 'ready') return null
+  const approval = evidence.approvals.find(x => x.revision_id === revision.id)
+  const execution = evidence.executions.find(x => x.revision_id === revision.id)
+  const delivery = evidence.deliveries.find(x => x.revision_id === revision.id)
+  if (!approval && !execution && !delivery) return (
+    <p className="cp06-evidence-empty">Sin declaraciones de aprobación, ejecución o entrega para esta revisión.</p>
+  )
+  return (
+    <details className="cp06-evidence">
+      <summary>Consultar constancias históricas declaradas por el taller</summary>
+      <p className="cp06-evidence-note">
+        Declaraciones del operador, no firma del cliente, comprobante de pago
+        ni acreditación independiente de reparaciones o entrega física.
+      </p>
+      <h4>Autorización de esta revisión</h4>
+      {approval ? (
+        <p>Declarada el {date(approval.recorded_at)}. Medio: {approval.method}.
+          Registro: {approval.recorded_by}. Nota: {approval.note}</p>
+      ) : <p>Sin declaración registrada.</p>}
+      <h4>Trabajos declarados como realizados</h4>
+      {execution ? (
+        <>
+          <p>Registrado el {date(execution.recorded_at)} por {execution.reviewed_by}.
+            Total de la cotización: {money(execution.quoted_total)}.
+            Total marcado realizado: {money(execution.performed_total)}.
+            No equivale a importe cobrado.</p>
+          <ul className="cp06-evidence-items">
+            {revision.payload.items.map(item => (
+              <li key={item.id}>
+                <strong>{execution.decisions[item.id] === 'performed' ? 'Marcado realizado' : 'No realizado'}</strong>
+                {' · '}{item.description} · Neto cotizado: {money(item.line_net)}
+              </li>
+            ))}
+          </ul>
+          <p>Pendientes: {execution.pending_note || 'Sin partidas declaradas pendientes.'}</p>
+        </>
+      ) : <p>Sin informe de ejecución registrado.</p>}
+      <h4>Constancia de entrega</h4>
+      {delivery ? (
+        <p>Declarada el {date(delivery.recorded_at)} por {delivery.recorded_by}.
+          Medio: {delivery.handover_method}. Nota: {delivery.handover_note}.
+          Las cuatro comprobaciones fueron declaradas por el responsable.
+          No se verificó recepción ni conformidad del cliente.</p>
+      ) : <p>Sin constancia registrada.</p>}
+    </details>
+  )
+}
 export function HistoryView({
   repository,
   vehicleId,
@@ -161,7 +212,8 @@ export function HistoryView({
     status: 'off',
     quotes: [],
     revisions: [],
-    events: []
+    events: [],
+    evidence: emptyEvidence()
   })
   const [next, setNext] = useState<Cursor | null>(null),
     [nextPending, setNextPending] = useState<Cursor | null>(null),
@@ -255,7 +307,15 @@ export function HistoryView({
               : page.quotes.status,
           quotes: [...old.quotes, ...page.quotes.quotes],
           revisions: [...old.revisions, ...page.quotes.revisions],
-          events: [...old.events, ...page.quotes.events]
+          events: [...old.events, ...page.quotes.events],
+          evidence: {
+            status: old.evidence.status === 'unavailable' ||
+              page.quotes.evidence.status === 'unavailable'
+              ? 'unavailable' : page.quotes.evidence.status,
+            approvals: [...old.evidence.approvals, ...page.quotes.evidence.approvals],
+            executions: [...old.evidence.executions, ...page.quotes.evidence.executions],
+            deliveries: [...old.evidence.deliveries, ...page.quotes.evidence.deliveries]
+          }
         }))
       }
     } catch (e) {
@@ -420,6 +480,7 @@ export function HistoryView({
                                 {r.payload.vehicle.plate || 'Sin patente'} · Total histórico:{' '}
                                 {money(r.payload.totals.total)}
                               </p>
+                              <EvidenceDetails evidence={quotes.evidence} revision={r} />
                               {onDownload && (
                                 <button
                                   type="button"
@@ -464,6 +525,13 @@ export function HistoryView({
               </button>
             )}
           </section>
+          {quotes.evidence.status === 'unavailable' && (
+            <p className="cp06-error" role="status">
+              No se pudieron verificar las declaraciones históricas del servidor.
+              El historial de visitas, inspecciones y cotizaciones continúa disponible.
+              No se interpreta ausencia de registros como ausencia de trabajos.
+            </p>
+          )}
           <p className="cp06-note">
             {quotes.status === 'off'
               ? 'Cotizaciones no habilitadas. Este historial consulta únicamente visitas e inspecciones.'
