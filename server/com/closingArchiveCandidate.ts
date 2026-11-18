@@ -126,6 +126,8 @@ function verifySnapshot(
       snapshot.quoteArchive.path !== request.workshopId+'/quotes/'+p.quote.id+'/r'+p.quote.revision+'/'+p.quote.payloadSha256+'.pdf' ||
       !validDigest(snapshot.quoteArchive.sha256) ||
       snapshot.quoteArchive.sha256 !== p.quote.pdfSha256 ||
+      snapshot.quoteArchive.path !== snapshot.revision.pdf_object_path ||
+      snapshot.quoteArchive.byteLength !== snapshot.revision.pdf_size ||
       !Number.isSafeInteger(snapshot.quoteArchive.byteLength) ||
       snapshot.quoteArchive.byteLength < 12 ||
       snapshot.quoteArchive.byteLength > CP05_MAX_PDF_BYTES)
