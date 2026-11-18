@@ -1,0 +1,818 @@
+{
+  "schema": "bytetorque.pilot.qa.v1",
+  "stage": "BT-PILOT-QA-01",
+  "date": "2026-11-18",
+  "repo": "Danielsanchezdesarrolador/biomotors-taller",
+  "base_commit": "439105bc3794ac04f2a388a7527b7605d951c2bc",
+  "scope": "Piloto Ignacio. Solo auditoría offline y mapeo de evidencia; no autoriza producción, SQL, Auth, Storage, pagos, APK ni correo.",
+  "statuses": {
+    "C": "codigo_ci: evidencia técnica en código/CI; NO equivale a prueba productiva",
+    "S": "simulado: fixture o HTTP/SQL local; NO equivale a backend alojado",
+    "F": "fisico_parcial: comprobación manual del Director solo en el alcance descrito",
+    "D": "pendiente_dispositivo: requiere sesión/prueba física de plataforma",
+    "B": "bloqueado_seguridad: requiere puerta de seguridad y autorización",
+    "N": "no_aplica: plataforma fuera del alcance del caso"
+  },
+  "gates": [
+    {
+      "id": "G-BACKUP",
+      "description": "Respaldo cifrado integral verificable, lectura de artefacto y restauración aislada",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ]
+    },
+    {
+      "id": "G-AUTH",
+      "description": "Identidad, confirmación de correo, sesión/MFA y revocación reales",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_10_20261115.md"
+      ]
+    },
+    {
+      "id": "G-RLS",
+      "description": "Aislamiento real multitenant para lectura, escritura, historial y descarga",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "docs/checkpoints/CHECKPOINT_BT_CP05_PRIVATE_ARCHIVE_20261118.md"
+      ]
+    },
+    {
+      "id": "G-DATA",
+      "description": "Migraciones CP03/CP04 + guardado real autorizado + continuidad de expediente",
+      "status": "bloqueado",
+      "evidence": [
+        "src/clientes/cp03PilotRepository.test.ts",
+        "src/ordenes/cp04Autosave.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ]
+    },
+    {
+      "id": "G-DOCS",
+      "description": "Storage privado, PDF emitido/recuperado, hash, permisos y proveedor de correo autorizado aparte",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_CP05_PRIVATE_ARCHIVE_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_CP06_PDF_HISTORICO_20261118.md"
+      ]
+    },
+    {
+      "id": "G-PRIVACY",
+      "description": "Propósito, minimización, consentimiento/avisos y retención aprobados",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_LEGAL_01_20261116.md"
+      ]
+    },
+    {
+      "id": "G-PLAN",
+      "description": "Licencias/cupos y concesión Full Ignacio efectivas y auditadas; cobros OFF",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_PLAN_04_IMPLEMENTACION_20261117.md"
+      ]
+    },
+    {
+      "id": "G-DEVICE",
+      "description": "QA física en Safari iPhone y Android con roles y recorridos, antes del uso con datos reales",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ]
+    },
+    {
+      "id": "G-RELEASE",
+      "description": "Repositorio privado para procesos sensibles, migraciones/despliegue reversibles y autorización final",
+      "status": "bloqueado",
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "P01",
+      "area": "Acceso personal",
+      "priority": "P0",
+      "acceptance": "Cuenta nueva confirma correo e inicia sesión sin activar taller automáticamente; usuario sin taller no ve operaciones.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_R2_A6_10_20261115.md"
+      ],
+      "gate": [
+        "G-AUTH"
+      ]
+    },
+    {
+      "id": "P02",
+      "area": "Roles",
+      "priority": "P0",
+      "acceptance": "Dueño/admin ve operaciones permitidas; mecánico solo su ámbito; recepción no puede ejecutar tareas reservadas.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "C"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "apps/android/scripts/test-demo-gateway.mjs",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ],
+      "gate": [
+        "G-ROLES",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P03",
+      "area": "Sesión y revocación",
+      "priority": "P0",
+      "acceptance": "Logout, token caducado, revocación y cuenta sin taller borran los datos visibles y bloquean acciones; reingreso válido.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "C"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "apps/android/scripts/test-demo-gateway.mjs"
+      ],
+      "gate": [
+        "G-AUTH",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P04",
+      "area": "Aislamiento A/B",
+      "priority": "P0",
+      "acceptance": "No hay lecturas, escritura, búsqueda ni descarga cruzada usando ID conocido/consulta directa entre talleres.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "S"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "scripts/security/verify-plan04-local.sh",
+        "apps/android/scripts/test-demo-gateway.mjs"
+      ],
+      "gate": [
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P05",
+      "area": "Registro de cliente",
+      "priority": "P0",
+      "acceptance": "Validar identidad del cliente con información mínima, consentimiento y alta sin crear duplicados accidentales.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "src/clientes/cp03PilotRepository.test.ts",
+        "src/flow/receptionDraft.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_LEGAL_01_20261116.md"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-PRIVACY"
+      ]
+    },
+    {
+      "id": "P06",
+      "area": "Vehículo recurrente",
+      "priority": "P0",
+      "acceptance": "Cliente existente agrega/retoma vehículo y nueva visita conservando kilometraje, motivo y fechas por expediente.",
+      "platforms": {
+        "web": "C",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "src/flow/receptionDraft.test.ts",
+        "src/clientes/cp03PilotRepository.test.ts"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P07",
+      "area": "Nueva recepción",
+      "priority": "P0",
+      "acceptance": "Cliente, vehículo, motivo y km producen una OT única al confirmar; doble pulsación no duplica.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "src/flow/flowBusiness.test.ts",
+        "src/clientes/cp03PilotRepository.test.ts"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P08",
+      "area": "Borrador/retorno",
+      "priority": "P0",
+      "acceptance": "Ir a WhatsApp, pestaña o menú y volver conserva el borrador; refrescar/reabrir recupera solo lo persistido autorizadamente.",
+      "platforms": {
+        "web": "S",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/flow/receptionDraft.test.ts",
+        "src/ordenes/cp04Autosave.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P09",
+      "area": "Búsqueda de OT",
+      "priority": "P1",
+      "acceptance": "Filtros y búsqueda localizan una OT por ID, patente y vehículo; ficha coincide con recepción.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "C"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "apps/android/scripts/test-demo-gateway.mjs"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P10",
+      "area": "Nueva OT real",
+      "priority": "P0",
+      "acceptance": "Crear una OT con datos autorizados persiste en una nueva sesión y conserva propietario/taller correctos.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "src/ordenes/cp04Autosave.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-RLS",
+        "G-BACKUP"
+      ]
+    },
+    {
+      "id": "P11",
+      "area": "Multipunto 34 filas",
+      "priority": "P0",
+      "acceptance": "34 ítems independientes con exactamente una X (OK/atención/inmediato) o sin revisar, sin convertir pendiente en OK.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md",
+        "src/ordenes/Cp04MultipuntoChecklist.test.tsx"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P12",
+      "area": "Autoguardado multipunto",
+      "priority": "P0",
+      "acceptance": "Marcar 1, 2 o 10 ítems seguidos sin tocar Guardar; no pierde marcas/observaciones ni guarda otro expediente.",
+      "platforms": {
+        "web": "S",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/ordenes/cp04Autosave.test.ts",
+        "src/ordenes/Cp04MultipuntoChecklist.test.tsx"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P13",
+      "area": "Informe y fotos",
+      "priority": "P1",
+      "acceptance": "Notas por ítem y fotos autorizadas quedan asociadas a su visita; archivos erróneos no se aceptan.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md",
+        "src/ordenes/Cp04MultipuntoChecklist.test.tsx"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-PRIVACY"
+      ]
+    },
+    {
+      "id": "P14",
+      "area": "Diagnóstico vs motivo",
+      "priority": "P0",
+      "acceptance": "Conserva motivo original separado del diagnóstico técnico; no inventa conclusiones ni trabajos.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/flow/flowBusiness.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md",
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P15",
+      "area": "Propuesta y aceptación",
+      "priority": "P0",
+      "acceptance": "Cotización solo progresa tras confirmación y aceptación de revisión vigente; rechazo/cambios impiden ejecutar.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/flow/flowBusiness.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P16",
+      "area": "Revisión obsoleta",
+      "priority": "P0",
+      "acceptance": "Modificar partidas, condiciones o inspección invalida aceptación previa y exige respuesta de nueva revisión.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/flow/flowBusiness.test.ts",
+        "src/cp05/cp05.test.ts"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P17",
+      "area": "Partidas CLP e IVA",
+      "priority": "P0",
+      "acceptance": "Calcula cantidad × precio neto, subtotal, IVA 19 %, total y límite de partidas sin errores de redondeo.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "S"
+      },
+      "evidence": [
+        "src/cp05/cp05.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_CP05_R3_DOCUMENTOS_REALES_QA_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P18",
+      "area": "PDF R3 borrador",
+      "priority": "P1",
+      "acceptance": "Descarga A4 legible con partida nueva, datos del taller y aviso de borrador; PDF no representa emisión.",
+      "platforms": {
+        "web": "F",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_CP05_R3_DOCUMENTOS_REALES_QA_20261118.md",
+        "src/cp05/pdf.ts"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P19",
+      "area": "PDF A4 extenso",
+      "priority": "P1",
+      "acceptance": "Formato R3 legible con muchas partidas, salto de páginas correcto, totales y advertencias sin repetición.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/cp05/cp05.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_CP05_R3_DOCUMENTOS_REALES_QA_20261118.md"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P20",
+      "area": "Archivo privado inmutable",
+      "priority": "P0",
+      "acceptance": "Emisión autorizada genera una revisión una vez, guarda bytes privados con tamaño/SHA-256, no sobrescribe otro hash.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_CP05_PRIVATE_ARCHIVE_20261118.md",
+        "src/cp05/archiveIntegrity.test.ts"
+      ],
+      "gate": [
+        "G-DOCS",
+        "G-BACKUP",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P21",
+      "area": "Descarga PDF histórico",
+      "priority": "P0",
+      "acceptance": "Desde vehículo y revisión R1/R2 obtiene PDF ORIGINAL; rechaza taller/vehículo ajenos y corrupción.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_CP06_PDF_HISTORICO_20261118.md",
+        "src/historial/archiveDownload.test.ts"
+      ],
+      "gate": [
+        "G-DOCS",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P22",
+      "area": "Correo único de entrega",
+      "priority": "P1",
+      "acceptance": "Envía al destinatario autorizado un solo correo con informe/cotización/entrega; errores no se declaran enviados.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_CP05_PRIVATE_ARCHIVE_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md"
+      ],
+      "gate": [
+        "G-DOCS",
+        "G-PRIVACY"
+      ]
+    },
+    {
+      "id": "P23",
+      "area": "Historial por vehículo",
+      "priority": "P0",
+      "acceptance": "Lista visitas por fecha con motivo/OT/hallazgos, sin asignar reparaciones inexistentes ni mezclar talleres.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "C"
+      },
+      "evidence": [
+        "src/historial/history.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_CP06_20261116.md",
+        "apps/android/scripts/test-demo-gateway.mjs"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P24",
+      "area": "Trabajos realizados",
+      "priority": "P0",
+      "acceptance": "Informe final parte con 'no realizado'; total y PDF incluyen SOLO trabajo marcado realizado.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "src/flow/flowBusiness.test.ts",
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P25",
+      "area": "Pausas y pendientes",
+      "priority": "P1",
+      "acceptance": "Falta de repuesto o hallazgo pendiente impide cierre hasta resolución explícita y trazable.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "src/flow/flowBusiness.test.ts"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P26",
+      "area": "Entrega y cierre",
+      "priority": "P0",
+      "acceptance": "Entrega requiere inspección, aprobación vigente, trabajos y confirmación; cierre idempotente y sin envío no autorizado.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "src/flow/flowBusiness.test.ts"
+      ],
+      "gate": [
+        "G-DATA",
+        "G-PRIVACY"
+      ]
+    },
+    {
+      "id": "P27",
+      "area": "Cancelación",
+      "priority": "P1",
+      "acceptance": "Cancelar exige motivo, no borra historial ni permite entrega posterior de OT cancelada.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "src/flow/flowBusiness.test.ts"
+      ],
+      "gate": [
+        "G-DATA"
+      ]
+    },
+    {
+      "id": "P28",
+      "area": "Sin conexión y reintento",
+      "priority": "P0",
+      "acceptance": "Sin red no expone registros de otro taller ni confirma guardados; reconectar no duplica operaciones.",
+      "platforms": {
+        "web": "S",
+        "pwa": "D",
+        "android": "C"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "apps/android/scripts/test-demo-gateway.mjs",
+        "src/ordenes/cp04Autosave.test.ts"
+      ],
+      "gate": [
+        "G-DEVICE",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P29",
+      "area": "Cambio de taller/sesión",
+      "priority": "P0",
+      "acceptance": "Al cambiar taller o usuario se vacía estado en pantalla y no aparece información cacheada de la sesión anterior.",
+      "platforms": {
+        "web": "S",
+        "pwa": "D",
+        "android": "C"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "apps/android/scripts/test-demo-gateway.mjs",
+        "src/clientes/cp03PilotRepository.test.ts"
+      ],
+      "gate": [
+        "G-AUTH",
+        "G-RLS"
+      ]
+    },
+    {
+      "id": "P30",
+      "area": "Planes y cupos",
+      "priority": "P1",
+      "acceptance": "Básico personal; Plus 4 mecánicos, Full 8; adicionales USD 2 facturados solo al propietario.",
+      "platforms": {
+        "web": "S",
+        "pwa": "B",
+        "android": "S"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_PLAN_04_IMPLEMENTACION_20261117.md",
+        "scripts/security/verify-plan04-local.sh",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ],
+      "gate": [
+        "G-PLAN"
+      ]
+    },
+    {
+      "id": "P31",
+      "area": "Concesión Ignacio",
+      "priority": "P0",
+      "acceptance": "Cuenta de Ignacio confirmada; creador asigna Full permanente al taller correcto con auditoría y posible revocación.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_PLAN_04_IMPLEMENTACION_20261117.md",
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ],
+      "gate": [
+        "G-PLAN",
+        "G-AUTH",
+        "G-BACKUP"
+      ]
+    },
+    {
+      "id": "P32",
+      "area": "Privacidad y consentimiento",
+      "priority": "P0",
+      "acceptance": "Aviso/propósito/retención verificables antes de datos reales; acceso y tratamiento limitados a responsables autorizados.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_LEGAL_01_20261116.md",
+        "src/clientes/cp03PilotRepository.test.ts"
+      ],
+      "gate": [
+        "G-PRIVACY"
+      ]
+    },
+    {
+      "id": "P33",
+      "area": "Respaldo/restauración",
+      "priority": "P0",
+      "acceptance": "Respaldo cifrado integral Auth+BD+RLS+Storage y restauración AISLADA con comprobación antes de piloto.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ],
+      "gate": [
+        "G-BACKUP"
+      ]
+    },
+    {
+      "id": "P34",
+      "area": "PWA Safari iPhone",
+      "priority": "P1",
+      "acceptance": "Instalar desde Safari, abrir/reabrir, navegar cinco pantallas sin recortes; flujos reales pendientes.",
+      "platforms": {
+        "web": "N",
+        "pwa": "F",
+        "android": "N"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_AUTH_01B_R1_CIERRE_CONTROLADO_20261114.md",
+        "docs/checkpoints/CHECKPOINT_BT_UI_02_R2_20261111.md"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P35",
+      "area": "Android APK física",
+      "priority": "P0",
+      "acceptance": "Generar APK interna firmada autorizada, instalar y probar flujo con táctil, teclado, navegación, cierres y reconexión.",
+      "platforms": {
+        "web": "N",
+        "pwa": "N",
+        "android": "D"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md",
+        "apps/android/README.md"
+      ],
+      "gate": [
+        "G-DEVICE",
+        "G-RELEASE"
+      ]
+    },
+    {
+      "id": "P36",
+      "area": "Tamaño y accesibilidad",
+      "priority": "P1",
+      "acceptance": "Sin desborde a 375/390/768/1440; controles táctiles, foco, navegación y lectores comprobables.",
+      "platforms": {
+        "web": "C",
+        "pwa": "D",
+        "android": "D"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_QA_02_20261113.md",
+        "docs/checkpoints/CHECKPOINT_BT_INS_01_20261113.md",
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md"
+      ],
+      "gate": [
+        "G-DEVICE"
+      ]
+    },
+    {
+      "id": "P37",
+      "area": "Migración reversible",
+      "priority": "P0",
+      "acceptance": "Revisar diff y dependencias 04B/04C+CP03/04/05, plan de reversión y pruebas aisladas; activar solo con autorización.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_PLAN_04_IMPLEMENTACION_20261117.md",
+        "docs/checkpoints/CHECKPOINT_BT_CP05_PRIVATE_ARCHIVE_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ],
+      "gate": [
+        "G-RELEASE",
+        "G-BACKUP"
+      ]
+    },
+    {
+      "id": "P38",
+      "area": "Despliegue y rollback",
+      "priority": "P0",
+      "acceptance": "Validar mismo commit web/nativo, versión, flags OFF, incidentes y reversión antes de acceso productivo.",
+      "platforms": {
+        "web": "B",
+        "pwa": "B",
+        "android": "B"
+      },
+      "evidence": [
+        "docs/checkpoints/CHECKPOINT_BT_ANDROID_02_INTEGRACION_OFFLINE_20261118.md",
+        "docs/checkpoints/CHECKPOINT_BT_PLAN_04_IMPLEMENTACION_20261117.md",
+        "docs/checkpoints/CHECKPOINT_BT_BACKUP_DRIVE_AUDIT_20261117.md"
+      ],
+      "gate": [
+        "G-RELEASE"
+      ]
+    }
+  ]
+}
