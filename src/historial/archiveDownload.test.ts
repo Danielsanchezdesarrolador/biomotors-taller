@@ -37,7 +37,7 @@ describe('CP06 historic PDF downloads remain behind private CP05 transport', () 
       { ...archived, payload: { ...archived.payload, quote: { ...archived.payload.quote, id: id(99) } } },
       { ...archived, revision: 0 }
     ]) {
-      await expect(archivedRevisionPdf(changed, vid, wid, { download }, save))
+      await expect(archivedRevisionPdf(changed as unknown as Revision, vid, wid, { download }, save))
         .rejects.toMatchObject({ kind: 'denied' })
     }
     expect(download).not.toHaveBeenCalled()
