@@ -221,8 +221,6 @@ export default function App() {
               </View>
             ))}
           </View>
-            ))}
-          </View>
 
           <View style={styles.panel}>
             <View style={styles.panelHeading}><Text style={styles.panelTitle}>Accesos rápidos</Text></View>
