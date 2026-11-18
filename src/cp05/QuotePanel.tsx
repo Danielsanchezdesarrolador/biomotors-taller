@@ -33,6 +33,7 @@ import type { Cp05Port } from './repository'
 import { documentOperation } from './documentClient'
 import { localDraft, rememberDraft, clearLocalDraft } from './temporaryDraft'
 import { readQuoteSelection, rememberQuoteSelection } from './quoteSelection'
+import { WorkExecutionDraft } from '../entrega/WorkExecutionDraft'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
 const empty: Draft = { price_basis: 'net', valid_days: 10, terms: '', comments: '', items: [] }
@@ -61,7 +62,8 @@ export function QuotePanel({
     [error, setError] = useState('')
   const [editing, setEditing] = useState<WorkItem | true | null>(null),
     [reason, setReason] = useState(''),
-    [recovery, setRecovery] = useState<Draft | null>(null)
+    [recovery, setRecovery] = useState<Draft | null>(null),
+    [executionOpen, setExecutionOpen] = useState(false)
   const active = useRef(true),
     sequence = useRef(0),
     lock = useRef(false),
@@ -693,6 +695,24 @@ export function QuotePanel({
                   </div>
                 </div>
               )}
+              {canWrite && bundle.quote.status === 'issued' &&
+                bundle.revisions
+                  .filter(r => r.revision === bundle.quote.issued_revision)
+                  .map(revision => (
+                    <section key={revision.id} aria-label="Preparación de informe técnico">
+                      <button type="button" className="cp04-secondary"
+                        disabled={busy}
+                        onClick={() => setExecutionOpen(!executionOpen)}>
+                        {executionOpen
+                          ? 'Cerrar revisión técnica preliminar'
+                          : 'Preparar informe técnico preliminar (sin guardar)'}
+                      </button>
+                      {executionOpen &&
+                        <WorkExecutionDraft
+                          key={revision.id} revision={revision} quote={bundle.quote}
+                        />}
+                    </section>
+                  ))}
               <section className="dashboard-card cp05-history">
                 <h2>Revisiones y trazabilidad</h2>
                 {!bundle.revisions.length && (
