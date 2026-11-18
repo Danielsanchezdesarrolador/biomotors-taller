@@ -8,11 +8,40 @@ export class HistoryFailure extends Error {
 }
 export type Cursor = { at: string; id: string }
 export type Page<T> = { rows: T[]; next: Cursor | null }
+/** Server-owned, append-only operator declarations; never client signatures. */
+export type EvidenceApproval = {
+  workshop_id: string; id: string; order_id: string; quote_id: string; revision_id: string
+  evidence_status: 'operator_attested'; recorded_at: string; recorded_by: string
+  method: string; note: string
+}
+export type EvidenceExecution = {
+  workshop_id: string; id: string; order_id: string; vehicle_id: string; quote_id: string
+  revision_id: string; approval_id: string; evidence_status: 'operator_attested'
+  recorded_at: string; reviewed_by: string; decisions: Record<string, string>
+  pending_note: string; quoted_net: number; quoted_tax: number; quoted_total: number
+  performed_net: number; performed_tax: number; performed_total: number
+}
+export type EvidenceDelivery = {
+  workshop_id: string; id: string; order_id: string; vehicle_id: string; quote_id: string
+  revision_id: string; report_id: string; evidence_status: 'operator_attested'
+  recorded_at: string; recorded_by: string; checklist: Record<string, boolean>
+  handover_method: string; handover_note: string
+}
+export type FlowEvidence = {
+  status: 'off' | 'unavailable' | 'ready'
+  approvals: EvidenceApproval[]
+  executions: EvidenceExecution[]
+  deliveries: EvidenceDelivery[]
+}
+export const emptyEvidence = (): FlowEvidence => ({
+  status: 'off', approvals: [], executions: [], deliveries: []
+})
 export type QuoteHistory = {
   status: 'off' | 'unavailable' | 'ready'
   quotes: Quote[]
   revisions: Revision[]
   events: QuoteEvent[]
+  evidence: FlowEvidence
 }
 export type Visit = { order: WorkOrder; findings: Finding[] }
 export type VisitPage = Page<Visit> & { quotes: QuoteHistory }
