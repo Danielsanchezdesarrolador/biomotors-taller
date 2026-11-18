@@ -83,7 +83,8 @@ export function prepareClosingPacket(
       invalid()
     return {
       id:item.id, type:item.type, description:item.description,
-      quantity100:item.quantity100, lineNet:item.line_net, decision
+      quantity100:item.quantity100, lineNet:item.line_net,
+      decision: decision === 'performed' ? 'performed' : 'not_performed'
     }
   })
   if (!lines.length || lines.length>200 ||
