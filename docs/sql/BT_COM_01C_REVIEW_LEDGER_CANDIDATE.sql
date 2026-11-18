@@ -136,7 +136,378 @@ DECLARE m bt_com_private.closing_manifests;
  answer bt_com_private.mail_reviews;
 BEGIN
  IF p_workshop_id IS NULL OR p_request_id IS NULL OR p_manifest_id IS NULL OR
-    p_actor_id IS NULL OR p_recipient IS NULL OR p_fingerprint !~ '^[a-f0-9]{64}$' OR
+    p_actor_id IS NULL OR p_recipient IS NULL OR p_fingerprint IS NULL OR
+    p_fingerprint !~ '^[a-f0-9]{64}
+    jsonb_typeof(p_hashes) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(p_hashes) IS DISTINCT FROM 3
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_INPUT' USING ERRCODE='22023'; END IF;
+ -- Gate is installed OFF even if a trusted service calls with valid credentials.
+ IF NOT EXISTS (SELECT 1 FROM bt_com_private.rollout gate
+  WHERE gate.workshop_id=p_workshop_id AND gate.review_enabled IS TRUE)
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_DISABLED' USING ERRCODE='42501'; END IF;
+
+ IF NOT EXISTS (
+  SELECT 1 FROM public.workshop_memberships mem
+  JOIN public.workshops w ON w.id=mem.workshop_id
+  JOIN auth.users u ON u.id=mem.user_id
+  WHERE mem.workshop_id=p_workshop_id AND mem.user_id=p_actor_id
+    AND mem.status='active' AND mem.role IN ('owner','admin','reception')
+    AND w.status='active' AND u.email_confirmed_at IS NOT NULL
+ ) THEN RAISE EXCEPTION 'BT_COM_ACCESS_DENIED' USING ERRCODE='42501'; END IF;
+
+ -- Exclusive per workshop/review key prevents two requests racing to mutate
+ -- one recorded review. Unique constraint is final arbiter across sessions.
+ PERFORM pg_advisory_xact_lock(
+  hashtextextended(p_workshop_id::text||':'||p_request_id::text,7)
+ );
+ SELECT * INTO m FROM bt_com_private.closing_manifests
+  WHERE workshop_id=p_workshop_id AND id=p_manifest_id FOR SHARE;
+ SELECT * INTO q FROM public.quotes
+  WHERE workshop_id=p_workshop_id AND id=m.quote_id FOR SHARE;
+ SELECT * INTO rev FROM public.quote_revisions
+  WHERE workshop_id=p_workshop_id AND id=m.revision_id;
+ SELECT * INTO d FROM public.bt_flow_visit_deliveries
+  WHERE workshop_id=p_workshop_id AND id=m.delivery_id;
+ IF m.id IS NULL OR q.id IS NULL OR rev.id IS NULL OR d.id IS NULL OR
+    m.manifest_status<>'prepared_not_sent' OR
+    m.order_id<>q.order_id OR m.quote_id<>rev.quote_id OR
+    m.revision_number<>rev.revision OR m.payload_sha256<>rev.payload_sha256 OR
+    m.approval_id IS DISTINCT FROM (
+      SELECT report.approval_id FROM public.bt_flow_execution_reports report
+      WHERE report.workshop_id=p_workshop_id AND report.id=m.report_id
+    ) OR
+    d.report_id<>m.report_id OR d.revision_id<>m.revision_id OR
+    d.order_id<>m.order_id OR d.quote_id<>m.quote_id OR
+    q.status<>'issued' OR q.issue_pending IS TRUE OR
+    q.issued_revision<>rev.revision
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_STALE' USING ERRCODE='55000'; END IF;
+ -- Do not permit a caller to substitute a recipient that isn't stored on
+ -- the actual customer row for THIS immutable quote.
+ SELECT c.email INTO customer_email FROM public.customers c
+  WHERE c.workshop_id=p_workshop_id AND c.id=q.customer_id;
+ IF customer_email IS NULL OR customer_email IS DISTINCT FROM p_recipient
+ THEN RAISE EXCEPTION 'BT_COM_RECIPIENT_CHANGED' USING ERRCODE='22023'; END IF;
+ IF jsonb_typeof(m.documents) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(m.documents)<>3 OR
+    m.documents->0->>'kind' IS DISTINCT FROM 'quote' OR
+    m.documents->1->>'kind' IS DISTINCT FROM 'report' OR
+    m.documents->2->>'kind' IS DISTINCT FROM 'handover' OR
+    m.documents->0->>'sha256' IS DISTINCT FROM rev.pdf_sha256 OR
+    m.documents->0->>'path' IS DISTINCT FROM rev.pdf_object_path OR
+    (m.documents->0->>'byteLength')::bigint IS DISTINCT FROM rev.pdf_size OR
+    m.documents->0->>'bucket' IS DISTINCT FROM 'cp05-quote-documents' OR
+    m.documents->1->>'bucket' IS DISTINCT FROM 'bt-closing-documents' OR
+    m.documents->2->>'bucket' IS DISTINCT FROM 'bt-closing-documents' OR
+    m.documents->1->>'path' IS DISTINCT FROM
+      m.workshop_id::text||'/closings/'||m.order_id::text||'/'||
+      m.revision_id::text||'/'||m.delivery_id::text||'/report/'||
+      (m.documents->1->>'sha256')||'.pdf' OR
+    m.documents->2->>'path' IS DISTINCT FROM
+      m.workshop_id::text||'/closings/'||m.order_id::text||'/'||
+      m.revision_id::text||'/'||m.delivery_id::text||'/handover/'||
+      (m.documents->2->>'sha256')||'.pdf' OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements(m.documents) doc
+      WHERE doc->>'contentType' IS DISTINCT FROM 'application/pdf' OR
+        coalesce(doc->>'fileName','') !~ '^[A-Za-z0-9_-]{1,115}\\.pdf
+ THEN RAISE EXCEPTION 'BT_COM_DOCUMENTS_INVALID' USING ERRCODE='22023'; END IF;
+ expected_hashes:=jsonb_build_array(m.documents->0->>'sha256',
+                                   m.documents->1->>'sha256',
+                                   m.documents->2->>'sha256');
+ IF p_hashes IS DISTINCT FROM expected_hashes OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements_text(expected_hashes) x(hash)
+     WHERE x.hash !~ '^[a-f0-9]{64}$')
+ THEN RAISE EXCEPTION 'BT_COM_HASH_MISMATCH' USING ERRCODE='22023'; END IF;
+
+ INSERT INTO bt_com_private.mail_reviews
+ (workshop_id,request_id,manifest_id,reviewer_id,recipient,review_fingerprint,document_hashes)
+ VALUES (p_workshop_id,p_request_id,p_manifest_id,p_actor_id,p_recipient,p_fingerprint,p_hashes)
+ ON CONFLICT (workshop_id,request_id) DO NOTHING
+ RETURNING * INTO answer;
+ IF answer.id IS NOT NULL THEN RETURN to_jsonb(answer); END IF;
+
+ SELECT * INTO prior FROM bt_com_private.mail_reviews
+  WHERE workshop_id=p_workshop_id AND request_id=p_request_id;
+ IF prior.id IS NULL OR prior.manifest_id IS DISTINCT FROM p_manifest_id OR
+    prior.reviewer_id IS DISTINCT FROM p_actor_id OR
+    prior.recipient IS DISTINCT FROM p_recipient OR
+    prior.review_fingerprint IS DISTINCT FROM p_fingerprint OR
+    prior.document_hashes IS DISTINCT FROM p_hashes
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_CONFLICT' USING ERRCODE='23505'; END IF;
+ RETURN to_jsonb(prior);
+END $$;
+
+-- The ONLY executable operation this candidate grants is recording a
+-- server-verified operator review. No queue/send/ack function exists.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_com_private
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION bt_com_private.record_review(
+ uuid,uuid,uuid,uuid,text,text,jsonb
+) TO service_role;
+
+COMMIT;
+ OR
+    jsonb_typeof(p_hashes) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(p_hashes) IS DISTINCT FROM 3
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_INPUT' USING ERRCODE='22023'; END IF;
+ -- Gate is installed OFF even if a trusted service calls with valid credentials.
+ IF NOT EXISTS (SELECT 1 FROM bt_com_private.rollout gate
+  WHERE gate.workshop_id=p_workshop_id AND gate.review_enabled IS TRUE)
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_DISABLED' USING ERRCODE='42501'; END IF;
+
+ IF NOT EXISTS (
+  SELECT 1 FROM public.workshop_memberships mem
+  JOIN public.workshops w ON w.id=mem.workshop_id
+  JOIN auth.users u ON u.id=mem.user_id
+  WHERE mem.workshop_id=p_workshop_id AND mem.user_id=p_actor_id
+    AND mem.status='active' AND mem.role IN ('owner','admin','reception')
+    AND w.status='active' AND u.email_confirmed_at IS NOT NULL
+ ) THEN RAISE EXCEPTION 'BT_COM_ACCESS_DENIED' USING ERRCODE='42501'; END IF;
+
+ -- Exclusive per workshop/review key prevents two requests racing to mutate
+ -- one recorded review. Unique constraint is final arbiter across sessions.
+ PERFORM pg_advisory_xact_lock(
+  hashtextextended(p_workshop_id::text||':'||p_request_id::text,7)
+ );
+ SELECT * INTO m FROM bt_com_private.closing_manifests
+  WHERE workshop_id=p_workshop_id AND id=p_manifest_id FOR SHARE;
+ SELECT * INTO q FROM public.quotes
+  WHERE workshop_id=p_workshop_id AND id=m.quote_id FOR SHARE;
+ SELECT * INTO rev FROM public.quote_revisions
+  WHERE workshop_id=p_workshop_id AND id=m.revision_id;
+ SELECT * INTO d FROM public.bt_flow_visit_deliveries
+  WHERE workshop_id=p_workshop_id AND id=m.delivery_id;
+ IF m.id IS NULL OR q.id IS NULL OR rev.id IS NULL OR d.id IS NULL OR
+    m.manifest_status<>'prepared_not_sent' OR
+    m.order_id<>q.order_id OR m.quote_id<>rev.quote_id OR
+    m.revision_number<>rev.revision OR m.payload_sha256<>rev.payload_sha256 OR
+    m.approval_id IS DISTINCT FROM (
+      SELECT report.approval_id FROM public.bt_flow_execution_reports report
+      WHERE report.workshop_id=p_workshop_id AND report.id=m.report_id
+    ) OR
+    d.report_id<>m.report_id OR d.revision_id<>m.revision_id OR
+    d.order_id<>m.order_id OR d.quote_id<>m.quote_id OR
+    q.status<>'issued' OR q.issue_pending IS TRUE OR
+    q.issued_revision<>rev.revision
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_STALE' USING ERRCODE='55000'; END IF;
+ -- Do not permit a caller to substitute a recipient that isn't stored on
+ -- the actual customer row for THIS immutable quote.
+ SELECT c.email INTO customer_email FROM public.customers c
+  WHERE c.workshop_id=p_workshop_id AND c.id=q.customer_id;
+ IF customer_email IS NULL OR customer_email IS DISTINCT FROM p_recipient
+ THEN RAISE EXCEPTION 'BT_COM_RECIPIENT_CHANGED' USING ERRCODE='22023'; END IF;
+ IF jsonb_typeof(m.documents) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(m.documents)<>3 OR
+    m.documents->0->>'kind'<>'quote' OR
+    m.documents->1->>'kind'<>'report' OR
+    m.documents->2->>'kind'<>'handover' OR
+    m.documents->0->>'sha256'<>rev.pdf_sha256 OR
+    m.documents->0->>'path'<>rev.pdf_object_path
+ THEN RAISE EXCEPTION 'BT_COM_DOCUMENTS_INVALID' USING ERRCODE='22023'; END IF;
+ expected_hashes:=jsonb_build_array(m.documents->0->>'sha256',
+                                   m.documents->1->>'sha256',
+                                   m.documents->2->>'sha256');
+ IF p_hashes IS DISTINCT FROM expected_hashes OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements_text(expected_hashes) x(hash)
+     WHERE x.hash !~ '^[a-f0-9]{64}$')
+ THEN RAISE EXCEPTION 'BT_COM_HASH_MISMATCH' USING ERRCODE='22023'; END IF;
+
+ INSERT INTO bt_com_private.mail_reviews
+ (workshop_id,request_id,manifest_id,reviewer_id,recipient,review_fingerprint,document_hashes)
+ VALUES (p_workshop_id,p_request_id,p_manifest_id,p_actor_id,p_recipient,p_fingerprint,p_hashes)
+ ON CONFLICT (workshop_id,request_id) DO NOTHING
+ RETURNING * INTO answer;
+ IF answer.id IS NOT NULL THEN RETURN to_jsonb(answer); END IF;
+
+ SELECT * INTO prior FROM bt_com_private.mail_reviews
+  WHERE workshop_id=p_workshop_id AND request_id=p_request_id;
+ IF prior.id IS NULL OR prior.manifest_id IS DISTINCT FROM p_manifest_id OR
+    prior.reviewer_id IS DISTINCT FROM p_actor_id OR
+    prior.recipient IS DISTINCT FROM p_recipient OR
+    prior.review_fingerprint IS DISTINCT FROM p_fingerprint OR
+    prior.document_hashes IS DISTINCT FROM p_hashes
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_CONFLICT' USING ERRCODE='23505'; END IF;
+ RETURN to_jsonb(prior);
+END $$;
+
+-- The ONLY executable operation this candidate grants is recording a
+-- server-verified operator review. No queue/send/ack function exists.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_com_private
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION bt_com_private.record_review(
+ uuid,uuid,uuid,uuid,text,text,jsonb
+) TO service_role;
+
+COMMIT;
+ OR
+        coalesce(doc->>'byteLength','') !~ '^[0-9]{1,8}
+ THEN RAISE EXCEPTION 'BT_COM_DOCUMENTS_INVALID' USING ERRCODE='22023'; END IF;
+ expected_hashes:=jsonb_build_array(m.documents->0->>'sha256',
+                                   m.documents->1->>'sha256',
+                                   m.documents->2->>'sha256');
+ IF p_hashes IS DISTINCT FROM expected_hashes OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements_text(expected_hashes) x(hash)
+     WHERE x.hash !~ '^[a-f0-9]{64}$')
+ THEN RAISE EXCEPTION 'BT_COM_HASH_MISMATCH' USING ERRCODE='22023'; END IF;
+
+ INSERT INTO bt_com_private.mail_reviews
+ (workshop_id,request_id,manifest_id,reviewer_id,recipient,review_fingerprint,document_hashes)
+ VALUES (p_workshop_id,p_request_id,p_manifest_id,p_actor_id,p_recipient,p_fingerprint,p_hashes)
+ ON CONFLICT (workshop_id,request_id) DO NOTHING
+ RETURNING * INTO answer;
+ IF answer.id IS NOT NULL THEN RETURN to_jsonb(answer); END IF;
+
+ SELECT * INTO prior FROM bt_com_private.mail_reviews
+  WHERE workshop_id=p_workshop_id AND request_id=p_request_id;
+ IF prior.id IS NULL OR prior.manifest_id IS DISTINCT FROM p_manifest_id OR
+    prior.reviewer_id IS DISTINCT FROM p_actor_id OR
+    prior.recipient IS DISTINCT FROM p_recipient OR
+    prior.review_fingerprint IS DISTINCT FROM p_fingerprint OR
+    prior.document_hashes IS DISTINCT FROM p_hashes
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_CONFLICT' USING ERRCODE='23505'; END IF;
+ RETURN to_jsonb(prior);
+END $$;
+
+-- The ONLY executable operation this candidate grants is recording a
+-- server-verified operator review. No queue/send/ack function exists.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_com_private
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION bt_com_private.record_review(
+ uuid,uuid,uuid,uuid,text,text,jsonb
+) TO service_role;
+
+COMMIT;
+ OR
+    jsonb_typeof(p_hashes) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(p_hashes) IS DISTINCT FROM 3
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_INPUT' USING ERRCODE='22023'; END IF;
+ -- Gate is installed OFF even if a trusted service calls with valid credentials.
+ IF NOT EXISTS (SELECT 1 FROM bt_com_private.rollout gate
+  WHERE gate.workshop_id=p_workshop_id AND gate.review_enabled IS TRUE)
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_DISABLED' USING ERRCODE='42501'; END IF;
+
+ IF NOT EXISTS (
+  SELECT 1 FROM public.workshop_memberships mem
+  JOIN public.workshops w ON w.id=mem.workshop_id
+  JOIN auth.users u ON u.id=mem.user_id
+  WHERE mem.workshop_id=p_workshop_id AND mem.user_id=p_actor_id
+    AND mem.status='active' AND mem.role IN ('owner','admin','reception')
+    AND w.status='active' AND u.email_confirmed_at IS NOT NULL
+ ) THEN RAISE EXCEPTION 'BT_COM_ACCESS_DENIED' USING ERRCODE='42501'; END IF;
+
+ -- Exclusive per workshop/review key prevents two requests racing to mutate
+ -- one recorded review. Unique constraint is final arbiter across sessions.
+ PERFORM pg_advisory_xact_lock(
+  hashtextextended(p_workshop_id::text||':'||p_request_id::text,7)
+ );
+ SELECT * INTO m FROM bt_com_private.closing_manifests
+  WHERE workshop_id=p_workshop_id AND id=p_manifest_id FOR SHARE;
+ SELECT * INTO q FROM public.quotes
+  WHERE workshop_id=p_workshop_id AND id=m.quote_id FOR SHARE;
+ SELECT * INTO rev FROM public.quote_revisions
+  WHERE workshop_id=p_workshop_id AND id=m.revision_id;
+ SELECT * INTO d FROM public.bt_flow_visit_deliveries
+  WHERE workshop_id=p_workshop_id AND id=m.delivery_id;
+ IF m.id IS NULL OR q.id IS NULL OR rev.id IS NULL OR d.id IS NULL OR
+    m.manifest_status<>'prepared_not_sent' OR
+    m.order_id<>q.order_id OR m.quote_id<>rev.quote_id OR
+    m.revision_number<>rev.revision OR m.payload_sha256<>rev.payload_sha256 OR
+    m.approval_id IS DISTINCT FROM (
+      SELECT report.approval_id FROM public.bt_flow_execution_reports report
+      WHERE report.workshop_id=p_workshop_id AND report.id=m.report_id
+    ) OR
+    d.report_id<>m.report_id OR d.revision_id<>m.revision_id OR
+    d.order_id<>m.order_id OR d.quote_id<>m.quote_id OR
+    q.status<>'issued' OR q.issue_pending IS TRUE OR
+    q.issued_revision<>rev.revision
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_STALE' USING ERRCODE='55000'; END IF;
+ -- Do not permit a caller to substitute a recipient that isn't stored on
+ -- the actual customer row for THIS immutable quote.
+ SELECT c.email INTO customer_email FROM public.customers c
+  WHERE c.workshop_id=p_workshop_id AND c.id=q.customer_id;
+ IF customer_email IS NULL OR customer_email IS DISTINCT FROM p_recipient
+ THEN RAISE EXCEPTION 'BT_COM_RECIPIENT_CHANGED' USING ERRCODE='22023'; END IF;
+ IF jsonb_typeof(m.documents) IS DISTINCT FROM 'array' OR
+    jsonb_array_length(m.documents)<>3 OR
+    m.documents->0->>'kind'<>'quote' OR
+    m.documents->1->>'kind'<>'report' OR
+    m.documents->2->>'kind'<>'handover' OR
+    m.documents->0->>'sha256'<>rev.pdf_sha256 OR
+    m.documents->0->>'path'<>rev.pdf_object_path
+ THEN RAISE EXCEPTION 'BT_COM_DOCUMENTS_INVALID' USING ERRCODE='22023'; END IF;
+ expected_hashes:=jsonb_build_array(m.documents->0->>'sha256',
+                                   m.documents->1->>'sha256',
+                                   m.documents->2->>'sha256');
+ IF p_hashes IS DISTINCT FROM expected_hashes OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements_text(expected_hashes) x(hash)
+     WHERE x.hash !~ '^[a-f0-9]{64}$')
+ THEN RAISE EXCEPTION 'BT_COM_HASH_MISMATCH' USING ERRCODE='22023'; END IF;
+
+ INSERT INTO bt_com_private.mail_reviews
+ (workshop_id,request_id,manifest_id,reviewer_id,recipient,review_fingerprint,document_hashes)
+ VALUES (p_workshop_id,p_request_id,p_manifest_id,p_actor_id,p_recipient,p_fingerprint,p_hashes)
+ ON CONFLICT (workshop_id,request_id) DO NOTHING
+ RETURNING * INTO answer;
+ IF answer.id IS NOT NULL THEN RETURN to_jsonb(answer); END IF;
+
+ SELECT * INTO prior FROM bt_com_private.mail_reviews
+  WHERE workshop_id=p_workshop_id AND request_id=p_request_id;
+ IF prior.id IS NULL OR prior.manifest_id IS DISTINCT FROM p_manifest_id OR
+    prior.reviewer_id IS DISTINCT FROM p_actor_id OR
+    prior.recipient IS DISTINCT FROM p_recipient OR
+    prior.review_fingerprint IS DISTINCT FROM p_fingerprint OR
+    prior.document_hashes IS DISTINCT FROM p_hashes
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_CONFLICT' USING ERRCODE='23505'; END IF;
+ RETURN to_jsonb(prior);
+END $$;
+
+-- The ONLY executable operation this candidate grants is recording a
+-- server-verified operator review. No queue/send/ack function exists.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_com_private
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION bt_com_private.record_review(
+ uuid,uuid,uuid,uuid,text,text,jsonb
+) TO service_role;
+
+COMMIT;
+ OR
+        (doc->>'byteLength')::bigint NOT BETWEEN 12 AND 20000000)
+ THEN RAISE EXCEPTION 'BT_COM_DOCUMENTS_INVALID' USING ERRCODE='22023'; END IF;
+ expected_hashes:=jsonb_build_array(m.documents->0->>'sha256',
+                                   m.documents->1->>'sha256',
+                                   m.documents->2->>'sha256');
+ IF p_hashes IS DISTINCT FROM expected_hashes OR
+    EXISTS (SELECT 1 FROM jsonb_array_elements_text(expected_hashes) x(hash)
+     WHERE x.hash !~ '^[a-f0-9]{64}$')
+ THEN RAISE EXCEPTION 'BT_COM_HASH_MISMATCH' USING ERRCODE='22023'; END IF;
+
+ INSERT INTO bt_com_private.mail_reviews
+ (workshop_id,request_id,manifest_id,reviewer_id,recipient,review_fingerprint,document_hashes)
+ VALUES (p_workshop_id,p_request_id,p_manifest_id,p_actor_id,p_recipient,p_fingerprint,p_hashes)
+ ON CONFLICT (workshop_id,request_id) DO NOTHING
+ RETURNING * INTO answer;
+ IF answer.id IS NOT NULL THEN RETURN to_jsonb(answer); END IF;
+
+ SELECT * INTO prior FROM bt_com_private.mail_reviews
+  WHERE workshop_id=p_workshop_id AND request_id=p_request_id;
+ IF prior.id IS NULL OR prior.manifest_id IS DISTINCT FROM p_manifest_id OR
+    prior.reviewer_id IS DISTINCT FROM p_actor_id OR
+    prior.recipient IS DISTINCT FROM p_recipient OR
+    prior.review_fingerprint IS DISTINCT FROM p_fingerprint OR
+    prior.document_hashes IS DISTINCT FROM p_hashes
+ THEN RAISE EXCEPTION 'BT_COM_REVIEW_CONFLICT' USING ERRCODE='23505'; END IF;
+ RETURN to_jsonb(prior);
+END $$;
+
+-- The ONLY executable operation this candidate grants is recording a
+-- server-verified operator review. No queue/send/ack function exists.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA bt_com_private
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION bt_com_private.record_review(
+ uuid,uuid,uuid,uuid,text,text,jsonb
+) TO service_role;
+
+COMMIT;
+ OR
     jsonb_typeof(p_hashes) IS DISTINCT FROM 'array' OR
     jsonb_array_length(p_hashes) IS DISTINCT FROM 3
  THEN RAISE EXCEPTION 'BT_COM_REVIEW_INPUT' USING ERRCODE='22023'; END IF;
