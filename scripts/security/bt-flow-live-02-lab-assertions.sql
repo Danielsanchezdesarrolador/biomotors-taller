@@ -11,7 +11,7 @@ BEGIN
   RAISE EXCEPTION 'Unexpected state % on %; expected %',SQLSTATE,cmd,expected;
  END;
  RAISE EXCEPTION 'Expected % denial: %',expected,cmd;
-END $;
+END $$;
 -- Independent server-side activation is DENY by default, even for an active
 -- owner with a legitimate JWT. No browser controls this private gate.
 SET ROLE authenticated;
