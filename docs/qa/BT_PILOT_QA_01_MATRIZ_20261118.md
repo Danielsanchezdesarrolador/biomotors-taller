@@ -28,7 +28,7 @@
 | ID | Área | Prio. | Criterio comprobable | Web | iPhone PWA | Android | Puertas |
 |---|---|---|---|:---:|:---:|:---:|---|
 | P01 | Acceso personal | P0 | Cuenta nueva confirma correo e inicia sesión sin activar taller automáticamente; usuario sin taller no ve operaciones. | S | B | B | G-AUTH |
-| P02 | Roles | P0 | Dueño/admin ve operaciones permitidas; mecánico solo su ámbito; recepción no puede ejecutar tareas reservadas. | S | B | C | G-ROLES, G-RLS |
+| P02 | Roles | P0 | Dueño/admin ve operaciones permitidas; mecánico solo su ámbito; recepción no puede ejecutar tareas reservadas. | S | B | C | G-AUTH, G-RLS |
 | P03 | Sesión y revocación | P0 | Logout, token caducado, revocación y cuenta sin taller borran los datos visibles y bloquean acciones; reingreso válido. | S | B | C | G-AUTH, G-RLS |
 | P04 | Aislamiento A/B | P0 | No hay lecturas, escritura, búsqueda ni descarga cruzada usando ID conocido/consulta directa entre talleres. | S | B | S | G-RLS |
 | P05 | Registro de cliente | P0 | Validar identidad del cliente con información mínima, consentimiento y alta sin crear duplicados accidentales. | S | B | B | G-DATA, G-PRIVACY |
