@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
                 !(env.VITE_BT_CREATOR_PRIVATE_ENABLED==='true' && /\/src\/creator\//.test(id)) &&
                 !(
                   env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
+                  /\/src\/(?:cp05\/|entrega\/(?:WorkExecutionDraft|executionPreview|executionPdf)\.|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
                     id
                   )
                 ) &&
