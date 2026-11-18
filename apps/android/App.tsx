@@ -1,5 +1,6 @@
 import { useMemo, useState, type ComponentProps } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { NativeModule } from './screens/NativeModules'
 import {
   Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native'
@@ -33,12 +34,6 @@ const ACTIVITY: { id: string; title: string; detail: string; icon: IconName; col
   { id: 'A2', title: 'Informe simulado', detail: 'OT-1002 · Sin correo enviado', icon: 'document-text-outline', color: '#7950D9', light: '#F1EAFF' },
   { id: 'A3', title: 'Revisión de muestra finalizada', detail: 'OT-1004 · Datos ficticios', icon: 'checkmark-outline', color: '#16B950', light: '#E0F8E7' },
 ]
-const DETAILS: Record<Exclude<Section, 'inicio'>, { title: string; description: string; items: string[]; icon: IconName }> = {
-  ordenes: { title: 'Órdenes de trabajo', description: 'Revisiones y estado de las reparaciones.', icon: 'construct-outline', items: ['Nueva orden de trabajo', 'Inspección multipunto', 'Seguimiento de diagnóstico y reparación'] },
-  clientes: { title: 'Clientes y vehículos', description: 'Registro y antecedentes de cada vehículo.', icon: 'people-outline', items: ['Enlace de registro para clientes', 'Ficha del cliente y sus vehículos', 'Historial de mantenciones y observaciones'] },
-  informes: { title: 'Informes y cotizaciones', description: 'Presupuestos y documentos para tus clientes.', icon: 'document-text-outline', items: ['Revisión multipunto en PDF', 'Cotización formal', 'Envío autorizado y trazable por correo'] },
-  configuracion: { title: 'Configuración', description: 'Datos y herramientas de tu taller.', icon: 'settings-outline', items: ['Datos del taller', 'Usuarios y permisos', 'Correos y plantillas'] },
-}
 const COLORS = { navy: '#0B1F3B', blue: '#006EFF', ink: '#14233E', muted: '#6F829A', bg: '#F5F8FD' }
 
 function IconCircle({ name, color = COLORS.blue, background = '#E4F0FF', size = 22 }: { name: IconName; color?: string; background?: string; size?: number }) {
@@ -66,6 +61,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'todas' | StatusKey>('todas')
+  const [focusedOrderId, setFocusedOrderId] = useState<string|undefined>(undefined)
   const filteredOrders = useMemo(() => {
     const term = query.trim().toLocaleLowerCase('es-CL')
     return ORDERS.filter(item =>
@@ -78,10 +74,7 @@ export default function App() {
     setSection(target)
     setMenuOpen(false)
   }
-  function notReady() {
-    Alert.alert('Disponible próximamente', 'Esta versión es solo una demostración visual. La información real se habilitará después de implementar acceso seguro y base de datos.')
-  }
-  const module = section === 'inicio' ? null : DETAILS[section]
+
   return (
     <View style={styles.app}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.navy} />
@@ -135,7 +128,7 @@ export default function App() {
             {statusFilter !== 'todas' && <TouchableOpacity onPress={() => setStatusFilter('todas')} style={styles.filterChip}><Text style={styles.filterChipText}>Quitar filtro de estados ✕</Text></TouchableOpacity>}
             {filteredOrders.length === 0 && <View style={styles.emptySearch}><Ionicons name="search-outline" size={24} color="#7890AA" /><Text style={styles.emptySearchText}>Sin resultados de muestra.</Text><TouchableOpacity onPress={() => {setQuery('');setStatusFilter('todas')}}><Text style={styles.linkText}>Limpiar filtros</Text></TouchableOpacity></View>}
             {filteredOrders.map(order => (
-              <TouchableOpacity accessibilityRole="button" key={order.id} style={styles.orderLine} activeOpacity={0.75} onPress={() => go('ordenes')}>
+              <TouchableOpacity accessibilityRole="button" key={order.id} style={styles.orderLine} activeOpacity={0.75} onPress={() => {setFocusedOrderId(order.id);go('ordenes')}}>
                 <View style={styles.orderIcon}><Ionicons name="car-sport-outline" size={25} color="#47739F" /></View>
                 <View style={styles.orderCopy}><Text style={styles.orderId}>{order.id}</Text><Text style={styles.orderVehicle} numberOfLines={1}>{order.vehicle}</Text><Text style={styles.orderService} numberOfLines={1}>{order.service}</Text></View>
                 <View style={styles.orderRight}><LabelBadge status={order.status} /><Ionicons name="chevron-forward" size={16} color="#748AA4" /></View>
@@ -161,10 +154,8 @@ export default function App() {
               <TouchableOpacity style={styles.shortcut} accessibilityRole="button" onPress={() => go('informes')}><Ionicons name="document-text-outline" size={27} color={COLORS.blue}/><Text style={styles.shortcutText}>Nuevo informe</Text></TouchableOpacity>
             </View>
           </View>
-        </> : module && <>
-          <View style={styles.moduleHero}><View style={styles.moduleIcon}><Ionicons name={module.icon} size={34} color={COLORS.blue}/></View><Text style={styles.kicker}>PRÓXIMA ETAPA</Text><Text style={styles.moduleHeading}>{module.title}</Text><Text style={styles.moduleDescription}>{module.description}</Text></View>
-          <View style={styles.panel}><Text style={styles.panelTitle}>Funciones planificadas</Text>{module.items.map(item=><View key={item} style={styles.plannedRow}><Ionicons name="checkmark-circle-outline" size={21} color={COLORS.blue}/><Text style={styles.plannedText}>{item}</Text></View>)}<TouchableOpacity style={styles.moduleButton} onPress={notReady}><Text style={styles.moduleButtonText}>Próximamente</Text><Ionicons name="arrow-forward" size={17} color="white"/></TouchableOpacity></View>
-        </>}
+        </> : <NativeModule key={section} section={section} initialOrderId={focusedOrderId}/>}
+
       </ScrollView>
 
       <View style={styles.bottomNav}>{NAV_ITEMS.map(item => (
