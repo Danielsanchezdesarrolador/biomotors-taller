@@ -29,7 +29,6 @@ export type DeliveryProjection = {
   sentToProvider: boolean
   retryBlocked: boolean
 }
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.source
 const UUID_FULL=new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 const CODE=/^[A-Z0-9_]{1,80}$/
 const deny=():never=>{throw Error('BT_COM_DELIVERY_LEDGER_INVALID')}
@@ -40,7 +39,6 @@ export function projectClosingDeliveryCandidate(
 ): DeliveryProjection {
   if(!UUID_FULL.test(workshopId)||!UUID_FULL.test(reviewId)||
     !Array.isArray(events)||events.length>30)deny()
-  void UUID
   let state: DeliveryProjection['state']='operator_reviewed_not_sent'
   let attempt=0, providerMessageId:string|null=null,lastRecordedAt:string|null=null
   const seen=new Set<string>()
