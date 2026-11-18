@@ -38,6 +38,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Instalar dependencias web
         run: npm install --no-audit --no-fund
+      - name: Matriz de aceptación BT-PILOT-QA-01 (consistencia offline; NO certifica piloto)
+        run: node scripts/qa/verify-pilot-matrix.mjs --check
       - name: Validar sintaxis de prueba de seguridad A/B (sin ejecutar acceso real)
         run: node --check scripts/security/bt-cp02-ab.mjs
       - name: Verificar TypeScript web
