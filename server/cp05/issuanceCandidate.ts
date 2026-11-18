@@ -67,9 +67,15 @@ export async function issueQuoteCandidate(
     throw Error('ARCHIVE_NOT_CONFIRMED')
   const issued = await ports.finish(user.id, frozen.request_id, receipt)
   if (
+    issued.workshop_id !== snapshot.quote.workshop_id ||
+    issued.quote_id !== quote.id ||
+    issued.revision !== frozen.revision ||
+    issued.pdf_size !== pdf.length ||
     issued.pdf_sha256 !== hash ||
     issued.pdf_object_path !== path ||
-    issued.payload_sha256 !== frozen.payload_sha256
+    issued.payload_sha256 !== frozen.payload_sha256 ||
+    issued.payload?.quote?.id !== quote.id ||
+    issued.payload?.quote?.version !== quote.version
   )
     throw Error('ISSUE_NOT_CONFIRMED')
   return issued
