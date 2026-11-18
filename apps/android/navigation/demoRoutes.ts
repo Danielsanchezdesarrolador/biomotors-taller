@@ -5,7 +5,7 @@ import {
   DemoReadError,
   type DemoSession,
   type DemoQuote,
-} from '../data/demoGateway'
+} from '../data/demoGateway.ts'
 
 export type DemoSection = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
 export type DemoRoute = Readonly<{section:DemoSection;focusedOrderId?:string}>
