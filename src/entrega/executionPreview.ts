@@ -111,6 +111,6 @@ export function executionPreview(
     quoted: p.totals, executed, difference: p.totals.total - executed.total,
     pendingExplanation: explanation, missing,
     readyForDraftPdf: missing.length === 0,
-    notice: 'BORRADOR INTERNO. Selecciones locales sin guardar en Supabase. No acredita trabajos ejecutados, autorización del cliente, entrega ni pago. No es documento tributario.'
+    notice: 'BORRADOR INTERNO · SIN GUARDAR en Supabase. Las selecciones locales no acreditan trabajos ejecutados, autorización del cliente, entrega ni pago. No es documento tributario.'
   }
 }
