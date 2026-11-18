@@ -13,7 +13,7 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
   fs.mkdirSync(out, { recursive: true })
   const results = []
   try {
-    for (const width of before ? [1650, 390] : [1650, 1440, 768, 390, 375]) {
+    for (const width of before ? [1650, 390] : [360, 390, 430, 768, 1366, 1440, 1920]) {
       const { p, state, requests, errors } = await cp04Page(browser, width)
       await p.locator('.cp04-order').first().waitFor()
       await p.screenshot({
