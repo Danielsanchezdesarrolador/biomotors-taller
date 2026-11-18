@@ -16,7 +16,7 @@ assert.ok(code.includes('ScrollView'))
 assert.ok(code.includes('ByteTorque'))
 assert.ok(code.includes('DEMO VISUAL'))
 assert.ok(!/WebView\b/.test(code), 'Android no debe ser una WebView')
-assert.ok(code.includes('OT-1001'))
+assert.ok(readFileSync('data/demoGateway.ts','utf8').includes('OT-1001'))
 console.log('ByteTorque Android: configuración nativa y perfil APK PASS (APK no generada)')
 // BT-BRAND-01: validate prepared native resources; this does not build an APK.
 const { createHash } = await import('node:crypto')
