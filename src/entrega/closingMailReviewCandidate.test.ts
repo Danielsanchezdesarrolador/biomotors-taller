@@ -101,7 +101,7 @@ describe('BT-COM-01B: offline recipient and triple-PDF operator review (NEVER se
     expect(p.documents.map(d=>d.sha256)).toEqual([H('b'),H('c'),H('d')])
     expect(p.reviewFingerprint).toMatch(/^[a-f0-9]{64}$/)
     expect(p.subject).toContain('Taller de pruebas R2')
-    expect(p.bodyText).toContain('no')
+    expect(p.bodyText).toContain('No acredita firma')
     expect(p.warning).toContain('No se ha enviado ningún correo')
     expect(p.bodyText).toContain('firma')
     expect(p.bodyText).not.toMatch(/pago confirmado|correo enviado/)
