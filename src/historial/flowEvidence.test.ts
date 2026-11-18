@@ -53,14 +53,15 @@ const delivery: EvidenceDelivery = {
   handover_method: 'in_person', handover_note: 'Retiro declarado en el taller por responsable QA'
 }
 function setup() {
-  const rows: Record<string, Array<{ workshop_id: string; id: string }>> = {
+  const rows: Record<string, Array<EvidenceApproval | EvidenceExecution | EvidenceDelivery>> = {
     bt_flow_quote_approvals: [approval],
     bt_flow_execution_reports: [execution],
     bt_flow_visit_deliveries: [delivery]
   }
-  const load=vi.fn(async (table: string, ids: string[], _column: string,
-    _foreign?: string, _vehicle?: string) => rows[table].filter(x =>
-      ids.includes((x as unknown as { revision_id: string }).revision_id)))
+  const load=vi.fn(async <T extends { workshop_id: string; id: string }>(
+    table: string, ids: string[], _column: string,
+    _foreign?: string, _vehicle?: string
+  ): Promise<T[]> => rows[table].filter(x => ids.includes(x.revision_id)) as T[])
   return { rows, load, run: () => readFlowEvidence(wid, vid, [quote], [revision], load) }
 }
 describe('CP06 LIVE-02 immutable evidence reader (build gated)', () => {
