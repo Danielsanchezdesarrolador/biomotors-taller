@@ -46,4 +46,12 @@ DO $$ BEGIN
  END IF;
 END $$;
 SELECT 'BT_FLOW_LIVE_02_LOCAL_FRESH_CONNECTION_PASS';
+RESET ROLE;
+DO $$ BEGIN
+ IF (SELECT count(*) FROM bt_com_private.mail_reviews)<>1 OR
+    (SELECT count(*) FROM bt_com_private.mail_provider_events)<>0 OR
+    EXISTS(SELECT 1 FROM bt_com_private.rollout WHERE delivery_enabled)
+ THEN RAISE EXCEPTION 'COM01C_FRESH_CONNECTION_PERSISTENCE_OR_MAIL_GUARD'; END IF;
+END $$;
+SELECT 'BT_COM_01C_LOCAL_FRESH_CONNECTION_NO_MAIL_PASS';
 SQL
