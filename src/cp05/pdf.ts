@@ -174,10 +174,10 @@ export async function quotePdf(
               fontSize, navy, true)
         x += widths[i]
       }
-      const cardsTop = top - 72
+      const cardsTop = top - 65
       const gap = 12
       const cardWidth = (CW - gap) / 2
-      const cardHeight = 111
+      const cardHeight = 102
       function infoCard(
         x0: number, title: string, fields: [string, string][]
       ) {
@@ -205,7 +205,7 @@ export async function quotePdf(
         ['OT:', snapshot.order.id],
         ['Motivo:', snapshot.order.complaint]
       ])
-      cursor = cardsTop - cardHeight - 32
+      cursor = cardsTop - cardHeight - 21
     } else {
       page.drawImage(icon, { x: M, y: H - 76, width: 34, height: 34 })
       write('ByteTorque · Continuación de cotización', M + 42, H - 57, 11, navy, true)
@@ -239,7 +239,7 @@ export async function quotePdf(
   }
   function tableItem(item: Snapshot['items'][number], index: number) {
     const description = wrap(item.description, 8.3, 176)
-    const height = Math.max(29, 12 + description.length * 11.2)
+    const height = Math.max(26, 11 + description.length * 11.2)
     if (cursor - height < 127) {
       nextPage()
       tableHeader()
@@ -266,7 +266,7 @@ export async function quotePdf(
       12 + 21 + 11 + observations.length * 11
     const required = Math.max(leftHeight + 15, 127) + legal.length * 9 + 36
     if (cursor - required < 128 && required < 540) nextPage()
-    cursor -= 18
+    cursor -= 13
     if (required < 540) {
       const yTop = cursor
       const leftW = 281
@@ -297,7 +297,7 @@ export async function quotePdf(
       write('TOTAL', rightX + 17, yTop - 103, 11, white, true)
       write(clp(snapshot.totals.total) + ' CLP', rightX + rightW - 16,
         yTop - 103, 11.5, white, true, 'right')
-      cursor = yTop - Math.max(leftHeight + 7, 130)
+      cursor = yTop - Math.max(leftHeight + 7, 124)
     } else {
       // Fully render unusually long legal/terms/observations; never silently
       // truncate them merely to force the two-column design.
@@ -336,7 +336,14 @@ export async function quotePdf(
     }
   }
   function finishingBlock() {
-    if (cursor < 157) nextPage()
+    const contact = [
+      snapshot.workshop.phone || '',
+      snapshot.workshop.contactEmail || '',
+      snapshot.workshop.address || ''
+    ].filter(Boolean)
+    // Reserve enough height for every contact field AND the signature text.
+    // Never silently drop a workshop address or email near the page footer.
+    if (cursor < 135 + contact.length * 11) nextPage()
     cursor -= 12
     rule(M, cursor, CW, blue, 1.1)
     cursor -= 20
@@ -345,13 +352,7 @@ export async function quotePdf(
     cursor -= 15
     write(truncate(snapshot.workshop.name, 8.7, 255), M + 5, cursor, 8.7, navy)
     cursor -= 14
-    const contact = [
-      snapshot.workshop.phone || '',
-      snapshot.workshop.contactEmail || '',
-      snapshot.workshop.address || ''
-    ].filter(Boolean)
     for (const field of contact) {
-      if (cursor < 88) break
       write(truncate(field, 7.9, 260), M + 5, cursor, 7.9, gray)
       cursor -= 11
     }

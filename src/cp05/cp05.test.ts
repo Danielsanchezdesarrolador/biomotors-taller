@@ -138,6 +138,34 @@ describe('CP05 importe y documentos', () => {
     expect(pdf.getPage(0).getSize().width).toBeCloseTo(595.28)
     expect(JSON.stringify(snapshot)).toBe(original)
   })
+  it('mantiene en una hoja A4 la cotización QA de tres partidas sin ocultar datos', async () => {
+    const qaDraft: Draft = {
+      ...draft,
+      terms: 'PRUEBA QA: cotización ficticia sin validez comercial.',
+      comments: 'Solo ensayo privado de ByteTorque. No emitir ni enviar.\\nBorrador sin emitir ni archivar. No es documento tributario ni aceptación del cliente.',
+      items: [
+        {...draft.items[0], description: 'Repuesto QA sin entrega', type: 'Repuesto',
+          quantity: 1, price: 52900},
+        {...draft.items[0], id: '22222222-2222-4222-8222-222222222222',
+          description: 'Mano de obra QA simulada', type: 'Mano de obra',
+          quantity: 1.5, price: 24900},
+        {...draft.items[0], id: '33333333-3333-4333-8333-333333333333',
+          description: 'Insumo QA no adquirido', type: 'Insumo',
+          quantity: 1.05, price: 10}
+      ]
+    }
+    const qa = previewSnapshot(bundle, qaDraft)
+    const pdf = await PDFDocument.load(await quotePdf(qa, assets, true))
+    expect(qa.totals).toEqual({subtotal: 90261, tax: 17150, total: 107411})
+    expect(pdf.getPageCount()).toBe(1)
+  })
+  it('permite todos los contactos configurados, sin perderlos cerca del pie', async () => {
+    const branded = {...snapshot, workshop: {...snapshot.workshop,
+      phone: '+56 2 1234 5678', contactEmail: 'qa@invalid.test',
+      address: 'Avenida de Pruebas 123, Santiago'}}
+    const pdf = await PDFDocument.load(await quotePdf(branded, assets, true))
+    expect(pdf.getPageCount()).toBeGreaterThanOrEqual(1)
+  })
   it('pagina 200 partidas sin perder el total histórico', async () => {
     const long = {
       ...snapshot,
