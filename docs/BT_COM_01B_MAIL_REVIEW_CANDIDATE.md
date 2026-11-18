@@ -23,7 +23,7 @@ La idempotencia futura del puerto `recordReview` será por `(workshop_id,request
 
 `src/entrega/closingMailReviewCandidate.test.ts` cubre: OFF sin IO, 3 referencias correctas, aislamiento de taller/OT/revisión/entrega, UUID inválidos, roles/membresía, PDFs no comprobados, revisión obsoleta, destinatarios ausentes/malformados, paths y hashes, confirmaciones incompletas, confirmación idempotente, revocación entre consulta y registro, reutilización de token con email o PDF distintos, y texto de cabecera con saltos de línea.
 
-No se usaron datos reales del taller de Ignacio ni servicios de correo. **GitHub Actions:** registrar el run de la última revisión solo al confirmar SUCCESS; los primeros commits detectaron errores de TypeScript y se corrigieron antes del checkpoint.
+No se usaron datos reales del taller de Ignacio ni servicios de correo. **GitHub Actions — código `dc8eb676`:** [verificación Web/PWA y Android Expo #44420380822](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44420380822) **SUCCESS**, 707/707 Vitest en 81 archivos. [QA de interfaz pública #44420380820](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44420380820) todavía pendiente al documentar. Los primeros commits detectaron errores de TypeScript y una aserción demasiado sensible a mayúsculas; ambos fueron corregidos.
 
 ## Dependencias reales bloqueadas
 
