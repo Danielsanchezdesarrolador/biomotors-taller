@@ -5,15 +5,18 @@
 import { useRef, useState } from 'react'
 import type { Quote, Revision } from '../cp05/contracts'
 import { clp } from '../ordenes/orderMoney'
-import { executionPreview, type ExecutionDecision } from './executionPreview'
+import { executionPreview, type ExecutionDecision, type ExecutionInput } from './executionPreview'
 import './execution.css'
 
 export function WorkExecutionDraft({
   revision,
-  quote
+  quote,
+  onRecord
 }: {
   revision: Revision
   quote: Quote
+  /** Only supplied by BT-FLOW-LIVE-02 after explicit private rollout approval. */
+  onRecord?: (input: ExecutionInput) => Promise<void>
 }) {
   const [decisions, setDecisions] = useState<Record<string, ExecutionDecision>>({})
   const [pendingExplanation, setPendingExplanation] = useState('')
@@ -34,6 +37,24 @@ export function WorkExecutionDraft({
     setDecisions(current => ({ ...current, [id]: decision }))
     setReviewed(false)
     setError('')
+  }
+  async function record() {
+    if (!onRecord || !review?.readyForDraftPdf || lock.current) return
+    lock.current = true
+    setBusy(true)
+    setError('')
+    try {
+      await onRecord({
+        decisions: { ...decisions },
+        pendingExplanation: review.pendingExplanation,
+        operatorReviewed: reviewed
+      })
+    } catch {
+      setError('No se pudo confirmar el registro en el servidor. Consulta los registros antes de repetirlo.')
+    } finally {
+      lock.current = false
+      setBusy(false)
+    }
   }
   async function download() {
     if (!review?.readyForDraftPdf || lock.current) return
@@ -123,6 +144,14 @@ export function WorkExecutionDraft({
             onClick={() => void download()}>
             {busy ? 'Generando borrador…' : 'Descargar informe técnico · BORRADOR'}
           </button>
+          {onRecord && (
+            <button type="button" className="cp04-secondary"
+              disabled={busy || !review.readyForDraftPdf}
+              onClick={() => void record()}>
+              {busy ? 'Verificando con el servidor…' :
+                'Registrar declaración de trabajos · requiere autorización'}
+            </button>
+          )}
           {error && <p role="alert" className="cp04-error">{error}</p>}
           <small>{review.notice}</small>
         </>
