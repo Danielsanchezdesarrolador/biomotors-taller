@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck",
-    "verify-config": "node scripts/verify-config.mjs"
+    "verify-config": "node scripts/verify-config.mjs",
+    "test:contracts": "node --experimental-strip-types --test scripts/test-demo-gateway.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
