@@ -119,4 +119,80 @@ describe('CP04 X multipoint autosave queue',()=>{
    expect(Object.keys(different.snapshot())).toHaveLength(0)
    engine.stop()
  })
+ it('does not promise local recovery when browser storage rejects pending writes',async()=>{
+   vi.useFakeTimers()
+   try {
+     const {port,rows}=lab()
+     const blocked={
+       getItem:vi.fn(()=>null),
+       setItem:vi.fn(()=>{throw Error('QuotaExceededError')}),
+       removeItem:vi.fn(()=>{throw Error('SecurityError')})
+     }
+     const engine=new Cp04AutosaveQueue({scope,initialFindings:rows,port,store:blocked})
+     engine.start()
+     engine.select(template[0].id,'attention')
+     expect(engine.hasTemporaryRecovery()).toBe(false)
+     expect(engine.snapshot()[template[0].id].phase).toBe('queued')
+     expect(engine.getSavedCount()).toBe(0)
+     await flush()
+     expect(port.createFinding).toHaveBeenCalledTimes(1)
+     expect(engine.getSavedCount()).toBe(1)
+     engine.stop()
+   }finally{vi.useRealTimers()}
+ })
+ it('does not write after a session ends during server reconciliation',async()=>{
+   vi.useFakeTimers()
+   try {
+     const {engine,port,store}=lab()
+     engine.start()
+     engine.select(template[0].id,'ok')
+     engine.stop() // Persist an unsent edit for same-tab restoration.
+     let release:((rows:Finding[])=>void)|undefined
+     port.findingsForOrder.mockImplementationOnce(()=>new Promise<Finding[]>(resolve=>{release=resolve}))
+     const recovered=new Cp04AutosaveQueue({scope,initialFindings:[],port,store})
+     recovered.start()
+     await vi.advanceTimersByTimeAsync(500)
+     expect(port.findingsForOrder).toHaveBeenCalledTimes(1)
+     recovered.stop() // Session invalidated while the SELECT is in flight.
+     release?.([])
+     await Promise.resolve()
+     await Promise.resolve()
+     expect(port.createFinding).not.toHaveBeenCalled()
+     expect(recovered.snapshot()[template[0].id].phase).toBe('queued')
+     expect(recovered.getSavedCount()).toBe(0)
+   }finally{vi.useRealTimers()}
+ })
+ it('ignores a late write response after stop/start and reconciles without duplicate confirmation',async()=>{
+   vi.useFakeTimers()
+   try {
+     const {engine,port,rows}=lab()
+     const onSaved=vi.fn()
+     engine.setOnSaved(onSaved)
+     const original=port.createFinding.getMockImplementation()!
+     let release:(()=>void)|undefined
+     port.createFinding.mockImplementationOnce(async(input)=>{
+       const row=await original(input)
+       await new Promise<void>(resolve=>{release=resolve})
+       return row
+     })
+     engine.start()
+     engine.select(template[0].id,'ok')
+     await vi.advanceTimersByTimeAsync(150)
+     expect(rows).toHaveLength(1) // Committed, response delayed.
+     engine.stop()
+     expect(engine.snapshot()[template[0].id].phase).toBe('saving') // snapshot of old generation
+     engine.start()
+     release?.()
+     await Promise.resolve()
+     await Promise.resolve()
+     // The obsolete generation cannot signal that the replacement session saved.
+     expect(onSaved).not.toHaveBeenCalled()
+     await flush()
+     expect(port.findingsForOrder).toHaveBeenCalled()
+     expect(port.createFinding).toHaveBeenCalledTimes(1)
+     expect(engine.getSavedCount()).toBe(1)
+     engine.stop()
+   }finally{vi.useRealTimers()}
+ })
+
 })
