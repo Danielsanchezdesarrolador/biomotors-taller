@@ -89,7 +89,7 @@ assert.ok(
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||
       (cp05PrivateEnabled &&
-        /src\/(?:cp05\/|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
+        /src\/(?:cp05\/|entrega\/(?:WorkExecutionDraft|executionPreview|executionPdf)\.|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
           id
         )) ||
       /src\/plans\/planStatus\.ts$/.test(id) ||
