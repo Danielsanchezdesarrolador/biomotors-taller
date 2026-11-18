@@ -519,42 +519,51 @@ export function VehicleHistory({
       .catch(() => { if (!cancelled) setArchive(null) })
     return () => { cancelled = true; port?.dispose() }
   }, [client, context, scope])
-  if (document?.kind === 'order')
-    return (
-      <ExistingOrder
-        client={client}
-        context={context}
-        id={document.id}
-        onBack={() => setDocument(null)}
-      />
-    )
-  if (document?.kind === 'quote' && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true')
-    return (
-      <ExistingQuote
-        client={client}
-        context={context}
-        id={document.id}
-        onBack={() => setDocument(null)}
-      />
-    )
-  return repository ? (
-    <HistoryView
-      onAccessLost={onAccessLost}
-      repository={repository}
-      vehicleId={vehicleId}
-      onDownload={archive?.scope === scope ? async (revision) => {
-        const { downloadPdf } = await import('../cp05/pdf')
-        await archivedRevisionPdf(revision, vehicleId, context.workshop.id, archive.port, downloadPdf)
-      } : undefined}
-      onBack={onBack}
-      onOrder={(id) => setDocument({ kind: 'order', id })}
-      onQuote={
-        import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
-          ? (id) => setDocument({ kind: 'quote', id })
-          : undefined
-      }
-    />
-  ) : (
-    <p role="status">Preparando historial autorizado…</p>
+  return (
+    <>
+      {/* Keep the verified history mounted while opening an OT or quotation:
+          returning to the vehicle must not lose loaded pages or scroll context. */}
+      <div hidden={document !== null}>
+        {repository ? (
+          <HistoryView
+            onAccessLost={onAccessLost}
+            repository={repository}
+            vehicleId={vehicleId}
+            onDownload={archive?.scope === scope ? async (revision) => {
+              const { downloadPdf } = await import('../cp05/pdf')
+              await archivedRevisionPdf(
+                revision, vehicleId, context.workshop.id, archive.port, downloadPdf
+              )
+            } : undefined}
+            onBack={onBack}
+            onOrder={(id) => setDocument({ kind: 'order', id })}
+            onQuote={
+              import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+                ? (id) => setDocument({ kind: 'quote', id })
+                : undefined
+            }
+          />
+        ) : (
+          <p role="status">Preparando historial autorizado…</p>
+        )}
+      </div>
+      {document?.kind === 'order' && (
+        <ExistingOrder
+          client={client}
+          context={context}
+          id={document.id}
+          onBack={() => setDocument(null)}
+        />
+      )}
+      {document?.kind === 'quote' &&
+        import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' && (
+        <ExistingQuote
+          client={client}
+          context={context}
+          id={document.id}
+          onBack={() => setDocument(null)}
+        />
+      )}
+    </>
   )
 }
