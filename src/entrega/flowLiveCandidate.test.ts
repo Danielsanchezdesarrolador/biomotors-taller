@@ -181,6 +181,65 @@ describe('BT-FLOW-LIVE-02 real-data transport candidate (OFF)', () => {
     await expect(port.execution(quote, revision, input, rid))
       .rejects.toMatchObject({ kind: 'conflict' })
   })
+  it('reloads attested evidence through read-only workshop/revision-scoped RLS queries', async () => {
+    const f = setup()
+    const q = () => {
+      const tableRows: Record<string, unknown> = {
+        bt_flow_quote_approvals: approval,
+        bt_flow_execution_reports: report,
+        bt_flow_visit_deliveries: handover
+      }
+      const from = vi.fn((table: string) => {
+        const filters: Record<string, unknown> = {}
+        const builder = {
+          select: () => builder,
+          eq: (key: string, value: unknown) => {
+            filters[key] = value
+            return builder
+          },
+          maybeSingle: async () => ({
+            data: tableRows[table] ?? null, error: null
+          })
+        }
+        return builder
+      })
+      const client = { auth: f.client.auth, rpc: f.rpc, from } as unknown as SupabaseClient
+      return { client, from }
+    }
+    const { client, from } = q()
+    const port = flowLiveCandidate(client, context, { explicitlyApproved: true })
+    expect(await port.history(quote, revision)).toEqual({
+      approval, execution: report, handover
+    })
+    expect(f.rpc).not.toHaveBeenCalled()
+    expect(from).toHaveBeenCalledTimes(3)
+  })
+  it('does not display another workshop or an orphan delivery from a corrupt read', async () => {
+    const f = setup()
+    const rows: Record<string, unknown> = {
+      bt_flow_quote_approvals: approval,
+      bt_flow_execution_reports: { ...report, workshop_id: id(99) },
+      bt_flow_visit_deliveries: handover
+    }
+    const from = vi.fn((table: string) => {
+      const query = {
+        select: () => query, eq: () => query,
+        maybeSingle: async () => ({ data: rows[table] ?? null, error: null })
+      }
+      return query
+    })
+    const client = { auth: f.client.auth, rpc: f.rpc, from } as unknown as SupabaseClient
+    const port = flowLiveCandidate(client, context, { explicitlyApproved: true })
+    await expect(port.history(quote, revision))
+      .rejects.toMatchObject({ kind: 'unconfirmed' })
+    rows.bt_flow_execution_reports = null
+    await expect(port.history(quote, revision))
+      .rejects.toMatchObject({ kind: 'unconfirmed' })
+    rows.bt_flow_visit_deliveries = null
+    expect(await port.history(quote, revision)).toEqual({
+      approval, execution: null, handover: null
+    })
+  })
   it('keeps user identity as the session identity, not a client supplied actor', async () => {
     const f = setup(), port = flowLiveCandidate(f.client, context, { explicitlyApproved: true })
     f.rpc.mockResolvedValueOnce({ data: { ...approval, recorded_by: id(99) }, error: null })
