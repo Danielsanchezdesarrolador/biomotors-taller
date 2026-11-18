@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { PDFDocument } from 'pdf-lib'
 import { calculateTotals } from '../ordenes/orderMoney'
 import { draftPayload, previewSnapshot, type Bundle, type Revision, type Draft } from './contracts'
-import { quotePdf } from './pdf'
+import { quotePdf, pdfLegalNotice } from './pdf'
 import { issueQuoteCandidate, type IssuePorts } from '../../server/cp05/issuanceCandidate'
 import { privateArchiveCandidate } from '../../server/cp05/archiveCandidate'
 import { deliverQuoteCandidate, type DeliveryPorts } from '../../server/cp05/deliveryCandidate'
@@ -106,6 +106,16 @@ describe('CP05 importe y documentos', () => {
       })
     ).toThrow()
     expect(() => draftPayload({ ...draft, price_basis: 'gross' } as unknown as Draft)).toThrow()
+  })
+  it('mantiene una sola advertencia legal al descargar el borrador QA', () => {
+    const fromSnapshot =
+      'Borrador sin emitir ni archivar. No es documento tributario ni aceptación del cliente.'
+    const pdfText = pdfLegalNotice(fromSnapshot)
+    expect(pdfText.match(/No es documento tributario/gi)).toHaveLength(1)
+    expect(pdfText).toBe(fromSnapshot)
+    const custom = pdfLegalNotice('Presupuesto interno en revisión.')
+    expect(custom.match(/No es documento tributario/gi)).toHaveLength(1)
+    expect(pdfLegalNotice(' ')).toContain('No es documento tributario')
   })
   it('genera PDF real, Unicode, A4 y bytes deterministas', async () => {
     const bytes = await quotePdf(snapshot, assets, true)

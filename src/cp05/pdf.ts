@@ -3,6 +3,19 @@ import fontkit from '@pdf-lib/fontkit'
 import { quoteNumber, type Snapshot } from './contracts'
 import { clp } from '../ordenes/orderMoney'
 
+
+/** Keep the non-tax disclaimer on a draft once, even when the snapshot
+ * already includes that statement. The legal status comes from the snapshot
+ * and cannot be promoted to an issued document by the PDF formatter. */
+export function pdfLegalNotice(notice: string): string {
+  const description = notice.trim()
+  const disclaimer = 'No es documento tributario ni acredita firma o aceptación del cliente.'
+  if (!description) return disclaimer
+  return /no es documento tributario/i.test(description)
+    ? description
+    : description + ' ' + disclaimer
+}
+
 /**
  * CP05 — plantilla oficial R3, aprobada visualmente el 17-11-2026.
  *
@@ -260,8 +273,7 @@ export async function quotePdf(
     const conditions = wrap(snapshot.quote.terms || 'Sin condiciones definidas', 8.1, 256)
     const observations = wrap(snapshot.quote.comments || 'Sin observaciones adicionales',
       8.1, 256)
-    const legal = wrap(snapshot.notice + ' No es documento tributario ni acredita ' +
-      'firma o aceptación del cliente.', 7.5, CW - 16)
+    const legal = wrap(pdfLegalNotice(snapshot.notice), 7.5, CW - 16)
     const leftHeight = 21 + 11 + conditions.length * 11 +
       12 + 21 + 11 + observations.length * 11
     const required = Math.max(leftHeight + 15, 127) + legal.length * 9 + 36
