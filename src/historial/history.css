@@ -137,3 +137,41 @@
     font-size: 14px;
   }
 }
+
+/* Historial verificado: las constancias no sustituyen los documentos firmados. */
+.cp06-evidence {
+  margin: 12px 0;
+  border: 1px solid #c6d7ef;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #f7faff;
+  overflow-wrap: anywhere;
+}
+.cp06-evidence summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #073c83;
+  min-height: 34px;
+  padding: 6px 0;
+}
+.cp06-evidence h4 {
+  margin: 14px 0 4px;
+  color: #0a2d58;
+}
+.cp06-evidence-note {
+  padding: 10px 12px;
+  background: #eaf1fc;
+  border-radius: 8px;
+  color: #193f6d;
+}
+.cp06-evidence-items {
+  padding-left: 22px;
+  line-height: 1.7;
+}
+.cp06-evidence-empty {
+  color: #4d6280;
+  font-size: 14px;
+}
+.cp06-evidence summary:focus-visible {
+  outline: 3px solid #6ab2ff;
+}
