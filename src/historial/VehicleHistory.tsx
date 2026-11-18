@@ -230,7 +230,7 @@ export function HistoryView({
       setVehicle(null)
       setVisits([])
       setPending([])
-      setQuotes({ status: 'off', quotes: [], revisions: [], events: [] })
+      setQuotes({ status: 'off', quotes: [], revisions: [], events: [], evidence: emptyEvidence() })
       setNext(null)
       setNextPending(null)
       onAccessLost?.()
@@ -246,7 +246,7 @@ export function HistoryView({
     setVehicle(null)
     setVisits([])
     setPending([])
-    setQuotes({ status: 'off', quotes: [], revisions: [], events: [] })
+    setQuotes({ status: 'off', quotes: [], revisions: [], events: [], evidence: emptyEvidence() })
     try {
       const [v, page, issues] = await Promise.all([
         repository.vehicle(vehicleId),
