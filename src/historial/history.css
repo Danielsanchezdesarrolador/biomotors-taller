@@ -175,3 +175,22 @@
 .cp06-evidence summary:focus-visible {
   outline: 3px solid #6ab2ff;
 }
+
+.cp06-evidence-downloads {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #cbdbef;
+}
+.cp06-evidence-downloads p {
+  flex: 1 0 100%;
+  margin: 4px 0;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .cp06-evidence-downloads button {
+    width: 100%;
+  }
+}
