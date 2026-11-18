@@ -1,0 +1,67 @@
+/* CP05 authenticated work review: R2 white / slate / navy / blue.
+   Intentionally separate from the public DEMO delivery flow. */
+.cp05-execution {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 20px;
+  color: #13253c;
+}
+.cp05-execution h3 { margin: 0; color: #0a1c3a; }
+.cp05-execution .cp05-notice { margin: 0; }
+.cp05-execution-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e2e9f2;
+  padding: 12px 0;
+  min-width: 0;
+}
+.cp05-execution-line strong { display: block; overflow-wrap: anywhere; }
+.cp05-execution-line small { display: block; margin-top: 5px; color: #53637b; }
+.cp05-execution-choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.cp05-execution-choices button[aria-pressed="true"] {
+  background: #e3efff;
+  color: #0648bd;
+  border-color: #2669d5;
+  font-weight: 700;
+}
+.cp05-execution-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 13px;
+  background: #f6f8fc;
+  border: 1px solid #e2e9f2;
+  border-radius: 12px;
+}
+.cp05-execution-totals p { margin: 0; }
+.cp05-execution-note, .cp05-execution-confirm { display: grid; gap: 7px; }
+.cp05-execution-note textarea {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 9px;
+  border: 1px solid #aabbd0;
+  background: #fff;
+  color: #0a1c3a;
+  padding: 11px;
+  font: inherit;
+}
+.cp05-execution-confirm { grid-template-columns: auto 1fr; align-items: start; }
+.cp05-execution-confirm input { width: 18px; height: 18px; }
+.cp05-execution-missing { margin: 0; padding-left: 20px; color: #8d3d22; }
+.cp05-execution button { min-height: 42px; }
+@media (max-width: 760px) {
+  .cp05-execution { padding: 14px; }
+  .cp05-execution-line { grid-template-columns: 1fr; }
+  .cp05-execution-choices { justify-content: stretch; }
+  .cp05-execution-choices button { flex: 1 1 140px; }
+  .cp05-execution-totals { grid-template-columns: 1fr; }
+}
