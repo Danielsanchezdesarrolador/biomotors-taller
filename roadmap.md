@@ -305,7 +305,12 @@ Las funcionalidades para administrar otros talleres, las páginas de precios, lo
 
 **Salida:** inspección completa y observaciones recuperables un año después.
 
-### BT-CP05 — Presupuestos, PDF y correo — PREPARACIÓN (NO OPERATIVO)
+### BT-CP05 — Cotizaciones, PDF R3, archivo y correo — CÓDIGO CANDIDATO CERRADO / ACTIVACIÓN PARCIAL
+
+**Estado actualizado 18/11/2026 — prevalece sobre la preparación histórica siguiente.** CP05 ya tiene **cotizaciones privadas y partidas persistentes en Supabase con registros exclusivamente ficticios**, PDF R3 borrador descargado y validado manualmente, y código candidato del worker `bt-cp05-documents` para emitir snapshot/revisión inmutables, archivar PDF privado, verificar SHA/tamaño, descargar revisión histórica y registrar intento de correo. El paquete Edge se genera/valida offline en GitHub Actions; **NO se ha desplegado ni activado** y la emisión/archivo/descarga privada continúan bloqueados. El código ahora rechaza un recibo de finalización con revisión, taller, cotización, versión o tamaño distintos de lo archivado. [CI 44326581500](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44326581500): **SUCCESS** Web/PWA + Android, **647/647** Vitest, compilaciones candidatas y paquete Edge offline.  
+**Criterio de cierre:** código candidato de CP05 listo para la fase de activación final, **NO CP05 operativo de extremo a extremo** hasta respaldo restaurable, autorización individual de bucket/políticas Storage y Edge, flags adecuados, prueba real A/B, restauración de PDF en navegador físico y aceptación de Ignacio. Correo transaccional de cotización sigue **OFF**; el **correo único de cierre con cotización + informe + entrega** sigue siendo requisito separado **BT-COM-01**, no está implementado ni debe presentarse como enviado. La seguridad final y **BT-PILOT-QA-04: A REPASAR** se revisarán juntos; ninguna de estas tareas impide seguir desarrollando otros módulos candidatos sin tocar infraestructura alojada.
+
+
 
 - [x] Contrato de entrega funcional única consolidado el 16/11/2026 en [BT_CP05_ENTREGA_FUNCIONAL.md](docs/BT_CP05_ENTREGA_FUNCIONAL.md). El editor de partidas y el motor de cálculo existentes fueron reutilizados sin importar fixtures; el candidato no equivale a persistencia alojada. SQL y Storage alojados, envío externo y activación privada **no autorizados**. CP05 no está certificado como operativo.
 
