@@ -34,6 +34,7 @@ import { documentOperation } from './documentClient'
 import { localDraft, rememberDraft, clearLocalDraft } from './temporaryDraft'
 import { readQuoteSelection, rememberQuoteSelection } from './quoteSelection'
 import { WorkExecutionDraft } from '../entrega/WorkExecutionDraft'
+import { FlowLive02Loader } from './FlowLive02Loader'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
 const empty: Draft = { price_basis: 'net', valid_days: 10, terms: '', comments: '', items: [] }
@@ -707,10 +708,14 @@ export function QuotePanel({
                           ? 'Cerrar revisión técnica preliminar'
                           : 'Preparar informe técnico preliminar (sin guardar)'}
                       </button>
-                      {executionOpen &&
-                        <WorkExecutionDraft
-                          key={revision.id} revision={revision} quote={bundle.quote}
-                        />}
+                      {executionOpen && (
+                        import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
+                          ? <FlowLive02Loader key={revision.id}
+                              client={privateClient} context={context}
+                              revision={revision} quote={bundle.quote} />
+                          : <WorkExecutionDraft key={revision.id}
+                              revision={revision} quote={bundle.quote} />
+                      )}
                     </section>
                   ))}
               <section className="dashboard-card cp05-history">
