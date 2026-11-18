@@ -6,6 +6,7 @@ import { useRef, useState } from 'react'
 import type { Quote, Revision } from '../cp05/contracts'
 import { clp } from '../ordenes/orderMoney'
 import { executionPreview, type ExecutionDecision } from './executionPreview'
+import './execution.css'
 
 export function WorkExecutionDraft({
   revision,
