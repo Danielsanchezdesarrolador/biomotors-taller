@@ -590,7 +590,8 @@ export function QuotePanel({
                   tributario.
                 </small>
               </div>
-              <div className="cp05-actions">
+              <div className="cp05-action-board" aria-label="Acciones de cotización">
+                <div className="cp05-action-group cp05-action-group-main">
                 {editable && (
                   <button
                     className="cp04-primary"
@@ -616,6 +617,9 @@ export function QuotePanel({
                     <FileDown size={17} /> Descargar PDF de borrador
                   </button>
                 )}
+                </div>
+                <div className="cp05-action-group cp05-action-group-advanced">
+                  <p className="cp05-action-group-label">Emisión y comunicaciones</p>
                 <button
                   disabled={
                     busy ||
@@ -661,6 +665,7 @@ export function QuotePanel({
                     Cancelar reserva pendiente
                   </button>
                 )}
+                </div>
               </div>
               {canWrite && bundle.quote.status !== 'draft' && (
                 <div className="dashboard-card cp05-conditions">
@@ -721,8 +726,12 @@ export function QuotePanel({
               <section className="dashboard-card cp05-history">
                 <h2>Revisiones y trazabilidad</h2>
                 {!bundle.revisions.length && (
-                  <p>No hay revisiones emitidas ni archivos privados confirmados.</p>
+                  <div className="cp05-history-empty">
+                    <FileText size={19} aria-hidden="true" />
+                    <p>No hay revisiones emitidas ni archivos privados confirmados.</p>
+                  </div>
                 )}
+                <div className="cp05-history-entries">
                 {bundle.revisions.map((r) => (
                   <article key={r.id}>
                     <strong>
@@ -751,9 +760,14 @@ export function QuotePanel({
                     {new Date(e.created_at).toLocaleString('es-CL')} · {e.reason}
                   </p>
                 ))}
+                </div>
+                <div className="cp05-history-deliveries">
                 <h3>Envíos</h3>
                 {!bundle.deliveries.length ? (
-                  <p>Sin envíos registrados. Correo externo desactivado.</p>
+                  <div className="cp05-history-empty">
+                    <Send size={19} aria-hidden="true" />
+                    <p>Sin envíos registrados. Correo externo desactivado.</p>
+                  </div>
                 ) : (
                   bundle.deliveries.map((d) => (
                     <p key={d.id}>
@@ -768,6 +782,7 @@ export function QuotePanel({
                     </p>
                   ))
                 )}
+                </div>
               </section>
             </>
           )}
