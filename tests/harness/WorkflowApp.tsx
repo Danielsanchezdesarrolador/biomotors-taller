@@ -142,8 +142,16 @@ function App() {
         workshopSubtitle: 'Entorno de muestra',
         workshopStatus: 'Sin datos reales',
         version: 'ByteTorque · BT-UI-02-R2 · DEMO',
-        accountTitle: 'Cuenta de prueba',
-        accountSubtitle: 'Taller de demostración',
+        accountTitle: visualPlan ? 'Nombre Apellido de Verificación Extensa' : 'Cuenta de prueba',
+        accountSubtitle: visualPlan ? 'Administrador' : 'Taller de demostración',
+        accountPlan: visualPlan ? {
+          scope: 'personal',
+          effectivePlan: visualPlan,
+          personalPlan: visualPlan,
+          isLifetime: false,
+          expiresAt: null,
+          workshopId: null
+        } : undefined,
         notifications: 'Sin notificaciones reales. Estamos en modo demostración.',
         avatarText: 'BT',
         notificationDot: true
