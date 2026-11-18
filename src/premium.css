@@ -383,3 +383,129 @@ body { background: #f0f6ff; }
   .metric-icon svg { width:27px; height:27px; }
   .welcome-area::before { background-image:linear-gradient(90deg,#f1f7ff 0%,rgba(237,246,255,.95) 40%,rgba(222,239,255,.72) 100%),url('/hero-workshop.webp'); }
 }
+
+/* BT-UI-POLISH-01 · Account identity: content defines height, not an
+   overflowing 78px header. All badges reflect the real PlanStatus. */
+.app-shell .topbar-controls,
+.app-shell .topbar .popover-anchor,
+.app-shell .account-trigger,
+.app-shell .account-copy {
+  min-width: 0;
+}
+.app-shell .topbar-controls { flex-shrink: 0; gap: 13px; }
+.app-shell .account-trigger {
+  box-sizing: border-box;
+  max-width: 320px;
+  gap: 11px;
+  padding: 5px 0;
+  align-items: center;
+}
+.app-shell .account-trigger > svg,
+.app-shell .account-trigger .avatar {
+  flex: 0 0 auto;
+}
+.app-shell .account-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 226px;
+}
+.app-shell .account-copy > strong {
+  display: block;
+  line-height: 1.27;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+.app-shell .account-meta {
+  display: flex;
+  gap: 6px 9px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+.app-shell .account-meta small {
+  color: #516c8f;
+  line-height: 1.35;
+}
+.app-shell .account-plan-badge,
+.app-shell .mobile-plan-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 750;
+  box-shadow: none;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.app-shell .account-plan-badge svg,
+.app-shell .mobile-plan-indicator svg {
+  flex: 0 0 auto;
+  stroke-width: 2;
+}
+.app-shell .plan-badge-basic,
+.app-shell .plan-badge-unknown {
+  background: #e9eef5;
+  border: 1px solid #d4deea;
+  color: #435b77;
+}
+.app-shell .plan-badge-plus {
+  background: linear-gradient(115deg, #0664e6, #167eef);
+  border: 1px solid #075ed9;
+  color: #fff;
+}
+.app-shell .plan-badge-full {
+  background: linear-gradient(115deg, #fff1bf, #f8d772);
+  border: 1px solid #d3a641;
+  color: #6b4400;
+}
+.app-shell .topbar .account-popover { top: calc(100% + 10px); }
+@media (min-width: 761px) {
+  .app-shell .topbar {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 94px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+  .app-shell .topbar-search { flex: 1 1 180px; min-width: 0; }
+}
+@media (min-width: 761px) and (max-width: 1150px) {
+  .app-shell .account-trigger { max-width: 285px; }
+  .app-shell .account-copy { max-width: 186px; }
+  .app-shell .topbar-controls { gap: 9px; }
+}
+@media (max-width: 760px) {
+  .app-shell .topbar {
+    height: calc(65px + env(safe-area-inset-top));
+    min-height: calc(65px + env(safe-area-inset-top));
+  }
+  .app-shell .mobile-plan-indicator {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-self: center;
+    max-width: 120px;
+    font-size: 10px;
+    padding: 4px 7px;
+    overflow: hidden;
+  }
+  .app-shell .mobile-plan-indicator > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+@media (max-width: 390px) {
+  .app-shell .mobile-plan-indicator { max-width: 99px; gap: 4px; }
+  .app-shell .topbar-controls { gap: 6px; }
+}
