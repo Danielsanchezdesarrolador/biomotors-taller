@@ -1,57 +1,39 @@
-/** BT-ANDROID-01 · Four native R2 screens using explicit, synthetic data only.
- * No network, Supabase client, persistent data, signed PDFs, or client secrets.
+/** BT-ANDROID-02 · Pantallas R2 conectadas SOLO al adaptador de lectura ficticio.
+ * No hay autenticación, backend, persistencia, correos ni documentos productivos.
  */
-import { useMemo, useState, type ComponentProps, type ReactNode } from 'react'
+import { useState, type ComponentProps, type ReactNode } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import {
-  Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,
-} from 'react-native'
+  createDemoGateway, demoErrorText,
+  type DemoSession, type DemoOrderState, type DemoFailureMode,
+} from '../data/demoGateway'
 
+type Gateway = ReturnType<typeof createDemoGateway>
 type IconName = ComponentProps<typeof Ionicons>['name']
 type ModuleSection = 'ordenes' | 'clientes' | 'informes' | 'configuracion'
-type OrderState = 'diagnostico' | 'servicio' | 'repuestos' | 'entrega'
-type SampleOrder = {
-  id: string
-  plate: string
-  vehicle: string
-  client: string
-  service: string
-  state: OrderState
-  odometer: string
-}
+type OrderState = DemoOrderState
 const colors = {
   navy: '#091E3C', deep: '#122C53', blue: '#086EF2', bg: '#F5F8FD',
   border: '#D5E2F3', soft: '#EAF3FF', ink: '#142A49', muted: '#647A98',
-  green: '#157B54', lightGreen: '#E4F6ED', white: '#FFFFFF'
+  green: '#157B54', lightGreen: '#E4F6ED', white: '#FFFFFF',
 }
-const orderStates: Record<OrderState, {label: string; tint: string; background: string}> = {
+const orderStates: Record<OrderState,{label:string;tint:string;background:string}> = {
   diagnostico: {label:'En diagnóstico',tint:'#0866CF',background:'#E5F1FF'},
   servicio: {label:'En servicio',tint:'#9C6300',background:'#FFF4DF'},
   repuestos: {label:'Por repuestos',tint:'#764ABE',background:'#F1E9FF'},
   entrega: {label:'Lista para entrega',tint:'#167C55',background:'#E4F7EC'},
 }
-const sampleOrders: SampleOrder[] = [
-  {id:'OT-1001',plate:'DEMO-01',vehicle:'Toyota Corolla · 2020',
-    client:'Cliente de ejemplo A',service:'Mantención de 10.000 km',state:'diagnostico',odometer:'68.420 km'},
-  {id:'OT-1002',plate:'DEMO-02',vehicle:'Hyundai Tucson · 2021',
-    client:'Cliente de ejemplo B',service:'Revisión de frenos',state:'servicio',odometer:'91.850 km'},
-  {id:'OT-1003',plate:'DEMO-03',vehicle:'Chevrolet Tracker · 2022',
-    client:'Cliente de ejemplo C',service:'Cambio de aceite',state:'repuestos',odometer:'42.700 km'},
-  {id:'OT-1004',plate:'DEMO-04',vehicle:'Mitsubishi L200 · 2019',
-    client:'Cliente de ejemplo D',service:'Diagnóstico de motor',state:'entrega',odometer:'125.310 km'},
-]
-const sampleQuotes = [
-  {id:'COT-DEMO-001',orderId:'OT-1002',title:'Revisión de frenos',
-    client:'Cliente de ejemplo B',vehicle:'Hyundai Tucson',total:'$107.411 CLP',status:'Borrador de demostración'},
-  {id:'COT-DEMO-002',orderId:'OT-1001',title:'Mantención preventiva',
-    client:'Cliente de ejemplo A',vehicle:'Toyota Corolla',total:'$84.900 CLP',status:'Borrador de demostración'},
-]
-
-function locked(message: string) {
-  Alert.alert('Función pendiente de activación', message +
-    '\n\nNo se han guardado datos, enviado correos ni emitido documentos.')
+const money = (amount: number) => '$' + amount.toLocaleString('es-CL') + ' CLP'
+function read<T>(fn: () => T): {value:T;error:null}|{value:null;error:string} {
+  try { return {value:fn(),error:null} }
+  catch(e) { return {value:null,error:demoErrorText(e)} }
 }
-function Headline({label,title,description,icon}: {
+function locked(message:string) {
+  Alert.alert('Función pendiente de activación',
+    message + '\n\nNo se han guardado datos ni enviado correos o documentos.')
+}
+function Headline({label,title,description,icon}:{
   label:string;title:string;description:string;icon:IconName
 }) {
   return <View style={s.heading}>
@@ -61,7 +43,7 @@ function Headline({label,title,description,icon}: {
     <Text style={s.subtitle}>{description}</Text>
   </View>
 }
-function Card({title,children,icon}: {title?:string;children:ReactNode;icon?:IconName}) {
+function Card({title,children,icon}:{title?:string;children:ReactNode;icon?:IconName}) {
   return <View style={s.card}>
     {title && <View style={s.cardHeader}>
       {icon && <Ionicons name={icon} size={19} color={colors.blue}/>}
@@ -70,58 +52,58 @@ function Card({title,children,icon}: {title?:string;children:ReactNode;icon?:Ico
     {children}
   </View>
 }
-function Label({children}: {children:ReactNode}) {
-  return <Text style={s.fieldLabel}>{children}</Text>
+function Label({children}:{children:ReactNode}) { return <Text style={s.fieldLabel}>{children}</Text> }
+function Row({label,value}:{label:string;value:string}) {
+  return <View style={s.detailRow}><Label>{label}</Label><Text style={s.fieldValue}>{value}</Text></View>
 }
-function Row({label,value}: {label:string;value:string}) {
-  return <View style={s.detailRow}>
-    <Label>{label}</Label><Text style={s.fieldValue}>{value}</Text>
-  </View>
-}
-function Action({label,icon,onPress,secondary=false}: {
+function Action({label,icon,onPress,secondary=false}:{
   label:string;icon:IconName;onPress:()=>void;secondary?:boolean
 }) {
-  return <TouchableOpacity accessibilityRole="button"
-    accessibilityLabel={label} style={[s.action,secondary&&s.actionSecondary]}
-    onPress={onPress} activeOpacity={0.8}>
+  return <TouchableOpacity accessibilityRole="button" accessibilityLabel={label}
+    style={[s.action,secondary&&s.actionSecondary]} onPress={onPress} activeOpacity={0.8}>
     <Ionicons name={icon} size={19} color={secondary?colors.blue:'#FFFFFF'}/>
     <Text style={[s.actionLabel,secondary&&s.actionSecondaryLabel]}>{label}</Text>
   </TouchableOpacity>
 }
-function Chip({label,active,onPress}: {label:string;active:boolean;onPress:()=>void}) {
-  return <TouchableOpacity accessibilityRole="button"
-    accessibilityState={{selected:active}}
+function Chip({label,active,onPress}:{label:string;active:boolean;onPress:()=>void}) {
+  return <TouchableOpacity accessibilityRole="button" accessibilityState={{selected:active}}
     onPress={onPress} style={[s.chip,active&&s.chipActive]}>
     <Text style={[s.chipText,active&&s.chipTextActive]}>{label}</Text>
   </TouchableOpacity>
 }
-function StatusPill({state}: {state:OrderState}) {
+function StatusPill({state}:{state:OrderState}) {
   const item=orderStates[state]
   return <View style={[s.status,{backgroundColor:item.background}]}>
     <Text style={[s.statusText,{color:item.tint}]}>{item.label}</Text>
   </View>
 }
-function OrdersModule({initialOrderId}: {initialOrderId?:string}) {
+function ReadError({message}:{message:string}) {
+  return <View style={s.info}><Ionicons name="alert-circle-outline" color={colors.blue} size={20}/>
+    <Text style={s.infoText}>{message} No se muestran datos de otro taller ni se permiten escrituras.</Text>
+  </View>
+}
+
+function OrdersModule({session,gateway,initialOrderId,onOpenQuote}:{
+  session:DemoSession;gateway:Gateway;initialOrderId?:string;onOpenQuote:(orderId:string)=>void
+}) {
   const [selected,setSelected]=useState<string|null>(initialOrderId??null)
   const [filter,setFilter]=useState<OrderState|'todas'>('todas')
   const [term,setTerm]=useState('')
-  const orders=useMemo(()=>sampleOrders.filter(item=>
+  const result=read(()=>gateway.listOrders(session))
+  const orders=(result.value??[]).filter(item=>
     (filter==='todas'||item.state===filter)&&
     (!term.trim()||[item.id,item.plate,item.vehicle,item.service]
-      .join(' ').toLocaleLowerCase('es-CL').includes(term.trim().toLocaleLowerCase('es-CL')))),
-    [term,filter])
-  const opened=sampleOrders.find(x=>x.id===selected)
+      .join(' ').toLocaleLowerCase('es-CL').includes(term.trim().toLocaleLowerCase('es-CL'))))
+  const opened=(result.value??[]).find(o=>o.id===selected)
   return <>
-    <Headline label="ÓRDENES · VISTA NATIVA" title="Órdenes de trabajo"
-      description="Consulta el recorrido de una OT de ejemplo, sin modificar datos reales."
+    <Headline label="ÓRDENES · LECTURA OFFLINE" title="Órdenes de trabajo"
+      description="Consulta de órdenes asignadas al taller y rol de prueba, sin modificar registros reales."
       icon="construct-outline"/>
     <Card>
-      <View style={s.search}>
-        <Ionicons name="search-outline" size={18} color={colors.muted}/>
-        <TextInput placeholder="Buscar OT, patente o vehículo de ejemplo"
+      <View style={s.search}><Ionicons name="search-outline" size={18} color={colors.muted}/>
+        <TextInput placeholder="Buscar OT, patente o vehículo ficticio"
           placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false}
-          accessibilityLabel="Buscar órdenes de demostración"
-          value={term} onChangeText={setTerm}/>
+          accessibilityLabel="Buscar órdenes de demostración" value={term} onChangeText={setTerm}/>
       </View>
       <View style={s.chips}>
         <Chip label="Todas" active={filter==='todas'} onPress={()=>setFilter('todas')}/>
@@ -130,9 +112,10 @@ function OrdersModule({initialOrderId}: {initialOrderId?:string}) {
         <Chip label="Repuestos" active={filter==='repuestos'} onPress={()=>setFilter('repuestos')}/>
         <Chip label="Entrega" active={filter==='entrega'} onPress={()=>setFilter('entrega')}/>
       </View>
-      {!orders.length&&<Text style={s.empty}>Sin órdenes ficticias para este filtro.</Text>}
+      {result.error&&<ReadError message={result.error}/>}
+      {!result.error&&!orders.length&&<Text style={s.empty}>Sin órdenes ficticias para este filtro.</Text>}
       {orders.map(item=><TouchableOpacity accessibilityRole="button" key={item.id}
-        accessibilityLabel={'Abrir detalle de ejemplo '+item.id}
+        accessibilityLabel={'Abrir detalle ficticio '+item.id}
         onPress={()=>setSelected(selected===item.id?null:item.id)} style={s.listItem}>
         <View style={s.listIcon}><Ionicons name="car-sport-outline" size={22} color={colors.blue}/></View>
         <View style={s.flex}>
@@ -150,115 +133,151 @@ function OrdersModule({initialOrderId}: {initialOrderId?:string}) {
       <Row label="Patente" value={opened.plate}/>
       <Row label="Kilometraje de ingreso" value={opened.odometer}/>
       <Row label="Motivo" value={opened.service}/>
+      {session.role==='administrador'&&<Action label="Consultar cotizaciones relacionadas"
+        icon="receipt-outline" secondary onPress={()=>onOpenQuote(opened.id)}/>}
       <View style={s.info}><Ionicons name="shield-checkmark-outline" color={colors.blue} size={19}/>
-        <Text style={s.infoText}>La inspección multipunto, el autoguardado y la ejecución de trabajos requieren la cuenta y los permisos reales del taller.</Text>
+        <Text style={s.infoText}>La inspección multipunto y el autoguardado real permanecen bloqueados hasta validar permisos y respaldos.</Text>
       </View>
       <Action label="Abrir inspección real" icon="lock-closed-outline"
-        onPress={()=>locked('La inspección nativa se conectará después de verificar la sesión, los permisos y los respaldos.')} secondary/>
+        onPress={()=>locked('La inspección real exige una sesión verificada, RLS y respaldos probados.')} secondary/>
     </Card>}
-    <Action label="Nueva recepción" icon="add-circle-outline"
-      onPress={()=>locked('El registro nativo de clientes y órdenes estará disponible después de activar la conexión segura del taller.')}/>
+    <Action label="Nueva recepción" icon="lock-closed-outline"
+      onPress={()=>locked('La creación de órdenes aún no está activada en Android.')}/>
   </>
 }
-function CustomersModule() {
+function CustomersModule({session,gateway,onOpenOrder}:{
+  session:DemoSession;gateway:Gateway;onOpenOrder:(id:string)=>void
+}) {
   const [selected,setSelected]=useState<string|null>(null)
   const [term,setTerm]=useState('')
-  const clients=sampleOrders.filter(item=>[item.client,item.plate,item.vehicle]
+  const result=read(()=>{
+    const customers=gateway.listCustomers(session)
+    return gateway.listVehicles(session).map(vehicle=>({
+      ...vehicle,client:customers.find(c=>c.id===vehicle.customerId)?.name??'Cliente ficticio',
+    }))
+  })
+  const all=result.value??[]
+  const clients=all.filter(item=>[item.client,item.plate,item.label]
     .join(' ').toLocaleLowerCase('es-CL').includes(term.trim().toLocaleLowerCase('es-CL')))
-  const current=sampleOrders.find(x=>x.plate===selected)
+  const current=all.find(v=>v.id===selected)
+  const history=current?read(()=>gateway.listHistory(session,current.id)):null
   return <>
-    <Headline label="DIRECTORIO · VISTA NATIVA" title="Clientes y vehículos"
-      description="Fichas de ejemplo con una estructura preparada para el historial por vehículo."
+    <Headline label="DIRECTORIO · LECTURA OFFLINE" title="Clientes y vehículos"
+      description="Consulta un directorio sintético y el historial por vehículo sin compartir datos entre talleres."
       icon="car-sport-outline"/>
     <Card>
-      <View style={s.search}>
-        <Ionicons name="search-outline" size={18} color={colors.muted}/>
-        <TextInput placeholder="Buscar cliente, patente o vehículo"
-          placeholderTextColor={colors.muted} style={s.searchInput}
-          accessibilityLabel="Buscar vehículos ficticios"
-          value={term} onChangeText={setTerm} autoCorrect={false}/>
+      <View style={s.search}><Ionicons name="search-outline" size={18} color={colors.muted}/>
+        <TextInput placeholder="Buscar cliente, patente o vehículo" placeholderTextColor={colors.muted}
+          style={s.searchInput} accessibilityLabel="Buscar clientes ficticios" value={term}
+          onChangeText={setTerm} autoCorrect={false}/>
       </View>
-      {!clients.length&&<Text style={s.empty}>No hay coincidencias en los ejemplos.</Text>}
+      {result.error&&<ReadError message={result.error}/>}
+      {!result.error&&!clients.length&&<Text style={s.empty}>No hay coincidencias de ejemplo.</Text>}
       {clients.map(item=><TouchableOpacity key={item.id} accessibilityRole="button"
-        accessibilityLabel={'Ver ficha de ejemplo '+item.plate}
-        onPress={()=>setSelected(selected===item.plate?null:item.plate)} style={s.listItem}>
+        accessibilityLabel={'Ver ficha ficticia '+item.plate}
+        onPress={()=>setSelected(selected===item.id?null:item.id)} style={s.listItem}>
         <View style={s.listIcon}><Ionicons name="person-outline" size={22} color={colors.blue}/></View>
         <View style={s.flex}>
           <Text style={s.itemTitle}>{item.client}</Text>
-          <Text style={s.itemText}>{item.vehicle}</Text>
+          <Text style={s.itemText}>{item.label}</Text>
           <Text style={s.itemMuted}>Patente: {item.plate}</Text>
         </View>
-        <Ionicons name={selected===item.plate?'chevron-up':'chevron-forward'} size={18} color={colors.muted}/>
+        <Ionicons name={selected===item.id?'chevron-up':'chevron-forward'} size={18} color={colors.muted}/>
       </TouchableOpacity>)}
     </Card>
-    {current&&<Card title="Ficha del vehículo" icon="car-outline">
+    {current&&<Card title="Ficha e historial del vehículo" icon="car-outline">
       <Row label="Cliente" value={current.client}/>
-      <Row label="Vehículo" value={current.vehicle}/>
+      <Row label="Vehículo" value={current.label}/>
       <Row label="Patente" value={current.plate}/>
-      <Row label="Última OT de ejemplo" value={current.id}/>
-      <View style={s.info}><Ionicons name="time-outline" color={colors.blue} size={19}/>
-        <Text style={s.infoText}>El historial real conservará visitas, inspecciones, problemas pendientes y revisiones PDF sin inventar trabajos realizados.</Text>
-      </View>
-      <Action label="Ver historial real" icon="lock-closed-outline" secondary
-        onPress={()=>locked('El historial CP06 de esta pantalla nativa necesita autenticación y aislamiento de taller antes de usar registros reales.')}/>
+      <Row label="Kilometraje ficticio" value={current.odometer}/>
+      <Text style={[s.cardTitle,{marginTop:15,marginBottom:7}]}>Historial de visitas de ejemplo</Text>
+      {history?.error&&<ReadError message={history.error}/>}
+      {history?.value?.map(item=><TouchableOpacity key={item.id} style={s.listItem}
+        accessibilityRole="button" onPress={()=>onOpenOrder(item.orderId)}>
+        <View style={s.flex}>
+          <Text style={s.itemTitle}>{item.date} · {item.orderId}</Text>
+          <Text style={s.itemText}>{item.summary}</Text>
+          <Text style={s.itemMuted}>{item.quoteId?'Cotización asociada (ficticia)':'Sin cotización asociada'}</Text>
+        </View>
+        <Ionicons name="chevron-forward" color={colors.blue} size={18}/>
+      </TouchableOpacity>)}
+      {history?.value?.length===0&&<Text style={s.empty}>Sin visitas de ejemplo.</Text>}
+      <Text style={s.disclaimer}>No hay documentos archivados ni trabajos confirmados en estos datos ficticios.</Text>
     </Card>}
-    <Action label="Registrar cliente y vehículo" icon="person-add-outline"
-      onPress={()=>locked('El alta real de clientes requiere conexión autenticada y validación del taller.')}/>
+    <Action label="Registrar cliente y vehículo" icon="lock-closed-outline"
+      onPress={()=>locked('El registro real de clientes y vehículos necesita autorización del taller.')}/>
   </>
 }
-function QuotesModule() {
+function QuotesModule({session,gateway,initialOrderId,onOpenOrder}:{
+  session:DemoSession;gateway:Gateway;initialOrderId?:string;onOpenOrder:(id:string)=>void
+}) {
   const [selected,setSelected]=useState<string|null>(null)
-  const current=sampleQuotes.find(q=>q.id===selected)
+  const result=read(()=>gateway.listQuotes(session))
+  const quotes=result.value??[]
+  const current=quotes.find(q=>q.id===selected) ??
+    (selected===null&&initialOrderId?quotes.find(q=>q.orderId===initialOrderId):undefined)
   return <>
-    <Headline label="INFORMES · VISTA NATIVA" title="Informes y cotizaciones"
-      description="Vista preliminar del formato corporativo R3 y de las futuras revisiones inmutables."
+    <Headline label="INFORMES · LECTURA OFFLINE" title="Informes y cotizaciones"
+      description="Consulta partidas y totales ficticios; las revisiones R3 y PDF reales siguen desactivados."
       icon="document-text-outline"/>
     <Card title="Cotizaciones de ejemplo" icon="receipt-outline">
-      {sampleQuotes.map(q=><TouchableOpacity key={q.id} accessibilityRole="button"
-        accessibilityLabel={'Ver cotización de ejemplo '+q.id}
-        onPress={()=>setSelected(selected===q.id?null:q.id)} style={s.listItem}>
+      {result.error&&<ReadError message={result.error}/>}
+      {!result.error&&!quotes.length&&<Text style={s.empty}>Sin cotizaciones de ejemplo.</Text>}
+      {quotes.map(q=><TouchableOpacity key={q.id} accessibilityRole="button"
+        accessibilityLabel={'Ver cotización ficticia '+q.id}
+        onPress={()=>setSelected(current?.id===q.id?'':q.id)} style={s.listItem}>
         <View style={s.listIcon}><Ionicons name="document-outline" size={22} color={colors.blue}/></View>
         <View style={s.flex}>
           <Text style={s.itemTitle}>{q.id}</Text>
           <Text style={s.itemText}>{q.vehicle} · {q.orderId}</Text>
           <Text style={s.itemMuted}>{q.status}</Text>
         </View>
-        <Ionicons name={selected===q.id?'chevron-up':'chevron-forward'} size={18} color={colors.muted}/>
+        <Ionicons name={current?.id===q.id?'chevron-up':'chevron-forward'} size={18} color={colors.muted}/>
       </TouchableOpacity>)}
     </Card>
-    {current&&<Card title="Detalle de cotización de ejemplo" icon="clipboard-outline">
+    {current&&<Card title="Detalle de cotización ficticia" icon="clipboard-outline">
       <Row label="Número" value={current.id}/>
       <Row label="Cliente" value={current.client}/>
       <Row label="Trabajo" value={current.title}/>
       <Row label="Orden" value={current.orderId}/>
+      {current.lines.map((line,i)=><Row key={i} label={line.label} value={money(line.amountClp)}/>)}
       <View style={s.total}>
-        <Text style={s.totalTitle}>TOTAL DE EJEMPLO</Text><Text style={s.totalAmount}>{current.total}</Text>
+        <Text style={s.totalTitle}>TOTAL DE EJEMPLO</Text><Text style={s.totalAmount}>{money(current.totalClp)}</Text>
       </View>
-      <Text style={s.disclaimer}>Cifra ficticia para probar la presentación. No se ha generado un PDF real ni una revisión emitida.</Text>
+      <Text style={s.disclaimer}>Solo simulación de lectura. No hay IVA documental, aprobación, revisión emitida ni PDF generado.</Text>
+      <Action label="Ver orden relacionada" icon="construct-outline" secondary
+        onPress={()=>onOpenOrder(current.orderId)}/>
       <Action label="Descargar PDF archivado" icon="lock-closed-outline" secondary
-        onPress={()=>locked('Las revisiones PDF reales se descargarán desde el archivo privado CP05, previa validación de SHA-256 y membresía.')}/>
+        onPress={()=>locked('El archivo privado CP05 exige validar membresía, permisos, integridad y respaldos.')}/>
     </Card>}
     <Card title="Estado de documentos" icon="shield-checkmark-outline">
       <View style={s.info}><Ionicons name="lock-closed-outline" size={20} color={colors.blue}/>
-        <Text style={s.infoText}>Emisión, archivo privado, envío por correo y aprobación de cliente están desactivados en Android hasta las pruebas y autorizaciones correspondientes.</Text>
+        <Text style={s.infoText}>Emisión, descarga de PDF, Storage, correos y aceptación del cliente están desactivados.</Text>
       </View>
     </Card>
-    <Action label="Preparar cotización" icon="add-circle-outline"
-      onPress={()=>locked('La preparación nativa de cotizaciones se conectará al flujo CP05 con permisos verificados.')}/>
+    <Action label="Preparar cotización" icon="lock-closed-outline"
+      onPress={()=>locked('La edición de cotizaciones reales aún no está habilitada.')}/>
   </>
 }
-function SettingsModule() {
+function SettingsModule({session,gateway,mode,onToggleOffline,onExpire,onSignOut}:{
+  session:DemoSession;gateway:Gateway;mode:DemoFailureMode
+  onToggleOffline:()=>void;onExpire:()=>void;onSignOut:()=>void
+}) {
+  const result=read(()=>gateway.getWorkshop(session))
   return <>
-    <Headline label="ADMINISTRACIÓN · VISTA NATIVA" title="Configuración"
-      description="Estructura preparada para datos del taller, permisos y suscripciones."
+    <Headline label="ADMINISTRACIÓN · LECTURA OFFLINE" title="Configuración"
+      description="Simulación local de taller, rol, sesión y errores, sin credenciales de Supabase."
       icon="settings-outline"/>
     <Card title="Taller de demostración" icon="business-outline">
-      <Row label="Nombre" value="Taller de ejemplo (sin conexión)"/>
-      <Row label="Identidad" value="ByteTorque R2"/>
-      <Row label="Plan" value="Sin suscripción real"/>
-      <Row label="Usuarios conectados" value="Ninguno"/>
+      {result.error?<ReadError message={result.error}/>:<>
+        <Row label="Nombre" value={result.value.name}/>
+        <Row label="Identificador" value={result.value.id}/>
+        <Row label="Plan de muestra" value={result.value.plan}/>
+      </>}
+      <Row label="Perfil ficticio" value={session.role==='administrador'?'Administrador de ejemplo':'Mecánico de ejemplo'}/>
+      <Row label="Conexión simulada" value={mode==='none'?'Activa':mode==='offline'?'Sin conexión':'Error de servicio'}/>
       <View style={s.info}><Ionicons name="information-circle-outline" size={19} color={colors.blue}/>
-        <Text style={s.infoText}>Esta APK de demostración no contiene credenciales ni accede a cuentas, documentos o datos de Supabase.</Text>
+        <Text style={s.infoText}>La sesión existe solo en memoria. No hay login real, cuenta creada, usuario conectado, permisos RLS ni datos productivos.</Text>
       </View>
     </Card>
     <Card title="Planes de talleres" icon="card-outline">
@@ -266,29 +285,40 @@ function SettingsModule() {
       <Row label="Plus" value="4 mecánicos incluidos"/>
       <Row label="Full" value="8 mecánicos incluidos"/>
       <Row label="Plaza adicional" value="USD 2 / mes por mecánico"/>
-      <Text style={s.disclaimer}>Las plazas adicionales se cobran al propietario, nunca al mecánico. Los pagos reales no están habilitados.</Text>
+      <Text style={s.disclaimer}>Referencias comerciales, no suscripciones activadas. Sin pagos.</Text>
     </Card>
     <Card title="Accesos y documentos" icon="people-outline">
-      <View style={s.settingRow}><Ionicons name="person-add-outline" size={21} color={colors.blue}/><Text style={s.flexText}>Invitaciones seguras por taller</Text><Text style={s.pending}>Pendiente</Text></View>
-      <View style={s.settingRow}><Ionicons name="document-text-outline" size={21} color={colors.blue}/><Text style={s.flexText}>Plantilla PDF R3 y Plus/Full</Text><Text style={s.pending}>Pendiente</Text></View>
+      <View style={s.settingRow}><Ionicons name="person-add-outline" size={21} color={colors.blue}/><Text style={s.flexText}>Invitaciones y Auth/RLS reales</Text><Text style={s.pending}>Pendiente</Text></View>
+      <View style={s.settingRow}><Ionicons name="document-text-outline" size={21} color={colors.blue}/><Text style={s.flexText}>PDF R3 y archivo privado</Text><Text style={s.pending}>Pendiente</Text></View>
       <View style={s.settingRow}><Ionicons name="shield-checkmark-outline" size={21} color={colors.blue}/><Text style={s.flexText}>Respaldos y recuperación</Text><Text style={s.pending}>Pendiente</Text></View>
     </Card>
-    <Action label="Administrar mi taller" icon="lock-closed-outline"
-      onPress={()=>locked('La administración de talleres y usuarios necesita iniciar sesión con autorización verificada.')}/>
+    <Card title="Laboratorio de lecturas" icon="flask-outline">
+      <Text style={s.disclaimer}>Prueba errores de sesión y red. Puedes restaurar la vista sin conectar un servidor.</Text>
+      <Action label={mode==='none'?'Simular sin conexión':'Restablecer conexión simulada'}
+        icon="wifi-outline" onPress={onToggleOffline} secondary/>
+      <Action label="Simular sesión vencida" icon="time-outline" onPress={onExpire} secondary/>
+    </Card>
+    <Action label="Salir de sesión de prueba" icon="log-out-outline" onPress={onSignOut}/>
   </>
 }
-export function NativeModule({section,initialOrderId}: {
-  section:ModuleSection
-  initialOrderId?:string
+export function NativeModule({section,session,gateway,mode,initialOrderId,
+  onOpenOrder,onOpenQuote,onSignOut,onToggleOffline,onExpire}:{
+  section:ModuleSection;session:DemoSession;gateway:Gateway;mode:DemoFailureMode
+  initialOrderId?:string;onOpenOrder:(id:string)=>void;onOpenQuote:(orderId:string)=>void
+  onSignOut:()=>void;onToggleOffline:()=>void;onExpire:()=>void
 }) {
   return <View style={s.root}>
     <View style={s.safetyBadge}>
       <Ionicons name="information-circle-outline" size={18} color="#855D0C"/>
-      <Text style={s.safetyText}>DATOS FICTICIOS · NAVEGACIÓN NATIVA SIN SERVICIOS REALES</Text>
+      <Text style={s.safetyText}>DATOS FICTICIOS · SESIÓN SIMULADA · SIN SERVICIOS REALES</Text>
     </View>
-    {section==='ordenes'?<OrdersModule initialOrderId={initialOrderId}/>:
-     section==='clientes'?<CustomersModule/>:
-     section==='informes'?<QuotesModule/>:<SettingsModule/>}
+    {section==='ordenes'?<OrdersModule session={session} gateway={gateway}
+      initialOrderId={initialOrderId} onOpenQuote={onOpenQuote}/>:
+     section==='clientes'?<CustomersModule session={session} gateway={gateway} onOpenOrder={onOpenOrder}/>:
+     section==='informes'?<QuotesModule session={session} gateway={gateway}
+       initialOrderId={initialOrderId} onOpenOrder={onOpenOrder}/>:
+       <SettingsModule session={session} gateway={gateway} mode={mode}
+         onSignOut={onSignOut} onToggleOffline={onToggleOffline} onExpire={onExpire}/>}
   </View>
 }
 
