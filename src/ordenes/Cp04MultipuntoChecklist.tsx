@@ -46,6 +46,7 @@ export function Cp04MultipuntoChecklist({
  const items=queue.getCurrentItems()
  const unconfirmed=Object.values(entries).filter(v=>v.phase!=='saved').length
  const errors=Object.values(entries).filter(v=>v.phase==='error').length
+ const temporaryRecoveryAvailable=queue.hasTemporaryRecovery()
  const incomplete=queue.hasIncompleteNotes()
  const savedCount=queue.getSavedCount()
  useEffect(()=>{onQueueChange?.(unconfirmed,incomplete)},[unconfirmed,incomplete,onQueueChange])
@@ -72,9 +73,16 @@ export function Cp04MultipuntoChecklist({
      <span><i className="cp04-legend-attention"/> Requiere atención</span>
      <span><i className="cp04-legend-immediate"/> Cambio inmediato</span>
    </div>
+   {unconfirmed>0&&!temporaryRecoveryAvailable&&<p className="cp04-error" role="alert">
+     <WifiOff size={17} aria-hidden="true"/> No hay copia temporal recuperable:
+     el navegador impidió guardar el borrador en esta pestaña. No cierres ni recargues
+     hasta confirmar las X en el servidor; si pierdes la sesión podrían perderse esos cambios.
+   </p>}
    {errors>0&&<p className="cp04-error" role="alert">
      <WifiOff size={17} aria-hidden="true"/> Algunas X no están confirmadas en Supabase.
-     Conservamos sus cambios temporalmente en esta pestaña.
+     {temporaryRecoveryAvailable
+       ? ' Hay una copia temporal en esta pestaña; no es un respaldo permanente.'
+       : ' El borrador local no pudo conservarse: mantén abierta esta vista.'}
      <button type="button" className="cp04-secondary"
        onClick={()=>queue.retryAll()}><RefreshCcw size={16}/> Reintentar guardados</button>
    </p>}
