@@ -103,7 +103,7 @@ assert.ok(
           id
         )) ||
       (flowLiveEnabled &&
-        /src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\.(?:ts|tsx|js)$/.test(id)) ||
+        /src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate|finalPackage|finalPdf)\.(?:ts|tsx|js)$/.test(id)) ||
       /src\/plans\/planStatus\.ts$/.test(id) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&
