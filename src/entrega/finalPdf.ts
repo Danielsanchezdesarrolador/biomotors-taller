@@ -3,7 +3,7 @@
  * NOT a signature, archived original, independent service proof, invoice or email.
  * No network call except fetching public font/logo assets in browserFinalPdf.
  */
-import { PDFDocument, rgb, type PDFPage, type PDFFont } from 'pdf-lib'
+import { PDFDocument, rgb, type PDFPage } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import type { PreparedClosing } from './finalPackage'
 
