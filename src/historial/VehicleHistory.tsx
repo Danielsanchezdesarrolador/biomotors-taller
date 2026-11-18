@@ -496,6 +496,19 @@ export function VehicleHistory({
       port: Pick<ReturnType<typeof import('../cp05/documentClient').documentClient>, 'download' | 'dispose'>
     } | null>(null)
   const scope = context.userId + ':' + context.workshop.id + ':' + context.role
+  const historyScroll = useRef(0)
+  const enterDocument = (kind: 'order' | 'quote', id: string) => {
+    historyScroll.current = window.scrollY
+    setDocument({ kind, id })
+  }
+  const backToHistory = () => {
+    setDocument(null)
+    window.requestAnimationFrame(() =>
+      window.requestAnimationFrame(() =>
+        window.scrollTo({ top: historyScroll.current, behavior: 'instant' })
+      )
+    )
+  }
   useEffect(() => {
     const repo = historyRepository(client, context, {
       cp05Enabled: import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -536,10 +549,10 @@ export function VehicleHistory({
               )
             } : undefined}
             onBack={onBack}
-            onOrder={(id) => setDocument({ kind: 'order', id })}
+            onOrder={(id) => enterDocument('order', id)}
             onQuote={
               import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
-                ? (id) => setDocument({ kind: 'quote', id })
+                ? (id) => enterDocument('quote', id)
                 : undefined
             }
           />
@@ -552,7 +565,7 @@ export function VehicleHistory({
           client={client}
           context={context}
           id={document.id}
-          onBack={() => setDocument(null)}
+          onBack={backToHistory}
         />
       )}
       {document?.kind === 'quote' &&
@@ -561,7 +574,7 @@ export function VehicleHistory({
           client={client}
           context={context}
           id={document.id}
-          onBack={() => setDocument(null)}
+          onBack={backToHistory}
         />
       )}
     </>
