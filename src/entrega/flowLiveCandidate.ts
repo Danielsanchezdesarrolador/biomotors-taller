@@ -73,7 +73,7 @@ function textNote(value: string, min: number, max: number) {
 }
 const staff = ['owner', 'admin', 'reception']
 export function flowLiveCandidate(
-  client: Pick<SupabaseClient, 'auth' | 'rpc'>,
+  client: Pick<SupabaseClient, 'auth' | 'rpc' | 'from'>,
   context: Context,
   policy: { explicitlyApproved: boolean } = { explicitlyApproved: false }
 ) {
@@ -199,7 +199,59 @@ export function flowLiveCandidate(
       reject('unconfirmed')
     return record
   }
+  /**
+   * Read-only durable recovery, safe across login or browser restart once the
+   * candidate SQL is explicitly installed and enabled. Rows remain subject to
+   * the server's RLS; no client-side cached copy of workshop data is used.
+   */
+  async function history(quote: Quote, revision: Revision): Promise<{
+    approval: ApprovalRecord | null
+    execution: ExecutionRecord | null
+    handover: HandoverRecord | null
+  }> {
+    await authorized()
+    if (quote.workshop_id !== workshopId ||
+      revision.workshop_id !== workshopId ||
+      revision.quote_id !== quote.id ||
+      revision.payload?.quote?.id !== quote.id ||
+      revision.payload?.vehicle?.id !== quote.vehicle_id ||
+      revision.payload?.order?.id !== quote.order_id) reject('denied')
+    const [approvals, reports, deliveries] = await Promise.all([
+      client.from('bt_flow_quote_approvals').select('*')
+        .eq('workshop_id', workshopId).eq('quote_id', quote.id)
+        .eq('revision_id', revision.id).maybeSingle(),
+      client.from('bt_flow_execution_reports').select('*')
+        .eq('workshop_id', workshopId).eq('quote_id', quote.id)
+        .eq('revision_id', revision.id).maybeSingle(),
+      client.from('bt_flow_visit_deliveries').select('*')
+        .eq('workshop_id', workshopId).eq('quote_id', quote.id)
+        .eq('revision_id', revision.id).maybeSingle()
+    ])
+    await authorized()
+    for (const result of [approvals, reports, deliveries]) {
+      if (result.error) {
+        if (['42501','PGRST301'].includes(result.error.code || '')) reject('denied')
+        reject('unavailable')
+      }
+    }
+    const a = approvals.data as ApprovalRecord | null
+    const e = reports.data as ExecutionRecord | null
+    const d = deliveries.data as HandoverRecord | null
+    for (const item of [a,e,d]) {
+      if (!item) continue
+      if (item.workshop_id !== workshopId || item.quote_id !== quote.id ||
+          item.revision_id !== revision.id || item.order_id !== quote.order_id ||
+          item.evidence_status !== 'operator_attested' ||
+          !item.id || validId(item.id) !== item.id) reject('unconfirmed')
+    }
+    if (e && (!a || e.approval_id !== a.id ||
+        e.vehicle_id !== quote.vehicle_id)) reject('unconfirmed')
+    if (d && (!e || d.report_id !== e.id ||
+        d.vehicle_id !== quote.vehicle_id)) reject('unconfirmed')
+    return { approval: a, execution: e, handover: d }
+  }
   return Object.freeze({
-    approval, execution, handover, dispose: () => { disposed = true }
+    approval, execution, handover, history,
+    dispose: () => { disposed = true }
   })
 }
