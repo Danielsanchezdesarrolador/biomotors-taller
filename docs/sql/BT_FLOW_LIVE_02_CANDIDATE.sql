@@ -8,6 +8,19 @@ CREATE SCHEMA bt_flow_live_private;
 REVOKE ALL ON SCHEMA bt_flow_live_private FROM PUBLIC,anon,authenticated,service_role;
 GRANT USAGE ON SCHEMA bt_flow_live_private TO authenticated;
 
+-- Independent per-workshop server kill switch. Installing SQL alone must
+-- NEVER expose an active write endpoint to operators/API callers.
+-- Only the database owner may insert/update this private row after approval.
+CREATE TABLE bt_flow_live_private.rollout (
+ workshop_id uuid PRIMARY KEY REFERENCES public.workshops(id) ON DELETE RESTRICT,
+ enabled boolean NOT NULL DEFAULT false,
+ enabled_at timestamptz,
+ approval_note text NOT NULL DEFAULT ''
+);
+ALTER TABLE bt_flow_live_private.rollout ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bt_flow_live_private.rollout FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON bt_flow_live_private.rollout FROM PUBLIC,anon,authenticated,service_role;
+
 CREATE TABLE public.bt_flow_quote_approvals (
  workshop_id uuid NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid(),
  request_id uuid NOT NULL, order_id uuid NOT NULL, quote_id uuid NOT NULL,
@@ -83,6 +96,9 @@ CREATE FUNCTION bt_flow_live_private.authorize(wid uuid) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 BEGIN
  IF wid IS NULL OR auth.uid() IS NULL OR NOT EXISTS (
+  SELECT 1 FROM bt_flow_live_private.rollout gate
+  WHERE gate.workshop_id=wid AND gate.enabled IS TRUE
+ ) OR NOT EXISTS (
   SELECT 1 FROM public.workshop_memberships m
   JOIN public.workshops w ON w.id=m.workshop_id
   JOIN auth.users u ON u.id=m.user_id
