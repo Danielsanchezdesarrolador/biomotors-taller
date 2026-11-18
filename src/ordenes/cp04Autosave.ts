@@ -112,12 +112,15 @@ export class Cp04AutosaveQueue {
  private entries:Record<string,AutosaveEntry>
  private current:AutosaveSnapshot={}
  private active=false
+ private generation=0
+ private backupAvailable=false
  private inFlight=0
  private onSaved?:(finding:Finding)=>void
  constructor(config:QueueConfig){
   if(!validScope(config.scope))throw Error('Invalid authenticated CP04 autosave scope')
   this.config=config
   this.store=config.store===undefined?storage():config.store
+  this.backupAvailable=this.store!==null
   this.finds=[...config.initialFindings]
   this.entries={...read(config.scope,this.store)}
   for(const id of Object.keys(this.entries))this.uncertain.add(id)
@@ -126,6 +129,9 @@ export class Cp04AutosaveQueue {
  }
  subscribe=(fn:()=>void)=>{this.subscribers.add(fn);return()=>{this.subscribers.delete(fn)}}
  snapshot=()=>this.current
+ /** Whether the current unsent changes could be recovered in this tab.
+  * This is NOT a server acknowledgment or durable backup. */
+ hasTemporaryRecovery=()=>this.backupAvailable
  setOnSaved(fn:(row:Finding)=>void){this.onSaved=fn}
  getOutstandingCount=()=>Object.values(this.entries).filter(x=>x.phase!=='saved').length
  hasIncompleteNotes=()=>this.finds.some(provisionalFinding) ||
@@ -144,16 +150,20 @@ export class Cp04AutosaveQueue {
  start(){
    if(this.active)return
    this.active=true
+   this.generation++
    for(const id of Object.keys(this.entries))if(this.entries[id].phase==='queued')
      this.schedule(id,450)
  }
  stop(){
    this.active=false
+   this.generation++
    for(const timer of this.timers.values())clearTimeout(timer)
    this.timers.clear()
    // In-flight writes might still commit; keep drafts for next server reconciliation.
-   for(const [id,x] of Object.entries(this.entries))if(x.phase==='saving')
+   for(const [id,x] of Object.entries(this.entries))if(x.phase==='saving'){
      this.entries[id]={...x,phase:'queued'}
+     this.uncertain.add(id) // Prior request might commit after session teardown.
+   }
    this.persist()
  }
  setFindings(rows:readonly Finding[]){
@@ -182,16 +192,20 @@ export class Cp04AutosaveQueue {
  }
  private persist(){
    try{
+     if(!this.store){this.backupAvailable=false;return}
      const key=keyFor(this.config.scope)
-     if(Object.keys(this.entries).length===0){this.store?.removeItem(key);return}
      const entries:DraftPayload['entries']={}
      for(const [id,v] of Object.entries(this.entries)){
        if(v.phase!=='saved')entries[id]={state:v.state,note:v.note,revision:v.revision,phase:v.phase}
      }
-     if(Object.keys(entries).length===0){this.store?.removeItem(key);return}
-     this.store?.setItem(key,JSON.stringify({scope:this.config.scope,
+     if(Object.keys(entries).length===0)this.store.removeItem(key)
+     else this.store.setItem(key,JSON.stringify({scope:this.config.scope,
        savedAt:Date.now(),entries} satisfies DraftPayload))
-   }catch{/* browser storage blocked, warn through UI on network failures */}
+     this.backupAvailable=true
+   }catch{
+     // Browser storage may be unavailable or full: never imply recoverability.
+     this.backupAvailable=false
+   }
  }
  select(id:string,state:Result){
    if(!this.active||!itemSet.has(id))return
@@ -252,6 +266,7 @@ export class Cp04AutosaveQueue {
  private async send(id:string){
    const entry=this.entries[id]
    if(!entry||!this.active||this.running.has(id)||entry.phase!=='queued')return
+   const generation=this.generation
    this.inFlight++;this.running.add(id)
    this.entries[id]={...entry,phase:'saving'}
    this.emit()
@@ -261,6 +276,7 @@ export class Cp04AutosaveQueue {
        // A network failure is ambiguous: first inspect the remote order to
        // avoid blindly issuing a second INSERT for a request that committed.
        const remote=await this.config.port.findingsForOrder(this.config.scope.orderId)
+       if(!this.active||generation!==this.generation)return
        if(!Array.isArray(remote)||remote.some(row=>
          row.workshop_id!==this.config.scope.workshopId||
          row.order_id!==this.config.scope.orderId||
@@ -273,6 +289,8 @@ export class Cp04AutosaveQueue {
        this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
        this.uncertain.delete(id)
      }
+     // Auth teardown may occur while reconciliation is waiting: no new mutation.
+     if(!this.active||generation!==this.generation)return
      // Reconcile server first when draft was restored after an interrupted
      // request; the original INSERT might already have reached PostgreSQL.
      let row=latestForMultipuntoItem(item,this.finds)
@@ -290,6 +308,9 @@ export class Cp04AutosaveQueue {
            this.config.scope.orderId,this.config.scope.vehicleId)
        row=await this.config.port.createFinding(input)
      }
+     // A request already sent before teardown may finish. Never advertise a
+     // late success to the new session or overwrite its pending draft.
+     if(!this.active||generation!==this.generation)return
      if(!row||row.workshop_id!==this.config.scope.workshopId||
        row.order_id!==this.config.scope.orderId||
        row.vehicle_id!==this.config.scope.vehicleId)
@@ -298,7 +319,6 @@ export class Cp04AutosaveQueue {
      if(index>=0)this.finds[index]=row
      else this.finds.push(row)
      this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
-     if(!this.active) return // Allow current-tab recovery to reconcile any committed request.
      this.onSaved?.(row)
      const current=this.entries[id]
      if(current&&current.revision===entry.revision){
@@ -309,7 +329,8 @@ export class Cp04AutosaveQueue {
        this.emit()
        this.schedule(id,50)
      }
-   }catch(error){
+   }catch{
+     if(!this.active||generation!==this.generation)return
      this.uncertain.add(id)
      const current=this.entries[id]
      if(current){
