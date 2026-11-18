@@ -270,9 +270,9 @@ function SettingsModule({session,gateway,mode,onToggleOffline,onExpire,onSignOut
       icon="settings-outline"/>
     <Card title="Taller de demostración" icon="business-outline">
       {result.error?<ReadError message={result.error}/>:<>
-        <Row label="Nombre" value={result.value.name}/>
-        <Row label="Identificador" value={result.value.id}/>
-        <Row label="Plan de muestra" value={result.value.plan}/>
+        <Row label="Nombre" value={result.value?.name??'Sin datos'}/>
+        <Row label="Identificador" value={result.value?.id??'Sin datos'}/>
+        <Row label="Plan de muestra" value={result.value?.plan??'Sin datos'}/>
       </>}
       <Row label="Perfil ficticio" value={session.role==='administrador'?'Administrador de ejemplo':'Mecánico de ejemplo'}/>
       <Row label="Conexión simulada" value={mode==='none'?'Activa':mode==='offline'?'Sin conexión':'Error de servicio'}/>
