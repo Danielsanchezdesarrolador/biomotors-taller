@@ -178,7 +178,7 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
       // without altering its original enabled/disabled behavior.
       const board = p.locator('.cp05-action-board')
       assert.equal(await board.count(), 1)
-      assert.equal(await board.locator('.cp05-action-group-main > button').count(), 2)
+      assert.equal(await board.locator('.cp05-action-group-main > button').count(), 3)
       assert.equal(await board.locator('.cp05-action-group-main > button.cp04-primary').count(), 1)
       assert.equal(await board.locator('.cp05-action-group-advanced > button').count(), 2)
       const boardBounds = await board.boundingBox()
