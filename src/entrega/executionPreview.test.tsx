@@ -95,8 +95,8 @@ describe('CP03-CP04-CP05 -> informe de ejecución preliminar, SIN persistir ni e
       { ...input, operatorReviewed: false }).readyForDraftPdf).toBe(false)
     expect(executionPreview(revision, quote,
       { ...input, decisions: { [id(10)]: 'performed' } }).readyForDraftPdf).toBe(false)
-    expect(executionPreview(revision, quote,
-      { ...input, pendingExplanation: 'x'.repeat(2001) })).toBeUndefined()
+    expect(() => executionPreview(revision, quote,
+      { ...input, pendingExplanation: 'x'.repeat(2001) })).toThrow(ExecutionFailure)
   })
   it.each([
     ['taller', { ...revision, workshop_id: id(99) }],
