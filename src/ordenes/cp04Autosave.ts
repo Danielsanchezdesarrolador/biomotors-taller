@@ -164,7 +164,9 @@ export class Cp04AutosaveQueue {
      this.entries[id]={...x,phase:'queued'}
      this.uncertain.add(id) // Prior request might commit after session teardown.
    }
-   this.persist()
+   // Refresh the external-store snapshot too: a suspended write is queued,
+   // not still "saving" after the session is stopped.
+   this.emit()
  }
  setFindings(rows:readonly Finding[]){
    // Do not discard a newer result returned by an in-flight mutation.
