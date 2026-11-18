@@ -6,6 +6,8 @@ import {
   Bell,
   CarFront,
   ChevronDown,
+  Crown,
+  Gem,
   FileText,
   House,
   Menu,
@@ -195,7 +197,9 @@ export function AppShell({
               <span className={'mobile-plan-indicator plan-badge-' +
                 (copy.accountPlan?.effectivePlan || 'unknown')}
                 title={planDetail(copy.accountPlan)}>
-                {planLabel(copy.accountPlan)}
+                {copy.accountPlan?.effectivePlan === 'plus' && <Crown size={13} aria-hidden="true" />}
+                {copy.accountPlan?.effectivePlan === 'full' && <Gem size={13} aria-hidden="true" />}
+                <span>{planLabel(copy.accountPlan)}</span>
               </span>
             )}
             <div className="popover-anchor">
@@ -233,14 +237,18 @@ export function AppShell({
                 <span className="avatar">{copy.avatarText ?? <UserRound size={21} />}</span>
                 <span className="account-copy">
                   <strong>{copy.accountTitle}</strong>
-                  <small>{copy.accountSubtitle}</small>
-                  {copy.accountPlan !== undefined && (
-                    <span className={'account-plan-badge plan-badge-' +
-                      (copy.accountPlan?.effectivePlan || 'unknown')}
-                      title={planDetail(copy.accountPlan)}>
-                      {planLabel(copy.accountPlan)}
-                    </span>
-                  )}
+                  <span className="account-meta">
+                    <small>{copy.accountSubtitle}</small>
+                    {copy.accountPlan !== undefined && (
+                      <span className={'account-plan-badge plan-badge-' +
+                        (copy.accountPlan?.effectivePlan || 'unknown')}
+                        title={planDetail(copy.accountPlan)}>
+                        {copy.accountPlan?.effectivePlan === 'plus' && <Crown size={13} aria-hidden="true" />}
+                        {copy.accountPlan?.effectivePlan === 'full' && <Gem size={13} aria-hidden="true" />}
+                        <span>{planLabel(copy.accountPlan)}</span>
+                      </span>
+                    )}
+                  </span>
                 </span>
                 <ChevronDown size={16} />
               </button>
