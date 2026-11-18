@@ -52,7 +52,7 @@ const delivery: EvidenceDelivery = {
     documentsChecked: true, pendingExplained: true },
   handover_method: 'in_person', handover_note: 'Retiro declarado en el taller por responsable QA'
 }
-function setup() {
+function setup(ignoreServerFilters = false) {
   const rows: Record<string, Array<EvidenceApproval | EvidenceExecution | EvidenceDelivery>> = {
     bt_flow_quote_approvals: [approval],
     bt_flow_execution_reports: [execution],
