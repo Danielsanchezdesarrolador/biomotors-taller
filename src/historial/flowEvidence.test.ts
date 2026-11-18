@@ -58,16 +58,19 @@ function setup() {
     bt_flow_execution_reports: [execution],
     bt_flow_visit_deliveries: [delivery]
   }
-  const load=vi.fn(async <T extends { workshop_id: string; id: string }>(
-    table: string, ids: string[], _column: string,
-    _foreign?: string, _vehicle?: string
-  ): Promise<T[]> => rows[table].filter(x => ids.includes(x.revision_id)) as T[])
-  return { rows, load, run: () => readFlowEvidence(wid, vid, [quote], [revision], load) }
+  const load=vi.fn(async (table: string, ids: string[], _column: string,
+    _foreign?: string, _vehicle?: string) =>
+    rows[table].filter(x => ids.includes(x.revision_id)))
+  const read=async <T extends { workshop_id: string; id: string }>(
+    table: string, ids: string[], column: string,
+    foreign?: string, vehicle?: string
+  ): Promise<T[]> => await load(table, ids, column, foreign, vehicle) as unknown as T[]
+  return { rows, load, read, run: () => readFlowEvidence(wid, vid, [quote], [revision], read) }
 }
 describe('CP06 LIVE-02 immutable evidence reader (build gated)', () => {
   it('does not query absent revisions', async () => {
     const s=setup()
-    expect(await readFlowEvidence(wid,vid,[quote],[],s.load)).toEqual({
+    expect(await readFlowEvidence(wid,vid,[quote],[],s.read)).toEqual({
       status: 'ready', approvals: [], executions: [], deliveries: []
     })
     expect(s.load).not.toHaveBeenCalled()
@@ -116,7 +119,7 @@ describe('CP06 LIVE-02 immutable evidence reader (build gated)', () => {
   it('keeps old declaration attached to immutable revision when quote changes', async () => {
     const s=setup()
     const old={ ...quote, status: 'voided' as const, issued_revision: 2 }
-    const result=await readFlowEvidence(wid,vid,[old],[revision],s.load)
+    const result=await readFlowEvidence(wid,vid,[old],[revision],s.read)
     expect(result.executions[0].performed_total).toBe(119)
   })
 })
