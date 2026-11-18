@@ -39,6 +39,16 @@ assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/planSta
   'Only the pure plan status formatter may enter the public app')
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
 const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+const flowLiveEnabled = process.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true'
+if (flowLiveEnabled) {
+  assert.equal(process.env.VITE_BT_CP05_DOCUMENTS_ENABLED,'true',
+    'Flow live requires private document archive')
+  assert.equal(process.env.VITE_BT_CP05_PRIVATE_ENABLED,'true',
+    'Flow live requires authenticated CP05')
+} else {
+  assert.ok(modules.every(id => !/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\./.test(id)),
+    'Flow live candidate must remain absent from OFF/public builds')
+}
 if (cp05PrivateEnabled)
   assert.equal(process.env.VITE_BT_CP04_PRIVATE_ENABLED, 'true', 'CP05 requires CP04')
 if (!cp05PrivateEnabled)
@@ -92,6 +102,8 @@ assert.ok(
         /src\/(?:cp05\/|entrega\/(?:WorkExecutionDraft|executionPreview|executionPdf)\.|informes\/trabajos\/(?:WorkItemsEditor|workItemCore)\.|ordenes\/orderMoney\.)/.test(
           id
         )) ||
+      (flowLiveEnabled &&
+        /src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate)\.(?:ts|tsx|js)$/.test(id)) ||
       /src\/plans\/planStatus\.ts$/.test(id) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&
