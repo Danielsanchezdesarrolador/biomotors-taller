@@ -1,0 +1,621 @@
+{
+  "schema": "bytetorque.pilot.journeys.v1",
+  "stage": "BT-PILOT-QA-02",
+  "created": "2026-11-18",
+  "matrix": "docs/qa/BT_PILOT_QA_01_CASES.json",
+  "instructions": "Estos recorridos son planes de prueba, no resultados. No cambiar puertas de seguridad sin autorización explícita.",
+  "phases": {
+    "offline-demo": "Datos sintéticos, sin backend productivo; ejecutable en código/entorno de laboratorio.",
+    "device-demo": "Solo prueba física autorizada con datos sintéticos; no equivale a APK productiva.",
+    "gated-real": "BLOQUEADO hasta aprobación y evidencia de todas las puertas requeridas."
+  },
+  "journeys": [
+    {
+      "id": "R01",
+      "title": "Administrador A: rutas nativas y detalle de OT",
+      "platform": "android",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P02",
+        "P04",
+        "P09",
+        "P17",
+        "P23",
+        "P29"
+      ],
+      "steps": [
+        {
+          "action": "Abrir laboratorio Android con Administrador Taller A; buscar OT-1002 y abrir ficha.",
+          "expected": "La OT y patente DEMO-02 corresponden a A; no aparece información de B."
+        },
+        {
+          "action": "Desde la OT navegar a cotización asociada y regresar a su OT.",
+          "expected": "COT-DEMO-001 corresponde a OT-1002; totales de ejemplo $107.411 CLP sin descarga ni emisión."
+        },
+        {
+          "action": "Abrir Clientes, ficha DEMO-01 e historial; tocar una visita.",
+          "expected": "Solo historial de DEMO-01; la visita regresa a OT-1001 sin arrastrar foco de OT-1002."
+        },
+        {
+          "action": "Cambiar sección desde el menú inferior y buscar otra OT.",
+          "expected": "No aparece como abierta la OT anterior al cambiar de pestaña."
+        }
+      ]
+    },
+    {
+      "id": "R02",
+      "title": "Mecánico A: permisos sintéticos y acceso denegado",
+      "platform": "android",
+      "role": "mecanico",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P02",
+        "P03",
+        "P04",
+        "P09"
+      ],
+      "steps": [
+        {
+          "action": "Entrar como Mecánico Taller A; abrir Órdenes y buscar OT-1002.",
+          "expected": "Solo OT asignadas 1001/1002; no aparecen OT-1003/1004 ni OT del Taller B."
+        },
+        {
+          "action": "Abrir Clientes, Informes y Configuración por sus pestañas.",
+          "expected": "No se expone contenido protegido; módulos informan restricción del perfil."
+        },
+        {
+          "action": "Intentar abrir la inspección real desde OT asignada.",
+          "expected": "Se informa que la escritura/inspección real sigue bloqueada."
+        }
+      ]
+    },
+    {
+      "id": "R03",
+      "title": "Taller B: aislamiento de muestras y cierre de sesión",
+      "platform": "android",
+      "role": "administrador",
+      "workshop": "demo-b",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P03",
+        "P04",
+        "P23",
+        "P29"
+      ],
+      "steps": [
+        {
+          "action": "Entrar con Administrador B y revisar Inicio/Órdenes/Clientes/Cotizaciones.",
+          "expected": "Solo figuran OT-B-9001, DEMO-B1 y COT-DEMO-B01."
+        },
+        {
+          "action": "Abrir Configuración y salir del laboratorio; volver a entrar como Administrador A.",
+          "expected": "No se conserva foco, búsqueda ni datos del Taller B; ahora aparecen solo datos A."
+        },
+        {
+          "action": "Abrir el historial del vehículo A y examinar sus visitas.",
+          "expected": "Las visitas visibles corresponden al vehículo/taller A de la nueva sesión."
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "title": "Fallo de red y sesión vencida en Android",
+      "platform": "android",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P03",
+        "P28",
+        "P29"
+      ],
+      "steps": [
+        {
+          "action": "En Configuración activar 'Simular sin conexión' y navegar a órdenes/clientes.",
+          "expected": "Se muestran errores de lectura; no se reutilizan datos protegidos de consultas anteriores."
+        },
+        {
+          "action": "Restablecer la conexión ficticia y volver a consultar.",
+          "expected": "Los datos A vuelven tras nueva lectura; ninguna escritura ni reintento duplicado."
+        },
+        {
+          "action": "Simular vencimiento de sesión y consultar un panel; salir y reingresar.",
+          "expected": "La sesión vencida impide lecturas; reingreso ficticio inicia un contexto nuevo."
+        }
+      ]
+    },
+    {
+      "id": "R05",
+      "title": "Web DEMO: recepción, expediente y retorno",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P14"
+      ],
+      "steps": [
+        {
+          "action": "En entorno DEMO local crear cliente y vehículo ficticios; iniciar recepción.",
+          "expected": "Datos del cliente/vehículo, motivo y km corresponden a la visita; no duplicar al confirmar dos veces."
+        },
+        {
+          "action": "Navegar entre Inicio, Órdenes y expediente; regresar a la visita.",
+          "expected": "El mismo contexto y referencia se mantienen dentro de la sesión DEMO."
+        },
+        {
+          "action": "Simular una segunda visita de un vehículo ya existente.",
+          "expected": "El nuevo motivo/km no altera visitas anteriores ni genera otro cliente accidentalmente."
+        },
+        {
+          "action": "Recargar el DEMO temporal y observar el aviso de pérdida.",
+          "expected": "Nunca interpretar persistencia en memoria como guardado real."
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "title": "Web DEMO: multipunto y autosave de interfaz",
+      "platform": "web",
+      "role": "mecanico",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P11",
+        "P12",
+        "P13",
+        "P14"
+      ],
+      "steps": [
+        {
+          "action": "Abrir multipunto sintético y marcar 1, luego 2 y luego 10 componentes sin cambiar de pantalla.",
+          "expected": "Cada fila mantiene una sola X y el contador refleja lo observado."
+        },
+        {
+          "action": "Anotar observaciones, dejar un ítem sin revisar y volver al expediente.",
+          "expected": "No se transforma pendiente en OK ni inventa diagnóstico. Solo verificar persistencia DEMO declarada."
+        },
+        {
+          "action": "Adjuntar una foto ficticia permitida y probar un archivo rechazado.",
+          "expected": "Se aplica validación local y ninguna foto se sube a servicios productivos."
+        }
+      ]
+    },
+    {
+      "id": "R07",
+      "title": "Web DEMO: revisión, respuesta, trabajo y entrega",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P15",
+        "P16",
+        "P17",
+        "P24",
+        "P25",
+        "P26",
+        "P27"
+      ],
+      "steps": [
+        {
+          "action": "Generar propuesta con partidas ficticias y comprobar subtotal, IVA 19% y total.",
+          "expected": "Los importes reproducen el mismo motor de cálculo de la cotización."
+        },
+        {
+          "action": "Rechazar y solicitar cambios en sendas revisiones de ejemplo.",
+          "expected": "No se habilita ejecución de trabajos con revisión rechazada u obsoleta."
+        },
+        {
+          "action": "Aceptar nueva revisión, precargar informe, marcar 1 trabajo realizado.",
+          "expected": "Informe arranca en 'no realizado'; solo suma la partida realizada."
+        },
+        {
+          "action": "Simular falta de repuesto, resolución y luego entrega y cancelación en escenarios separados.",
+          "expected": "Los estados bloquean cierres indebidos y no se envía correo real."
+        }
+      ]
+    },
+    {
+      "id": "R08",
+      "title": "PDF R3: borrador y paginación web",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "offline-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P17",
+        "P18",
+        "P19"
+      ],
+      "steps": [
+        {
+          "action": "Generar borrador PDF R3 solo con datos ficticios; agregar una partida.",
+          "expected": "Documento A4 muestra nueva línea y cálculo correcto. Debe indicar BORRADOR y no tributario."
+        },
+        {
+          "action": "Generar borrador extenso de varias páginas (sin enviar ni emitir).",
+          "expected": "Tabla, cabecera, página y resumen son legibles y no duplican avisos legales."
+        },
+        {
+          "action": "Conservar evidencia únicamente de datos ficticios sin nombre real de clientes.",
+          "expected": "No se confunde descarga de borrador con emisión archivada."
+        }
+      ]
+    },
+    {
+      "id": "R09",
+      "title": "iPhone PWA: experiencia de navegación sin backend nuevo",
+      "platform": "pwa",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "device-demo",
+      "requiredGates": [],
+      "caseIds": [
+        "P07",
+        "P08",
+        "P09",
+        "P11",
+        "P12",
+        "P17",
+        "P18",
+        "P28",
+        "P34",
+        "P36"
+      ],
+      "steps": [
+        {
+          "action": "Instalar desde Safari y abrir la PWA de prueba sin credenciales nuevas.",
+          "expected": "Apertura/reapertura e identidad R2 sin desbordes; registrar modelo/iOS."
+        },
+        {
+          "action": "Con datos sintéticos navegar recepción, OT, multipunto y cotización.",
+          "expected": "Sin controles tapados por teclado ni pérdida inesperada durante navegación local."
+        },
+        {
+          "action": "Cambiar a otra app, volver y probar modo avión solamente en datos DEMO.",
+          "expected": "No marcar guardado productivo ni entrega real; anotar límites observados."
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "title": "Android físico: APK de laboratorio pendiente de autorización",
+      "platform": "android",
+      "role": "administrador",
+      "workshop": "demo-a",
+      "phase": "device-demo",
+      "requiredGates": [
+        "G-DEVICE",
+        "G-RELEASE"
+      ],
+      "caseIds": [
+        "P28",
+        "P29",
+        "P35",
+        "P36"
+      ],
+      "steps": [
+        {
+          "action": "Tras autorización de compilación/firma, instalar APK interna DEMO en Android de prueba.",
+          "expected": "Versión, icono, instalación y apertura sin cierre inesperado."
+        },
+        {
+          "action": "Navegar cinco pestañas con teclado, volver atrás y alternar entre A/B ficticios.",
+          "expected": "No hay información cruzada, foco obsoleto o desborde visual."
+        },
+        {
+          "action": "Simular conexión perdida y vencimiento; restaurar sesión ficticia.",
+          "expected": "Los mensajes describen errores; no hay solicitudes productivas."
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "title": "Web real candidato: cuenta/roles, aislamiento A/B",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "A/B pruebas autorizadas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-AUTH",
+        "G-RLS",
+        "G-PRIVACY"
+      ],
+      "caseIds": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P29"
+      ],
+      "steps": [
+        {
+          "action": "Tras restauración aislada y permisos, crear/iniciar cuentas ficticias autorizadas A/B.",
+          "expected": "Usuario sin taller está bloqueado; MFA/sesión/rol corresponden al actor."
+        },
+        {
+          "action": "Intentar leer/escribir el ID de recurso de otro taller, con cada rol.",
+          "expected": "RLS rechaza lecturas y escrituras cruzadas con evidencia de servidor."
+        },
+        {
+          "action": "Revocar membresía y renovar/cerrar sesión.",
+          "expected": "No hay datos visibles ni permisos después de revocación; registrar resultados sin tokens."
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "title": "Datos reales candidatos: recepción, OT y autoguardado",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "Taller piloto de pruebas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-DATA",
+        "G-RLS",
+        "G-PRIVACY"
+      ],
+      "caseIds": [
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P23"
+      ],
+      "steps": [
+        {
+          "action": "Solo con respaldo y SQL autorizado, crear cliente y vehículo de prueba en taller asignado.",
+          "expected": "Persisten en nueva sesión sin duplicarse ni aparecer en otro taller."
+        },
+        {
+          "action": "Crear OT e inspeccionar 34 X consecutivas y notas sin tocar Guardar.",
+          "expected": "Autoguardado confirma solo tras persistencia real y se recupera tras F5/nueva sesión."
+        },
+        {
+          "action": "Abrir historial de otra visita y de otro taller.",
+          "expected": "Aislamiento y relación por vehículo/visita se mantienen; no se inventan trabajos."
+        }
+      ]
+    },
+    {
+      "id": "R13",
+      "title": "Documentos: revisiones privadas y recuperación íntegra",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "Taller piloto de pruebas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-DOCS",
+        "G-RLS",
+        "G-DATA"
+      ],
+      "caseIds": [
+        "P15",
+        "P16",
+        "P17",
+        "P20",
+        "P21",
+        "P22",
+        "P23",
+        "P24"
+      ],
+      "steps": [
+        {
+          "action": "Tras Storage/RLS y servicio autorizados, emitir una revisión a partir de cotización de prueba.",
+          "expected": "Solo una revisión inmutable, PDF con SHA-256/tamaño comprobados."
+        },
+        {
+          "action": "Editar nueva revisión y descargar PDF histórico desde CP06.",
+          "expected": "R1 original conserva bytes; R2 es otro archivo; IDs ajenos y corrupción son rechazados."
+        },
+        {
+          "action": "Ensayar eventual correo con proveedor de prueba habilitado por permiso independiente.",
+          "expected": "Ningún estado 'enviado' sin acuse confirmado; no enviar a destinatario real no autorizado."
+        }
+      ]
+    },
+    {
+      "id": "R14",
+      "title": "iPhone PWA: aceptación funcional real con sesiones autorizadas",
+      "platform": "pwa",
+      "role": "administrador",
+      "workshop": "Taller piloto de pruebas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-AUTH",
+        "G-RLS",
+        "G-DATA",
+        "G-DOCS",
+        "G-DEVICE"
+      ],
+      "caseIds": [
+        "P01",
+        "P02",
+        "P03",
+        "P08",
+        "P11",
+        "P12",
+        "P17",
+        "P20",
+        "P21",
+        "P23",
+        "P24",
+        "P26",
+        "P28",
+        "P29",
+        "P34",
+        "P36"
+      ],
+      "steps": [
+        {
+          "action": "Iniciar sesión de prueba autorizada desde PWA Safari y ejecutar recepción→multipunto→cotización.",
+          "expected": "La sesión y autoguardado persisten sin fugas ni pérdida de datos al abrir WhatsApp."
+        },
+        {
+          "action": "Revisar PDF emitido, historial, trabajos realizados y entrega.",
+          "expected": "Documentos privados correctos, roles aplicados y flujo cerrado con confirmación."
+        },
+        {
+          "action": "Revocar sesión, dejar sin red y comprobar bloqueo/recuperación.",
+          "expected": "Sin registros de otra cuenta ni falsos avisos de éxito."
+        }
+      ]
+    },
+    {
+      "id": "R15",
+      "title": "Android futuro: paridad backend y uso del mecánico",
+      "platform": "android",
+      "role": "mecanico",
+      "workshop": "Taller piloto de pruebas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-AUTH",
+        "G-RLS",
+        "G-DATA",
+        "G-DOCS",
+        "G-DEVICE",
+        "G-RELEASE"
+      ],
+      "caseIds": [
+        "P02",
+        "P03",
+        "P04",
+        "P10",
+        "P11",
+        "P12",
+        "P23",
+        "P28",
+        "P29",
+        "P35",
+        "P36"
+      ],
+      "steps": [
+        {
+          "action": "Solo después de APK real integrada y autorizada, ingresar con mecánico limitado.",
+          "expected": "Una sesión segura corresponde al taller y tareas asignadas."
+        },
+        {
+          "action": "Completar multipunto y confirmar recuperación tras salida/reingreso.",
+          "expected": "Autoguardado real no mezcla talleres ni confirma operaciones fallidas."
+        },
+        {
+          "action": "Probar rutas ajenas, sesión vencida y red intermitente.",
+          "expected": "Acceso denegado y no se retienen datos ajenos en pantalla."
+        }
+      ]
+    },
+    {
+      "id": "R16",
+      "title": "Creador: licencias y Full permanente de Ignacio",
+      "platform": "web",
+      "role": "creador",
+      "workshop": "Taller Ignacio confirmado",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-AUTH",
+        "G-PLAN",
+        "G-RLS"
+      ],
+      "caseIds": [
+        "P30",
+        "P31"
+      ],
+      "steps": [
+        {
+          "action": "Cuando Ignacio tenga cuenta verificada, asignar plan Full permanente a su taller específico.",
+          "expected": "Concesión auditada, sin cobro, sin otorgar propiedad del software ni acceso cruzado."
+        },
+        {
+          "action": "Comprobar cupos Plus 4, Full 8, plazas adicionales y revocación autorizada.",
+          "expected": "Cobro de adicionales al titular, nunca mecánico; pagos no se habilitan en esta prueba."
+        }
+      ]
+    },
+    {
+      "id": "R17",
+      "title": "Privacidad del piloto: consentimiento y control de tratamiento",
+      "platform": "web",
+      "role": "administrador",
+      "workshop": "Taller piloto de pruebas",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-PRIVACY",
+        "G-AUTH"
+      ],
+      "caseIds": [
+        "P05",
+        "P13",
+        "P22",
+        "P32"
+      ],
+      "steps": [
+        {
+          "action": "Revisar con responsable el aviso, minimización y política de retención antes de cualquier dato real.",
+          "expected": "Tratamiento y acceso documentados; no adjuntar datos personales en capturas públicas."
+        },
+        {
+          "action": "Comprobar permisos de fotos y destinatarios de correos.",
+          "expected": "No hay difusión sin base/autorización ni envío silencioso."
+        }
+      ]
+    },
+    {
+      "id": "R18",
+      "title": "Respaldo y recuperación íntegra sin tocar producción",
+      "platform": "backend",
+      "role": "administrador",
+      "workshop": "Entorno aislado aprobado",
+      "phase": "gated-real",
+      "requiredGates": [
+        "G-BACKUP",
+        "G-RELEASE"
+      ],
+      "caseIds": [
+        "P33",
+        "P37",
+        "P38"
+      ],
+      "steps": [
+        {
+          "action": "Desde PC personal y repositorio privado realizar respaldo cifrado integral con checksum y lectura posterior.",
+          "expected": "Incluye base, Auth, políticas/roles, Storage, configuración necesaria; artefacto íntegro."
+        },
+        {
+          "action": "Restaurar la copia en entorno aislado, verificar integridad y acceso A/B.",
+          "expected": "Nunca restauración destructiva en Supabase alojado."
+        },
+        {
+          "action": "Ensayar despliegue/migración y plan de rollback verificando commit y flags.",
+          "expected": "Sin datos perdidos, sin activar pagos, correos ni público accidentalmente."
+        }
+      ]
+    }
+  ]
+}
