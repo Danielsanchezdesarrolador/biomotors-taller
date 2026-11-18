@@ -2,6 +2,10 @@ import { useMemo, useState, type ComponentProps } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { NativeModule } from './screens/NativeModules'
 import {
+  createDemoGateway, demoErrorText, openDemoSession,
+  type DemoSession, type DemoFailureMode, type DemoRole, type DemoWorkshopId,
+} from './data/demoGateway'
+import {
   Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native'
 
@@ -22,17 +26,6 @@ const STATUSES: Status[] = [
   { key: 'servicio', label: 'En servicio', color: '#F5AC00', light: '#FFF4D5', count: 6, icon: 'construct-outline' },
   { key: 'repuestos', label: 'Por repuestos', color: '#8950E8', light: '#F2EAFF', count: 5, icon: 'cube-outline' },
   { key: 'entrega', label: 'Lista para entrega', color: '#16B950', light: '#E0F8E7', count: 3, icon: 'checkmark-circle-outline' },
-]
-const ORDERS: WorkOrder[] = [
-  { id: 'OT-1001', vehicle: 'Toyota Corolla · 2020', service: 'Mantención de 10.000 km', plate: 'DEMO-01', status: 'diagnostico' },
-  { id: 'OT-1002', vehicle: 'Hyundai Tucson · 2021', service: 'Revisión de frenos', plate: 'DEMO-02', status: 'servicio' },
-  { id: 'OT-1003', vehicle: 'Chevrolet Tracker · 2022', service: 'Cambio de aceite', plate: 'DEMO-03', status: 'repuestos' },
-  { id: 'OT-1004', vehicle: 'Mitsubishi L200 · 2019', service: 'Diagnóstico de motor', plate: 'DEMO-04', status: 'entrega' },
-]
-const ACTIVITY: { id: string; title: string; detail: string; icon: IconName; color: string; light: string }[] = [
-  { id: 'A1', title: 'Orden de ejemplo creada', detail: 'OT-1001 · Toyota Corolla', icon: 'construct-outline', color: '#0875F5', light: '#E1F0FF' },
-  { id: 'A2', title: 'Informe simulado', detail: 'OT-1002 · Sin correo enviado', icon: 'document-text-outline', color: '#7950D9', light: '#F1EAFF' },
-  { id: 'A3', title: 'Revisión de muestra finalizada', detail: 'OT-1004 · Datos ficticios', icon: 'checkmark-outline', color: '#16B950', light: '#E0F8E7' },
 ]
 const COLORS = { navy: '#0B1F3B', blue: '#006EFF', ink: '#14233E', muted: '#6F829A', bg: '#F5F8FD' }
 
@@ -58,22 +51,100 @@ function Metric({ label, value, icon, color, background, onPress }: {
 
 export default function App() {
   const [section, setSection] = useState<Section>('inicio')
+  const [demoSession, setDemoSession] = useState<DemoSession|null>(null)
+  const [failureMode, setFailureMode] = useState<DemoFailureMode>('none')
+  const gateway = useMemo(() => createDemoGateway(failureMode), [failureMode])
+  const ordersResult = (() => {
+    try { return {items:gateway.listOrders(demoSession),error:null as string|null} }
+    catch(error) { return {items:[] as ReturnType<typeof gateway.listOrders>,error:demoErrorText(error)} }
+  })()
+  const ORDERS: WorkOrder[] = ordersResult.items.map(order => ({
+    id:order.id,vehicle:order.vehicle,service:order.service,plate:order.plate,status:order.state,
+  }))
+  const statusesWithCounts = STATUSES.map(status => ({
+    ...status, count:ORDERS.filter(order => order.status===status.key).length,
+  }))
+  let vehicleCount: number|null = null
+  let quoteCount: number|null = null
+  if(demoSession?.role==='administrador' && !ordersResult.error) {
+    try {
+      vehicleCount = gateway.listVehicles(demoSession).length
+      quoteCount = gateway.listQuotes(demoSession).length
+    } catch { /* fail closed: never show counts from another workshop */ }
+  }
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'todas' | StatusKey>('todas')
   const [focusedOrderId, setFocusedOrderId] = useState<string|undefined>(undefined)
-  const filteredOrders = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase('es-CL')
-    return ORDERS.filter(item =>
-      (statusFilter === 'todas' || item.status === statusFilter) &&
-      (!term || [item.id, item.vehicle, item.service, item.plate].some(text => text.toLocaleLowerCase('es-CL').includes(term))))
-  }, [query, statusFilter])
+  const term = query.trim().toLocaleLowerCase('es-CL')
+  const filteredOrders = ORDERS.filter(item =>
+    (statusFilter === 'todas' || item.status === statusFilter) &&
+    (!term || [item.id, item.vehicle, item.service, item.plate].some(value => value.toLocaleLowerCase('es-CL').includes(term))))
   const today = useMemo(() => new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago' }).format(new Date()), [])
 
-  function go(target: Section) {
+  function go(target: Section, orderId?: string) {
+    setFocusedOrderId(orderId)
     setSection(target)
     setMenuOpen(false)
   }
+  function enterDemo(workshopId:DemoWorkshopId,role:DemoRole) {
+    setDemoSession(openDemoSession(workshopId,role))
+    setFailureMode('none')
+    setSection('inicio')
+    setQuery('')
+    setStatusFilter('todas')
+    setFocusedOrderId(undefined)
+    setMenuOpen(false)
+  }
+  function signOut() {
+    setDemoSession(null)
+    setFailureMode('none')
+    setSection('inicio')
+    setQuery('')
+    setStatusFilter('todas')
+    setFocusedOrderId(undefined)
+    setMenuOpen(false)
+  }
+  if(!demoSession) return <View style={styles.app}>
+    <StatusBar barStyle="light-content" backgroundColor={COLORS.navy}/>
+    <View style={styles.topBar}>
+      <View style={styles.topBrand}>
+        <Image source={require('./assets/brand/logo-horizontal-dark.png')} resizeMode="contain"
+          style={{width:156,height:44,backgroundColor:'transparent'}}/>
+      </View>
+    </View>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.demoNotice}>
+        <Ionicons name="shield-checkmark-outline" size={19} color="#8B6E34"/>
+        <Text style={styles.demoNoticeText}><Text style={styles.demoNoticeBold}>LABORATORIO DEMO · </Text>
+          Sin cuentas reales, contraseñas, backend, documentos, pagos ni persistencia. Estas opciones no inician sesión en Supabase.</Text>
+      </View>
+      <View style={styles.welcome}>
+        <Text style={styles.kicker}>BT-ANDROID-02 · PRUEBAS SIN RED</Text>
+        <Text style={styles.greeting}>Acceso simulado</Text>
+        <Text style={styles.welcomeSubtitle}>Elige un perfil ficticio para verificar navegación, aislamiento A/B y restricciones.</Text>
+      </View>
+      <TouchableOpacity accessibilityRole="button" onPress={()=>enterDemo('demo-a','administrador')} style={styles.demoEnter}>
+        <Ionicons name="business-outline" size={23} color={COLORS.blue}/>
+        <View style={{flex:1}}><Text style={styles.demoEnterTitle}>Administrador · Taller A</Text>
+          <Text style={styles.orderService}>4 órdenes y directorio ficticio</Text></View>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.blue}/>
+      </TouchableOpacity>
+      <TouchableOpacity accessibilityRole="button" onPress={()=>enterDemo('demo-a','mecanico')} style={styles.demoEnter}>
+        <Ionicons name="construct-outline" size={23} color={COLORS.blue}/>
+        <View style={{flex:1}}><Text style={styles.demoEnterTitle}>Mecánico · Taller A</Text>
+          <Text style={styles.orderService}>Solo sus órdenes asignadas</Text></View>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.blue}/>
+      </TouchableOpacity>
+      <TouchableOpacity accessibilityRole="button" onPress={()=>enterDemo('demo-b','administrador')} style={styles.demoEnter}>
+        <Ionicons name="business-outline" size={23} color={COLORS.blue}/>
+        <View style={{flex:1}}><Text style={styles.demoEnterTitle}>Administrador · Taller B</Text>
+          <Text style={styles.orderService}>Datos ficticios distintos del Taller A</Text></View>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.blue}/>
+      </TouchableOpacity>
+      <Text style={styles.panelHint}>Acceso exclusivamente ilustrativo. Nunca usar como autenticación ni control de permisos real.</Text>
+    </ScrollView>
+  </View>
 
   return (
     <View style={styles.app}>
@@ -97,23 +168,27 @@ export default function App() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {section === 'inicio' && <View style={styles.demoNotice}><Ionicons name="information-circle-outline" size={18} color="#8B6E34" /><Text style={styles.demoNoticeText}><Text style={styles.demoNoticeBold}>DEMO VISUAL · </Text>Órdenes, vehículos y cifras ficticias; no se registran datos ni se envían correos.</Text></View>}
         {section === 'inicio' ? <>
+          {ordersResult.error && <View style={styles.demoNotice}>
+            <Ionicons name="alert-circle-outline" size={18} color="#8B6E34"/>
+            <Text style={styles.demoNoticeText}>{ordersResult.error} Cierra y vuelve a abrir una sesión ficticia si venció.</Text>
+          </View>}
           <View style={styles.welcome}>
-            <View style={styles.welcomeHeading}><Text style={styles.kicker}>PANEL PRINCIPAL</Text><Text style={styles.greeting}>¡Hola, equipo! 👋</Text><Text style={styles.welcomeSubtitle}>Resumen de tu taller hoy.</Text></View>
+            <View style={styles.welcomeHeading}><Text style={styles.kicker}>PANEL PRINCIPAL · {demoSession.workshopId.toUpperCase()}</Text><Text style={styles.greeting}>¡Hola, equipo! 👋</Text><Text style={styles.welcomeSubtitle}>{demoSession.role==='administrador'?'Administrador':'Mecánico'} de ejemplo · Lecturas sin red</Text></View>
             <View style={styles.dateBadge}><Ionicons name="calendar-outline" size={17} color="#1D447B" /><Text style={styles.dateText}>{today}</Text></View>
           </View>
           <View style={styles.searchBar}><Ionicons name="search-outline" size={21} color="#355D90" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar OT, patente o vehículo de ejemplo..." placeholderTextColor="#70849F" style={styles.searchInput} accessibilityLabel="Buscar órdenes demostrativas" autoCorrect={false} />{query.length > 0 && <TouchableOpacity onPress={() => setQuery('')} accessibilityLabel="Limpiar búsqueda"><Ionicons name="close-circle" size={20} color="#8194AD" /></TouchableOpacity>}</View>
 
           <View style={styles.metricGrid}>
-            <Metric label="Órdenes activas" value="18" icon="construct-outline" color="#0875F5" background="#E4F0FF" onPress={() => go('ordenes')} />
-            <Metric label="Vehículos en taller" value="14" icon="car-sport-outline" color="#8950E8" background="#F1E9FF" onPress={() => go('clientes')} />
-            <Metric label="Informes pendientes" value="6" icon="clipboard-outline" color="#0875F5" background="#E4F0FF" onPress={() => go('informes')} />
-            <Metric label="Cotizaciones pendientes" value="5" icon="document-text-outline" color="#8950E8" background="#F1E9FF" onPress={() => go('informes')} />
+            <Metric label="Órdenes activas" value={ordersResult.error?'—':String(ORDERS.length)} icon="construct-outline" color="#0875F5" background="#E4F0FF" onPress={() => go('ordenes')} />
+            <Metric label="Vehículos en taller" value={vehicleCount===null?'—':String(vehicleCount)} icon="car-sport-outline" color="#8950E8" background="#F1E9FF" onPress={() => go('clientes')} />
+            <Metric label="Informes pendientes" value={quoteCount===null?'—':String(quoteCount)} icon="clipboard-outline" color="#0875F5" background="#E4F0FF" onPress={() => go('informes')} />
+            <Metric label="Cotizaciones pendientes" value={quoteCount===null?'—':String(quoteCount)} icon="document-text-outline" color="#8950E8" background="#F1E9FF" onPress={() => go('informes')} />
           </View>
 
           <View style={styles.panel}>
             <View style={styles.panelHeading}><Text style={styles.panelTitle}>Estado de órdenes</Text><Text style={styles.smallDemo}>Simulado</Text></View>
-            <View style={styles.progressStrip}>{STATUSES.map(item => <View key={item.key} style={[styles.progressPart, { backgroundColor: item.color, flex: item.count }]} />)}</View>
-            <View style={styles.statusGrid}>{STATUSES.map(item => (
+            <View style={styles.progressStrip}>{statusesWithCounts.map(item => <View key={item.key} style={[styles.progressPart, { backgroundColor: item.color, flex: Math.max(0.01,item.count) }]} />)}</View>
+            <View style={styles.statusGrid}>{statusesWithCounts.map(item => (
               <TouchableOpacity key={item.key} style={[styles.statusTile, { backgroundColor: item.light }]} onPress={() => setStatusFilter(statusFilter === item.key ? 'todas' : item.key)} accessibilityRole="button">
                 <Ionicons name={item.icon} size={24} color={item.color} />
                 <Text style={styles.statusTileLabel}>{item.label}</Text>
@@ -128,7 +203,7 @@ export default function App() {
             {statusFilter !== 'todas' && <TouchableOpacity onPress={() => setStatusFilter('todas')} style={styles.filterChip}><Text style={styles.filterChipText}>Quitar filtro de estados ✕</Text></TouchableOpacity>}
             {filteredOrders.length === 0 && <View style={styles.emptySearch}><Ionicons name="search-outline" size={24} color="#7890AA" /><Text style={styles.emptySearchText}>Sin resultados de muestra.</Text><TouchableOpacity onPress={() => {setQuery('');setStatusFilter('todas')}}><Text style={styles.linkText}>Limpiar filtros</Text></TouchableOpacity></View>}
             {filteredOrders.map(order => (
-              <TouchableOpacity accessibilityRole="button" key={order.id} style={styles.orderLine} activeOpacity={0.75} onPress={() => {setFocusedOrderId(order.id);go('ordenes')}}>
+              <TouchableOpacity accessibilityRole="button" key={order.id} style={styles.orderLine} activeOpacity={0.75} onPress={() => go('ordenes',order.id)}>
                 <View style={styles.orderIcon}><Ionicons name="car-sport-outline" size={25} color="#47739F" /></View>
                 <View style={styles.orderCopy}><Text style={styles.orderId}>{order.id}</Text><Text style={styles.orderVehicle} numberOfLines={1}>{order.vehicle}</Text><Text style={styles.orderService} numberOfLines={1}>{order.service}</Text></View>
                 <View style={styles.orderRight}><LabelBadge status={order.status} /><Ionicons name="chevron-forward" size={16} color="#748AA4" /></View>
@@ -138,11 +213,14 @@ export default function App() {
 
           <View style={styles.panel}>
             <View style={styles.panelHeading}><Text style={styles.panelTitle}>Actividad reciente</Text><Text style={styles.smallDemo}>De ejemplo</Text></View>
-            {ACTIVITY.map(item => (
+            {ORDERS.slice(0,3).map(item => (
               <View style={styles.activityLine} key={item.id}>
-                <IconCircle name={item.icon} color={item.color} background={item.light} size={20} />
-                <View style={styles.activityCopy}><Text style={styles.activityTitle}>{item.title}</Text><Text style={styles.activityDetail}>{item.detail}</Text></View>
+                <IconCircle name="construct-outline" color={COLORS.blue} background="#E1F0FF" size={20}/>
+                <View style={styles.activityCopy}><Text style={styles.activityTitle}>Orden ficticia {item.id}</Text>
+                  <Text style={styles.activityDetail}>{item.vehicle} · Sin operaciones reales</Text></View>
               </View>
+            ))}
+          </View>
             ))}
           </View>
 
@@ -154,7 +232,13 @@ export default function App() {
               <TouchableOpacity style={styles.shortcut} accessibilityRole="button" onPress={() => go('informes')}><Ionicons name="document-text-outline" size={27} color={COLORS.blue}/><Text style={styles.shortcutText}>Nuevo informe</Text></TouchableOpacity>
             </View>
           </View>
-        </> : <NativeModule key={section} section={section} initialOrderId={focusedOrderId}/>}
+        </> : <NativeModule key={section+demoSession.workshopId+demoSession.role+(focusedOrderId??'')}
+          section={section} session={demoSession} gateway={gateway} mode={failureMode}
+          initialOrderId={focusedOrderId}
+          onOpenOrder={id=>go('ordenes',id)} onOpenQuote={id=>go('informes',id)}
+          onSignOut={signOut}
+          onToggleOffline={()=>setFailureMode(current=>current==='none'?'offline':'none')}
+          onExpire={()=>setDemoSession(current=>current?{...current,expiresAt:0}:null)}/>}
 
       </ScrollView>
 
@@ -170,6 +254,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  demoEnter: { backgroundColor:'white',borderWidth:1,borderColor:'#D5E2F3',
+    borderRadius:14,padding:16,marginTop:12,flexDirection:'row',alignItems:'center',gap:14,minHeight:82 },
+  demoEnterTitle: {fontSize:15,fontWeight:'800',color:'#14233E'},
   app: { flex: 1, backgroundColor: COLORS.bg },
   topBar: { height: 65, flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.navy, paddingHorizontal: 11, borderBottomWidth: 1, borderBottomColor: '#274365' },
   topAction: { width: 38, height: 43, justifyContent: 'center', alignItems: 'center', position: 'relative' },
