@@ -98,6 +98,17 @@ jobs:
           VITE_SUPABASE_URL: 'https://suxcqqnmcjoezfxltoms.supabase.co'
           VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_build_only'
         run: npm run build
+      - name: Compilar BT-FLOW-LIVE-02 como candidato privado (NO activar backend ni Render)
+        env:
+          VITE_BT_AUTH_R1_ENABLED: 'true'
+          VITE_BT_CP03_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP04_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP05_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP05_DOCUMENTS_ENABLED: 'true'
+          VITE_BT_FLOW_LIVE_02_ENABLED: 'true'
+          VITE_SUPABASE_URL: 'https://suxcqqnmcjoezfxltoms.supabase.co'
+          VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_build_only'
+        run: npm run build
   android-native:
     name: Android React Native / Expo (sin generar APK)
     runs-on: ubuntu-latest
