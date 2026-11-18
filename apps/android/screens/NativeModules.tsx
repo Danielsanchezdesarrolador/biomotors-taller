@@ -1,7 +1,7 @@
 /** BT-ANDROID-01 · Four native R2 screens using explicit, synthetic data only.
  * No network, Supabase client, persistent data, signed PDFs, or client secrets.
  */
-import { useMemo, useState, type ComponentProps } from 'react'
+import { useMemo, useState, type ComponentProps, type ReactNode } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import {
   Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,
@@ -61,7 +61,7 @@ function Headline({label,title,description,icon}: {
     <Text style={s.subtitle}>{description}</Text>
   </View>
 }
-function Card({title,children,icon}: {title?:string;children:React.ReactNode;icon?:IconName}) {
+function Card({title,children,icon}: {title?:string;children:ReactNode;icon?:IconName}) {
   return <View style={s.card}>
     {title && <View style={s.cardHeader}>
       {icon && <Ionicons name={icon} size={19} color={colors.blue}/>}
@@ -70,7 +70,7 @@ function Card({title,children,icon}: {title?:string;children:React.ReactNode;ico
     {children}
   </View>
 }
-function Label({children}: {children:React.ReactNode}) {
+function Label({children}: {children:ReactNode}) {
   return <Text style={s.fieldLabel}>{children}</Text>
 }
 function Row({label,value}: {label:string;value:string}) {

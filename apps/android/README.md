@@ -48,3 +48,18 @@ La nueva propuesta premium del Inicio se desarrolla primero en la web Render y P
 
 
 **BT-BRAND-02:** el encabezado oscuro selecciona `logo-horizontal-dark.png` y usa fondo transparente, sin placa blanca. Es únicamente selección/estilo gráfico: icono, foreground adaptativo, splash, `app.json` y los recursos BT-BRAND-01 anteriores conservan sus hashes. Sin adaptación funcional ni APK. La exportación del bundle se verifica de nuevo con esta variante.
+
+## BT-ANDROID-01 — Pantallas R2 nativas de preparación (18/11/2026)
+
+Además del Inicio original, Android dispone de cuatro módulos **React Native auténticos**, no WebView:
+
+- **Órdenes:** listado nativo de OT ficticias, búsqueda, filtros por estado y ficha con vehículo, cliente, km y motivo. La inspección real permanece bloqueada.
+- **Clientes y vehículos:** directorio filtrable y ficha de ejemplo; entrada al historial real aún bloqueada.
+- **Informes y cotizaciones:** listado de cotizaciones ficticias y detalle con total rotulado como demostración, sin generar ni descargar documentos reales.
+- **Configuración:** resumen del taller ficticio, planes Plus/Full 4/8, extras USD 2, permisos y herramientas todavía pendientes.
+
+La navegación conserva las cinco pestañas R2 y enlaza una orden tocada desde Inicio con su ficha nativa. Ninguna pantalla guarda registros, inicia sesión o utiliza claves/Supabase; cada vista mantiene una advertencia inequívoca, y las acciones de escritura muestran un bloqueo claro. No se generó APK ni se habilitaron permisos nativos.
+
+La prueba `npm run verify-config` valida ahora también que existen los cuatro módulos, su contenido de demostración y que no se hayan incorporado WebView, `fetch()` ni un cliente SDK de datos. `npm run typecheck` y `expo export --platform android` siguen en CI.
+
+**Pendientes para Android operativo:** autenticación verificada; aislamiento de talleres, roles y RLS; conexión a los repositorios CP03/CP04/CP05/CP06 con control de acceso; persistencia/retorno a la ficha; fotos/documentos solo tras Storage y backups verificables; QA móvil físico; APK interna firmada con autorización. No confundir la paridad visual con paridad de backend.

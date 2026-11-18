@@ -95,7 +95,7 @@ export default function App() {
       </View>}
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={styles.demoNotice}><Ionicons name="information-circle-outline" size={18} color="#8B6E34" /><Text style={styles.demoNoticeText}><Text style={styles.demoNoticeBold}>DEMO VISUAL · </Text>Órdenes, vehículos y cifras ficticias; no se registran datos ni se envían correos.</Text></View>
+        {section === 'inicio' && <View style={styles.demoNotice}><Ionicons name="information-circle-outline" size={18} color="#8B6E34" /><Text style={styles.demoNoticeText}><Text style={styles.demoNoticeBold}>DEMO VISUAL · </Text>Órdenes, vehículos y cifras ficticias; no se registran datos ni se envían correos.</Text></View>}
         {section === 'inicio' ? <>
           <View style={styles.welcome}>
             <View style={styles.welcomeHeading}><Text style={styles.kicker}>PANEL PRINCIPAL</Text><Text style={styles.greeting}>¡Hola, equipo! 👋</Text><Text style={styles.welcomeSubtitle}>Resumen de tu taller hoy.</Text></View>

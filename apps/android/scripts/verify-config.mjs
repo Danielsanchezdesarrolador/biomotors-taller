@@ -35,3 +35,17 @@ assert.equal(app.splash.image, app.icon)
 assert.equal(app.splash.resizeMode, 'contain')
 assert.ok(code.includes('./assets/brand/logo-horizontal-dark.png'))
 console.log('BT-BRAND-01: native icon, adaptive foreground, splash and horizontal artwork PASS')
+
+const native = readFileSync('screens/NativeModules.tsx', 'utf8')
+for (const label of ['Órdenes de trabajo','Clientes y vehículos',
+  'Informes y cotizaciones','Configuración','Descargar PDF archivado']) {
+  assert.ok(native.includes(label), 'Falta pantalla nativa: ' + label)
+}
+for (const marker of ['DATOS FICTICIOS','DEMO-01','COT-DEMO-001',
+  'No se han guardado datos']) {
+  assert.ok(native.includes(marker), 'Debe indicarse demo sin persistencia: ' + marker)
+}
+assert.ok(!/WebView\b|fetch\s*\(|\.from\s*\(|createClient\s*\(/.test(native),
+  'BT-ANDROID-01 no puede abrir WebView ni consultar backend real')
+assert.ok(code.includes("section={section}"), 'Las 5 pestañas deben usar la navegación nativa')
+console.log('BT-ANDROID-01: 4 módulos R2, navegación y límites DEMO verificados (sin Auth/Storage)')
