@@ -75,7 +75,7 @@ export function prepareClosingPacket(
       e.approval_id!==a.id || d.report_id!==e.id ||
       !e.decisions || typeof e.decisions!=='object' || Array.isArray(e.decisions))
     denied()
-  const lines: FinalLine[]=p.items.map(item => {
+  const lines: FinalLine[]=p.items.map((item): FinalLine => {
     const decision=e.decisions[item.id]
     if (item.workshop_id!==quote.workshop_id || item.quote_id!==quote.id ||
         (decision!=='performed' && decision!=='not_performed') ||
