@@ -244,6 +244,27 @@ describe('Pilot document HTTP, private bytes and delivery integration (synthetic
     expect((await handler(request('send', { revisionId: rid, attempt: 2 }))).status).toBe(200)
     expect(f.send).toHaveBeenCalledOnce()
   })
+  it.each([
+    ['revision number', (r: any) => ({ ...r, revision: r.revision + 1 })],
+    ['PDF byte count', (r: any) => ({ ...r, pdf_size: r.pdf_size + 1 })],
+    ['workshop identity', (r: any) => ({ ...r, workshop_id: id(91) })],
+    ['frozen quote version', (r: any) => ({
+      ...r, payload: { ...r.payload, quote: { ...r.payload.quote, version: 999 } }
+    })]
+  ])('does not report an issued revision if final server receipt changes %s', async (_name, alter) => {
+    const f = setup()
+    const original = f.rpc.getMockImplementation()!
+    f.rpc.mockImplementation(async (name, args) => {
+      const response = await original(name, args)
+      return name === 'bt_cp05_finish_issue'
+        ? { ...response, data: alter(response.data) }
+        : response
+    })
+    const result = await documentHandlerCandidate(policy, f.deps)(request('issue'))
+    expect(result.status).toBe(409)
+    expect((await result.json()).error).toBe('OPERATION_NOT_CONFIRMED')
+    expect(f.send).not.toHaveBeenCalled()
+  })
   it('recovers a pending reservation with a new browser request ID, finalizing the original ID', async () => {
     const f = setup(),
       handler = documentHandlerCandidate(policy, f.deps)
