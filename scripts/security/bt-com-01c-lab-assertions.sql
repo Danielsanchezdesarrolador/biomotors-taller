@@ -92,11 +92,9 @@ SELECT public.com01c_expect(
  $cmd$SELECT bt_com_private.record_review(
  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
  'eeeeeeee-0000-4000-8000-000000000002',
- (SELECT id FROM bt_com_private.closing_manifests LIMIT 1),
+ 'eeeeeeee-0000-4000-8000-000000000003',
  '11111111-1111-4111-8111-111111111111','synthetic@invalid.test',
- repeat('e',64),
- (SELECT jsonb_build_array(documents->0->>'sha256',documents->1->>'sha256',
-   documents->2->>'sha256') FROM bt_com_private.closing_manifests LIMIT 1))$cmd$,
+ repeat('e',64),jsonb_build_array(repeat('a',64),repeat('c',64),repeat('d',64)))$cmd$,
  '55000');
 RESET ROLE;
 
