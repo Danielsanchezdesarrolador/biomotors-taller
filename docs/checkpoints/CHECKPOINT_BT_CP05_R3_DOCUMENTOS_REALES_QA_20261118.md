@@ -18,7 +18,7 @@ Los dos PDF muestran la frase `No es documento tributario` duplicada en la adver
 
 - Commit anterior del 18/11/2026 `107b9fd3ff19b19a5eff9a0a3ae95a0f0777bf64`: ajuste del PDF R3 para 3 partidas QA en A4 y reserva de espacio para todos los datos de contacto; GitHub CI `44302886190` `SUCCESS` y Render `dep-dbupfqe1egvs73b4l7h0` `LIVE`.
 - **Commit nuevo `858f76ef2e8238d0691e34488d97dc8e29c9c218`:** en `src/cp05/pdf.ts` se incorporó `pdfLegalNotice()` para evitar repetir `No es documento tributario` si el `snapshot.notice` ya lo incluye. En `src/cp05/cp05.test.ts` se añadió una prueba dedicada con el texto de borrador QA y texto personalizado sin la advertencia.
-- Render del commit `858f76e`: `dep-dbupkl2vcj2c7393dt7g`; CI nuevo `44304533505` (general) y `44304533600` (visual). **Consultar sus estados antes de declarar PASS**; estaban en progreso al documentar este checkpoint.
+- Render del commit `858f76e`: `dep-dbupkl2vcj2c7393dt7g` **LIVE**; CI `44304533505` **SUCCESS** (verificación general Web/PWA y Android); CI `44304533600` (visual) seguía en ejecución en la última consulta. No declarar PASS visual hasta obtener conclusión.
 - No hubo modificaciones a Supabase, su esquema, clientes/vehículos/OT, suscripciones, membresías, secretos, archivos privados o datos reales. Los cambios fueron de formato y pruebas del generador.
 
 ## Estado de puertas de seguridad
