@@ -184,21 +184,16 @@ export function historyRepository(
     if (!options.cp05Enabled) return { status: 'off', ...empty }
     if (!orders.length) return { status: 'ready', ...empty }
     try {
-      const q = await client
-        .from('quotes')
-        .select('*')
-        .eq('workshop_id', wid)
-        .eq('vehicle_id', vid)
-        .in(
-          'order_id',
-          orders.map((o) => o.id)
-        )
-        .limit(pageSize)
-        .abortSignal(abort.signal)
-      if (q.error && ['42P01', 'PGRST205'].includes(q.error.code))
-        return { status: 'unavailable', ...empty }
-      check(q.error)
-      const quotes = many<Quote>(q.data)
+      // One 20-visit page can have many distinct quotes. A fixed limit here
+      // silently hid older documents, even while CP06 showed "loaded" visits.
+      // Reuse the same keyset pagination as inspection findings/revisions.
+      const quotes = await allRows<Quote>(
+        'quotes',
+        orders.map((o) => o.id),
+        'created_at',
+        'order_id',
+        vid
+      )
       for (const quote of quotes)
         if (quote.vehicle_id !== vid || !orders.some((o) => o.id === quote.order_id)) {
           dispose()
