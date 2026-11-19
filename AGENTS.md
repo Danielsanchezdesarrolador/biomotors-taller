@@ -1,3 +1,9 @@
+## REGLA DE TRABAJO — DIAGNÓSTICOS COMPLETOS Y BLOQUES GRANDES (19/11/2026)
+
+En el chat exclusivo de seguridad, por decisión expresa del propietario, agrupar la revisión en **bloques cerrados**: consultar primero documentación y evidencia histórica; investigar causas y alternativas oficiales; inspeccionar código completo disponible; proponer/realizar correcciones solo en copias candidatas y probar casos sintéticos sin red; solicitar al propietario **una sola acción agrupada** cuando sea indispensable acceder a su PC. Ante errores, hacer diagnóstico razonado y documentar causas comprobadas frente a hipótesis **antes de volver a ejecutar**; no serializar una docena de inspecciones triviales ni repetir probes que perdieron su evidencia. Mantener consentimiento explícito para nuevas conexiones/exportaciones, modificaciones de producción, migraciones, backups, restauraciones y cambios de secretos. Nunca subir código local con credenciales, .env, .pgpass, keyring ni copias GPG a un repositorio o chat. El cambio metodológico NO rebaja las puertas de seguridad.
+
+---
+
 ## REGLA PERMANENTE — BITÁCORA DE ERRORES, CAUSAS Y SOLUCIONES (19/11/2026)
 
 **ANTES de diagnosticar o intentar de nuevo un fallo de ByteTorque**, leer [auditoría histórica y libro SEC-01…SEC-17](docs/BT_SEGURIDAD_AUDITORIA_RETROSPECTIVA_20261119.md), el `roadmap.md`, `agent.md` y último checkpoint. **Nunca concluir "herramienta desinstalada" de "NO ENCONTRADO EN PATH", ni "backup inexistente" de "backup cloud bloqueado", ni "restauración pendiente" de ausencia de prueba total cuando existe una restauración SQL parcial validada.** PostgreSQL 17 **ya fue instalado** en Windows el 17/11/2026 y se habilitó entonces `C:\Program Files\PostgreSQL\17\bin` en el `PATH` de aquella sesión; en una sesión nueva se debe comprobar primero la ruta absoluta. Docker 29.9.3 está presente según el propietario.

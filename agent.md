@@ -1,3 +1,7 @@
+## BT-SEC-07-BLOQUES-GRANDES-04 · Trabajo agrupado (19/11/2026)
+
+El propietario pidió auditorías por bloques grandes, no preguntas/comandos unitarios reiterativos. La inspección local encontró una referencia a pooler en línea 23 y puerto 5432 en línea 24; **solo son literales, no prueba de conexión efectiva**. Modo sesión 5432 está documentado como opción válida por Supabase; no alterar endpoint sin evidencia. El exportador local revela dos problemas de validación (no verifica bytes en claro; puede conservar ciphertext inválido), mientras que **causa del exit 1 de pg_dumpall sigue NO DETERMINADA**. Próximo bloque: recibir/revisar ambos scripts .py **sin credenciales**, proponer parche candidato y pruebas sintéticas agrupadas; no volver a ejecutar dump ni alterar producción. [Checkpoint SEC-07](./docs/checkpoints/CHECKPOINT_BT_SEC_07_ROLES_DIAGNOSTICO_FOCALIZADO_20261119.md). Sin backups ni despliegue; **BT-PILOT-QA-04: A REPASAR**.
+
 ## BT-SEC-07-POOLER-CODIGO-03 · Inspección de endpoint (19/11/2026)
 
 La inspección AST del propietario devolvió `ENDPOINT_EN_CODIGO: POOLER`, `INSPECCION_LOCAL_OK`. **Solo evidencia un literal de pooler en el código**: no confirma el host/puerto de conexión real ni la causa del fallo de roles. Pendiente clasificar de forma segura el puerto de `DB` sin imprimir la cadena; sesión 5432 y transacciones 6543 tienen usos diferentes. No repetir `pg_dumpall` ni alterar backups/secretos. [Checkpoint actualizado](./docs/checkpoints/CHECKPOINT_BT_SEC_07_ROLES_DIAGNOSTICO_FOCALIZADO_20261119.md). Sin cambios en producción.
