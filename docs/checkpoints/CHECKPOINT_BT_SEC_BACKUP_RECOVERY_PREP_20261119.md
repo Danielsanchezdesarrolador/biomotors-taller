@@ -129,3 +129,36 @@ DIAG_EXIT_CODE: 2
 **Operación siguiente preparada, NO ejecutada aún:** una única llamada al diagnóstico offline SHA-verificado `BT_SEC07_GPG_DIAGNOSTICO_OFFLINE_20261119.py` configurando `GNUPGHOME` a **la ruta histórica exacta y existente solamente en el proceso actual** y restaurando el valor anterior en `finally`. No recorrer otras carpetas, no crear ningún homedir ausente, no usar `--decrypt`, `--import`, `--export-secret-keys`, SQL, red, backups ni GPG nuevos. Solo imprimir las etiquetas ya predefinidas. **No se sabe si tendrá `SECRET_KEY_RECORDS: FOUND` hasta ejecutar en PC**.
 
 **Estado:** GPG predeterminado sin clave privada, clave pública asociada al backup histórico; nuevo backup y restore aún NO realizados. Si anillo histórico contiene privada coincidente, revisar custodia y prueba de recuperabilidad antes de usarlo; si no, detenerse e investigar alternativas de custodia con autorización separada. `BT-PILOT-QA-04: A REPASAR`.
+
+## BT-SEC07-GPG-ISOLATED-MATCH-11 · Diagnóstico exitoso en GNUPGHOME histórico y ejecución de v2 habilitada
+
+**Evidencia autentica aportada por el propietario, 19/11/2026:**
+
+```text
+ALMACEN_HISTORICO: ENCONTRADO
+DIAGNOSTICO: INTEGRIDAD_OK
+BT_SEC07_GPG_DIAG_MODE: OFFLINE_READ_ONLY
+BT_SEC07_SELFTEST: 14_OF_14_OK
+BT_SEC07_GPG_BINARY: FOUND
+BT_SEC07_GPG_HOME_MODE: CUSTOM
+BT_SEC07_HISTORICAL_FILE: FOUND
+BT_SEC07_PACKET_VISIBLE_RECIPIENTS: ONE
+BT_SEC07_SECRET_LIST_COMMAND: OK
+BT_SEC07_PUBLIC_LIST_COMMAND: OK
+BT_SEC07_SECRET_KEY_RECORDS: FOUND
+BT_SEC07_SECRET_FORMAT: OK
+BT_SEC07_PUBLIC_RECIPIENT: MATCH
+BT_SEC07_SECRET_RECIPIENT: MATCH
+BT_SEC07_V2_MATCHER: MATCH
+BT_SEC07_FINAL: KEY_IDENTIFIED_RECHECK_V2_RUNTIME
+DIAG_EXIT_CODE: 0
+CONFIGURACION_GPG_ORIGINAL: RESTAURADA
+```
+
+**Causa inmediata del bloqueo v2, verificada:** el flujo v2 consultaba el GNUPGHOME por defecto y éste carece de entradas privadas; la clave privada coincidente reside en el directorio aislado histórico documentado previamente, que fue probado por el propietario. El algoritmo de mapeo del destinatario v2 también reportó MATCH en el almacén aislado: **el código no necesita nuevo parche para ese chequeo**. Esta operación solo lee metadatos GPG, no descifra el archivo real ni confirma la passphrase/material desbloqueable, y no accedió a Supabase. No afirmar recuperación integral.
+
+**Auditoría del flujo antes de reusar:** se inspeccionó el script `bt_sec07_backup_restore.py` dentro del ZIP v2 previamente entregado. `old_fingerprint`, `ensure_gpg` y `isolated_restore/decrypt_to_command` emplean GPG sin `--homedir` para acceso al anillo privado, por lo que respetan `GNUPGHOME` heredado del proceso; el homedir nuevo `gpg-public` es solamente para cifrar con la clave pública. `PGSSLMODE=verify-full`, `default_transaction_read_only=on`, pooler sesión 5432 y directorio nuevo único permanecen. Los datos de roles del catálogo son metadatos, no roles SQL; restore local podrá fallar por extensiones o roles de Supabase. No se ejecutó aquí el backup.
+
+**Próxima operación autorizada:** el permiso previo cubre una nueva exportación cifrada de solo lectura y una restauración aislada local. No repetir QA 43/43 ni descargar/reinstalar software. Verificar SHA256 de ZIP original v2 `9ee61398d67cd7e811f211c70a449878009b36271fce61082479a09db7a6042d`, del orquestador `0cd6fb1c77ad1d07deb28a72fe4e877c70c4ec424cd93c7ef326e23155a93001` y módulo de cifrado `74c7276e914e46f360b80c4c49eb8c6351ced1a802a88269abca791ac0ff953e` comprobados en el ZIP local del asistente, y que `GNUPGHOME` histórico exista. Ejecutar v2 **una vez** asignando `GNUPGHOME` durante el subproceso Python, guardando/restaurando el valor previo incluso ante error (`try/finally`). Solicitar contraseña PostgreSQL solamente en terminal. Si falla, reportar solo etiquetas `BT_SEC07_*` y `BLOQUE_EXIT_CODE`, **no repetir**. Contenido GPG privado nunca se sube a repo/chat.
+
+**Estado actual:** `SEC-07` productor pg_dumpall exit 1/75B aún sin causa; copia de roles SQL inutilizable; respaldo actual y restore aún NO ejecutados; OAuth Drive bloqueado; `BT-PILOT-QA-04: A REPASAR`. Documentación únicamente, sin SQL/Render/Auth/Drive/GPG writes por parte del asistente.
