@@ -162,3 +162,26 @@ CONFIGURACION_GPG_ORIGINAL: RESTAURADA
 **Próxima operación autorizada:** el permiso previo cubre una nueva exportación cifrada de solo lectura y una restauración aislada local. No repetir QA 43/43 ni descargar/reinstalar software. Verificar SHA256 de ZIP original v2 `9ee61398d67cd7e811f211c70a449878009b36271fce61082479a09db7a6042d`, del orquestador `0cd6fb1c77ad1d07deb28a72fe4e877c70c4ec424cd93c7ef326e23155a93001` y módulo de cifrado `74c7276e914e46f360b80c4c49eb8c6351ced1a802a88269abca791ac0ff953e` comprobados en el ZIP local del asistente, y que `GNUPGHOME` histórico exista. Ejecutar v2 **una vez** asignando `GNUPGHOME` durante el subproceso Python, guardando/restaurando el valor previo incluso ante error (`try/finally`). Solicitar contraseña PostgreSQL solamente en terminal. Si falla, reportar solo etiquetas `BT_SEC07_*` y `BLOQUE_EXIT_CODE`, **no repetir**. Contenido GPG privado nunca se sube a repo/chat.
 
 **Estado actual:** `SEC-07` productor pg_dumpall exit 1/75B aún sin causa; copia de roles SQL inutilizable; respaldo actual y restore aún NO ejecutados; OAuth Drive bloqueado; `BT-PILOT-QA-04: A REPASAR`. Documentación únicamente, sin SQL/Render/Auth/Drive/GPG writes por parte del asistente.
+
+## BT-SEC07-DOCKER-PG17-12 · Parada pre-remota por requisito imagen Docker PG17 (19/11/2026)
+
+**Evidencia recibida del propietario, Windows:**
+
+```text
+BT_SEC07_PREFLIGHT: HASHES_OK
+BT_SEC07_PREFLIGHT: HISTORICAL_KEYRING_SELECTED
+BT_SEC07_RECIPIENT: MATCHED_HISTORICAL_CIPHERTEXT
+BT_SEC07_STOP: DOCKER_PG17_IMAGE_NOT_FOUND_NO_AUTO_PULL
+BLOQUE_EXIT_CODE: 2
+BT_SEC07_GPG_CONFIGURATION: RESTORED
+```
+
+**Causa inmediata confirmada:** El orquestador `bt_sec07_backup_restore.py` v2 ejecutó `docker_image` antes de solicitar contraseña PostgreSQL. Esta función examina solamente las etiquetas `postgres:17`, `postgres:17-bookworm`, `postgres:17.12-bookworm`, y, cuando encuentra alguna, ejecuta un contenedor efímero `postgres --version` sin red para exigir versión mayor 17. Si ninguna pasa, genera la etiqueta observada. **No se distingue con la evidencia actual** si las etiquetas no están descargadas, el daemon Docker Desktop no está listo, se utiliza otro Docker context, o si falló el test del contenedor. La salida es un gate funcional; no evidencia ausencia total de imágenes en el PC.
+
+**Alcance del intento:** El destinatario GPG se reconoció satisfactoriamente en el anillo aislado histórico; el bloque terminó antes de `getpass`, `base.check_db`, consultas de roles, `pg_dump`, archivo actual, cifrado, `isolated_restore` o lectura de filas Supabase. La variable de proceso `GNUPGHOME` anterior se restituyó. **No se generó ni restauró backup nuevo; antiguos siguen intactos según el flujo.** Causa original de `pg_dumpall` exit 1/stderr 75B permanece desconocida.
+
+**Verificación documental externa:** Docker Hub imagen oficial PostgreSQL en https://hub.docker.com/_/postgres incluye etiqueta `17.12-bookworm` y `17-bookworm`; Docker documenta `docker image inspect`, `docker image pull` y `docker version` en https://docs.docker.com/reference/cli/docker/image/inspect/ , https://docs.docker.com/reference/cli/docker/image/pull/ y https://docs.docker.com/reference/cli/docker/version/ . La descarga de imagen es local a Docker, no instala PostgreSQL en Windows ni modifica Supabase.
+
+**Siguiente procedimiento propuesto — una sola intervención agrupada:** (1) verificar hashes anteriores ZIP/script/módulo y GNUPGHOME histórico; (2) evaluar disponibilidad real de Docker Engine y las tres etiquetas usando contenedores `--rm --network none`; (3) si ninguna está disponible pero daemon está sano, permitir descarga local **expresa y visible** desde Docker Hub de `postgres:17.12-bookworm` y validar versión 17 sin puertos; (4) **solo si** requisitos positivos, ejecutar **una vez** el orquestador v2 con almacén GPG histórico durante proceso y restaurar la variable incluso si falla. El paquete v2 ya pasó 43/43 QA offline Windows; no repetir salvo cambio de código. No descargar imágenes cuando Docker Engine falla o existe imagen compatible usable. Si el propietario decide no descargar, terminar sin backup ni restore. No automatizar instalación de Docker, no crear/restaurar BD en producción, no cambiar permisos. Si falla una etapa, detenerse y reportar solo etiquetas seguras; no reintentar a ciegas.
+
+**Efectos de esta entrada:** solo `roadmap.md`, `agent.md` y checkpoint en rama única main, `[skip render]`; ninguna operación de Docker o Supabase ejecutada por el asistente. **SEC-07 abierto y BT-PILOT-QA-04: A REPASAR.**
