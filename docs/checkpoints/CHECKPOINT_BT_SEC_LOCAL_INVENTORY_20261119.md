@@ -16,3 +16,19 @@ Desde PowerShell, comprobar **solo** si `roles.sql.gpg` puede descifrarse y medi
 
 ## Seguridad de esta etapa
 Sin cambios en Supabase, Render, Auth, RLS, Storage, Drive, clientes o datos. No se disparó ningún backup ni migración ni ejecución remota. Commits documentales `[skip render]`. **BT-PILOT-QA-04: A REPASAR**.
+
+
+## Seguimiento del diagnóstico GPG (19/11/2026) — comprobación recibida del propietario
+
+El propietario ejecutó el comando previsto de **descifrado de roles a la salida estándar, con salida canalizada únicamente a `Measure-Object -Line -Character`**, sin guardar SQL en claro ni mostrar su contenido.
+
+**Salida observada:**
+- `ROLES_DESCIFRADO_EXIT: 0`
+- `ROLES_LINEAS: 0`
+- `ROLES_CARACTERES: 0`
+
+**Interpretación acotada:** GPG terminó sin error y PowerShell no detectó ninguna línea ni carácter del texto descifrado. Esto hace **muy probable** que el contenido cifrado esté vacío, aunque 151 bytes de ciphertext existan. **Todavía no existe una medición de bytes del texto descifrado**; un conteo de caracteres/líneas no la sustituye. No se ha demostrado que la causa sea exactamente `pg_dumpall` (pudo ser un fallo del productor, redirección, pipeline o entrada vacía).
+
+**Próximo paso focalizado:** medir la salida de `gpg --decrypt` a nivel binario **en memoria y sin imprimir/guardar contenido**, con código de salida independiente, para confirmar si realmente son cero bytes. Si es cero, conservar el `roles.sql.gpg` original intacto como evidencia, diagnosticar solamente el exportador de roles y protegerse contra encrypt de stdin vacío. No volver a extraer/cifrar la base completa, ni repetir el restore SQL de 7 tablas; no inferir que el respaldo de roles está sano por EXIT 0.
+
+**Impacto:** este control no autoriza migraciones, accesos alojados, cambios de permisos, exportación nueva ni corrección automática; los componentes pendientes de recuperación integral continúan pendientes.
