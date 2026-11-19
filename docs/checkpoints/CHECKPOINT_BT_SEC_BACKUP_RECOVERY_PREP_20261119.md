@@ -64,3 +64,27 @@ BLOQUE_EXIT_CODE: 2
 **Autorización y próxima operación:** el permiso del propietario para el bloque completo de nuevo respaldo cifrado y recuperación aislada sigue vigente; el primer intento se detuvo antes de uso remoto, por lo que se preparó corrección del prerrequisito sin ampliar alcance. Antes de contacto con Supabase, ejecutar **una sola instrucción PowerShell autocontenida** para verificar el nuevo ZIP por SHA256, descomprimirlo en directorio distinto del v1, ejecutar las **43 pruebas offline**, luego invocar el orquestador v2 una vez. No permitir reintentos ciegos. Mantener `BT-PILOT-QA-04: A REPASAR` hasta recuperabilidad efectiva; roles catálogo NO equivale a SQL de roles, ni cubre configuración Auth, Storage object bytes, Edge Functions/secrets o Drive.
 
 **Cambios a GitHub:** solo documentación `AGENTS.md`, `roadmap.md`, `agent.md` y este checkpoint; no se añadieron los scripts ni copias cifradas al repo, no hubo deploy Render ni cambios Supabase/Drive. Este registro no afirma éxito de la ejecución Windows v2.
+
+## BT-SEC-BACKUP-RECOVERY-ERR08-GPG · Parada v2 por reconocimiento del destinatario GPG, diagnóstico sin red preparado
+
+**Evidencia auténtica aportada por el propietario (Windows, 19/11/2026):**
+
+```text
+OK
+QA_OFFLINE_OK
+INICIANDO_RESPALDO_AUTORIZADO_V2
+BT_SEC07_STOP: HISTORICAL_RECIPIENT_KEY_NOT_UNIQUELY_PRESENT
+BLOQUE_EXIT_CODE: 2
+```
+
+**Análisis exacto del código v2:** en `old_fingerprint(root,gpg)`, el mensaje solo se emite tras (a) encontrar `database.dump.gpg` histórico con longitud mínima, (b) reconocer **un único** key ID PKESK público en `gpg --list-packets`, (c) finalizar `gpg --list-secret-keys --with-colons --fingerprint --fingerprint` con código 0, y (d) no construir exactamente una huella primaria con `_secret_primary_matching`. **El código no distingue si el listado privado realmente carece de la clave, si se usó otro homedir durante la restauración vieja, o si el parser falla con esa variante GPG. No afirmar pérdida de clave ni corrupción del backup antiguo.**
+
+**Alcance del fallo:** `main()` invoca `old_fingerprint` ANTES de `docker_image`, `getpass`, `check_db`, `snapshot_catalog`, `pg_dump`, creación del nuevo directorio cifrado, y `isolated_restore`. Por tanto v2 se detuvo sin nueva conexión a Supabase, sin nuevo backup, sin restauración, sin modificación de originales/producción. El `roles.sql.gpg` antiguo sigue inválido y SEC-07 original `pg_dumpall` no identificado.
+
+**Investigación y nuevo artefacto preparado:** se releyó la fuente v2 original del ZIP, más tests; se construyó el **diagnóstico offline autónomo** `BT_SEC07_GPG_DIAGNOSTICO_OFFLINE_20261119.py`, 9.584 bytes, SHA256 `b6d1d14a30b6402aba5406974cfa049163dcb7098d7fb33e651fc9c6c95ec508`. Este script busca *solo el archivo histórico conocido*, analiza encabezado OpenPGP con `--list-packets` en homedir vacío, e inspecciona metadatos del anillo actual `--list-secret-keys` y `--list-keys`, comparando un parser independiente contra el algoritmo v2; solo muestra **categorías predefinidas**, sin nombres, IDs, huellas, rutas privadas, contenido, contraseñas ni stderr. **No ejecuta `--decrypt`, `--export-secret-keys`, comandos SQL ni red.**
+
+**Evidencia de QA del script:** 14/14 comprobaciones sintéticas internas PASS; `py_compile` PASS. Integración real GPG con clave/subclave y ciphertext completamente sintéticos en GNUPGHOME temporal: `KEY_IDENTIFIED_RECHECK_V2_RUNTIME`, `PUBLIC MATCH`, `SECRET MATCH`, comprobación de no fuga PASS. En contenedor asistente no existe el backup real del usuario, y el script correctamente devuelve `STOP_NO_DATA`; **no se ha probado todavía en PC Windows**.
+
+**Condición para siguiente intento:** propietario descarga script de esta conversación, valida su SHA-256 y lo ejecuta **una vez en Windows**. Solo devuelve líneas `BT_SEC07_*` y `DIAG_EXIT_CODE`, sin imprimir datos privados. Si detecta `V2_PARSER_DEFECT_CANDIDATE`, revisar y corregir v2 en nuevo paquete con tests; si `NO_SECRET_MATCH_IN_ACTIVE_KEYRING_PUBLIC_ONLY` o `NO_SECRET_KEYS_IN_ACTIVE_KEYRING`, conciliar custodia/homedir mediante plan autorizado, **no crear/importar claves a ciegas**; si `KEY_IDENTIFIED_RECHECK_V2_RUNTIME`, investigar diferencia de ejecución. **No volver a ejecutar orquestador v1/v2, ni Supabase, ni respaldo antiguo hasta clasificar.**
+
+**Estado:** solo documentación actualizada en `AGENTS.md`, `agent.md`, `roadmap.md` y checkpoint. Scripts GPG/backup privados quedan fuera del GitHub público; no se cambió Render, Supabase, Auth, Drive, OAuth ni repositorio visibilidad. `BT-PILOT-QA-04: A REPASAR`.
