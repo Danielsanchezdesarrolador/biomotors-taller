@@ -1,3 +1,7 @@
+## BT-SEC-07-LOCAL-DIAG-02 · Seguimiento de roles (19/11/2026)
+
+En Windows se verificaron por ruta absoluta PostgreSQL 17.12 (cuatro utilitarios); `SEC-15` solucionado sin reinstalación ni PATH. Se localizó el exportador local y se creó candidato independiente del diagnóstico, sintaxis OK y clasificación sintética 8/8. En dos conexiones autorizadas, prueba TLS previa OK pero `pg_dumpall --roles-only --no-role-passwords` falló; último código `1`, stderr capturado `75 bytes`, sin patrones reconocidos. **No se conoce la causa ni se debe repetir la operación sin plan nuevo y autorización**. El stderr fue descartado y no permite análisis retrospectivo. Respaldos GPG antiguos intactos; rol GPG sigue inválido (0 bytes); recuperación integral actual pendiente. [Checkpoint](./docs/checkpoints/CHECKPOINT_BT_SEC_07_ROLES_DIAGNOSTICO_FOCALIZADO_20261119.md). Sin producción modificada; **BT-PILOT-QA-04: A REPASAR**.
+
 ## Auditoría integral de seguridad y errores — 19/11/2026
 
 **Primero revisar:** [informe retrospectivo y bitácora SEC-01…SEC-17](./docs/BT_SEGURIDAD_AUDITORIA_RETROSPECTIVA_20261119.md) y [checkpoint BT-SEC-REVIEW-01](./docs/checkpoints/CHECKPOINT_BT_SEC_REVIEW_20261119.md). Regla permanente en `AGENTS.md`: **todo error nuevo debe registrar causa confirmada frente a hipótesis, solución, evidencia real, impacto, pendientes y condición de reintento**, sin repetir pruebas ciegas ni destruir originales. 
