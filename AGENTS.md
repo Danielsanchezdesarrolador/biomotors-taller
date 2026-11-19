@@ -1,3 +1,9 @@
+## ACTUALIZACIÓN DE SEGURIDAD — ROLES GPG CONFIRMADOS VACÍOS (19/11/2026)
+
+**Resultado verificado en el PC del propietario:** descifrado GPG binario de `roles.sql.gpg` (ciphertext de 151 bytes) con `ROLES_DESCIFRADO_EXIT: 0` y `ROLES_BYTES_DESCIFRADOS: 0`. El archivo **descifra, pero su contenido es exactamente 0 bytes**, así que **NO es un respaldo válido de roles**. Preservarlo como evidencia, sin sobrescribirlo. El anterior diagnóstico TLS fue `POSTGRES_TLS_OK`, seguido de `ROLES_ORIGEN_FALLA_NO_CLASIFICADA` al ejecutar `pg_dumpall --roles-only --no-role-passwords`; **la causa de ese error NO está identificada**. Primero comprobar las versiones de `pg_dumpall` y `psql` sin conectar, luego depurar exclusivamente ese productor con códigos de diagnóstico seguros. No recrear clave GPG ni respaldar/restaurar nuevamente la base SQL ya comprobada. Para nueva copia cifrada de roles, exigir autorización específica y nombre nuevo, sin alterar los originales. Ver [checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC_LOCAL_INVENTORY_20261119.md).
+
+---
+
 ## REGLA OBLIGATORIA PARA TODOS LOS CHATS Y AGENTES DE BYTETORQUE — LEER ANTES, DOCUMENTAR DESPUÉS (19/11/2026)
 
 **Aplica a CUALQUIER chat, agente, ChatGPT, Codex o colaborador que dé instrucciones o ejecute tareas sobre este repositorio, incluidas preguntas de continuidad, comandos de PowerShell, prompts para otros agentes, QA, seguridad, diseño, despliegues y migraciones.** Es una regla de proyecto, no una afirmación sobre comportamientos de otros chats que no accedan a estos archivos.
