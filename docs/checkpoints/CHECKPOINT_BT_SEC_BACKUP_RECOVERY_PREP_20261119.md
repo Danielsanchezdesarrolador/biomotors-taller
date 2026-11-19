@@ -38,3 +38,29 @@
 - Este commit modifica **solo** `roadmap.md`, `agent.md` y el presente checkpoint. Código candidato/ZIP privado queda **solo en conversación** y PC cuando se descargue.
 - Sin cambios Supabase SQL, RLS, Auth, Render, secretos, OAuth, GitHub workflows, Drive, ni backups anteriores. No se ejecutó ninguna llamada de exportación en el entorno del asistente.
 - **Próxima acción concreta:** el propietario ejecuta un **único bloque PowerShell autocontenido `& {...}`** que verifica ZIP SHA, descomprime a carpeta nueva, corre las 35 pruebas offline y **solo si todas pasan** lanza `python -B bt_sec07_backup_restore.py`. Entrega únicamente etiquetas `BT_SEC07_*` y `BLOQUE_EXIT_CODE`; si falla no repetir a ciegas. Luego registrar resultados en roadmap/agent/checkpoint y decidir siguiente control pendiente.
+
+## BT-SEC-BACKUP-RECOVERY-ERR07-V2 · Respuesta al fallo `HISTORICAL_MANIFEST_MISSING` y versión corregida
+
+**Evidencia real del propietario (Windows, 19/11/2026):**
+
+```text
+ZIP_INTEGRIDAD_OK
+Ran 35 tests in 1.042s
+OK
+QA_OFFLINE_OK
+INICIANDO_RESPALDO_AUTORIZADO
+BT_SEC07_STOP: HISTORICAL_MANIFEST_MISSING
+BLOQUE_EXIT_CODE: 2
+```
+
+**Alcance real:** el proceso v1 ejecutó `find_ca`, `tools_needed`, `find_tool('docker')` y la comprobación de archivo `old_fingerprint(root)`; el fallo se produce ANTES de `docker_image`, `getpass`, `check_db`, toda conexión PostgreSQL, exportación nueva, cifrado, creación de staging o restauración. **NO se creó nuevo backup ni se contactó Supabase.** La comprobación CA/herramientas antes del fallo sí puede haber leído archivos locales no secretos o sus metadatos. El ciphertext antiguo no fue modificado.
+
+**Causa raíz demostrada (nuestro paquete, no el fallo original `pg_dumpall`):** `old_fingerprint` exigía `manifest.json` dentro del backup histórico; `bytetorque_respaldo_local.py` original construye y guarda ese manifiesto únicamente *después* de exportar y cifrar roles, operación que había fallado y dejó `roles.sql.gpg` inútil. Diseñamos un prerrequisito incompatible con el estado anterior. No asumir que este error significa que faltan claves ni que está dañado el `database.dump.gpg` válido. **SEC-07 original sigue con causa no determinada**.
+
+**Solución preparada:** nuevo paquete `BT_SEC07_RESPALDO_ACTUAL_CORREGIDO_20261119.zip`, **25.466 bytes**, SHA256 `9ee61398d67cd7e811f211c70a449878009b36271fce61082479a09db7a6042d`, **entregado solo en conversación, no en repo público**. La función corregida `old_fingerprint(root,gpg)` exige existencia del ciphertext histórico de base, lee solamente su encabezado OpenPGP público (PKESK) con `gpg --list-packets` en `GNUPGHOME` efímero sin claves privadas, identifica un único ID de destinatario, lo asocia a la subclave de cifrado del `--list-secret-keys --with-colons` del perfil local y obtiene la huella de la clave primaria existente. Bloquea destinatario oculto/ambiguo, ausencia de clave, ausencia del ciphertext, discrepancia de huella y manifiesto de proyecto inválido. Si existe manifiesto histórico, lo coteja; **su ausencia es aceptada y NO equivale a daño**. No descifra `database.dump.gpg` antiguo, no imprime IDs de clave ni SQL y no genera nuevos secretos.
+
+**QA v2 en el contenedor del asistente:** `python -B -m unittest -q test_BT_SEC07_offline.py test_bt_sec07_orchestration_offline.py`: **43 tests PASS**, repetido tras descomprimir el nuevo ZIP y verificar `ZipFile.testzip() == None`; AST correcto. **Prueba de integración GPG real con clave y backup COMPLETAMENTE SINTÉTICOS (no pertenecen al usuario):** recipient subkey ↔ primary fingerprint PASS; manifiesto presente y coincidente PASS; ciphertext adulterado rechazado PASS. Son comprobaciones de código y GPG sintético, NO certifican la clave GPG real del PC ni restauración actual.
+
+**Autorización y próxima operación:** el permiso del propietario para el bloque completo de nuevo respaldo cifrado y recuperación aislada sigue vigente; el primer intento se detuvo antes de uso remoto, por lo que se preparó corrección del prerrequisito sin ampliar alcance. Antes de contacto con Supabase, ejecutar **una sola instrucción PowerShell autocontenida** para verificar el nuevo ZIP por SHA256, descomprimirlo en directorio distinto del v1, ejecutar las **43 pruebas offline**, luego invocar el orquestador v2 una vez. No permitir reintentos ciegos. Mantener `BT-PILOT-QA-04: A REPASAR` hasta recuperabilidad efectiva; roles catálogo NO equivale a SQL de roles, ni cubre configuración Auth, Storage object bytes, Edge Functions/secrets o Drive.
+
+**Cambios a GitHub:** solo documentación `AGENTS.md`, `roadmap.md`, `agent.md` y este checkpoint; no se añadieron los scripts ni copias cifradas al repo, no hubo deploy Render ni cambios Supabase/Drive. Este registro no afirma éxito de la ejecución Windows v2.
