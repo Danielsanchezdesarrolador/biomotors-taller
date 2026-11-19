@@ -202,3 +202,21 @@ BT_SEC07_STOP: DOCKER_ENGINE_NOT_READY
 **Siguiente operación planeada:** un comando PowerShell autocontenido que verifica Docker CLI y contexto local, consulta el daemon; si el daemon no está listo y Docker Desktop CLI está disponible, invoca **solo** `docker desktop start --detach` y observa hasta un límite corto el arranque, sin reiniciar servicios/contendedores; verifica Engine Linux y lista disponibilidad de imágenes PG17 entre tres tags permitidos sin descargar, crear contenedores ni hacer backup. Si no arranca, enumera solo códigos sanitizados de Docker Desktop presente/estado, WSL presente/respuesta y estado de servicio, sin mostrar logs crudos ni nombres de distros. Un nuevo paso de imagen/backup se condiciona a resultado confirmado; autorización anterior de exportación no invalida la precaución ante Engine inestable. No se ejecutó todavía esta operación en el PC.
 
 **Modificaciones documentales solamente:** roadmap, agent y checkpoint; producción Supabase/Render/Drive, GPG y respaldo histórico intactos. **BT-PILOT-QA-04: A REPASAR**.
+
+## BT-SEC07-DOCKER-ENGINE-RECOVERED-14 · Prueba real de Docker Desktop/Engine recuperado (19/11/2026)
+
+**Resultado recibido del propietario:**
+
+```text
+BT_SEC07_DOCKER_CONTEXT: LOCAL
+BT_SEC07_DOCKER_ENGINE: RUNNING
+BT_SEC07_DOCKER_LINUX: OK
+BT_SEC07_PG17_IMAGE: PRESENT
+BT_SEC07_DOCKER_DIAGNOSTIC: COMPLETE
+```
+
+**Cierre limitado de incidente:** Docker CLI apunta a contexto local y el daemon respondió; el modo actual es Linux; alguna de las tres etiquetas `postgres:17`, `postgres:17-bookworm`, `postgres:17.12-bookworm` pasó `docker image inspect`. El bloqueo del daemon anterior se considera **resuelto en esta sesión**. El comando empleado **no ejecutó** la imagen PostgreSQL 17: antes del backup hay que comprobar que `postgres --version` dentro de un contenedor sin red informe 17, que su salida y código sean válidos, y que Docker siga en contexto local. `PRESENT` no prueba restorable.
+
+**Bloque consecutivo permitido:** reutilizar ZIP v2 SHA256 `9ee61398d67cd7e811f211c70a449878009b36271fce61082479a09db7a6042d`, script SHA256 `0cd6fb1c77ad1d07deb28a72fe4e877c70c4ec424cd93c7ef326e23155a93001`, módulo SHA256 `74c7276e914e46f360b80c4c49eb8c6351ced1a802a88269abca791ac0ff953e`, anillo GPG aislado histórico confirmado, Docker Linux local y una etiqueta Postgres 17 verificada mediante `docker run --rm --network none --pull=never ... postgres --version`, **sin pull**, y ejecutar UNA VEZ `python -B bt_sec07_backup_restore.py` con GNUPGHOME solo en proceso. No repetir QA 43/43 ni crear zip v3. Uso de PostgreSQL remoto read-only, snapshot cifrado con id nuevo y restore Docker sin red estaba autorizado expresamente por el propietario. Si algo falla, detenerse, compartir únicamente categorías `BT_SEC07_*` y `BLOQUE_EXIT_CODE` y no repetir ciegamente. No proporcionar contraseña ni material sensible en el chat.
+
+**Estado real:** aún no hay evidencia de que se haya creado un respaldo actual ni ejecutado restore de este. Los roles SQL y recuperación completa de Supabase continúan no verificados; respaldo histórico conservado; `BT-PILOT-QA-04: A REPASAR`.
