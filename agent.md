@@ -1,3 +1,11 @@
+## Auditoría integral de seguridad y errores — 19/11/2026
+
+**Primero revisar:** [informe retrospectivo y bitácora SEC-01…SEC-17](./docs/BT_SEGURIDAD_AUDITORIA_RETROSPECTIVA_20261119.md) y [checkpoint BT-SEC-REVIEW-01](./docs/checkpoints/CHECKPOINT_BT_SEC_REVIEW_20261119.md). Regla permanente en `AGENTS.md`: **todo error nuevo debe registrar causa confirmada frente a hipótesis, solución, evidencia real, impacto, pendientes y condición de reintento**, sin repetir pruebas ciegas ni destruir originales. 
+
+**Estado ya demostrado:** PostgreSQL 17 **sí fue instalado en Windows el 17/11** y el PATH de aquella sesión incluyó `C:\\Program Files\\PostgreSQL\\17\\bin`. No aparecer en PATH del PowerShell de hoy NO significa desinstalación. Docker 29.9.3 encontrado. `database.dump.gpg` 89.091 bytes descifrado y restauración real SQL aislada de siete tablas verificada; `roles.sql.gpg` 151 bytes descifra a **0 bytes**: **inválido**. Drive no tiene recibo de respaldo externo; la provisión `44094695940` **se ejecutó y falló**. Backup local **14:41 UTC** anterior a migraciones CP05, Creador y 04A: se necesita otro backup del estado **actual** y validación de recuperación, con consentimiento, sin sobrescribir el viejo.
+
+**Supabase observado solo lectura:** 8 migraciones, 12 públicas RLS, 8 privadas RLS+FORCE; faltan validar avisos de contraseñas filtradas y controles internos de seis RPC. Render visual anterior LIVE; no habilitar candidatas de email/Storage. Siguiente instrucción PC: comprobar exclusivamente por ruta absoluta `C:\\Program Files\\PostgreSQL\\17\\bin\\pg_dumpall.exe` y `psql.exe` con `--version`, NO instalar ni editar PATH global.
+
 # ByteTorque — agent.md | Entrada obligatoria para todos los chats/agentes
 
 ## Protocolo permanente: ANTES de instruir y DESPUÉS de trabajar
