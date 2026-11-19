@@ -32,3 +32,19 @@ El propietario ejecutó el comando previsto de **descifrado de roles a la salida
 **Próximo paso focalizado:** medir la salida de `gpg --decrypt` a nivel binario **en memoria y sin imprimir/guardar contenido**, con código de salida independiente, para confirmar si realmente son cero bytes. Si es cero, conservar el `roles.sql.gpg` original intacto como evidencia, diagnosticar solamente el exportador de roles y protegerse contra encrypt de stdin vacío. No volver a extraer/cifrar la base completa, ni repetir el restore SQL de 7 tablas; no inferir que el respaldo de roles está sano por EXIT 0.
 
 **Impacto:** este control no autoriza migraciones, accesos alojados, cambios de permisos, exportación nueva ni corrección automática; los componentes pendientes de recuperación integral continúan pendientes.
+
+
+## BT-SEC-ROLES-GPG-03 — Resultado binario definitivo (19/11/2026)
+
+**Evidencia nueva del propietario en PowerShell:** proceso GPG ejecutado sobre el archivo ORIGINAL `roles.sql.gpg`, con lectura de `StandardOutput.BaseStream` directamente como bytes en memoria, sin revelar SQL ni escribir un dump en claro:
+
+- `ROLES_DESCIFRADO_EXIT: 0`
+- `ROLES_BYTES_DESCIFRADOS: 0`
+
+**Conclusión verificada:** el `roles.sql.gpg` de 151 bytes es un ciphertext GPG descifrable **cuyo contenido descifrado está vacío (0 bytes)**. **NO es un respaldo útil de roles.** Mantenerlo sin sobreescribir, borrarlo ni interpretarlo como recuperación válida. Esto supera la anterior medición de 0 líneas/caracteres: ahora está comprobado a nivel binario.
+
+**Diagnóstico histórico previo:** la herramienta local `ByteTorque_Diagnostico_Roles.py` ejecutaba `pg_dumpall --roles-only --no-role-passwords` con stdout descartado y stderr clasificado en códigos seguros, después de una lectura TLS exitosa. Informó `DIAG_ROLES: POSTGRES_TLS_OK` y `DIAG_ROLES: ROLES_ORIGEN_FALLA_NO_CLASIFICADA`. Ese código demuestra **fallo no clasificado del productor** en tal ejecución, pero no prueba aún la causa concreta (permisos, versión, pooler u otra). No inventar una causa.
+
+**Pendientes inmediatos:** sin volver a descifrar ni restaurar las siete tablas, consultar de modo **local y solo lectura** versiones/rutas de `pg_dumpall` y `psql`, y ubicar el programa `bytetorque_respaldo_local.py` ya existente para preparar un diagnóstico de roles que capture **solo código de salida y categorías saneadas**, nunca SQL crudo, cadena de conexión, contraseñas ni stderr íntegro. Si se requiere corregir el productor, usar cambio acotado y una copia cifrada NUEVA de roles con nombre distinto SOLO tras autorización, conservando `database.dump.gpg` y `roles.sql.gpg` anteriores.
+
+**Límites:** no se exportaron roles, no se creó GPG nuevo, no se alteraron permisos ni datos alojados, ni se ejecutó Docker, GitHub Actions, Drive o Render. La restauración SQL aislada de 7 tablas permanece válida en su alcance.
