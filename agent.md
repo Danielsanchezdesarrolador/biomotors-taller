@@ -14,6 +14,8 @@
 
 **Próximo paso en PC:** reutilizar y comprobar el backup/keyring existente, resolver específicamente roles y cerrar la cobertura faltante. **No volver a generar claves, exportar, cifrar ni restaurar la misma parte ya verificada sin una razón concreta y documentada**; no asumir que la copia SQL por sí sola protege Storage ni configuración externa.
 
+- **Última comprobación GPG recibida (19/11/2026):** `roles.sql.gpg` dio `ROLES_DESCIFRADO_EXIT=0`, `ROLES_LINEAS=0`, `ROLES_CARACTERES=0`. Indica salida de texto aparentemente vacía; **no confirma todavía cero bytes de plaintext** ni causa del fallo de exportación. Siguiente: medir bytes descifrados localmente sin guardar/mostrar SQL. [Evidencia](./docs/checkpoints/CHECKPOINT_BT_SEC_LOCAL_INVENTORY_20261119.md).
+
 - **Último control local comprobado (19/11/2026):** [BT-SEC-LOCAL-INVENTORY-01](./docs/checkpoints/CHECKPOINT_BT_SEC_LOCAL_INVENTORY_20261119.md) — archivos `database.dump.gpg` (89.091 bytes), `roles.sql.gpg` (151 bytes) y directorio GPG presentes en el PC del propietario; descifrado del archivo de roles todavía **no ejecutado en este control**. Próximo paso: analizar roles sin mostrar SQL ni rehacer cifrado.
 
 ## Fuentes y continuidad
