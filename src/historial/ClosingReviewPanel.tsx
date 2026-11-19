@@ -3,7 +3,7 @@
  * Not a mail composer or delivery authorization. Never stores confirmations.
  * Loaded only by the independent private preview + FLOW-LIVE-02 gates.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Quote, Revision } from '../cp05/contracts'
 import type { FlowEvidence } from './contracts'
 import { prepareClosingPacket } from '../entrega/finalPackage'
@@ -42,10 +42,16 @@ export function ClosingReviewPanel({
     }
   }, [quote, revision, evidence])
   const historicEmail = revision.payload.customer.email
-  const reviewedLocally = recipientChecked && documentsChecked && declarationChecked
+  const reviewedLocally = Boolean(historicEmail) &&
+    recipientChecked && documentsChecked && declarationChecked
   const hasArchive = Boolean(onQuotePdf)
   const hasCopies = Boolean(onCopyPdf) && !!packet
   const identity = revision.id + ':' + (packet?.bundleId || 'unavailable')
+  useEffect(() => {
+    setRecipientChecked(false)
+    setDocumentsChecked(false)
+    setDeclarationChecked(false)
+  }, [identity, historicEmail])
   // Never present historical snapshot contact as a verified current address.
   return (
     <section className="cp06-closing" aria-label="Revisión de cierre documental">
@@ -137,6 +143,7 @@ export function ClosingReviewPanel({
                 <p>Las marcas son temporales en esta pantalla. No se guardan en
                   Supabase ni sustituyen la confirmación del operador en el backend.</p>
                 <label><input type="checkbox" checked={recipientChecked}
+                  disabled={!historicEmail}
                   onChange={e => setRecipientChecked(e.target.checked)} />
                   Revisé el correo histórico; aún requiere validación actual.</label>
                 <label><input type="checkbox" checked={documentsChecked}
