@@ -48,3 +48,16 @@ El propietario ejecutó el comando previsto de **descifrado de roles a la salida
 **Pendientes inmediatos:** sin volver a descifrar ni restaurar las siete tablas, consultar de modo **local y solo lectura** versiones/rutas de `pg_dumpall` y `psql`, y ubicar el programa `bytetorque_respaldo_local.py` ya existente para preparar un diagnóstico de roles que capture **solo código de salida y categorías saneadas**, nunca SQL crudo, cadena de conexión, contraseñas ni stderr íntegro. Si se requiere corregir el productor, usar cambio acotado y una copia cifrada NUEVA de roles con nombre distinto SOLO tras autorización, conservando `database.dump.gpg` y `roles.sql.gpg` anteriores.
 
 **Límites:** no se exportaron roles, no se creó GPG nuevo, no se alteraron permisos ni datos alojados, ni se ejecutó Docker, GitHub Actions, Drive o Render. La restauración SQL aislada de 7 tablas permanece válida en su alcance.
+
+
+## BT-SEC-ROLES-PGTOOLS-04 — Diagnóstico de ejecutables en PATH (19/11/2026)
+
+**Nueva salida de PowerShell proporcionada por el propietario:**
+- `pg_dumpall.exe: NO ENCONTRADO EN PATH`
+- `psql.exe: NO ENCONTRADO EN PATH`
+
+**Interpretación estricta:** ninguno de los dos ejecutables se resuelve mediante `Get-Command` en la sesión PowerShell actual. **NO prueba que los clientes PostgreSQL estén desinstalados ni que hayan desaparecido las versiones con que se trabajó el 17/11**: podrían estar en `Program Files\PostgreSQL\<version>\bin`, en una ubicación no incluida en el PATH, en un entorno temporal o en el contenedor Docker aislado. **No instalar, actualizar, editar el PATH ni repetir dump/restore como respuesta automática.**
+
+**Próxima instrucción local:** inspeccionar exclusivamente carpetas habituales de `Program Files\PostgreSQL`, consultar la existencia/versiones de ambos ejecutables por **ruta absoluta**, y mostrar el estado de `docker` sin conexión a Supabase. No buscar toda la unidad, ejecutar `pg_dumpall` contra producción ni mostrar SQL/secretos. Si no aparecen, localizar el programa Python local `bytetorque_respaldo_local.py` y consultar su método `tools_needed()`/ubicación de sus herramientas antes de instalar software.
+
+**Estado restante:** `roles.sql.gpg` se descifró a 0 bytes, sigue **inválido** como respaldo de roles. Se conserva sin sobrescribir. La restauración SQL aislada ya realizada y el cifrado de `database.dump.gpg` siguen sin repetirse. Drive automático sigue pendiente por OAuth, por separado. No hubo operaciones sobre Supabase, Render, Drive o archivos locales al crear esta nota.
