@@ -7,6 +7,7 @@ import { archivedRevisionPdf } from './archiveDownload'
 import { cp04Repository } from '../ordenes/cp04Repository'
 import { Cp04OrdersView } from '../ordenes/Cp04OrdersView'
 import { historyRepository, type HistoryPort } from './repository'
+import type { ClosingReviewProps } from './ClosingReviewPanel'
 import {
   HistoryFailure,
   historyMessage,
@@ -213,6 +214,7 @@ export function HistoryView({
   onQuote,
   onDownload,
   onFinalDownload,
+  ClosingReview,
   onAccessLost
 }: {
   repository: HistoryPort
@@ -226,6 +228,7 @@ export function HistoryView({
     quote: QuoteHistory['quotes'][number], revision: Revision,
     evidence: FlowEvidence, kind: 'report' | 'handover'
   ) => Promise<void>
+  ClosingReview?: ComponentType<ClosingReviewProps>
 }) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null),
     [visits, setVisits] = useState<Visit[]>([]),
@@ -519,9 +522,20 @@ export function HistoryView({
                               </p>
                               <EvidenceDetails evidence={quotes.evidence} revision={r}
                                 downloading={!!downloading || busy}
-                                onDownload={onFinalDownload
+                                onDownload={onFinalDownload && !ClosingReview
                                   ? (kind) => void downloadFinal(r, kind)
                                   : undefined} />
+                              {ClosingReview && (
+                                <ClosingReview key={r.id} quote={q} revision={r}
+                                  evidence={quotes.evidence}
+                                  downloading={!!downloading || busy}
+                                  onQuotePdf={onDownload
+                                    ? () => void downloadArchived(r)
+                                    : undefined}
+                                  onCopyPdf={onFinalDownload
+                                    ? (kind) => void downloadFinal(r, kind)
+                                    : undefined} />
+                              )}
                               {onDownload && (
                                 <button
                                   type="button"
@@ -603,6 +617,10 @@ export function VehicleHistory({
     [archive, setArchive] = useState<{
       scope: string
       port: Pick<ReturnType<typeof import('../cp05/documentClient').documentClient>, 'download' | 'dispose'>
+    } | null>(null),
+    [closingPreview, setClosingPreview] = useState<{
+      scope: string
+      Panel: ComponentType<ClosingReviewProps>
     } | null>(null)
   const scope = context.userId + ':' + context.workshop.id + ':' + context.role
   const historyScroll = useRef(0)
@@ -641,6 +659,22 @@ export function VehicleHistory({
       .catch(() => { if (!cancelled) setArchive(null) })
     return () => { cancelled = true; port?.dispose() }
   }, [client, context, scope])
+  useEffect(() => {
+    // Gate is independent from hosted server checks and defaults OFF. Do not
+    // bundle the document review or its packet validator into ordinary PWA.
+    if (import.meta.env.VITE_BT_COM_01D_PREVIEW_ENABLED !== 'true' ||
+        import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED !== 'true' ||
+        import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED !== 'true' ||
+        import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED !== 'true' ||
+        !['owner', 'admin', 'reception'].includes(context.role)) return
+    let cancelled = false
+    void import('./ClosingReviewPanel')
+      .then(({ ClosingReviewPanel }) => {
+        if (!cancelled) setClosingPreview({ scope, Panel: ClosingReviewPanel })
+      })
+      .catch(() => { if (!cancelled) setClosingPreview(null) })
+    return () => { cancelled = true }
+  }, [context.role, scope])
   return (
     <>
       {/* Keep the verified history mounted while opening an OT or quotation:
@@ -651,6 +685,11 @@ export function VehicleHistory({
             onAccessLost={onAccessLost}
             repository={repository}
             vehicleId={vehicleId}
+            ClosingReview={
+              closingPreview?.scope === scope &&
+              ['owner', 'admin', 'reception'].includes(context.role)
+                ? closingPreview.Panel : undefined
+            }
             onDownload={archive?.scope === scope ? async (revision) => {
               const { downloadPdf } = await import('../cp05/pdf')
               await archivedRevisionPdf(
