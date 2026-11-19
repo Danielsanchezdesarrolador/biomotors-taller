@@ -53,3 +53,14 @@ Tras esa autorización, una sola ejecución de **BT-DRIVE-PROVISION** en main co
 - https://developers.google.com/workspace/drive/api/guides/api-specific-auth
 - https://rclone.org/drive/#drivefile
 - https://rclone.org/commands/rclone_mkdir/
+
+
+## ACTUALIZACIÓN HISTÓRICA VERIFICADA EL 19/11/2026 — HUBO UNA EJECUCIÓN POSTERIOR
+
+Este checkpoint se escribió **antes** de que el propietario disparara la provisión. Para evitar que futuros chats interpreten «creación no ejecutada» como estado vigente:
+
+- [GitHub Actions **44094695940**](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44094695940), commit `1f054d22`, **SÍ EJECUTÓ** el workflow `BT-DRIVE-PROVISION` (17/11/2026 13:38 UTC). **Resultado FAILURE**, código sanitizado `DRIVE_PROVISION_NOT_COMPLETE: DRIVE_FOLDER_INACCESSIBLE`.
+- No existe recibo positivo `owner_root_private_verified=true` ni `destination_activated=true`. No quedó demostrada ni autorizada la nueva carpeta como destino de backups; ninguna exportación/restauración cloud resultó de este run.
+- El nombre determinista de la operación se forma a partir del ID del run. Antes de intentar `mkdir` de nuevo, **reconciliar en solo lectura** si existe una carpeta creada/parcial de aquella ejecución. Con el error por sí solo no afirmar que no se creó ningún objeto.
+- **NO ejecutar nuevamente la provisión ni cambiar OAuth/scope/destino sin diagnóstico específico y permiso explícito.** El bloqueo por acceso/visibilidad Drive `drive.file` sigue pendiente.
+- Véase [auditoría retrospectiva con libro de incidentes](../BT_SEGURIDAD_AUDITORIA_RETROSPECTIVA_20261119.md) y su checkpoint final. La evidencia histórica original de «todavía no ejecutado» se conserva arriba como correcta para el momento en que fue redactada.
