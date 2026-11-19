@@ -28,3 +28,11 @@ En la creación inicial de copia, `elseif` y `else` se interpretaron en comandos
 - No se revisó stderr de esos 75 bytes; los datos ya descartados no pueden recuperarse del proceso finalizado. Una tercera prueba de pg_dumpall sin mejor hipótesis no aportaría evidencia suficiente.
 - **Próximo paso:** determinar alternativa de diagnóstico que capture solo códigos sanitizados con evidencia más específica y verifique si el endpoint local usado es conexión directa o pooler **sin revelar URI ni credenciales**; revisar documentación oficial y pedir autorización específica antes de otro contacto remoto. No activar nuevos backups ni workflows hasta resolver fallo y proteger datos actuales.
 - **BT-PILOT-QA-04: A REPASAR.** No se certifica recuperación integral, exportación de roles, ni respaldo cloud operativo.
+
+## BT-SEC-07-POOLER-CODIGO-03 — Localización estática sin conexión (19/11/2026)
+
+- El propietario ejecutó un inspeccionador AST sobre el programa **local** `bytetorque_respaldo_local.py` y observó `ENDPOINT_EN_CODIGO: POOLER`; `INSPECCION_LOCAL_OK`.
+- **Límite importante:** la comprobación buscaba literales dentro del archivo, no evaluó si el literal efectivamente se usa para la conexión ni determinó el puerto; no revela cadena de conexión. **No se atribuye la falla de `pg_dumpall` al pooler sin más pruebas.**
+- La documentación actual de Supabase contempla el pooler de **sesión (5432)** en ciertos flujos de respaldo y diferencia el de **transacción (6543)**. Se requiere comprobar de forma local y sanitizada cuál está configurado antes de sugerir cambio.
+- **Paso pendiente:** revisar exclusivamente la asignación estática `DB` para clasificar categoría de host y puerto (sin emitir el DSN, contraseña, nombre de usuario ni tokens). Devolver `NO_DETERMINADO` si la construcción es dinámica. **No ejecutar nueva conexión ni respaldo** sin hipótesis específica/autorización.
+- Se preservan tanto los archivos GPG como el programa original; el fallo SEC-07 sigue abierto. No hubo modificaciones alojadas; este commit solo documenta los hallazgos.
