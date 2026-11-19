@@ -1,28 +1,25 @@
-# ByteTorque — agent.md (entrada de continuidad para agentes)
+# ByteTorque — agent.md | Entrada obligatoria para todos los chats/agentes
 
-**OBLIGATORIO antes de cualquier tarea de seguridad o backup:** leer primero la sección
-**«PRIORIDAD ABSOLUTA — NO REPETIR CIFRADO DE RESPALDO LOCAL (19/11/2026)»** en
-[AGENTS.md](./AGENTS.md) y el estado prioritario de [roadmap.md](./roadmap.md).
+## Protocolo permanente: ANTES de instruir y DESPUÉS de trabajar
 
-**Importante: YA SE HIZO EL CIFRADO LOCAL, NO COMENZAR DE CERO.**
-El 17/11/2026 en Windows el propietario reportó una copia GPG local en `BT-Backups`:
-`database.dump.gpg` (89.091 bytes) y `roles.sql.gpg` (151 bytes).
-El cifrado/descifrado del primero se comprobó con `BASE_DESCIFRADO_OK`;
-se realizó una **restauración aislada parcial con paridad de siete tablas**
-(`BT_PARIDAD: SIETE_TABLAS_COINCIDEN`). **No está verificada la recuperación integral**
-ni el archivo de roles: quedó `ROLES_ORIGEN_FALLA_NO_CLASIFICADA`.
+**Para CADA solicitud de instrucciones o trabajo relacionada con ByteTorque**, todo chat (ChatGPT, Codex u otro agente) debe consultar la **versión vigente en `main`** de: **(1) `AGENTS.md`, (2) este `agent.md`, (3) `roadmap.md` y (4) el checkpoint relevante más reciente de `docs/checkpoints/`**. Leer el estado real del repo (HEAD) y las pruebas/activaciones comprobadas antes de prescribir comandos, prompts, pasos o modificaciones. No asumir que hay que repetir etapas porque no aparecen en el chat nuevo; comprobar continuidad. Si no se puede consultar estos documentos, avisar y no sugerir acciones sensibles basadas en suposiciones.
 
-**Próximo paso sin trabajo duplicado:** conservar y verificar los archivos GPG y
-la clave local ya existente; diagnosticar el respaldo de roles y completar
-verificación de recuperación integral. **No repetir generación de claves ni cifrado,
-ni tratar el respaldo manual como inexistente.** El workflow automatizado hacia
-Google Drive es otro frente distinto y quedó bloqueado por OAuth `drive.file`;
-sin exportación Drive ni restauración externa verificada.
+**Al terminar CUALQUIER trabajo** (función, corrección, prueba, documento, seguridad, operación autorizada o intento bloqueado), actualizar **`roadmap.md` y un checkpoint** con lo realizado y **lo que falta**; actualizar **este `agent.md`** con el enlace/estado del último checkpoint y **`AGENTS.md` si nace una regla permanente**. Registrar commit en `main` y comunicar commit, CI, publicación/flags, tareas pendientes y siguiente instrucción. Esto es obligatorio también al mudar de chat. Los cambios documentales por sí solos no autorizan Render/Supabase/Drive; usar `[skip render]` cuando proceda.
 
-**Reglas canónicas:** [AGENTS.md](./AGENTS.md).  
-**Plan y progreso:** [roadmap.md](./roadmap.md).  
-**Checkpoint de código más reciente:** [BT-COM-01D](./docs/checkpoints/CHECKPOINT_BT_COM_01D_CIERRE_DOCUMENTAL_R2_20261118.md).
+## Seguridad / respaldo — NO empezar de cero
 
-Este archivo es un índice de compatibilidad, no una segunda fuente de políticas;
-ante cualquier discrepancia manda AGENTS.md y la evidencia verificada en los
-checkpoints. Nunca copiar contraseñas, claves privadas, dumps ni secretos a GitHub.
+**El 17/11/2026 ya se hizo el cifrado GPG local en Windows.** En `BT-Backups` se informaron `database.dump.gpg` (89.091 bytes) y `roles.sql.gpg` (151 bytes). El primero fue descifrado con éxito (`BASE_DESCIFRADO_OK`, `ARCHIVO_POSTGRES_OK`, `CATALOGO_OK`).
+
+**SÍ se ejecutó una RESTAURACIÓN SQL en entorno Docker aislado y hubo verificación funcional positiva**: `BT_DATOS: RLS_ACTIVA=7 POLITICAS=16`, `BT_REGISTROS: TABLAS=7 FILAS=25`, `BT_PARIDAD: SIETE_TABLAS_COINCIDEN`. **No confundir alcance de la validación (siete tablas) con ausencia de restauración.** Esto NO demuestra todavía recuperación integral de todo Supabase/Auth/Storage/Edge/roles/secretos. El respaldo de roles de 151 bytes sigue sin validarse (`ROLES_ORIGEN_FALLA_NO_CLASIFICADA`). El flujo automático GitHub → Google Drive es **otro trabajo**: detenido por autorización OAuth `drive.file`, sin recibo completo de exportación/restauración externa.
+
+**Próximo paso en PC:** reutilizar y comprobar el backup/keyring existente, resolver específicamente roles y cerrar la cobertura faltante. **No volver a generar claves, exportar, cifrar ni restaurar la misma parte ya verificada sin una razón concreta y documentada**; no asumir que la copia SQL por sí sola protege Storage ni configuración externa.
+
+## Fuentes y continuidad
+
+- **Fuente obligatoria de reglas:** [AGENTS.md](./AGENTS.md).
+- **Estado vivo y pendientes:** [roadmap.md](./roadmap.md).
+- **Checkpoint de seguridad y regla de continuidad más reciente:** [BT-SEC-AGENT-RESTORE-01](./docs/checkpoints/CHECKPOINT_BT_SEC_AGENT_RESTORE_20261119.md).
+- **Último checkpoint de desarrollo funcional:** [BT-COM-01D](./docs/checkpoints/CHECKPOINT_BT_COM_01D_CIERRE_DOCUMENTAL_R2_20261118.md).
+- **Antecedente del backup manual:** [BT-SEC-BACKUP-CONTINUIDAD](./docs/checkpoints/CHECKPOINT_BT_SEC_BACKUP_CONTINUIDAD_20261119.md).
+
+No mantener reglas divergentes: ante conflictos verificar evidencia, corregir fuentes y conservar los checkpoints históricos. No compartir ni subir a GitHub, chats o capturas datos privados, GPG private key, contraseñas, tokens ni dumps.
