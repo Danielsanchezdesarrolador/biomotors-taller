@@ -40,7 +40,9 @@ El flag es solo **presentación**, no autorización de backend. El repositorio s
 - Compilación TypeScript y Web/PWA, tests existentes, Android Expo (sin APK). Build privado de la vista de cierre exclusivamente en CI con interruptor sintético ON.
 - Capturas Chromium de la **interfaz real del componente** con fixture inventada en 360, 390, 430, 768, 1366, 1440 y 1920 px; no debe existir overflow horizontal, corte de PDF, envío habilitado, descargas sin Storage, pérdida de estado bloqueado ni persistencia de checkboxes entre recargas.
 - Caso negativo con constancia ausente: no se debe mostrar un PDF final ni acciones de envío.
-- Los artefactos de screenshots se conservan bajo `artifacts/bt-com-01d/` en la ejecución de UI. **No equivalen a prueba física Safari iPhone/Android.** Registrar los números concretos de ejecución CI y sus resultados solo después de SUCCESS.
+- **[GitHub Actions general #44432369991](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44432369991): SUCCESS** para `2c025add`. **717/717 Vitest (82 archivos)**, TypeScript, Android Expo sin APK, PostgreSQL 17 aislado, web/PWA OFF y build privado ON solo en CI; comprobación del bundle público PASS.
+- **[QA visual #44432370000](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44432370000): SUCCESS**, marcador `BT_COM_01D_R2_CLOSING_UI_SEVEN_SIZES_NO_MAIL_PASS`. Los siete tamaños comprobaron tres filas, botones de descarga y correo deshabilitados, checklist temporal no persistido tras recarga, ausencia de tráfico externo y overflow horizontal. Caso sin constancia de entrega: **0 documentos mostrados**. Capturas bajo `artifacts/bt-com-01d/` en el artefacto de ejecución `14486323719`.
+- **No equivale a prueba física Safari iPhone/Android** ni autorización de producción.
 
 **Pendientes para uso real:** backup/restore verificado; autorización de migraciones/Edge/Storage del circuito CP05, LIVE-02, COM-01A/B/C; adaptador backend autenticado de revisión; RLS, dirección y consentimiento; proveedor y auditoría real de envío; pruebas móviles físicas y revisión final `BT-PILOT-QA-04: A REPASAR`.
 
