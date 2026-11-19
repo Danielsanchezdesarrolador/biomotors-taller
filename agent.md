@@ -18,6 +18,8 @@
 
 - **Último control local comprobado (19/11/2026):** [BT-SEC-LOCAL-INVENTORY-01](./docs/checkpoints/CHECKPOINT_BT_SEC_LOCAL_INVENTORY_20261119.md) — archivos `database.dump.gpg` (89.091 bytes), `roles.sql.gpg` (151 bytes) y directorio GPG presentes en el PC del propietario; descifrado del archivo de roles todavía **no ejecutado en este control**. Próximo paso: analizar roles sin mostrar SQL ni rehacer cifrado.
 
+- **Diagnóstico DEFINITIVO 19/11/2026:** el mismo archivo original `roles.sql.gpg` (151 bytes) **se descifra exitosamente, pero a 0 bytes**: `ROLES_DESCIFRADO_EXIT=0`, `ROLES_BYTES_DESCIFRADOS=0`. **No es backup válido de roles**. Conservarlo intacto. El `pg_dumpall` histórico falló con `ROLES_ORIGEN_FALLA_NO_CLASIFICADA` pese a `POSTGRES_TLS_OK`, causa no identificada. Próximo control: versiones locales de `pg_dumpall` y `psql`; después diagnóstico sanitizado solo del productor, no de toda la base. [Evidencia](./docs/checkpoints/CHECKPOINT_BT_SEC_LOCAL_INVENTORY_20261119.md).
+
 ## Fuentes y continuidad
 
 - **Fuente obligatoria de reglas:** [AGENTS.md](./AGENTS.md).
