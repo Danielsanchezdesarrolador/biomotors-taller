@@ -88,3 +88,34 @@ BLOQUE_EXIT_CODE: 2
 **Condición para siguiente intento:** propietario descarga script de esta conversación, valida su SHA-256 y lo ejecuta **una vez en Windows**. Solo devuelve líneas `BT_SEC07_*` y `DIAG_EXIT_CODE`, sin imprimir datos privados. Si detecta `V2_PARSER_DEFECT_CANDIDATE`, revisar y corregir v2 en nuevo paquete con tests; si `NO_SECRET_MATCH_IN_ACTIVE_KEYRING_PUBLIC_ONLY` o `NO_SECRET_KEYS_IN_ACTIVE_KEYRING`, conciliar custodia/homedir mediante plan autorizado, **no crear/importar claves a ciegas**; si `KEY_IDENTIFIED_RECHECK_V2_RUNTIME`, investigar diferencia de ejecución. **No volver a ejecutar orquestador v1/v2, ni Supabase, ni respaldo antiguo hasta clasificar.**
 
 **Estado:** solo documentación actualizada en `AGENTS.md`, `agent.md`, `roadmap.md` y checkpoint. Scripts GPG/backup privados quedan fuera del GitHub público; no se cambió Render, Supabase, Auth, Drive, OAuth ni repositorio visibilidad. `BT-PILOT-QA-04: A REPASAR`.
+
+## BT-SEC07-GPG-CUSTODIA-09 · Diagnóstico real de custodia GPG Windows (19/11/2026)
+
+**Evidencia aportada por el propietario, salida sanitizada completa:**
+
+```text
+DIAG_INTEGRIDAD_OK
+BT_SEC07_GPG_DIAG_MODE: OFFLINE_READ_ONLY
+BT_SEC07_SELFTEST: 14_OF_14_OK
+BT_SEC07_GPG_BINARY: FOUND
+BT_SEC07_GPG_HOME_MODE: DEFAULT
+BT_SEC07_HISTORICAL_FILE: FOUND
+BT_SEC07_PACKET_VISIBLE_RECIPIENTS: ONE
+BT_SEC07_SECRET_LIST_COMMAND: OK
+BT_SEC07_PUBLIC_LIST_COMMAND: OK
+BT_SEC07_SECRET_KEY_RECORDS: NONE
+BT_SEC07_SECRET_FORMAT: OK
+BT_SEC07_PUBLIC_RECIPIENT: MATCH
+BT_SEC07_SECRET_RECIPIENT: NOT_FOUND
+BT_SEC07_V2_MATCHER: NOT_FOUND
+BT_SEC07_FINAL: NO_SECRET_MATCH_IN_ACTIVE_KEYRING_PUBLIC_ONLY
+DIAG_EXIT_CODE: 2
+```
+
+**Causa inmediata confirmada por la ejecución real:** el archivo cifrado histórico expone un único destinatario público; `gpg --list-keys` de homedir por defecto lo reconoce; `gpg --list-secret-keys` finalizó OK **sin entradas `sec/ssb`**. V2 no pudo vincular ese destinatario a una huella primaria privada porque **no existen claves privadas enumerables en el almacén GPG activo**, no por incongruencia de un parser de subclave. La herramienta nunca mostró huellas, direcciones ni contenido. Este hallazgo **no demuestra que la clave esté perdida, ni dónde fue utilizada anteriormente**, ni reemplaza la validación de accesibilidad/desbloqueo/descifrado.
+
+**Conciliación histórica:** existen evidencias previas de descifrado/restauración de `database.dump.gpg` histórico en Docker aislado, con 7 tablas/25 filas/16 políticas. Por tanto existió algún mecanismo de descifrado operativo entonces, pero este diagnóstico NO identifica GNUPGHOME/ubicación actual. No afirmar que el almacén predeterminado actual sea el mismo que entonces. La falla original de `pg_dumpall` (exit 1, stderr 75 B) sigue pendiente y es distinta de esta falla de custodia.
+
+**Acción en el proyecto:** actualizar documentación sin escribir datos; NO repetir orquestador v1/v2, emitir claves nuevas, importar material privado o recorrer perfiles/rutas privadas sin consentimiento. No solicitar que se compartan claves, passphrases o exportaciones privadas. **Próximo bloque propuesto bajo autorización nueva y acotada:** inventariar almacenes GPG candidatos conocidos y copias de custodia mediante metadatos sin exponer nombres, cotejar clave destinataria histórica por su key ID solamente en memoria, verificar disponibilidad del material privado en el almacén autorizado y diseñar restauración aislada. Cualquier descifrado real del respaldo, importación, nueva exportación alojada o recuperación se registra y autoriza por separado si excede el alcance vigente. No asumir que una clave pública basta para recuperar un backup.
+
+**Estado:** paquete offline PASS, diagnóstico GPG real concluyente para el almacén actual; **ningún nuevo respaldo o restore ejecutado**, no conexión Supabase/Render/Drive, no despliegue. `BT-PILOT-QA-04: A REPASAR`.
