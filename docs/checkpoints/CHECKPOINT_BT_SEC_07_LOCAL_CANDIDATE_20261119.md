@@ -48,3 +48,22 @@ Paquete descargable en esta conversación, **NO agregado al GitHub público**: `
 ## 6. Archivos del commit documental y efectos
 
 Solo `roadmap.md`, `agent.md` y este checkpoint, sin versionar los scripts privados. Sin nuevo workflow, backup, desplegar Render, tocar Supabase/Auth/RLS ni cambiar visibilidad del repo. Commit marcado `[skip render]`.
+
+## BT-SEC-07-WIN-QA-06 · Validación offline en Windows del propietario — CONFIRMADA
+
+**Evidencia aportada directamente por el propietario, 19/11/2026:**
+
+```text
+INTEGRIDAD_ZIP: OK
+----------------------------------------------------------------------
+Ran 20 tests in 0.881s
+
+OK
+PRUEBAS_EXIT_CODE: 0
+```
+
+**Entorno:** Windows PowerShell, Python -B, paquete SHA256 esperado `60b001e1a44be1cb9dbbecb0d64dd1ae46f0a8b569c58f092436ff7d6d152f35` extraído a `BT-SEC07-QA-VERIFICADO`, destino separado de scripts originales. **Resultado:** 20/20 pruebas sintéticas offline PASARON en Windows y código de salida 0; validación de integridad ZIP pasó. El paquete ya había pasado 20/20 en contenedor del asistente.
+
+**Incidencia propia del comando de validación:** El primer bloque PowerShell contenía `if { ... }` y `else { ... }` en ejecuciones separadas. PowerShell interpretó `else` aislado y mostró `CommandNotFoundException`. La solución comprobada fue envolver la instrucción en una sola invocación autocontenida con `& { ... }` y validaciones tempranas; el usuario obtuvo PASS. **Esto no tiene relación con el error de `pg_dumpall`**. No confundir fallo de pegado de shell con fallo de exportación.
+
+**Estado final del bloque:** CANDIDATOS PREPARADOS + QA OFFLINE WINDOWS APROBADA. No activa exportador ni reemplaza script original; no valida cifrado GPG real, PostgreSQL real, secretos/ACL del PC, restauración o capacidad de recuperar Base/Auth/roles posterior a migraciones. **SEC-07 y respaldo actual siguen abiertos.** No se ha solicitado ni ejecutado una tercera exportación de roles. El siguiente bloque útil no es repetir 20 pruebas, sino diseñar un backup **actual** de roles, esquema y datos con cobertura y exclusiones Supabase conscientes, cifrado + validación + recuperación aislada y permiso específico. La alternativa `supabase db dump --role-only` de documentación oficial usa filtros propios; **no significa que la copia CLI contenga automáticamente todos los datos de Auth/Storage o toda configuración externa**, que requieren cobertura adicional explícita. Referencia: https://supabase.com/docs/guides/self-hosting/restore-from-platform .
