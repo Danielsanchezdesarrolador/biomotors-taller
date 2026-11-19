@@ -40,6 +40,18 @@ assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/planSta
 const cp03PrivateEnabled = process.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
 const cp05PrivateEnabled = process.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
 const flowLiveEnabled = process.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true'
+const closingReviewEnabled = process.env.VITE_BT_COM_01D_PREVIEW_ENABLED === 'true'
+if (closingReviewEnabled) {
+  assert.equal(flowLiveEnabled, true,
+    'Cierre documental needs verified historical declarations')
+  assert.equal(cp06PrivateEnabled, true,
+    'Cierre documental needs private CP06 history')
+  assert.equal(process.env.VITE_BT_CP05_DOCUMENTS_ENABLED, 'true',
+    'Cierre documental needs private CP05 archive gate')
+} else {
+  assert.ok(modules.every(id => !/src\/historial\/ClosingReviewPanel\.(?:ts|tsx|js)$/.test(id)),
+    'Closing review candidate must not appear in OFF/public bundles')
+}
 if (flowLiveEnabled) {
   assert.equal(process.env.VITE_BT_CP05_DOCUMENTS_ENABLED,'true',
     'Flow live requires private document archive')
