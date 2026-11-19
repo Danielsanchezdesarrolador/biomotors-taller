@@ -185,3 +185,20 @@ BT_SEC07_GPG_CONFIGURATION: RESTORED
 **Siguiente procedimiento propuesto — una sola intervención agrupada:** (1) verificar hashes anteriores ZIP/script/módulo y GNUPGHOME histórico; (2) evaluar disponibilidad real de Docker Engine y las tres etiquetas usando contenedores `--rm --network none`; (3) si ninguna está disponible pero daemon está sano, permitir descarga local **expresa y visible** desde Docker Hub de `postgres:17.12-bookworm` y validar versión 17 sin puertos; (4) **solo si** requisitos positivos, ejecutar **una vez** el orquestador v2 con almacén GPG histórico durante proceso y restaurar la variable incluso si falla. El paquete v2 ya pasó 43/43 QA offline Windows; no repetir salvo cambio de código. No descargar imágenes cuando Docker Engine falla o existe imagen compatible usable. Si el propietario decide no descargar, terminar sin backup ni restore. No automatizar instalación de Docker, no crear/restaurar BD en producción, no cambiar permisos. Si falla una etapa, detenerse y reportar solo etiquetas seguras; no reintentar a ciegas.
 
 **Efectos de esta entrada:** solo `roadmap.md`, `agent.md` y checkpoint en rama única main, `[skip render]`; ninguna operación de Docker o Supabase ejecutada por el asistente. **SEC-07 abierto y BT-PILOT-QA-04: A REPASAR.**
+
+## BT-SEC07-DOCKER-ENGINE-13 · Evidencia de parada en Docker Engine y plan sin reintentos destructivos
+
+**Salida exacta (únicas etiquetas compartidas), 19/11/2026:**
+
+```text
+BT_SEC07_PREFLIGHT: FILES_AND_GPG_OK
+BT_SEC07_STOP: DOCKER_ENGINE_NOT_READY
+```
+
+**Alcance demostrado:** PowerShell verificó hashes del ZIP/programas y existencia de GNUPGHOME histórico; `docker` CLI fue encontrado; no se rechazó `DOCKER_HOST` remoto ni contexto remoto; la consulta `docker version --format '{{.Server.Version}}'` no obtuvo estado utilizable. Puede indicar daemon detenido, fallo de inicialización o backend WSL/Hyper-V, entre otras posibilidades. **No prueba que la imagen PG17 falte ni que Docker Desktop esté desinstalado**. El bloque se detuvo antes de `docker image inspect`, `docker pull`, contraseña, conectar Supabase, crear backup nuevo o restaurar. La clave GPG ya había coincidido en pruebas previas, pero no se volvió a consultar con Docker en este resultado. No hay evidencia de cambios alojados.
+
+**Verificación de guía de fabricante:** [Docker Desktop CLI](https://docs.docker.com/desktop/features/desktop-cli/) documenta `start` y `status`. [Docker Desktop Windows](https://docs.docker.com/desktop/setup/install/windows-install/) advierte que puede no iniciarse automáticamente. [Docker WSL troubleshoot](https://docs.docker.com/desktop/troubleshoot-and-support/troubleshoot/topics) para diferenciar arranque de problemas del backend. No es apropiado forzar `wsl --unregister docker-desktop`, `docker desktop factory reset`, reinstalación, `docker system prune` ni cambiar contexto de otros entornos sin evidencia/permiso.
+
+**Siguiente operación planeada:** un comando PowerShell autocontenido que verifica Docker CLI y contexto local, consulta el daemon; si el daemon no está listo y Docker Desktop CLI está disponible, invoca **solo** `docker desktop start --detach` y observa hasta un límite corto el arranque, sin reiniciar servicios/contendedores; verifica Engine Linux y lista disponibilidad de imágenes PG17 entre tres tags permitidos sin descargar, crear contenedores ni hacer backup. Si no arranca, enumera solo códigos sanitizados de Docker Desktop presente/estado, WSL presente/respuesta y estado de servicio, sin mostrar logs crudos ni nombres de distros. Un nuevo paso de imagen/backup se condiciona a resultado confirmado; autorización anterior de exportación no invalida la precaución ante Engine inestable. No se ejecutó todavía esta operación en el PC.
+
+**Modificaciones documentales solamente:** roadmap, agent y checkpoint; producción Supabase/Render/Drive, GPG y respaldo histórico intactos. **BT-PILOT-QA-04: A REPASAR**.
