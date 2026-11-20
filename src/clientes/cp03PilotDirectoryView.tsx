@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CarFront, Search, Plus, Pencil, UsersRound, ArrowLeft, RefreshCw } from 'lucide-react'
 import type { Role } from '../auth/controller'
+import { commitAndRefresh } from '../flow/confirmedWrite'
 import {
   DirectoryFailure, customerPayload, vehiclePayload,
   type CustomerInput, type CustomerRecord, type VehicleRecord
@@ -291,31 +292,44 @@ export function Cp03PilotDirectoryView({
     setNotice('')
     try {
       const input = customerPayload(customerDraft)
-      // Do not silently merge same-name customers. If an exact email already
-      // appears, require the operator to select the existing customer.
+      // Do not silently merge same-name customers or risk a duplicate save.
       if (editor === 'new-customer' && input.email) {
         const found = await repository.search(input.email)
-        if (found.customers.some(row => row.email === input.email)) {
+        if (found.customers.some(row => row.email === input.email))
           throw new DirectoryFailure('conflict')
-        }
       }
-      const saved = editor === 'edit-customer' && customer
-        ? await repository.updateCustomer(customer.id,customer.updated_at,input)
-        : await repository.createCustomer(input)
-      // A successful server response is the authoritative commit. A later
-      // list-refresh failure must never offer to re-submit the same draft.
-      clearCp03Draft(); setDraftAvailable(false); setDraftRestored(false)
-      if (!active.current) return
-      const list = await repository.vehiclesForCustomer(saved.id)
-      if (!active.current) return
-      setCustomer(saved)
-      setVehicles(list)
-      setVehicle(null)
-      setMatches(null)
-      setEditor(null)
-      setNotice('Ficha confirmada por el servidor.')
-      const rows = await repository.recentCustomers()
-      if (active.current) setRecent(rows)
+      const outcome = await commitAndRefresh(
+        () => editor === 'edit-customer' && customer
+          ? repository.updateCustomer(customer.id, customer.updated_at, input)
+          : repository.createCustomer(input),
+        saved => {
+          // The response is a confirmed server write. Keep the entity and
+          // discard the draft BEFORE any optional readback can fail.
+          clearCp03Draft()
+          setDraftAvailable(false)
+          setDraftRestored(false)
+          if (!active.current) return
+          setCustomer(saved)
+          setVehicles([])
+          setVehicle(null)
+          setMatches(null)
+          setEditor(null)
+          setNotice('Ficha confirmada por el servidor.')
+        },
+        async saved => {
+          const list = await repository.vehiclesForCustomer(saved.id)
+          if (!active.current) return false
+          setVehicles(list)
+          const rows = await repository.recentCustomers()
+          if (!active.current) return false
+          setRecent(rows)
+          return true
+        }
+      )
+      if (active.current && !outcome.viewRefreshed)
+        setNotice(
+          'Ficha guardada en el servidor. No pudimos actualizar todos los listados: vuelve a buscar la ficha, pero no la registres nuevamente.'
+        )
     } catch (error) {
       if (active.current) {
         if (error instanceof DirectoryFailure && error.kind === 'conflict' &&
@@ -339,17 +353,30 @@ export function Cp03PilotDirectoryView({
       const input = vehiclePayload({...vehicleDraft,customer_id:customer.id,
         model_year:formNumber(vehicleDraft.model_year),
         odometer_km:formNumber(vehicleDraft.odometer_km)})
-      const saved = editor === 'edit-vehicle' && vehicle
-        ? await repository.updateVehicle(vehicle.id,vehicle.updated_at,input)
-        : await repository.createVehicle(input)
-      clearCp03Draft(); setDraftAvailable(false); setDraftRestored(false)
-      if (!active.current) return
-      const list = await repository.vehiclesForCustomer(customer.id)
-      if (!active.current) return
-      setVehicles(list)
-      setVehicle(saved)
-      setEditor(null)
-      setNotice('Vehículo confirmado por el servidor.')
+      const outcome = await commitAndRefresh(
+        () => editor === 'edit-vehicle' && vehicle
+          ? repository.updateVehicle(vehicle.id, vehicle.updated_at, input)
+          : repository.createVehicle(input),
+        saved => {
+          clearCp03Draft()
+          setDraftAvailable(false)
+          setDraftRestored(false)
+          if (!active.current) return
+          setVehicle(saved)
+          setEditor(null)
+          setNotice('Vehículo confirmado por el servidor.')
+        },
+        async () => {
+          const list = await repository.vehiclesForCustomer(customer.id)
+          if (!active.current) return false
+          setVehicles(list)
+          return true
+        }
+      )
+      if (active.current && !outcome.viewRefreshed)
+        setNotice(
+          'Vehículo guardado en el servidor. No pudimos actualizar la lista: abre nuevamente la ficha, pero no registres otro vehículo.'
+        )
     } catch(error) {
       if (active.current) setMessage(cp03Message(error))
     } finally {
