@@ -49,7 +49,8 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
  const font=await pdf.embedFont(fontBytes,{subset:true})
  pdf.setTitle('Inspección multipunto - borrador no enviado')
  pdf.setProducer('ByteTorque')
- let page:PDFPage,y=0
+ let page:PDFPage=pdf.addPage([W,H]),y=0
+ let firstPage=true
  const measure=(text:string,size:number)=>font.widthOfTextAtSize(clean(text),size)
  const put=(text:string,x:number,at:number,size=9,color=navy)=>
    page.drawText(clean(text),{x,y:at,size,font,color})
@@ -77,7 +78,8 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
    return result.length?result:['Sin información']
  }
  function newPage(continued=false){
-   page=pdf.addPage([W,H])
+   if(firstPage)firstPage=false
+   else page=pdf.addPage([W,H])
    page.drawRectangle({x:0,y:H-101,width:W,height:101,color:navy})
    page.drawRectangle({x:M,y:H-102,width:85,height:3,color:blue})
    put('BYTETORQUE  /  INFORME TÉCNICO',M,H-27,9.5,white)
