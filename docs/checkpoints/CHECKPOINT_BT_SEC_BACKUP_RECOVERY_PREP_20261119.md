@@ -220,3 +220,33 @@ BT_SEC07_DOCKER_DIAGNOSTIC: COMPLETE
 **Bloque consecutivo permitido:** reutilizar ZIP v2 SHA256 `9ee61398d67cd7e811f211c70a449878009b36271fce61082479a09db7a6042d`, script SHA256 `0cd6fb1c77ad1d07deb28a72fe4e877c70c4ec424cd93c7ef326e23155a93001`, módulo SHA256 `74c7276e914e46f360b80c4c49eb8c6351ced1a802a88269abca791ac0ff953e`, anillo GPG aislado histórico confirmado, Docker Linux local y una etiqueta Postgres 17 verificada mediante `docker run --rm --network none --pull=never ... postgres --version`, **sin pull**, y ejecutar UNA VEZ `python -B bt_sec07_backup_restore.py` con GNUPGHOME solo en proceso. No repetir QA 43/43 ni crear zip v3. Uso de PostgreSQL remoto read-only, snapshot cifrado con id nuevo y restore Docker sin red estaba autorizado expresamente por el propietario. Si algo falla, detenerse, compartir únicamente categorías `BT_SEC07_*` y `BLOQUE_EXIT_CODE` y no repetir ciegamente. No proporcionar contraseña ni material sensible en el chat.
 
 **Estado real:** aún no hay evidencia de que se haya creado un respaldo actual ni ejecutado restore de este. Los roles SQL y recuperación completa de Supabase continúan no verificados; respaldo histórico conservado; `BT-PILOT-QA-04: A REPASAR`.
+
+## BT-SEC07-SNAPSHOT-CREATED-RESTORE-FAIL-15 · Evidencia de nuevo respaldo cifrado y ensayo de restauración FALLIDO
+
+**Salida real proporcionada por el propietario, 19/11/2026:**
+
+```text
+BT_SEC07_PREFLIGHT: READY
+BT_SEC07_BACKUP: AUTHORIZED_START
+BT_SEC07_RECIPIENT: MATCHED_HISTORICAL_CIPHERTEXT
+BT_SEC07_LOCAL_PREFLIGHT: OK
+Clave PostgreSQL (solo aquí; no enviar al chat): [contraseña NO compartida]
+BT_SEC07_POSTGRES_READONLY_TLS: OK
+BT_SEC07_ROLES_CATALOG: OK_METADATA_ONLY
+BT_SEC07_NEW_ENCRYPTED_SNAPSHOT: OK_NEW_UNIQUE_DIRECTORY
+BT_SEC07_RESTORE: RESTORE_FULL_FAILED_IN_ISOLATION
+BT_SEC07_BACKUP_ROLES_SQL: NOT_INCLUDED
+BT_SEC07_FULL_PROJECT_RECOVERY: NOT_CERTIFIED
+BLOQUE_EXIT_CODE: 3
+BT_SEC07_GPG_CONFIGURATION: RESTORED
+```
+
+**Interpretación calibrada:** `NEW_ENCRYPTED_SNAPSHOT` solo se imprime después de `pg_dump --format=custom` → GPG por pipe, exigencia de cabecera `PGDMP` y bytes no vacíos en el productor, confirmación de códigos de salida, validación SHA de ciphertext y promoción a **ruta local nueva única** con manifest. Por tanto **un nuevo archivo cifrado de estado actual fue creado** y hay metadatos de roles cifrados; conservarlo, no confundir con el `database.dump.gpg` del 17/11. Un SHA correcto no demuestra por sí mismo descifrado ni recuperación. El restore aislado de PostgreSQL 17 **FALLÓ**, y `restoration_verified=false`, `status=RESTORE_NOT_VALIDATED`; el manifest solo contiene un código agregado del fallo. No contiene `roles.sql` restaurables, contraseñas de roles, Storage object bytes, Auth provider settings ni Edge Functions/secretos. **No lanzar piloto real ni certificar recuperación.**
+
+**Investigación del código exacto v2 revisado localmente:** `isolated_restore` `lineas 286-326` creó un contenedor PostgreSQL 17 Docker con `--network none`, BD en tmpfs, sin puertos; comprobó `pg_isready`, creó placeholders NOLOGIN dentro del contenedor y ejecutó `decrypt_to_command`. Esa función `lineas 211-250` envía stdout GPG a `docker exec pg_restore --exit-on-error --no-owner --no-acl` por pipe, **pero descarta stderr de ambos procesos** y devuelve `(gpg_rc, restore_rc, bytes)`; la condición `if gc or rc or received <=5` reduce todos a `RESTORE_FULL_FAILED_IN_ISOLATION`. Dado el código, llegar a esa etiqueta implica que `create_test_roles` no detuvo el flujo, pero NO identifica qué proceso falló. Posibles problemas de roles administrados/extension/Supabase son hipótesis, no hechos confirmados.
+
+**Corrección de observabilidad, sin nuevo dump:** archivo privado del chat `BT_SEC07_RESTORE_DIAGNOSTICO_20261119.zip` (9.013 bytes, SHA256 `e0c951ed5ecbc47c0b7c58f84db537b5c3f1d2788f024963bae746c741b511d7`), contiene programa `BT_SEC07_Restore_Diagnostico_Offline.py`, 19 pruebas y LEEME. El script exige SHA de los dos fuentes v2 existentes; identifica **exactamente una** carpeta `bytetorque-current-sec07-...` con `status=RESTORE_NOT_VALIDATED`, `restore_result=RESTORE_FULL_FAILED_IN_ISOLATION`, validación del project_ref/backup_id/estructura y hashes/tamaños de todos los ciphertexts. Se bloquea si son cero/múltiples. Exige GNUPGHOME histórico aislado, coteja destinatario del ciphertext antiguo con el manifest nuevo, Docker local Linux y PG17. **Solo entonces** reutiliza `isolated_restore` del v2 para un ensayo Docker ephemeral `--network none` y sustituye temporalmente el pipe GPG→pg_restore para clasificar hasta 512KiB de stderr del destino **en memoria** por categorías predefinidas (sin presentar raw, SQL, nombres, rutas ni contraseñas), distinguir códigos GPG/PG y transferencia no vacía. **Nunca se escribe SQL claro en disco ni se modifican backups/manifests, no se accede a Supabase ni se genera nuevo respaldo.** El contenedor temporal se elimina en finally; si falta engine/imagen, stop local. 19/19 pruebas offline sintéticas PASS, repetidas tras ZIP extraído, sintaxis correcta; **no se probó contra el snapshot real ni Docker en el asistente**. La salida se limita a `BT_SEC07_*`.
+
+**Puerta de autorización:** el propietario había autorizado ensayo de restauración aislada y recuperación del backup actual. Esta es **una única repetición focalizada en un contenedor local** con razón nueva (recuperar categoría de falla antes descartada), sin repetir exportación ni conectar PostgreSQL; la ejecución efectiva en Windows requiere que el propietario ejecute personalmente el bloque PowerShell descargado, verifique SHA y lea LEEME; compartir solo etiquetas sanitizadas. Si se considera nueva operación de restauración, esa acción del propietario expresa conformidad, sin inferir acceso permanente. **No ejecutar más reintentos sin evidencia nueva.**
+
+**Ningún cambio en Supabase/Render/Auth/Drive, app, SQL productivo, secretos ni backups históricos.** Docs/commit únicamente, código privado del chat no se incorpora a GitHub. `BT-PILOT-QA-04: A REPASAR`; original `pg_dumpall` roles exit 1/stderr 75B sin raíz comprobada y Google Drive OAuth todavía bloqueado.
