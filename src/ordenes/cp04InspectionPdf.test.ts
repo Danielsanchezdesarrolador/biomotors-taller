@@ -1,5 +1,7 @@
 import {describe,it,expect} from 'vitest'
-import {multipuntoPdfModel} from './cp04InspectionPdf'
+import {multipuntoPdfModel,multipuntoPdf} from './cp04InspectionPdf'
+import {readFileSync} from 'node:fs'
+import {PDFDocument} from 'pdf-lib'
 import type {Finding,OrderWithVehicle} from './cp04Contracts'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 const b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
@@ -44,5 +46,18 @@ describe('CP04 multipoint local PDF model',()=>{
  it('rejects mismatched workshop data',()=>{
    expect(()=>multipuntoPdfModel({workshopName:'Taller',
      order:{...order,vehicle:{...order.vehicle,workshop_id:b}},findings:[]})).toThrow('MULTIPUNTO_PDF_CONTEXT_MISMATCH')
+ })
+ it('creates a real A4 PDF with many pages for long technician notes',async()=>{
+   const font=new Uint8Array(readFileSync('public/cp05/DejaVuSans.ttf'))
+   const x=await multipuntoPdf({workshopName:'Taller de ensayo',order,findings:[
+     finding('Multipunto · Pastillas de freno','attention','Desgaste '.repeat(210))
+   ]},font)
+   expect(Array.from(x.slice(0,5))).toEqual([37,80,68,70,45])
+   const doc=await PDFDocument.load(x)
+   expect(doc.getPageCount()).toBeGreaterThan(1)
+   for(const p of doc.getPages()){
+     expect(Math.abs(p.getWidth()-595.28)).toBeLessThan(1)
+     expect(Math.abs(p.getHeight()-841.89)).toBeLessThan(1)
+   }
  })
 })
