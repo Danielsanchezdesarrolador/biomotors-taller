@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react'
 import {Download,Eye,FileText,X} from 'lucide-react'
 import type {Finding,OrderWithVehicle} from './cp04Contracts'
-import {provisionalFinding} from './cp04Autosave'
+import {hasCurrentProvisionalFindings} from './cp04Autosave'
 
 /** CP04 document preview only. It never sends, stores, or marks a PDF as issued. */
 export function Cp04MultipuntoPdfPreview({
@@ -14,10 +14,10 @@ export function Cp04MultipuntoPdfPreview({
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState('')
  const [display,setDisplay]=useState(false)
- const blocked=outstanding>0||incomplete||findings.some(provisionalFinding)
+ const blocked=outstanding>0||incomplete||hasCurrentProvisionalFindings(findings)
  const reason=outstanding>0
    ?'Hay X que todavía no se han confirmado en el servidor.'
-   :incomplete||findings.some(provisionalFinding)
+   :incomplete||hasCurrentProvisionalFindings(findings)
      ?'Completa las observaciones técnicas provisionales antes de preparar el documento.'
      :''
  useEffect(()=>()=>{if(url)URL.revokeObjectURL(url)},[url])

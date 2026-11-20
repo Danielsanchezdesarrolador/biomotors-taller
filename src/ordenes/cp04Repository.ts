@@ -9,6 +9,7 @@ import type { Context,Role } from '../auth/controller'
 import { UUID } from '../clientes/cp03PilotContracts'
 import {
   WorkOrderFailure, workFailure, validId, validPlateSearch, orderInput,
+  effectivePendingFindings,
   findingInput, workStatuses, recentOrdersLimit, type WorkOrder, type Finding, type NewOrder,
   type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle
 } from './cp04Contracts'
@@ -126,12 +127,35 @@ export function cp04Repository(client:SupabaseClient,context:Context){
   }
   async function pendingForVehicle(vehicleId:string):Promise<Finding[]>{
     const id=validId(vehicleId),version=await guard()
-    const result=await client.from('inspection_findings').select(findingCols)
-      .eq('workshop_id',tenant).eq('vehicle_id',id).eq('resolution','pending')
-      .order('created_at',{ascending:false}).limit(100)
-    if(result.error)workFailure(result.error)
-    valid(version)
-    return many<Finding>(result.data,tenant)
+    const all:Finding[]=[]
+    let last:Finding|null=null
+    const seen=new Set<string>()
+    // Old pending-only query could not see the newer OK that superseded it.
+    // Read confirmed vehicle history in deterministic keyset pages, read only.
+    for(let page=0;page<100;page++){
+      let query=client.from('inspection_findings').select(findingCols)
+        .eq('workshop_id',tenant).eq('vehicle_id',id)
+        .order('created_at',{ascending:false})
+        .order('id',{ascending:false}).limit(201)
+      if(last){
+        if(!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|[+-]\d\d:\d\d)$/.test(last.created_at)
+          ||!UUID.test(last.id))throw new WorkOrderFailure('unavailable')
+        query=query.or(
+          `created_at.lt.${last.created_at},and(created_at.eq.${last.created_at},id.lt.${last.id})`)
+      }
+      const response=await query
+      if(response.error)workFailure(response.error)
+      valid(version)
+      const rows=many<Finding>(response.data,tenant)
+      if(rows.some(row=>row.vehicle_id!==id||seen.has(row.id)))
+        throw new WorkOrderFailure('unavailable')
+      const batch=rows.slice(0,200)
+      batch.forEach(row=>seen.add(row.id))
+      all.push(...batch)
+      if(rows.length<=200)return effectivePendingFindings(all)
+      last=batch[batch.length-1]
+    }
+    throw new WorkOrderFailure('unavailable')
   }
   async function createOrder(data:NewOrder):Promise<WorkOrder>{
     const input=orderInput(data),version=await guard(staff)

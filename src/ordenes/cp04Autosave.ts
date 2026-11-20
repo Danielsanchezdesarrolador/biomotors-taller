@@ -8,7 +8,7 @@
  *
  * Existing R1 Supabase repository / RLS remains the only write authority.
  */
-import type {Finding,NewFinding} from './cp04Contracts'
+import {effectivePendingFindings,type Finding,type NewFinding} from './cp04Contracts'
 import type {Result} from '../informes/multipunto/multipuntoTemplate'
 import {
   multipuntoFinding,multipuntoSavedState,latestForMultipuntoItem,
@@ -100,6 +100,11 @@ export function provisionalFinding(f:Finding):boolean {
   (f.note===CP04_PROVISIONAL_NOTE||
    f.note===CP04_IMMEDIATE_PREFIX+CP04_PROVISIONAL_NOTE)
 }
+/** Only currently outstanding provisional multipoint diagnoses block the PDF.
+ * An older provisional note superseded by a confirmed OK stays in history. */
+export function hasCurrentProvisionalFindings(rows: readonly Finding[]): boolean {
+  return effectivePendingFindings(rows).some(provisionalFinding)
+}
 export class Cp04AutosaveQueue {
  private readonly config:QueueConfig
  private readonly store:StorageApi|null
@@ -134,7 +139,7 @@ export class Cp04AutosaveQueue {
  hasTemporaryRecovery=()=>this.backupAvailable
  setOnSaved(fn:(row:Finding)=>void){this.onSaved=fn}
  getOutstandingCount=()=>Object.values(this.entries).filter(x=>x.phase!=='saved').length
- hasIncompleteNotes=()=>this.finds.some(provisionalFinding) ||
+ hasIncompleteNotes=()=>hasCurrentProvisionalFindings(this.finds) ||
    Object.values(this.entries).some(x=>(x.state==='attention'||x.state==='immediate')&&!x.note.trim())
  getSavedCount=()=>template.filter(item=>{
    const entry=this.entries[item.id]

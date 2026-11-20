@@ -31,6 +31,34 @@ export type NewFinding=Readonly<{
   order_id:string;vehicle_id:string;category:string;
   result:FindingResult;note:string|null
 }>
+/** A later confirmed OK supersedes an old multipoint pending in the current
+ * vehicle to-do list. Keep historic findings intact: no auto-repair assertion.
+ * Generic diagnostic categories may represent different faults, so preserve
+ * each pending entry. A later "not checked" is NOT evidence of OK.
+ */
+export function effectivePendingFindings(rows: readonly Finding[]): Finding[] {
+  const latest = new Map<string, Finding>()
+  const generic: Finding[] = []
+  const newer = (a: Finding, b: Finding): boolean => {
+    const ams = Date.parse(a.created_at), bms = Date.parse(b.created_at)
+    if (Number.isFinite(ams) && Number.isFinite(bms) && ams !== bms) return ams > bms
+    return a.created_at > b.created_at ||
+      (a.created_at === b.created_at && a.id > b.id)
+  }
+  for (const row of rows) {
+    if (!row.category.startsWith('Multipunto · ')) {
+      if (row.result === 'attention' && row.resolution === 'pending') generic.push(row)
+      continue
+    }
+    if (row.result === 'not_checked') continue
+    const key = row.workshop_id + '\u0000' + row.vehicle_id + '\u0000' + row.category
+    const prev = latest.get(key)
+    if (!prev || newer(row, prev)) latest.set(key, row)
+  }
+  return [...generic, ...[...latest.values()].filter(
+    row => row.result === 'attention' && row.resolution === 'pending'
+  )].sort((a,b)=>newer(a,b)?-1:newer(b,a)?1:0)
+}
 export const recentOrdersLimit = 40
 export const workStatuses:readonly OrderStatus[]=['received','inspecting','in_service','ready','closed']
 export const workStatusLabel:Record<OrderStatus,string>={

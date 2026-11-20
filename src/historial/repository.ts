@@ -1,13 +1,14 @@
 /** Read-only CP06. Same authenticated SDK; no writes, SQL, persistence or DEMO fixtures. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
-import type { Finding, WorkOrder } from '../ordenes/cp04Contracts'
+import { effectivePendingFindings,type Finding,type WorkOrder } from '../ordenes/cp04Contracts'
 import type { Quote, Revision, QuoteEvent } from '../cp05/contracts'
 import {
   HistoryFailure,
   historyId,
   instant,
   cursorFilter,
+  compareCursor,
   slicePage,
   pageSize,
   type Cursor,
@@ -324,24 +325,16 @@ export function historyRepository(
   }
   async function pending(id: string, after: Cursor | null = null) {
     const vid = historyId(id)
+    if(after){historyId(after.id);instant(after.at)}
     await guard()
-    let query = client
-      .from('inspection_findings')
-      .select(findingCols)
-      .eq('workshop_id', wid)
-      .eq('vehicle_id', vid)
-      .eq('result', 'attention')
-      .eq('resolution', 'pending')
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(pageSize + 1)
-    if (after) query = query.or(cursorFilter(after, 'created_at'))
-    const r = await query.abortSignal(abort.signal)
-    check(r.error)
-    const rows = many<Finding>(r.data).map((f) => finding(f, vid))
-    if (rows.some((f) => f.result !== 'attention' || f.resolution !== 'pending'))
-      throw new HistoryFailure('unavailable')
-    const page = slicePage(rows, (f) => f.created_at, after)
+    // Preserve historical diagnoses; derive current pending using later OKs.
+    const all = await allRows<Finding>(
+      'inspection_findings', [vid], 'created_at', 'vehicle_id', vid
+    )
+    const current = effectivePendingFindings(all.map(row=>finding(row,vid)))
+    const filtered = after ? current.filter(row=>
+      compareCursor({at:row.created_at,id:row.id},after)<0) : current
+    const page = slicePage(filtered,(f)=>f.created_at,after)
     await guard()
     return page
   }

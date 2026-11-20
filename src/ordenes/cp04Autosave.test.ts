@@ -1,5 +1,5 @@
 import {describe,it,expect,vi} from 'vitest'
-import {Cp04AutosaveQueue,CP04_PROVISIONAL_NOTE} from './cp04Autosave'
+import {Cp04AutosaveQueue,CP04_PROVISIONAL_NOTE,hasCurrentProvisionalFindings} from './cp04Autosave'
 import {multipuntoTemplateItems} from './cp04Multipunto'
 import type {Finding} from './cp04Contracts'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
@@ -193,6 +193,19 @@ describe('CP04 X multipoint autosave queue',()=>{
      expect(engine.getSavedCount()).toBe(1)
      engine.stop()
    }finally{vi.useRealTimers()}
- })
+ })  it('unblocks PDF after a later server-confirmed OK for the provisional X',async()=>{
+    vi.useFakeTimers()
+    try{
+      const {engine,rows,port}=lab();engine.start()
+      engine.select(template[0].id,'attention');await flush()
+      expect(engine.hasIncompleteNotes()).toBe(true)
+      engine.select(template[0].id,'ok');await flush()
+      expect(rows).toHaveLength(2)
+      expect(port.createFinding).toHaveBeenCalledTimes(2)
+      expect(engine.hasIncompleteNotes()).toBe(false)
+      expect(hasCurrentProvisionalFindings(rows)).toBe(false)
+      engine.stop()
+    }finally{vi.useRealTimers()}
+  })
 
 })

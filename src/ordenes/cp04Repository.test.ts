@@ -1,6 +1,6 @@
 import { describe,expect,it,vi } from 'vitest'
 import { cp04Repository } from './cp04Repository'
-import { WorkOrderFailure } from './cp04Contracts'
+import { WorkOrderFailure,type Finding } from './cp04Contracts'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
@@ -72,5 +72,20 @@ describe('CP04 private data repository and lifecycle',()=>{
     await expect(r.findVehicleByPlate('AA-1234')).resolves.toBeNull()
     expect(touched.slice(-1)).toEqual(['vehicles'])
     await expect(r.findVehicleByPlate('INVALID!!! TOO LONG')).rejects.toMatchObject({kind:'invalid'})
+  })  it('hides older multipoint pending after OK, retains broad pending issue',async()=>{
+    const {client,reads}=fake()
+    const earlier:Finding={workshop_id:b,id:a,order_id:a,vehicle_id:a,
+      category:'Multipunto · Luces bajas',result:'attention',note:'Problema',
+      resolution:'pending',resolved_at:null,recorded_by:a,
+      created_at:'2026-11-20T12:00:00Z',updated_at:'2026-11-20T12:00:00Z'}
+    reads.inspection_findings.rows=[
+      earlier,
+      {...earlier,id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',result:'ok',
+        note:null,resolution:'not_applicable',created_at:'2026-11-20T12:01:00Z'},
+      {...earlier,id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',category:'Frenos'}
+    ]
+    const result=await cp04Repository(client,ctx).pendingForVehicle(a)
+    expect(result.map(row=>row.category)).toEqual(['Frenos'])
+    expect(reads.inspection_findings.rows).toHaveLength(3)
   })
 })

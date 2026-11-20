@@ -27,6 +27,7 @@ import {
   workStatusLabel,
   workMessage,
   inspectionResolutionLabel,
+  effectivePendingFindings,
   recentOrdersLimit,
   type Finding,
   type FindingResult,
@@ -37,7 +38,7 @@ import {
 import { readCp04Draft, writeCp04Draft, emptyCp04Draft, rememberCp04Position } from './cp04Draft'
 import { Cp04MultipuntoChecklist } from './Cp04MultipuntoChecklist'
 import { Cp04MultipuntoPdfPreview } from './Cp04MultipuntoPdfPreview'
-import { provisionalFinding } from './cp04Autosave'
+import { hasCurrentProvisionalFindings } from './cp04Autosave'
 import './cp04.css'
 export type Cp04Port = Pick<
   ReturnType<typeof cp04Repository>,
@@ -421,10 +422,9 @@ export function Cp04OrdersView({
       if (index < 0) return [...prev, record]
       return prev.map((x) => (x.id === record.id ? record : x))
     })
-    setPending((prev) => {
-      const remaining = prev.filter((x) => x.id !== record.id)
-      return record.resolution === 'pending' ? [record, ...remaining] : remaining
-    })
+    setPending(prev=>effectivePendingFindings([
+      ...prev.filter(x=>x.id!==record.id),record
+    ]))
   }
   function openMultipunto() {
     setMultipuntoOpen(true)
@@ -436,7 +436,7 @@ export function Cp04OrdersView({
     if (!selected || lock.current || !canCreate) return
     if (
       next === 'closed' &&
-      (multipuntoOutstanding > 0 || multipuntoIncomplete || findings.some(provisionalFinding))
+      (multipuntoOutstanding > 0 || multipuntoIncomplete || hasCurrentProvisionalFindings(findings))
     ) {
       setMessage(
         'No cierres la orden: existen X sin guardar o detalles técnicos pendientes de completar.'

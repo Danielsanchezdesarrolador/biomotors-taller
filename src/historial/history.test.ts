@@ -206,6 +206,18 @@ describe('CP06 chronology and existing history semantics', () => {
     expect(p.rows[0].findings).toHaveLength(225)
     expect(f.calls.filter((c) => c.table === 'inspection_findings')).toHaveLength(2)
   })
+  it('removes multipoint issues superseded by a later OK from pending but not history',async()=>{
+    const f=fake()
+    const previous={...finding(45),category:'Multipunto · Luces bajas',
+      result:'attention',resolution:'pending',note:'Fallo',
+      created_at:'2026-11-16T12:00:00.000001Z'}
+    const ok={...previous,id:uuid(46),result:'ok',resolution:'not_applicable',
+      note:null,created_at:'2026-11-16T12:01:00.000001Z'}
+    f.rows.inspection_findings=[previous,ok,finding(47)]
+    const r=f.repo()
+    expect((await r.pending(vid)).rows.map(row=>row.id)).toEqual([uuid(47)])
+    expect((await r.visits(vid)).rows[0].findings).toHaveLength(3)
+  })
   it('pending issues are independently paginated across old visits', async () => {
     const f = fake()
     f.rows.inspection_findings = Array.from({ length: 25 }, (_, i) => finding(i + 100))
