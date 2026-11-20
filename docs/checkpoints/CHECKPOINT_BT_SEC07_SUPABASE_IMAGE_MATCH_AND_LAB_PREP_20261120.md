@@ -60,3 +60,7 @@ Paquete **solo en conversación**, no en GitHub: `BT_SEC07_SUPABASE_ISOLATED_RES
 4. Mantener `BT-PILOT-QA-04: A REPASAR` hasta recuperación operativa con alcance completo y seguridad A/B.
 
 **Operación documental:** solo `agent.md`, `roadmap.md` y este nuevo checkpoint; sin cambios en código, workflows, Render, Supabase, manifiestos o claves; commit `[skip render]`.
+
+## BT-SEC07-RESTORE-ISOLATED-PASS-22 · Resultado real posterior: restauración Docker Supabase APROBADA en el alcance del laboratorio
+
+**El propietario sí ejecutó** el ensayo preparado más arriba, con autorización `AUTORIZO` en Windows. Evidencia: 25/25 tests, `LAB_GPG_PROCESS: OK`, `LAB_PG_RESTORE_PROCESS: OK`, `LAB_ERROR_CLASS: NONE`, `LAB_PUBLIC_TABLE_COUNT: 12`, `LAB_RESTORE: SCHEMA_LOADED_ISOLATED_SCOPE_ONLY`, limpieza `VERIFIED_REMOVED` y respaldo/manifiesto intactos. **No volver a tratar la herramienta como «no ejecutada»**: ver [checkpoint de resultado completo](CHECKPOINT_BT_SEC07_RESTORE_ISOLATED_SUCCESS_20261120.md). La validación solo cuenta tablas de `public`; omite propietarios/ACL y no valida paridad de datos/RLS/Auth/Storage/Edge. `FULL_PROJECT_RECOVERY: NOT_CERTIFIED`. El manifiesto `RESTORE_NOT_VALIDATED` no se modifica.
