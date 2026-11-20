@@ -193,7 +193,8 @@ describe('CP04 X multipoint autosave queue',()=>{
      expect(engine.getSavedCount()).toBe(1)
      engine.stop()
    }finally{vi.useRealTimers()}
- })  it('unblocks PDF after a later server-confirmed OK for the provisional X',async()=>{
+ })
+  it('unblocks PDF after a later server-confirmed OK for the provisional X',async()=>{
     vi.useFakeTimers()
     try{
       const {engine,rows,port}=lab();engine.start()

@@ -72,7 +72,8 @@ describe('CP04 private data repository and lifecycle',()=>{
     await expect(r.findVehicleByPlate('AA-1234')).resolves.toBeNull()
     expect(touched.slice(-1)).toEqual(['vehicles'])
     await expect(r.findVehicleByPlate('INVALID!!! TOO LONG')).rejects.toMatchObject({kind:'invalid'})
-  })  it('hides older multipoint pending after OK, retains broad pending issue',async()=>{
+  })
+  it('hides older multipoint pending after OK, retains broad pending issue',async()=>{
     const {client,reads}=fake()
     const earlier:Finding={workshop_id:b,id:a,order_id:a,vehicle_id:a,
       category:'Multipunto · Luces bajas',result:'attention',note:'Problema',

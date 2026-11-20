@@ -30,7 +30,8 @@ describe('CP04: typed intake/inspection contracts',()=>{
   it('never exposes unexpected server errors to operator',()=>{
     expect(workMessage(new Error('password Bearer private@client.com')))
       .not.toMatch(/Bearer|private@|password/)
-  })  it('later confirmed OK suppresses previous multipoint pending, not history',()=>{
+  })
+  it('later confirmed OK suppresses previous multipoint pending, not history',()=>{
     const original:Finding={id:a,workshop_id:a,vehicle_id:a,order_id:a,
       category:'Multipunto · Luces bajas',result:'attention',resolution:'pending',
       note:'Requiere atención',recorded_by:a,created_at:'2026-11-20T12:00:00.000001Z',
