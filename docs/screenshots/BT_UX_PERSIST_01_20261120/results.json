@@ -1,0 +1,62 @@
+[
+  {
+    "width": 1366,
+    "status": "PASS",
+    "scope": "HTTP mocks, not hosted Auth/RLS or physical Safari",
+    "cases": [
+      "same DOM/cursor/scroll",
+      "screenshot/focus/visibility burst",
+      "token refresh",
+      "no business reload",
+      "five modules/back/forward",
+      "unsent CP03/04 forms",
+      "pending X no duplicate write",
+      "PDF iframe retained",
+      "CP06 subview",
+      "offline recovery",
+      "revoked membership",
+      "role change",
+      "different verified user denied old memberships"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "scope": "HTTP mocks, not hosted Auth/RLS or physical Safari",
+    "cases": [
+      "same DOM/cursor/scroll",
+      "screenshot/focus/visibility burst",
+      "token refresh",
+      "no business reload",
+      "five modules/back/forward",
+      "unsent CP03/04 forms",
+      "pending X no duplicate write",
+      "PDF iframe retained",
+      "CP06 subview",
+      "offline recovery",
+      "revoked membership",
+      "role change",
+      "different verified user denied old memberships"
+    ]
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "scope": "HTTP mocks, not hosted Auth/RLS or physical Safari",
+    "cases": [
+      "same DOM/cursor/scroll",
+      "screenshot/focus/visibility burst",
+      "token refresh",
+      "no business reload",
+      "five modules/back/forward",
+      "unsent CP03/04 forms",
+      "pending X no duplicate write",
+      "PDF iframe retained",
+      "CP06 subview",
+      "offline recovery",
+      "revoked membership",
+      "role change",
+      "different verified user denied old memberships"
+    ]
+  }
+]

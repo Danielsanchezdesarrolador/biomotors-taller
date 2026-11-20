@@ -1,3 +1,13 @@
+## BT-UX-PERSIST-01 — candidato de navegación continua (20/11/2026)
+
+Base `bfa7556`, main única. Revalidación coordinada preserva el contexto confirmado,
+cinco vistas visitadas en memoria conservan formularios/scroll y contexto; una
+invalidación real sigue retirando datos/repositorios. Sin cambios Render,
+Supabase/flags/SQL/RLS, Android ni SEC-07. Despliegue pendiente de autorización.
+Incidentes UX-INC-01…05 y UX-TEST-01, pruebas y límites en
+[checkpoint UX](docs/checkpoints/CHECKPOINT_BT_UX_PERSIST_01_20261120.md).
+No confundir HTTP sintético y CI con prueba física Safari/Edge o piloto real.
+
 ## BT-PILOT-QA-04C · RENDER LIVE del arreglo de pendientes (20/11/2026)
 
 Autorización expresa del propietario tras QA: **[CI Web/PWA+Android #44774998665](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44774998665) SUCCESS y [navegador #44774998785](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44774998785) SUCCESS**, código `e617542`; solo docs posteriores. Despliegue manual en Render existente `biomotors-taller-demo` / `srv-dbqe4quc6qcc73f275jg` / workspace `tea-daum20gjo6nc73dndfqg`: `dep-dc086ugm7kps73d78ue0` sobre `bd9c8e5` **LIVE confirmado 20/11/2026 17:29:52 UTC**. El previo `f757daf2` quedó deactivated. No cambios de env, Supabase, SQL/RLS, Auth/Edge/Storage, correo, pagos ni APK. **No se validó físicamente** cambio atención→OK en QA1234 ni descarga PDF real: usuario debe revisar guardado, pendientes, recarga y prueba de histórico. No confundir LIVE con aprobación piloto Ignacio; SEC-07 sigue pendiente. [Checkpoint](./docs/checkpoints/CHECKPOINT_BT_PILOT_QA_04C_PENDIENTES_VIGENTES_20261120.md).
