@@ -53,7 +53,7 @@ async function run(browser, id, width, task) {
       await run(browser, 'F01', width, async ({ p, state, requests }) => {
         await openDirectory(p, width)
         await createCustomer(p, 'Cliente F01 Sintético')
-        await p.getByText(/Ficha guardada en el servidor\\. No pudimos actualizar todos los listados/).waitFor()
+        await p.getByText(/Ficha guardada en el servidor\. No pudimos actualizar todos los listados/).waitFor()
         assert.equal(state.customers.length, 1)
         assert.equal(writes(requests, 'customers'), 1)
         assert.equal(await p.locator('.cp03-editor').count(), 0, 'confirmed form must close')
@@ -75,7 +75,7 @@ async function run(browser, id, width, task) {
         await p.getByLabel('Marca *').fill('Kia')
         await p.getByLabel('Modelo *').fill('Rio')
         await p.getByRole('button', { name: 'Guardar ficha del vehículo' }).click()
-        await p.getByText(/Vehículo guardado en el servidor\\. No pudimos actualizar la lista/).waitFor()
+        await p.getByText(/Vehículo guardado en el servidor\. No pudimos actualizar la lista/).waitFor()
         assert.equal(state.vehicles.filter((v) => v.plate === 'QA-F02').length, 1)
         assert.equal(writes(requests, 'vehicles'), 1)
         assert.equal(await p.locator('.cp03-editor').count(), 0)
@@ -83,7 +83,7 @@ async function run(browser, id, width, task) {
       })
       await run(browser, 'F03', width, async ({ p, state, requests }) => {
         await createOrder(p, 'QA1234', 'Orden sintética guardada con recarga fallida')
-        await p.getByText(/Orden guardada en el servidor\\. La actualización de la pantalla está pendiente/).waitFor()
+        await p.getByText(/Orden guardada en el servidor\. La actualización de la pantalla está pendiente/).waitFor()
         assert.equal(state.orders.length, 6)
         const stored = state.orders[5].id
         assert.equal(writes(requests, 'work_orders'), 1)
@@ -102,7 +102,7 @@ async function run(browser, id, width, task) {
         await p.getByLabel('Resultado', { exact: true }).selectOption('attention')
         await p.getByLabel('Observación técnica *').fill('Revisión de freno sintética')
         await p.getByRole('button', { name: 'Guardar punto de inspección' }).click()
-        await p.getByText(/Inspección guardada en el servidor\\. La lista está pendiente/).waitFor()
+        await p.getByText(/Inspección guardada en el servidor\. La lista está pendiente/).waitFor()
         assert.equal(state.findings.length, 1)
         assert.equal(writes(requests, 'inspection_findings'), 1)
         assert.equal(await p.locator('.cp04-finding').count(), 1)
@@ -122,7 +122,7 @@ async function run(browser, id, width, task) {
         await p.locator('.cp04-order').first().click()
         await p.locator('.cp04-pending').first().waitFor()
         await p.getByRole('button', { name: 'Marcar resuelto' }).click()
-        await p.getByText(/Observación resuelta en el servidor\\. La lista está pendiente/).waitFor()
+        await p.getByText(/Observación resuelta en el servidor\. La lista está pendiente/).waitFor()
         assert.equal(state.findings[0].resolution, 'resolved')
         assert.equal(await p.locator('.cp04-pending').count(), 0)
         assert.equal(writes(requests, 'inspection_findings', 'PATCH'), 1)
@@ -142,6 +142,6 @@ async function run(browser, id, width, task) {
       })
     }
     fs.writeFileSync(out + '/results.json', JSON.stringify({ status: 'PASS', tests: results,
-      note: 'F01-F06 browser synthetic only; R05-R08 manual steps not executed' }, null, 2) + '\\n')
+      note: 'F01-F06 browser synthetic only; R05-R08 manual steps not executed' }, null, 2) + '\n')
   } finally { await browser.close() }
 })().catch((e) => { console.error(e); process.exitCode = 1 })
