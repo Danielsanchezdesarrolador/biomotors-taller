@@ -57,8 +57,8 @@ recarga física posible a React: el navegador/OS sí puede descartar la pestaña
   anterior. QA04B F01–F06 pasa después en ambos tamaños.
 - **UX-INC-05:** una pasada de Vitest ejecutada junto a varios Chromium agotó
   5000 ms en el test existente de PDF (5142 ms), con 738 PASS. No se modificaron
-  renderer, test o umbral de PDF. La suite final se ejecuta sin carga de navegador
-  paralela; resultado real registrado en la sección de pruebas.
+  renderer, test o umbral de PDF. Una pasada aislada posterior obtuvo 739/739 PASS; tras las cinco regresiones
+  nuevas, el cierre completo obtuvo 744/744 PASS, sin ampliar ese umbral.
 - **UX-INC-06:** la lectura de plan podía cancelarse por el epoch de una
   verificación rutinaria concurrente, o quedar asociada al montaje previo al
   aceptar una invitación. Se separa `authorityVersion` de los epochs de petición:
@@ -104,7 +104,7 @@ recarga física posible a React: el navegador/OS sí puede descartar la pestaña
 
 ## Pruebas y evidencia
 
-- Vitest final aislado: **744/744 PASS, 84 archivos (incluye ajuste final de autoridad)**, 31.72 s; no se aumentó
+- Vitest final: **744/744 PASS, 84 archivos (incluye ajuste final de autoridad)**, 31.72 s; no se aumentó
   el límite de tiempo de PDF. Controlador/binding CP03 y metadatos: 58 pruebas focalizadas PASS tras el ajuste final.
 - TypeScript + build público + build combinado Auth/Creador/PLAN04/CP03–06: PASS;
   grafo oficial, PWA e identidad de marca: PASS.
@@ -157,9 +157,8 @@ reclasificó. No se crearon cuentas/concesiones ni se habilitó el piloto Ignaci
 Todos los commits incluyen `[skip render]`; los resultados locales se presentan
 antes de publicar código. Despliegue Render automático/manual sigue **NO AUTORIZADO**.
 Render leído sin mutación: `dep-dc086ugm7kps73d78ue0` LIVE en `bd9c8e5`
-(`srv-dbqe4quc6qcc73f275jg`, My Workspace autorizado previamente). CI remoto y
-estado de publicación se registran después de verificar sus resultados.
-El mismo recorrido UX se ejecutará también con WebKit Linux en CI, usando el
+(`srv-dbqe4quc6qcc73f275jg`, My Workspace autorizado previamente). CI remoto y estado final se documentan en el cierre remoto al final de este checkpoint.
+El mismo recorrido UX pasó también con WebKit Linux en CI, usando el
 binario que ese workflow ya instala. No se instaló un navegador nuevo en Cloud
 (WebKit local ausente) ni se lo presenta como prueba física de Safari/iPhone.
 
@@ -179,3 +178,20 @@ flags y sin migraciones:
 6. Verificar en Safari/iPhone PWA, Chrome y Edge físicos. Registrar versión y
    resultados auténticos. Guardar/confirmar operaciones antes de recargar o cerrar;
    si un acuse es incierto, reconciliar por identidad sin reenviar la escritura.
+
+## Cierre remoto del ajuste final (20/11/2026)
+
+Código publicado exclusivamente en main: `badea20b49142e0092e73ef905a4b141549dfcaf`
+(`[skip render]`). Incluye generaciones de autoridad, actualización expresa del
+plan y limpieza de filtro al abrir otra OT, además de sus regresiones.
+
+- [CI general 44798553027](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798553027):
+  Web/iOS PWA **SUCCESS**, Android/Expo **SUCCESS** (sin generar APK).
+- [CI visual 44798552931](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798552931):
+  **SUCCESS**, incluyendo UX persistente Chromium y WebKit Linux en 1366/390/768.
+- Recorridos remotos FLOW 44798553143, COT 44798553114 y REG 44798553573:
+  **SUCCESS**. Todos corresponden a `badea20`.
+- Render consultado después del push: último deploy continúa
+  `dep-dc086ugm7kps73d78ue0`, LIVE `bd9c8e5`; no hubo deploy nuevo.
+- No se ejecutaron operaciones alojadas Supabase ni cambios de infraestructura.
+  Publicación en GitHub no equivale a despliegue en bytetorque.cl.

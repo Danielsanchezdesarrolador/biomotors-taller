@@ -2,7 +2,9 @@
 
 Cierre local: 744/744 pruebas PASS, builds público/privado PASS y UX Chromium
 1366/390/768 PASS. Ajustes de autoridad/plan y destino explícito de otra OT
-probados también con PLAN04 y CP05 sintéticos; CI final pendiente.
+probados también con PLAN04 y CP05 sintéticos. Código `badea20`: CI general
+44798553027 y visual Chromium/WebKit 44798552931 SUCCESS, al igual que FLOW/COT/REG.
+Publicado en main con `[skip render]`; NO desplegado. Render conserva `bd9c8e5`.
 
 Base `bfa7556`, main única. Revalidación coordinada preserva el contexto confirmado,
 cinco vistas visitadas en memoria conservan formularios/scroll y contexto; una
