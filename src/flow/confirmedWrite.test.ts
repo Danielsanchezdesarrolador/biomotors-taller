@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { commitAndRefresh } from './confirmedWrite'
+import { commitAndRefresh } from '../official/confirmedWrite'
 
 describe('BT-PILOT-QA-04 — confirmed mutation versus readback', () => {
   it('returns the saved identity and refreshes only after a confirmed write', async () => {
