@@ -1,5 +1,5 @@
 // BT-UX-PERSIST-01: real React/SDK with synthetic HTTP only, never hosted data.
-const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
+const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp04Page,uuid,tenant,userId}=require('../tests/harness/cp04BrowserFixture.cjs')
 const out=process.env.OUTPUT_DIR||'artifacts/bt-ux-persist'
 const api='https://suxcqqnmcjoezfxltoms.supabase.co'
@@ -13,7 +13,8 @@ async function stable(p,value){
  assert.equal(await p.evaluate(()=>document.querySelector('.app-shell')===window.__uxShell),true)
 }
 ;(async()=>{
- fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
+ const engine=process.env.BT_UX_BROWSER||'chromium';assert.ok(['chromium','webkit'].includes(engine))
+ fs.mkdirSync(out,{recursive:true});const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
  const results=[]
  try{for(const width of [1366,390,768]){
   let context
@@ -98,8 +99,8 @@ async function stable(p,value){
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(await p.locator('.workspace-views').count(),0)
   assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),false)
   assert.deepEqual(errors,[])
-  results.push({width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF iframe retained','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
-  await p.close();console.log('BT_UX_PERSIST_PASS',width)
+  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF iframe retained','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
+  await p.close();console.log('BT_UX_PERSIST_PASS',engine,width)
  }
  fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2))
  }finally{await browser.close()}

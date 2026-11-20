@@ -140,6 +140,9 @@ antes de publicar código. Despliegue Render automático/manual sigue **NO AUTOR
 Render leído sin mutación: `dep-dc086ugm7kps73d78ue0` LIVE en `bd9c8e5`
 (`srv-dbqe4quc6qcc73f275jg`, My Workspace autorizado previamente). CI remoto y
 estado de publicación se registran después de verificar sus resultados.
+El mismo recorrido UX se ejecutará también con WebKit Linux en CI, usando el
+binario que ese workflow ya instala. No se instaló un navegador nuevo en Cloud
+(WebKit local ausente) ni se lo presenta como prueba física de Safari/iPhone.
 
 Tras autorización específica de despliegue en el Render existente, conservando
 flags y sin migraciones:

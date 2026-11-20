@@ -81,6 +81,7 @@ jobs:
             sleep 1
           done
           CP04_BASE_URL=http://127.0.0.1:5183 node scripts/verify-ux-persist.cjs
+          BT_UX_BROWSER=webkit CP04_BASE_URL=http://127.0.0.1:5183 OUTPUT_DIR=artifacts/bt-ux-persist-webkit node scripts/verify-ux-persist.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
         env:
           BT_INVITE_BROWSER: webkit
@@ -101,6 +102,7 @@ jobs:
           name: BT-OFICIAL-01A-Estados-vacios-Capturas
           path: |
             artifacts/bt-ux-persist/
+            artifacts/bt-ux-persist-webkit/
             artifacts/cp04-redesign/
             artifacts/bt-pilot-qa04b/
             artifacts/cp05-mobile/
