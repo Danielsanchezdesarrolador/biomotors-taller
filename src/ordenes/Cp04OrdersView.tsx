@@ -20,7 +20,7 @@ import {
   Info
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
-import { commitAndRefresh } from '../flow/confirmedWrite'
+import { commitAndRefresh } from '../official/confirmedWrite'
 import { cp04Repository } from './cp04Repository'
 import {
   inspectionCategories,
