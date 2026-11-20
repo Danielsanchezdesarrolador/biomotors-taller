@@ -20,6 +20,7 @@ import {
   Info
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
+import { commitAndRefresh } from '../flow/confirmedWrite'
 import { cp04Repository } from './cp04Repository'
 import {
   inspectionCategories,
@@ -94,6 +95,7 @@ export function Cp04OrdersView({
   const restoredPosition = useRef(false)
   const [orders, setOrders] = useState<OrderWithVehicle[]>([])
   const [selected, setSelected] = useState<OrderWithVehicle | null>(null)
+  const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null)
   const [findings, setFindings] = useState<Finding[]>([])
   const [pending, setPending] = useState<Finding[]>([])
   const [plate, setPlate] = useState(initial.plate)
@@ -128,7 +130,7 @@ export function Cp04OrdersView({
     if (!viewRoot.current?.isConnected) return
     writeCp04Draft(scope, {
       scrollY: scrollPosition.current,
-      selectedOrderId: selected?.order.id ?? initial.selectedOrderId,
+      selectedOrderId: selected?.order.id ?? confirmedOrderId ?? initial.selectedOrderId,
       plate,
       complaint,
       intakeOdometer: intake,
@@ -141,6 +143,7 @@ export function Cp04OrdersView({
     context.userId,
     context.workshop.id,
     selected?.order.id,
+    confirmedOrderId,
     plate,
     complaint,
     intake,
@@ -222,7 +225,7 @@ export function Cp04OrdersView({
     }
   }, [repository])
 
-  async function openOrder(id: string, focusDetail = false) {
+  async function openOrder(id: string, focusDetail = false): Promise<boolean> {
     const request = ++revision.current
     setLoading(true)
     setMessage('')
@@ -234,7 +237,7 @@ export function Cp04OrdersView({
         repository.findingsForOrder(item.order.id),
         repository.pendingForVehicle(item.order.vehicle_id)
       ])
-      if (!active.current || request !== revision.current) return
+      if (!active.current || request !== revision.current) return false
       if (selected && selected.order.id !== item.order.id) {
         setMultipuntoOpen(false)
         setMultipuntoOutstanding(0)
@@ -250,26 +253,30 @@ export function Cp04OrdersView({
           orderDetail.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
           orderDetail.current?.focus({ preventScroll: true })
         })
+      return true
     } catch (error) {
       if (active.current && request === revision.current) setMessage(workMessage(error))
+      return false
     } finally {
       if (active.current && request === revision.current) setLoading(false)
     }
   }
-  async function reload() {
+  async function reload(): Promise<boolean> {
     const request = ++listRevision.current
     setOrdersState('loading')
     setOrdersError('')
     try {
       const items = await repository.recentOrders()
-      if (!active.current || request !== listRevision.current) return
+      if (!active.current || request !== listRevision.current) return false
       setOrders(items)
       setOrdersState('ready')
+      return true
     } catch (error) {
       if (active.current && request === listRevision.current) {
         setOrdersState('error')
         setOrdersError(workMessage(error))
       }
+      return false
     }
   }
   function scrollBehavior(): ScrollBehavior {
@@ -313,18 +320,43 @@ export function Cp04OrdersView({
     try {
       const chosen = vehicle ?? (await repository.findVehicleByPlate(plate))
       if (!chosen) throw Error('vehicle_not_found')
-      const created = await repository.createOrder({
-        vehicle_id: chosen.id,
-        complaint,
-        intake_odometer: odometer(intake)
-      })
+      const outcome = await commitAndRefresh(
+        () => repository.createOrder({
+          vehicle_id: chosen.id,
+          complaint,
+          intake_odometer: odometer(intake)
+        }),
+        created => {
+          // Server confirmed a new OT. Save its ID before readback: failing to
+          // fetch the list/detail must not offer to create the same OT again.
+          writeCp04Draft(scope, {
+            ...(readCp04Draft(scope) ?? emptyCp04Draft),
+            selectedOrderId: created.id,
+            plate,
+            complaint: '',
+            intakeOdometer: '',
+            note: ''
+          })
+          if (!active.current) return
+          setSelected(null)
+          setConfirmedOrderId(created.id)
+          setComplaint('')
+          setIntake('')
+          setNote('')
+          setNotice('Orden de trabajo guardada en el servidor.')
+        },
+        async created => {
+          if (!active.current) return false
+          const listed = await reload()
+          const opened = await openOrder(created.id, true)
+          return listed && opened
+        }
+      )
       if (!active.current) return
-      setComplaint('')
-      setIntake('')
-      setNote('')
-      await reload()
-      await openOrder(created.id, true)
-      if (active.current) setNotice('Orden de trabajo guardada en el servidor.')
+      setMessage('')
+      setNotice(outcome.viewRefreshed
+        ? 'Orden de trabajo guardada en el servidor.'
+        : 'Orden guardada en el servidor. La actualización de la pantalla está pendiente: pulsa Actualizar o vuelve a abrir la OT, pero no guardes otra orden.')
     } catch (error) {
       if (active.current) setMessage(workMessage(error))
     } finally {
@@ -340,24 +372,39 @@ export function Cp04OrdersView({
     setMessage('')
     setNotice('')
     try {
-      await repository.createFinding({
-        order_id: selected.order.id,
-        vehicle_id: selected.order.vehicle_id,
-        category,
-        result,
-        note: note.trim() || null
-      })
-      if (!active.current) return
-      setNote('')
-      setResult('not_checked')
-      const [list, outstanding] = await Promise.all([
-        repository.findingsForOrder(selected.order.id),
-        repository.pendingForVehicle(selected.order.vehicle_id)
-      ])
-      if (!active.current) return
-      setFindings(list)
-      setPending(outstanding)
-      setNotice('Resultado de inspección guardado en Supabase.')
+      const order = selected.order
+      const outcome = await commitAndRefresh(
+        () => repository.createFinding({
+          order_id: order.id,
+          vehicle_id: order.vehicle_id,
+          category,
+          result,
+          note: note.trim() || null
+        }),
+        saved => {
+          if (!active.current) return
+          setNote('')
+          setResult('not_checked')
+          multipuntoCommitted(saved)
+          setNotice('Resultado de inspección guardado en Supabase.')
+        },
+        async () => {
+          const [list, outstanding] = await Promise.all([
+            repository.findingsForOrder(order.id),
+            repository.pendingForVehicle(order.vehicle_id)
+          ])
+          if (!active.current) return false
+          setFindings(list)
+          setPending(outstanding)
+          return true
+        }
+      )
+      if (active.current && !outcome.viewRefreshed) {
+        setMessage('')
+        setNotice(
+          'Inspección guardada en el servidor. La lista está pendiente de actualizar; no vuelvas a registrar el mismo resultado.'
+        )
+      }
     } catch (error) {
       if (active.current) setMessage(workMessage(error))
     } finally {
@@ -423,16 +470,31 @@ export function Cp04OrdersView({
     setMessage('')
     setNotice('')
     try {
-      await repository.markResolved(item.id, item.updated_at, true)
-      if (!active.current) return
-      const [list, outstanding] = await Promise.all([
-        repository.findingsForOrder(selected.order.id),
-        repository.pendingForVehicle(selected.order.vehicle_id)
-      ])
-      if (!active.current) return
-      setFindings(list)
-      setPending(outstanding)
-      setNotice('Observación marcada como resuelta. El diagnóstico original se conserva.')
+      const order = selected.order
+      const outcome = await commitAndRefresh(
+        () => repository.markResolved(item.id, item.updated_at, true),
+        saved => {
+          if (!active.current) return
+          multipuntoCommitted(saved)
+          setNotice('Observación marcada como resuelta. El diagnóstico original se conserva.')
+        },
+        async () => {
+          const [list, outstanding] = await Promise.all([
+            repository.findingsForOrder(order.id),
+            repository.pendingForVehicle(order.vehicle_id)
+          ])
+          if (!active.current) return false
+          setFindings(list)
+          setPending(outstanding)
+          return true
+        }
+      )
+      if (active.current && !outcome.viewRefreshed) {
+        setMessage('')
+        setNotice(
+          'Observación resuelta en el servidor. La lista está pendiente de actualizar; no repitas esta acción.'
+        )
+      }
     } catch (error) {
       if (active.current) setMessage(workMessage(error))
     } finally {
