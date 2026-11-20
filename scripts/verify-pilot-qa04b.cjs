@@ -71,7 +71,7 @@ async function run(browser, id, width, task) {
         await p.getByText('Ficha confirmada por el servidor.').waitFor()
         state.injectFault = 'F02'
         await p.getByRole('button', { name: 'Agregar vehículo' }).click()
-        await p.getByLabel('Patente').fill('QA-F02')
+        await p.locator('.cp03-editor').getByLabel('Patente', { exact: true }).fill('QA-F02')
         await p.getByLabel('Marca *').fill('Kia')
         await p.getByLabel('Modelo *').fill('Rio')
         await p.getByRole('button', { name: 'Guardar ficha del vehículo' }).click()
