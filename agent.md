@@ -1,3 +1,7 @@
+## BT-UX-PERSIST-01 · WEB/PWA LIVE verificado 20/11/2026
+
+Con autorización expresa del titular se publicó `main` commit `7da13a3f` en el servicio Render **existente** `biomotors-taller-demo` (`srv-dbqe4quc6qcc73f275jg`, workspace `tea-daum20gjo6nc73dndfqg`), deploy `dep-dc09s9jncjis7387ghv0`, **LIVE** confirmado 20/11/2026 19:23:40 UTC. La revisión de código `badea20b` tenía 744/744 PASS, compilaciones pública/privada, [CI general](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798553027) y [CI visual](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798552931) SUCCESS. El anterior LIVE `bd9c8e5` se sustituyó. El despliegue se hizo por API `clearCache:false`; no hubo cambio de env/flags ni de Supabase, Auth alojado, SQL, RLS, Edge, Storage, correo, pagos, APK ni otro servicio. **Pendiente QA manual** foco/captura, navegación a 5 módulos, regreso a subpantallas/scroll/cursor, edición sin perder datos y Safari/iPhone físico. La revocación/offline debe seguir bloqueando privada. No declarar final de piloto Ignacio ni SEC-07. [Checkpoint](./docs/checkpoints/CHECKPOINT_BT_UX_PERSIST_01_20261120.md).
+
 ## BT-UX-PERSIST-01 — candidato de navegación continua (20/11/2026)
 
 Cierre local: 744/744 pruebas PASS, builds público/privado PASS y UX Chromium

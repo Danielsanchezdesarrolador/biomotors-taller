@@ -195,3 +195,16 @@ plan y limpieza de filtro al abrir otra OT, además de sus regresiones.
   `dep-dc086ugm7kps73d78ue0`, LIVE `bd9c8e5`; no hubo deploy nuevo.
 - No se ejecutaron operaciones alojadas Supabase ni cambios de infraestructura.
   Publicación en GitHub no equivale a despliegue en bytetorque.cl.
+
+
+## Adenda · Despliegue autorizado LIVE — 20/11/2026
+
+**Autorización específica:** el titular aprobó («autorizo») el despliegue de BT-UX-PERSIST-01 en `https://bytetorque.cl`, manteniendo Supabase y flags sin cambios. No se autorizó habilitar funciones, pagos, emails ni trabajar con clientes reales.
+
+**Preflight de ejecución:** HEAD `7da13a3f7c1f9a396c777515ce911674a10bde33`, que incluye el código `badea20b49142e0092e73ef905a4b141549dfcaf` y únicamente un commit documental de cierre adicional; [GitHub CI general #44798553027](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798553027) y [GitHub visual #44798552931](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44798552931) terminaron `completed/success` para `badea20b`. Comparación con LIVE anterior `bd9c8e5`: 7 commits, archivos de auth, navegación, pruebas, screenshots, workflows y documentación de UX; sin otros módulos ajenos encontrados en el delta. Se verificó servicio existente en Render: workspace `tea-daum20gjo6nc73dndfqg` (My Workspace), servicio `srv-dbqe4quc6qcc73f275jg` (biomotors-taller-demo), branch `main` y origen del mismo repositorio.
+
+**Acción real:** una llamada `trigger_deploy` Render del mismo servicio, `clearCache:false`, sin crear servicio ni cambiar variables. Despliegue `dep-dc09s9jncjis7387ghv0`, commit `7da13a3f7c1f9a396c777515ce911674a10bde33`, `createdAt=2026-11-20T19:23:18.462491Z`, `finishedAt=2026-11-20T19:23:40.380081Z`, `status=live` confirmado por `get_deploy`. Previo LIVE `dep-dc086ugm7kps73d78ue0` apuntaba a `bd9c8e5`. Dirección comercial: `https://bytetorque.cl`; [servicio Render](https://dashboard.render.com/static/srv-dbqe4quc6qcc73f275jg).
+
+**Límites:** se desplegó el paquete completo de `main` en frontend/PWA. No se ejecutaron modificaciones de Supabase alojado, migraciones SQL, RLS/Auth, Edge, Storage, correo, pagos, variables/flags, otros servicios, Android nativo, OTA ni APK. No se introdujeron escrituras deliberadas a datos por el agente. La certificación del build en Render no es QA manual real ni ensayo de seguridad integral; SEC-07, R05–R08 y la autorización del piloto Ignacio permanecen pendientes.
+
+**Comprobación por propietario (QA con datos ficticios y sesión propia):** (1) abrir una OT y formulario con texto no enviado; (2) cambiar de ventana, hacer captura y regresar sin pantalla de acceso ni pérdida de cursor/scroll; (3) navegar Inicio → Clientes/vehículos → Órdenes → Cotizaciones → Configuración y volver a los contextos originales; (4) probar botón atrás/adelante; (5) verificar que desconexión/revocación sí oculte datos; (6) repetir desde Safari iPhone/PWA física. No prometer conservación de estado completo ante cierre forzado, nueva carga de documento o descarte de pestaña por el sistema operativo. No guardar capturas con datos privados en GitHub. Reportar cualquier fallo reproducible con módulo, pasos, navegador y estado de guardado.
