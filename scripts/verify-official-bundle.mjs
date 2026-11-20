@@ -77,7 +77,7 @@ if (!cp04PrivateEnabled) {
   assert.ok(
     modules.every(
       (id) =>
-        !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+        !/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist|MultipuntoPdfPreview)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave|InspectionPdf))\.(?:ts|tsx|js)/.test(
           id
         )
     ),
@@ -123,7 +123,7 @@ assert.ok(
           id
         )) ||
       (cp04PrivateEnabled &&
-        /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+        /src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist|MultipuntoPdfPreview)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave|InspectionPdf))\.(?:ts|tsx|js)/.test(
           id
         )) ||
       (cp04PrivateEnabled &&
