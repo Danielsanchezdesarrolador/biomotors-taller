@@ -72,3 +72,9 @@
 - Referencia externa utilizada previamente: [Supabase — Restore from Platform](https://supabase.com/docs/guides/self-hosting/restore-from-platform) y [PostgreSQL 17 — pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html).
 
 **Estado final:** `BT-SEC-07: ABIERTO` · `BT-PILOT-QA-04: A REPASAR` · **Backup actual cifrado: CREADO, no recuperado/validado íntegramente**.
+
+## BT-SEC07-DOCKER-MANUAL-START-18 · Rectificación de la solución Docker tras el cierre
+
+**Nueva precisión aportada directamente por el propietario (19/11):** «Docker funcionó cuando abrí el programa». La secuencia ya no queda solo como «motor recuperado»: la acción concreta fue **abrir manualmente Docker Desktop**, tras lo cual los controles mostraron `DOCKER_ENGINE: RUNNING` y `DOCKER_LINUX: OK`. La explicación operativa es que **el motor no estaba accesible antes de abrir Docker Desktop**; no hay evidencia para atribuir la parada a una instalación defectuosa, ausencia de imagen o fallo permanente del backend WSL.
+
+**Solución que debe reutilizarse:** abrir Docker Desktop y comprobar que el daemon Linux responda antes de buscar o descargar imágenes. **No reinstalar Docker/PostgreSQL, resetear datos, eliminar imágenes, cambiar contexto ni ejecutar `docker system prune`** como primera reacción. Esta corrección no afecta a la existencia del nuevo respaldo cifrado ni al bloqueo actual de recuperación `EXTENSION_UNAVAILABLE`.

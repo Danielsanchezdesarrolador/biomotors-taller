@@ -52,3 +52,15 @@ No borrar/sobrescribir snapshot nuevo ni histórico, no modificar el manifiesto 
 
 ### Prompt para retomar en un nuevo chat el viernes 20/11
 > Retoma ByteTorque exclusivamente en seguridad y respaldos, repositorio `Danielsanchezdesarrolador/biomotors-taller`, única rama `main`. Lee HEAD, `AGENTS.md`, `agent.md`, `roadmap.md`, `docs/checkpoints/CHECKPOINT_BT_SEC07_CIERRE_JORNADA_20261119.md` y `docs/BT_SEC07_INFORME_ERRORES_Y_SOLUCIONES_20261119.md`. El 19/11 se creó un NUEVO snapshot PostgreSQL cifrado y se verificaron hashes/GPG, pero restauración Docker falló con `PG_RESTORE_ERROR_CLASS: EXTENSION_UNAVAILABLE`. No hay recuperación completa ni roles SQL, piloto `BT-PILOT-QA-04: A REPASAR`. Próximo paso exclusivo: inventario offline de extensiones del MISMO respaldo con `BT_SEC07_EXTENSION_INVENTORY_20261119.zip` (SHA256 documentado; 16 pruebas asistente, Windows pendiente). No volver a ejecutar dumps ni conexiones remotas sin causa y autorización. Documenta resultados/incidentes y commits [skip render] en main; protege secretos y datos.
+
+## BT-SEC07-DOCKER-MANUAL-START-18 · Aclaración posterior del propietario: solución concreta de Docker Desktop
+
+El propietario añadió el mismo 19/11 después de recibir el checkpoint: **«Docker funcionó cuando abrí el programa, se me olvidó decirte eso»**. La secuencia real queda precisada así:
+
+1. Primer intento: `BT_SEC07_STOP: DOCKER_ENGINE_NOT_READY` tras validaciones locales; no hubo backup en esa ejecución.
+2. **Acción manual del propietario:** abrió la aplicación **Docker Desktop** en Windows.
+3. Prueba posterior: `BT_SEC07_DOCKER_CONTEXT: LOCAL`, `DOCKER_ENGINE: RUNNING`, `DOCKER_LINUX: OK`, `PG17_IMAGE: PRESENT`. El ensayo posterior con PG17 se ejecutó, y se generó el snapshot cifrado nuevo.
+
+**Solución operacional comprobada:** iniciar Docker Desktop manualmente y esperar a que Engine esté disponible. No se necesitaron reinstalaciones, cambios de PATH ni eliminación/recreación de imágenes. Que la aplicación estuviera cerrada o no iniciada **explica suficientemente el síntoma observado**, pero no prueba ningún diagnóstico profundo sobre WSL u otros servicios de Docker.
+
+**Regla de continuidad:** si reaparece `DOCKER_ENGINE_NOT_READY`, comprobar primero que Docker Desktop esté iniciado y `docker version` responda; no saltar directamente a descargar la imagen, reiniciar WSL, reinstalar Docker ni eliminar volúmenes. Esta adenda **no cambia** el punto de reanudación: ZIP de inventario de extensiones ya entregado, Windows pendiente; no realizar nuevas exportaciones remotas. **BT-PILOT-QA-04: A REPASAR**.
