@@ -94,7 +94,7 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
    reserve(40);y-=8
    page.drawRectangle({x:M,y:y-23,width:CW,height:25,color:pale})
    put(name.toUpperCase(),M+9,y-16,9.1)
-   y-=35
+   y-=31
  }
  const heads=[['COMPONENTE',M+7],['OK',M+311],['AT.',M+354],['URG.',M+408],['S/R',M+469]] as const
  function columnHeads(){heads.forEach(([name,x])=>put(name,x,y,7.1,muted));y-=12}
@@ -130,8 +130,7 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
      const note=item.note?lines(item.note,7.4,CW-24):[]
      const res=item.resolution==='resolved'?'Resolución registrada':
        item.resolution==='pending'?'Reparación pendiente':''
-     const height=19+(note.length+(res?1:0))*10
-     if(y-height<63){newPage(true);section(cat.name+' (continuación)');columnHeads()}
+     if(y-19<63){newPage(true);section(cat.name+' (continuación)');columnHeads()}
      page.drawLine({start:{x:M,y:y+8},end:{x:W-M,y:y+8},color:line,thickness:.55})
      put(item.label,M+7,y-3,8.1)
      for(const [state,x] of [['ok',M+312],['attention',M+356],
@@ -141,9 +140,16 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
            ?state==='ok'?green:state==='attention'?amber:state==='immediate'?red:muted:white})
        if(item.state===state)put('X',x+2,y-5,8,white)
      }
-     y-=17
-     for(const l of note){put(l,M+14,y,7.4,muted);y-=10}
-     if(res){put(res,M+14,y,7.4,muted);y-=10}
+     y-=14
+     // Notes can be as long as the server's 2000-character limit. Wrap them
+     // across new A4 pages instead of drawing off the paper.
+     for(const l of [...note,...(res?[res]:[])]){
+       if(y-11<63){
+         newPage(true);section(cat.name+' (continuación)');columnHeads()
+         put(item.label+' (continuación)',M+7,y-3,8.1);y-=14
+       }
+       put(l,M+14,y,7.4,muted);y-=10
+     }
      y-=2
    }
  }
