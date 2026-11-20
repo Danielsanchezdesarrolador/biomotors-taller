@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CarFront, Search, Plus, Pencil, UsersRound, ArrowLeft, RefreshCw } from 'lucide-react'
 import type { Role } from '../auth/controller'
-import { commitAndRefresh } from '../flow/confirmedWrite'
+import { commitAndRefresh } from '../official/confirmedWrite'
 import {
   DirectoryFailure, customerPayload, vehiclePayload,
   type CustomerInput, type CustomerRecord, type VehicleRecord
