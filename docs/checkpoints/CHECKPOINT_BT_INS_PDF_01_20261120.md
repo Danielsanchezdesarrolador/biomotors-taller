@@ -22,7 +22,7 @@ Preparar el **informe técnico multipunto para revisión visual y descarga local
 ## Evidencia y límites
 
 - Commits implementados: `abe82ea4` (generador/modelo), `cc5d610f` (vista previa UI), `fea438ad` (TS), `5383cc3d`/`438ab716` (frontera privada), `5b69c0fc` (paginar), `bf131773` (prueba PDF).
-- Corrida final al documentar: [CI general 44762455426](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455426) y [QA visual 44762455300](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455300) **RESULTADO PENDIENTE DE COMPROBAR**.
+- Corrida final al documentar: [CI general 44762455426](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455426) y [QA visual 44762455300](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455300) **GENERAL SUCCESS verificado** (84/84 archivos de pruebas web, 6/6 pruebas del nuevo PDF, TypeScript y Android OK). **Visual pendiente** al registrar esta adenda..
 - Existe muestra visual independiente de dos páginas A4 realizada localmente con datos **ficticios**, verificada por renderizado en imagen. Muestra editorial, **no es** el PDF generado y descargado de la aplicación ni evidencia de un usuario real.
 - **No** se habilitó Render, Supabase alojado, SQL, RLS, Auth, Storage, Edge, correos, PDF emitidos/inmutables, firmas, aprobaciones, pagos, APK ni OTA. No se generaron datos reales, ni imágenes adjuntas, ni identificadores ficticios dentro del código de producción.
 - Pendientes: CI final, verificación de descarga con navegador físico/web, confirmar terminología y layout con Ignacio, datos de cliente/técnico/contacto cuando exista fuente autorizada, definición de adjuntos privados y envío conjunto COM solo tras puerta de seguridad y aprobación de revisión/consentimiento. R05–R08 sin ejecutar. **SEC-07** restauración integral separada; **piloto real NO habilitado**.
@@ -32,3 +32,7 @@ Preparar el **informe técnico multipunto para revisión visual y descarga local
 1. Confirmar status final de los dos workflows y, si fallan, diagnosticar logs antes de reintentar; nunca convertir FAIL en PASS.
 2. Validar el PDF real descargado desde la UI con datos sintéticos en móvil/escritorio (sin conexión real) y corregir problemas visuales demostrados.
 3. Obtener aprobación visual del formato antes de implementar archivo y correo; esas acciones requieren autorización específica y puertas independientes.
+
+## Adenda de CI general verificado (20/11/2026)
+
+Ejecución [44762455426](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455426) finalizó `completed/success`: Web/iOS PWA + Android/Expo; 84/84 archivos Vitest PASS, `src/ordenes/cp04InspectionPdf.test.ts` 6/6 PASS; verificación de público/privado y build CP04 privado PASS. No prueba el gesto real de pulsar «Vista previa PDF» en un navegador físico. [Pruebas visuales #44762455300](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44762455300) en ejecución al documentar. Sin despliegue ni operaciones alojadas.
