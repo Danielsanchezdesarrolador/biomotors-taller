@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
                 ) &&
                 !(
                   env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
-                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave))\.(?:ts|tsx|js)/.test(
+                  /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist|MultipuntoPdfPreview)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave|InspectionPdf))\.(?:ts|tsx|js)/.test(
                     id
                   )
                 ) &&
