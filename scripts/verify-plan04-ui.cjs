@@ -49,6 +49,7 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
   assert.equal(await page.getByRole('button',{name:'Crear mi taller',exact:true}).count(),0)
   await page.screenshot({path:out+'/personal-basic-'+width+'.png',fullPage:true})
   plan='full';await page.getByRole('button',{name:'Actualizar mi plan y accesos'}).click()
+  await page.getByLabel('Nombre de mi taller').waitFor({timeout:5000})
   await page.getByLabel('Nombre de mi taller').fill('Taller sintético')
   await page.getByRole('button',{name:'Crear mi taller',exact:true}).click()
   await page.locator('.dashboard-main').waitFor()

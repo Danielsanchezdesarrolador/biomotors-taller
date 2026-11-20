@@ -27,8 +27,9 @@ function fingerprint(c: Context) {
   return [c.userId, c.workshop.id, c.workshop.name, c.workshop.status, c.role].join('|')
 }
 /**
- * Auth checking/offline/logout/choose is always a HARD teardown, even when
- * the same user returns. No previous customer data may survive sign-out.
+ * First-load/explicit checking, offline/logout/choose is a HARD teardown, even when
+ * the same user returns. Routine checks keep the verified Auth snapshot.
+ * No previous customer data may survive sign-out.
  * The caller must unmount the old Cp03PilotDirectoryView on snapshot change.
  */
 export function cp03PilotAccessBinding(auth: AuthReader, client: SupabaseClient) {

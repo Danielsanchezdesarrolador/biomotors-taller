@@ -56,8 +56,8 @@ export function RealAccess({
   const [creatorOpen, setCreatorOpen] = useState(false)
   const [CreatorPanel, setCreatorPanel] = useState<ComponentType<{controller:AuthController;onBack:()=>void}> | null>(null)
   const [creatorLoadError,setCreatorLoadError] = useState(false)
-  const principalScope = [state.phase,state.context?.userId ?? state.identityId].join(':')
-  const privateScope = [state.context?.userId ?? state.identityId,state.context?.workshop.id,state.context?.role].join(':')
+  const principalScope = [state.phase,state.context?.userId ?? state.identityId,state.authorityVersion].join(':')
+  const privateScope = [state.context?.userId ?? state.identityId,state.context?.workshop.id,state.context?.role,state.authorityVersion].join(':')
   const [creatorGrant, setCreatorGrant] = useState<{scope:string;allowed:boolean}|null>(null)
   const creatorAccess = creatorGrant?.scope === principalScope && creatorGrant.allowed
   const [planRevision, setPlanRevision] = useState(0)
@@ -65,7 +65,7 @@ export function RealAccess({
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') setPlanRevision(v => v + 1) }, 30_000)
     return () => window.clearInterval(timer)
   }, [])
-  const planScope = [state.phase,state.context?.userId ?? state.identityId,state.context?.workshop.id].join(':')
+  const planScope = [principalScope,state.context?.workshop.id].join(':')
   const [planResponse, setPlanResponse] = useState<{scope:string;value:PlanStatus|null}|null>(null)
   const planStatus = planResponse?.scope === planScope ? planResponse.value : null
   useEffect(() => {
@@ -141,6 +141,7 @@ export function RealAccess({
     clearOperationalDrafts()
     void controller.logout()
   }
+  const refreshAccess = () => { void controller.validate().then(() => setPlanRevision(value => value + 1)) }
   const controls = (
     <div className="auth-session-controls">
       <button type="button" onClick={logout}>
@@ -164,7 +165,7 @@ export function RealAccess({
     </div>
   )
   const creatorView = CreatorPanel
-    ? <CreatorPanel key={privateScope} controller={controller} onBack={()=>{setCreatorOpen(false);void controller.validate()}}/>
+    ? <CreatorPanel key={privateScope} controller={controller} onBack={()=>{setCreatorOpen(false);refreshAccess()}}/>
     : <p role="status">{creatorLoadError?'No se pudo cargar el panel del creador.':'Cargando panel privado del creador…'}</p>
   if (page==='login' && creatorOpen && creatorAccess && state.phase==='restricted') return creatorView
   if (page==='login' && ['authorized','restricted','no-membership'].includes(state.phase) &&
@@ -172,6 +173,7 @@ export function RealAccess({
   if (page === 'login' && state.phase === 'no-membership' && import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true') {
     return <><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
       <PersonalHome key={privateScope} controller={controller} plan={planStatus} name={state.identityName}
+        onRefresh={refreshAccess}
         onCreator={creatorAccess ? () => setCreatorOpen(true) : undefined} />
       </div>{creatorOpen && creatorAccess && creatorView}</>
   }
@@ -201,7 +203,7 @@ export function RealAccess({
     if (role === 'owner' || role === 'admin') {
       return (<><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
         <OfficialWorkspaceView
-          key={[state.context.userId,workshop.id,role].join(':')}
+          key={privateScope}
           session={{ workshop: workshop.name, role: roleNames[role],
             displayName: state.context.displayName, controls,
             planStatus: import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true'

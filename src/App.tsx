@@ -156,6 +156,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
               ? (id) => {
                   setQuoteOrder(id)
+                  setQuoteVehicle(undefined)
                   navigateScreen('informes')
                 }
               : undefined

@@ -1,7 +1,8 @@
 /**
  * CP03 private use: AuthController owns identity, and provides its EXISTING
- * Supabase client. The bound repository closes on logout, revalidation or
- * tenant change. No separate SDK, fake data, service keys or browser storage.
+ * Supabase client. The bound repository closes on hard Auth invalidation or
+ * tenant change. Routine revalidation retains the verified binding.
+ * No separate SDK, fake data, service keys or browser storage.
  * This module is only imported after an explicitly enabled private R1 route.
  */
 import { useEffect, useState, useSyncExternalStore } from 'react'

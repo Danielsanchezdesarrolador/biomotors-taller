@@ -269,6 +269,44 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     release(false);await pending
     expect(c.getSnapshot().phase).toBe('authorized')
   })
+  it('keeps the verified personal-account snapshot while checking unchanged missing memberships',async()=>{
+    const {controller:c,gateway:g}=fixture();vi.mocked(g.memberships).mockResolvedValue([])
+    await c.validate();const before=c.getSnapshot();await c.validate()
+    expect(c.getSnapshot()).toBe(before);expect(g.getUser).toHaveBeenCalledTimes(2)
+    expect(g.memberships).toHaveBeenCalledTimes(2)
+  })
+  it('does not cancel a verified self client when an overlapping routine check succeeds',async()=>{
+    const {controller:c,gateway:g}=fixture();const sdk={} as import('@supabase/supabase-js').SupabaseClient
+    g.getDataClient=vi.fn(async()=>sdk);await c.validate()
+    let finish!:(value:{id:string;confirmed:boolean})=>void
+    vi.mocked(g.getUser).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}))
+    const pending=c.personalPlanClient();await c.validate();finish({id:'user-a',confirmed:true})
+    expect(await pending).toBe(sdk)
+  })
+  it('rejects an old self-client read after logout and reauthentication of the same user',async()=>{
+    const {controller:c,gateway:g}=fixture();g.getDataClient=vi.fn(async()=>({} as import('@supabase/supabase-js').SupabaseClient));await c.validate()
+    const generation=c.getSnapshot().authorityVersion
+    let finish!:(value:{id:string;confirmed:boolean})=>void
+    vi.mocked(g.getUser).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}))
+    const pending=c.personalPlanClient();await c.logout();await c.login('synthetic@invalid.test','synthetic')
+    expect(c.getSnapshot().authorityVersion).not.toBe(generation)
+    finish({id:'user-a',confirmed:true});expect(await pending).toBeNull()
+    expect(c.getSnapshot().phase).toBe('authorized');expect(g.getDataClient).not.toHaveBeenCalled()
+  })
+  it('fails closed when a self-client read detects an expired session',async()=>{
+    const {controller:c,gateway:g}=fixture();g.getDataClient=vi.fn(async()=>null);await c.validate()
+    vi.mocked(g.getUser).mockRejectedValueOnce(new AuthFailure('expired'))
+    expect(await c.personalPlanClient()).toBeNull();expect(c.getSnapshot().context).toBeUndefined()
+    expect(c.getSnapshot().phase).toBe('anonymous')
+  })
+  it('invalidates a changed server identity before handing out a self client',async()=>{
+    vi.useFakeTimers()
+    try{const {controller:c,gateway:g}=fixture();g.getDataClient=vi.fn(async()=>null);await c.validate()
+      vi.mocked(g.getUser).mockResolvedValueOnce({id:'user-b',confirmed:true})
+      expect(await c.personalPlanClient()).toBeNull();expect(c.getSnapshot().context).toBeUndefined()
+      expect(c.getSnapshot().phase).toBe('checking');expect(g.getDataClient).not.toHaveBeenCalled()
+    }finally{vi.clearAllTimers();vi.useRealTimers()}
+  })
   it('coalesces concurrent routine reads, preserving snapshot and repository identity', async () => {
     const {controller:c,gateway:g}=fixture();await c.validate()
     const before=c.getSnapshot();let finish!:(rows:Membership[])=>void

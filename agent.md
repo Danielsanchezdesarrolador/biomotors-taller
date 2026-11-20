@@ -1,10 +1,14 @@
 ## BT-UX-PERSIST-01 — candidato de navegación continua (20/11/2026)
 
+Cierre local: 744/744 pruebas PASS, builds público/privado PASS y UX Chromium
+1366/390/768 PASS. Ajustes de autoridad/plan y destino explícito de otra OT
+probados también con PLAN04 y CP05 sintéticos; CI final pendiente.
+
 Base `bfa7556`, main única. Revalidación coordinada preserva el contexto confirmado,
 cinco vistas visitadas en memoria conservan formularios/scroll y contexto; una
 invalidación real sigue retirando datos/repositorios. Sin cambios Render,
 Supabase/flags/SQL/RLS, Android ni SEC-07. Despliegue pendiente de autorización.
-Incidentes UX-INC-01…05 y UX-TEST-01, pruebas y límites en
+Incidentes UX-INC-01…07 y UX-TEST-01, pruebas y límites en
 [checkpoint UX](docs/checkpoints/CHECKPOINT_BT_UX_PERSIST_01_20261120.md).
 No confundir HTTP sintético y CI con prueba física Safari/Edge o piloto real.
 

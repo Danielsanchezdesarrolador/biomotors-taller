@@ -59,6 +59,23 @@ recarga física posible a React: el navegador/OS sí puede descartar la pestaña
   5000 ms en el test existente de PDF (5142 ms), con 738 PASS. No se modificaron
   renderer, test o umbral de PDF. La suite final se ejecuta sin carga de navegador
   paralela; resultado real registrado en la sección de pruebas.
+- **UX-INC-06:** la lectura de plan podía cancelarse por el epoch de una
+  verificación rutinaria concurrente, o quedar asociada al montaje previo al
+  aceptar una invitación. Se separa `authorityVersion` de los epochs de petición:
+  solo una autorización nueva cambia esa generación. El cliente de lectura sigue
+  comprobando getUser y ámbito; sesión expirada/otra identidad cierran acceso.
+  Una lectura antigua se rechaza incluso tras salir y volver a entrar como el
+  mismo usuario. Actualizar plan y volver del Creador invalidan sus metadatos
+  expresamente. Cinco regresiones añadidas; 58 pruebas focalizadas PASS. El
+  recorrido PLAN04 real/HTTP mock PASS en 1440/390 exige alta disponible en
+  menos de 5 s tras actualizar; no se apoya en el polling de 30 s.
+- **UX-INC-07:** conservar el módulo retenía el filtro de vehículo al abrir
+  explícitamente una OT diferente. El nuevo destino OT limpia únicamente ese
+  filtro; cambiar de módulo sin nuevo destino conserva el contexto. CP05 suma
+  regresión vehículo A → otra OT y verifica su UUID seleccionado y lista sin
+  filtro obsoleto. 7 tamaños PASS, incluido PDF. El primer locator de ese test
+  esperaba nombre accesible exacto de un select con opciones anidadas; se ajustó
+  al select del panel y se espera habilitación, manteniendo el UUID exacto.
 - **UX-TEST-01:** el lector histórico CP06 que exige CP05 OFF se invocó inicialmente
   con todos los gates locales de prueba ON. Se repitió con CP05 false, conservando
   su aserción de cero consultas CP05. No se cambiaron flags/env de Render ni .env.
@@ -87,8 +104,8 @@ recarga física posible a React: el navegador/OS sí puede descartar la pestaña
 
 ## Pruebas y evidencia
 
-- Vitest final aislado: **739/739 PASS, 84 archivos**, 30.47 s; no se aumentó
-  el límite de tiempo de PDF. Controlador/binding CP03: 47 pruebas PASS.
+- Vitest final aislado: **744/744 PASS, 84 archivos (incluye ajuste final de autoridad)**, 31.72 s; no se aumentó
+  el límite de tiempo de PDF. Controlador/binding CP03 y metadatos: 58 pruebas focalizadas PASS tras el ajuste final.
 - TypeScript + build público + build combinado Auth/Creador/PLAN04/CP03–06: PASS;
   grafo oficial, PWA e identidad de marca: PASS.
 - Nuevo recorrido UX con SDK/HTTP simulado: **3/3 tamaños PASS** (1366,390,768):
@@ -106,8 +123,10 @@ recarga física posible a React: el navegador/OS sí puede descartar la pestaña
   privados + 9 escenarios negativos + 5 tamaños públicos OFF), sin acceso real.
 - YAML/JavaScript y diff check: PASS. No hay ESLint configurado.
 
-Logs reproducibles en `/workspace/work/ux-persist/`. Estos resultados son locales;
-CI remoto del nuevo código sigue pendiente de publicación/verificación.
+Logs reproducibles en `/workspace/work/ux-persist/`. El cierre local del ajuste final incluye las 744 pruebas, ambas compilaciones y
+UX Chromium 1366/390/768 PASS. CI del código anterior `a0ee685` fue SUCCESS
+en general (44793504072) y visual Chromium/WebKit (44793504028); no se atribuye
+a ese CI la validación del ajuste final todavía pendiente de publicación.
 Capturas/JSON sintéticos: `docs/screenshots/BT_UX_PERSIST_01_20261120/`.
 
 ## Límites y comportamiento seguro

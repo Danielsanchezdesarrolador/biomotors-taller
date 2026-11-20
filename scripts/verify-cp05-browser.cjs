@@ -242,6 +242,13 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
         await p.getByRole('heading', { name: 'Cotizaciones del vehículo' }).waitFor()
         await p.getByRole('button', { name: /COT-000001 · R0/ }).click()
         await p.locator('.wt-items tbody tr').nth(2).waitFor()
+        // A new explicit OT target must clear the previous vehicle filter.
+        await p.locator('.bottom-nav button').nth(1).click()
+        await p.locator('.cp04-order').nth(1).click()
+        await p.getByRole('button', {name:'Preparar / consultar cotización'}).click()
+        await p.getByRole('heading',{name:'Documentos recientes',exact:true}).waitFor()
+        await p.locator('.cp05-list select:enabled').waitFor()
+        assert.equal(await p.locator('.cp05-list select').inputValue(),uuid(201))
       }
       assert.equal(errors.length, 0, errors.join('\n'))
       assert.ok(!requests.some((r) => /storage|functions|deliver/i.test(r.path)))

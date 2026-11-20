@@ -39,6 +39,8 @@ export type AuthState = {
   message: string
   identityName?: string
   identityId?: string
+  /** Changes on a new verified authority, not on routine checks of the same scope. */
+  authorityVersion?: number
   choices?: Choice[]
   context?: Context
 }
@@ -69,12 +71,33 @@ export class AuthController {
   }
   /** A confirmed personal account may query self-only RPCs without workshop membership. */
   async personalPlanClient(): Promise<SupabaseClient | null> {
-    if (!this.gateway?.getDataClient ||
-        !['authorized', 'restricted', 'no-membership'].includes(this.state.phase)) return null
-    const epoch = this.epoch
-    const user = await this.gateway.getUser()
-    if (!user?.confirmed || epoch !== this.epoch || !['authorized','restricted','no-membership'].includes(this.state.phase)) return null
-    return this.gateway.getDataClient()
+    const scope = this.authorityKey()
+    if (!this.gateway?.getDataClient || !scope) return null
+    try {
+      const user = await this.gateway.getUser()
+      if (this.authorityKey() !== scope) return null
+      if (!user?.confirmed) throw new AuthFailure(user ? 'unconfirmed' : 'expired')
+      if (user.id !== (this.state.context?.userId ?? this.state.identityId)) {
+        this.epoch++; this.validation=undefined; this.selected=undefined
+        this.set({phase:'checking',message:'Verificando sesión y autorización…'})
+        this.requestRevalidation()
+        return null
+      }
+      const client = await this.gateway.getDataClient()
+      return this.authorityKey() === scope ? client : null
+    } catch (error) {
+      if (this.authorityKey() === scope) {
+        this.epoch++; this.validation=undefined
+        if (this.eventTimer) clearTimeout(this.eventTimer)
+        this.fail(error)
+      }
+      return null
+    }
+  }
+  private authorityKey() {
+    if (!['authorized','restricted','no-membership'].includes(this.state.phase)) return null
+    return [this.state.phase,this.state.context?.userId ?? this.state.identityId,
+      this.state.context?.workshop.id,this.state.context?.role,this.state.authorityVersion].join(':')
   }
   async directoryClient(): Promise<SupabaseClient | null> {
     if (!this.gateway?.getDataClient ||
@@ -224,11 +247,15 @@ export class AuthController {
       if (epoch !== this.epoch) return
       if (!choices.length || (requested && !choices.some((c) => c.workshop.id === requested))) {
         this.selected = undefined
+        if (routine && previous.phase==='no-membership' && previous.identityId===user.id &&
+            previous.identityName===user.displayName) return
         this.set({
           phase: 'no-membership',
           message: 'Cuenta personal verificada. Todavía no tienes un taller autorizado. Tu plan y las invitaciones se verifican en el servidor.',
           identityName: user.displayName,
-          identityId: user.id
+          identityId: user.id,
+          authorityVersion: routine && previous.phase==='no-membership' && previous.identityId===user.id
+            ? previous.authorityVersion ?? epoch : epoch
         })
         return
       }
@@ -247,6 +274,7 @@ export class AuthController {
       const nextContext = { ...choice, userId: user.id, displayName: user.displayName }
       const sameContext = JSON.stringify(previous.context) === JSON.stringify(nextContext)
       const phase = choice.role === 'reception' ? 'restricted' : 'authorized'
+      const sameAuthority = previous.context?.userId===user.id && previous.context?.workshop.id===choice.workshop.id && previous.context?.role===choice.role
       if (routine && previous.phase === phase && sameContext && JSON.stringify(previous.choices) === JSON.stringify(choices)) return
       this.set({
         phase,
@@ -255,6 +283,7 @@ export class AuthController {
             ? 'Acceso restringido. Las funciones de recepción están pendientes de definición.'
             : 'Sesión y membresía verificadas. Operaciones de negocio aún no habilitadas.',
         choices,
+        authorityVersion: routine && sameAuthority ? previous.authorityVersion ?? epoch : epoch,
         context: sameContext ? previous.context : nextContext
       })
     } catch (error) {
