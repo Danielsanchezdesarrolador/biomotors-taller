@@ -418,3 +418,33 @@
     min-width: 0;
   }
 }
+
+/* BT-INS-PDF-01: read-only document actions, same surfaces on mobile/web. */
+.cp04-private .cp04-pdf-controls {
+  margin: 16px 0; padding: 17px; background: #fff; border: 1px solid #e0e9f4;
+  border-radius: 14px; box-shadow: 0 4px 15px rgba(11,35,76,.045);
+}
+.cp04-private .cp04-pdf-intro {display:flex;align-items:flex-start;gap:12px;color:#15345d}
+.cp04-private .cp04-pdf-intro svg {color:#1764d8;flex:none}
+.cp04-private .cp04-pdf-intro strong {font-size:15px}
+.cp04-private .cp04-pdf-intro p,
+.cp04-private .cp04-pdf-hint,
+.cp04-private .cp04-pdf-preview p {
+  font-size:12px;line-height:1.5;color:#536a87;margin:7px 0 0;
+}
+.cp04-private .cp04-pdf-actions {display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.cp04-private .cp04-pdf-actions button {display:inline-flex;align-items:center;gap:7px;max-width:100%}
+.cp04-private .cp04-pdf-preview {
+  border:1px solid #dbe5f1;border-radius:10px;background:#f6f8fc;
+  padding:12px;margin-top:16px;
+}
+.cp04-private .cp04-pdf-preview-title {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.cp04-private .cp04-pdf-preview-title strong {font-size:13px;color:#183456}
+.cp04-private .cp04-pdf-preview iframe {display:block;width:100%;height:min(75vh,900px);min-height:450px;border:1px solid #dbe5f1;background:#fff}
+@media(max-width:600px){
+  .cp04-private .cp04-pdf-controls {padding:13px}
+  .cp04-private .cp04-pdf-actions {display:grid;grid-template-columns:minmax(0,1fr)}
+  .cp04-private .cp04-pdf-actions button {width:100%;justify-content:center}
+  .cp04-private .cp04-pdf-preview {padding:7px}
+  .cp04-private .cp04-pdf-preview iframe {min-height:360px;height:62vh}
+}

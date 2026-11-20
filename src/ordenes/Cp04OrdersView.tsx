@@ -36,6 +36,7 @@ import {
 } from './cp04Contracts'
 import { readCp04Draft, writeCp04Draft, emptyCp04Draft, rememberCp04Position } from './cp04Draft'
 import { Cp04MultipuntoChecklist } from './Cp04MultipuntoChecklist'
+import { Cp04MultipuntoPdfPreview } from './Cp04MultipuntoPdfPreview'
 import { provisionalFinding } from './cp04Autosave'
 import './cp04.css'
 export type Cp04Port = Pick<
@@ -834,6 +835,14 @@ export function Cp04OrdersView({
               Revisar los componentes de la hoja original y registrar cada X en Supabase.
             </small>
           </div>
+          <Cp04MultipuntoPdfPreview
+            workshopName={context.workshop.name}
+            order={selected}
+            findings={findings}
+            outstanding={multipuntoOutstanding}
+            incomplete={multipuntoIncomplete}
+            disabled={busy || loading}
+          />
           {canCreate && statusNext[selected.order.status].length > 0 && (
             <div className="cp04-actions">
               {statusNext[selected.order.status].map((next) => (
