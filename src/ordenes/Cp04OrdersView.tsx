@@ -158,12 +158,12 @@ export function Cp04OrdersView({
   useEffect(() => {
     let frame: number | undefined
     const remember = () => {
-      if (!restoredPosition.current || !active.current || !viewRoot.current?.isConnected) return
+      if (!restoredPosition.current || !active.current || (!viewRoot.current?.isConnected || viewRoot.current.closest('[hidden]'))) return
       scrollPosition.current = window.scrollY
       if (frame === undefined)
         frame = window.requestAnimationFrame(() => {
           frame = undefined
-          if (active.current && restoredPosition.current && viewRoot.current?.isConnected)
+          if (active.current && restoredPosition.current && viewRoot.current?.isConnected && !viewRoot.current.closest('[hidden]'))
             rememberCp04Position(scope, scrollPosition.current)
         })
     }
@@ -172,7 +172,7 @@ export function Cp04OrdersView({
         document.visibilityState === 'hidden' &&
         active.current &&
         restoredPosition.current &&
-        viewRoot.current?.isConnected
+        viewRoot.current?.isConnected && !viewRoot.current.closest('[hidden]')
       )
         rememberCp04Position(scope, window.scrollY)
     }
@@ -211,8 +211,8 @@ export function Cp04OrdersView({
           window.requestAnimationFrame(() =>
             window.requestAnimationFrame(() => {
               if (!active.current || cancelled || !viewRoot.current?.isConnected) return
-              window.scrollTo({ top: scrollPosition.current, behavior: 'auto' })
               restoredPosition.current = true
+              if (!viewRoot.current.closest('[hidden]')) window.scrollTo({ top: scrollPosition.current, behavior: 'auto' })
             })
           )
         }

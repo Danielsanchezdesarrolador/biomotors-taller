@@ -196,7 +196,13 @@ async function cp04Page(browser, width, options = {}) {
   await p.getByLabel('Correo electrónico', { exact: true }).fill('cp04-browser@invalid.test')
   await p.getByLabel('Contraseña', { exact: true }).fill('synthetic-password-only')
   await p.getByRole('button', { name: 'Ingresar', exact: true }).click()
-  await p.locator('.dashboard-main').waitFor()
+  await p.locator('.dashboard-main').waitFor().catch(async error=>{
+    const diagnostic='\nSynthetic startup diagnostics: '+JSON.stringify({errors,
+      phase:await p.evaluate(()=>window.btUxQa?.phase()),
+      message:await p.locator('.auth-status > p').allTextContents(),requests})
+    error.stack+=diagnostic
+    throw error
+  })
   await p
     .locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
     .nth(1)

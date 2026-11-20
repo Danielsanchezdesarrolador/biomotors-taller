@@ -73,6 +73,14 @@ jobs:
             sleep 1
           done
           CP04_BASE_URL=http://127.0.0.1:5181 OUTPUT_DIR=artifacts/cp05-mobile node scripts/verify-cp05-browser.cjs
+      - name: UX persistente · Sesión, navegación y formularios con HTTP simulado
+        run: |
+          VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_BT_CP05_PRIVATE_ENABLED=true VITE_BT_CP06_PRIVATE_ENABLED=true npm run dev:harness -- --host 127.0.0.1 --port 5183 --strictPort > /tmp/bt-ux-persist.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5183/ > /dev/null; then break; fi
+            sleep 1
+          done
+          CP04_BASE_URL=http://127.0.0.1:5183 node scripts/verify-ux-persist.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
         env:
           BT_INVITE_BROWSER: webkit
@@ -92,6 +100,7 @@ jobs:
         with:
           name: BT-OFICIAL-01A-Estados-vacios-Capturas
           path: |
+            artifacts/bt-ux-persist/
             artifacts/cp04-redesign/
             artifacts/bt-pilot-qa04b/
             artifacts/cp05-mobile/

@@ -8,7 +8,7 @@ import { ShieldCheck } from 'lucide-react'
 import { AppShell, type Screen } from './layout/AppShell'
 import { OfficialPanel } from './official/OfficialPanels'
 import { preparationNotice } from './official/officialWorkspace'
-import { readPrivateScreen, rememberPrivateScreen } from './official/privateScreen'
+import { useWorkspaceNavigation } from './official/useWorkspaceNavigation'
 import './informes/informes.css'
 import './official/official.css'
 import { TechnicianReview } from './access/TechnicianReview'
@@ -139,21 +139,58 @@ export function OfficialWorkspaceView({
   review?: boolean
   onReviewExit?: () => void
 }) {
-  // Auth revalidates on focus and temporarily unmounts the workspace. Restore
-  // the selected section only; never persist private records or form drafts.
-  const [screen, setScreen] = useState<Screen>(() =>
-    session && !review ? readPrivateScreen() : 'inicio'
-  )
+  const privateSession = !!session && !review
+  const navigation = useWorkspaceNavigation(privateSession)
+  const {screen,navigate:navigateScreen} = navigation
   const [quoteOrder, setQuoteOrder] = useState<string | undefined>()
   const [quoteVehicle, setQuoteVehicle] = useState<string | undefined>()
-  const navigateScreen = (next: Screen) => {
-    if (next !== 'informes') {
-      setQuoteOrder(undefined)
-      setQuoteVehicle(undefined)
-    }
-    setScreen(next)
-    if (session && !review) rememberPrivateScreen(next)
-  }
+  const renderPanel = (screen: Screen) => (
+screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
+        <PrivateWorkshopSettings controller={session.directoryController}/>
+      ) : screen === 'ordenes' &&
+      session?.directoryController &&
+      import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
+        <PrivateWorkOrders
+          controller={session.directoryController}
+          onQuote={
+            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+              ? (id) => {
+                  setQuoteOrder(id)
+                  navigateScreen('informes')
+                }
+              : undefined
+          }
+        />
+      ) : screen === 'informes' &&
+        !review &&
+        session?.directoryController &&
+        import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' ? (
+        <PrivateQuotes
+          key={quoteOrder ? 'order:'+quoteOrder : quoteVehicle ? 'vehicle:'+quoteVehicle : 'recent'}
+          controller={session.directoryController}
+          initialVehicleId={quoteVehicle}
+          initialOrderId={quoteOrder}
+          onBack={() => navigateScreen(quoteVehicle ? 'clientes' : 'ordenes')}
+        />
+      ) : screen === 'clientes' &&
+        session?.directoryController &&
+        import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ? (
+        <PrivateClientDirectory
+          controller={session.directoryController}
+          onVehicleQuotes={
+            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
+              ? (id) => {
+                  setQuoteVehicle(id)
+                  setQuoteOrder(undefined)
+                  navigateScreen('informes')
+                }
+              : undefined
+          }
+        />
+      ) : (
+        <OfficialPanel screen={screen} onNavigate={navigateScreen} />
+      )
+  )
   const privateOrders =
     screen === 'ordenes' &&
     !!session?.directoryController &&
@@ -163,6 +200,7 @@ export function OfficialWorkspaceView({
     <AppShell
       screen={screen}
       onNavigate={navigateScreen}
+      preserveNavigationPosition={privateSession}
       copy={
         session
           ? {
@@ -213,52 +251,12 @@ export function OfficialWorkspaceView({
         </div>
         {privateOrders && session?.controls}
       </div>
-      {screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
-        <PrivateWorkshopSettings controller={session.directoryController}/>
-      ) : screen === 'ordenes' &&
-      session?.directoryController &&
-      import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
-        <PrivateWorkOrders
-          controller={session.directoryController}
-          onQuote={
-            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
-              ? (id) => {
-                  setQuoteOrder(id)
-                  setScreen('informes')
-                  rememberPrivateScreen('informes')
-                }
-              : undefined
-          }
-        />
-      ) : screen === 'informes' &&
-        !review &&
-        session?.directoryController &&
-        import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' ? (
-        <PrivateQuotes
-          controller={session.directoryController}
-          initialVehicleId={quoteVehicle}
-          initialOrderId={quoteOrder}
-          onBack={() => navigateScreen(quoteVehicle ? 'clientes' : 'ordenes')}
-        />
-      ) : screen === 'clientes' &&
-        session?.directoryController &&
-        import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ? (
-        <PrivateClientDirectory
-          controller={session.directoryController}
-          onVehicleQuotes={
-            !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
-              ? (id) => {
-                  setQuoteVehicle(id)
-                  setQuoteOrder(undefined)
-                  setScreen('informes')
-                  rememberPrivateScreen('informes')
-                }
-              : undefined
-          }
-        />
-      ) : (
-        <OfficialPanel screen={screen} onNavigate={navigateScreen} />
-      )}
+      <div ref={navigation.root} className="workspace-views">
+        {navigation.rendered.map(section=><div key={section} data-workspace-section={section}
+          hidden={section!==screen} inert={section!==screen}>
+          {renderPanel(section)}
+        </div>)}
+      </div>
     </AppShell>
   )
 }

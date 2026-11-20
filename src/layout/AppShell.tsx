@@ -53,13 +53,15 @@ export function AppShell({
   search,
   copy = officialCopy,
   children,
-  accountControls
+  accountControls,
+  preserveNavigationPosition = false
 }: {
   screen: Screen
   onNavigate: (screen: Screen) => void
   search?: { value: string; onChange: (value: string) => void; label: string }
   copy?: ShellCopy
   accountControls?: ReactNode
+  preserveNavigationPosition?: boolean
   children: ReactNode
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false),
@@ -81,7 +83,7 @@ export function AppShell({
     setMobileMenuOpen(false)
     setShowAccount(false)
     setShowNotifications(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (!preserveNavigationPosition) window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   return (
     <div className="app-shell">

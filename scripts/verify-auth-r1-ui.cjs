@@ -148,7 +148,7 @@ async function shot(p, name) {
       assert.equal(await nav.count(), 5)
       for (let panel = 0; panel < 5; panel++) {
         await nav.nth(panel).click()
-        await p.locator('.official-panel').waitFor()
+        await p.locator('.official-panel:visible').waitFor()
         assert.equal(
           await p
             .locator(

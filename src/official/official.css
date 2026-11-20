@@ -551,3 +551,8 @@
  .cp04-session p{font-size:11px}
  .cp04-session .auth-session-controls button{font-size:11px;padding:6px 8px;white-space:nowrap}
 }
+
+/* Cached private views must stay absent from layout, focus and the accessibility tree. */
+.workspace-views > [hidden] { display: none !important; }
+
+.workspace-views { overflow-anchor: none; }
