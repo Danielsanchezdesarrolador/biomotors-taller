@@ -94,8 +94,8 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
       return (data || []) as Workshop[]
     },
     subscribe(callback) {
-      const { data } = client.auth.onAuthStateChange((event) => {
-        callback(event)
+      const { data } = client.auth.onAuthStateChange((event, session) => {
+        callback(event, session?.user.id)
       })
       return () => data.subscription.unsubscribe()
     }

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AuthState, Context } from '../auth/controller'
+import {AuthController} from '../auth/controller'
 import { cp03PilotAccessBinding } from './cp03PilotAccessBinding'
 
 const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
@@ -33,6 +34,19 @@ const allowed = (context: Context): AuthState => ({
   phase:context.role==='reception'?'restricted':'authorized',context,message:'Verified'
 })
 describe('BT-CP03-P4 · cierre fail-closed del repositorio al perder Auth (no publicado)', () => {
+  it('retains the real Auth binding during routine checks, disposes it on confirmed revocation',async()=>{
+    const f=fixture(),memberships=vi.fn(async()=>[{user_id:U,workshop_id:A,role:'owner',status:'active'}])
+    const auth=new AuthController({hasSession:async()=>true,getUser:async()=>({id:U,confirmed:true}),
+      signIn:async()=>{},signOut:async()=>{},memberships,workshops:async()=>[{id:A,name:'Taller sintético',status:'active'}],subscribe:()=>()=>{}})
+    const binding=cp03PilotAccessBinding(auth,f.sdk)
+    await auth.validate();const first=binding.getSnapshot()
+    const check=auth.validate();expect(binding.getSnapshot()).toBe(first)
+    await check;expect(binding.getSnapshot()).toBe(first)
+    memberships.mockResolvedValue([]);await auth.validate()
+    expect(binding.getSnapshot()).toBeNull()
+    await expect(first!.repository.recentCustomers()).rejects.toMatchObject({kind:'denied'})
+    binding.dispose()
+  })
   it('no crea repositorio al montar sin identidad verificada', () => {
     const f=fixture(), binding=cp03PilotAccessBinding(f.auth,f.sdk)
     expect(binding.getSnapshot()).toBeNull()

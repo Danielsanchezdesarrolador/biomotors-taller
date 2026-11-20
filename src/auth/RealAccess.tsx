@@ -56,42 +56,46 @@ export function RealAccess({
   const [creatorOpen, setCreatorOpen] = useState(false)
   const [CreatorPanel, setCreatorPanel] = useState<ComponentType<{controller:AuthController;onBack:()=>void}> | null>(null)
   const [creatorLoadError,setCreatorLoadError] = useState(false)
-  const [creatorAccess, setCreatorAccess] = useState(false)
+  const principalScope = [state.phase,state.context?.userId ?? state.identityId].join(':')
+  const privateScope = [state.context?.userId ?? state.identityId,state.context?.workshop.id,state.context?.role].join(':')
+  const [creatorGrant, setCreatorGrant] = useState<{scope:string;allowed:boolean}|null>(null)
+  const creatorAccess = creatorGrant?.scope === principalScope && creatorGrant.allowed
   const [planRevision, setPlanRevision] = useState(0)
   useEffect(() => {
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') setPlanRevision(v => v + 1) }, 30_000)
     return () => window.clearInterval(timer)
   }, [])
-  const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null)
+  const planScope = [state.phase,state.context?.userId ?? state.identityId,state.context?.workshop.id].join(':')
+  const [planResponse, setPlanResponse] = useState<{scope:string;value:PlanStatus|null}|null>(null)
+  const planStatus = planResponse?.scope === planScope ? planResponse.value : null
   useEffect(() => {
     let active = true
-    setPlanStatus(null)
     if (import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED !== 'true' ||
-        !['authorized', 'restricted', 'no-membership'].includes(state.phase)) return
+        !['authorized', 'restricted', 'no-membership'].includes(state.phase)) {setPlanResponse(null);return}
     void controller.personalPlanClient().then(async (client) => {
       if (!client) return null
       const { data, error } = await client.rpc('bt_plan04_my_status', {
         p_workshop_id: state.context?.workshop.id ?? null
       })
       return !error ? parsePlanStatus(data) : null
-    }).then(plan => { if (active) setPlanStatus(plan) })
-      .catch(() => { if (active) setPlanStatus(null) })
+    }).then(plan => { if (active) setPlanResponse({scope:planScope,value:plan}) })
+      .catch(() => { if (active) setPlanResponse({scope:planScope,value:null}) })
     return () => { active = false }
-  }, [controller, state.phase, state.context?.userId, state.context?.workshop.id, planRevision])
+  }, [controller, planScope, planRevision])
   useEffect(() => {
     let active = true
-    setCreatorAccess(false)
+    setCreatorGrant(null)
     if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED === 'true' &&
         ['authorized', 'restricted', 'no-membership'].includes(state.phase)) {
       void controller.personalPlanClient().then(async (client) => {
         if (!client) return false
         const { data, error } = await client.rpc('bt_creator_is_creator')
         return !error && data === true
-      }).then((allowed) => { if (active) setCreatorAccess(allowed) })
-        .catch(() => { if (active) setCreatorAccess(false) })
+      }).then((allowed) => { if (active) setCreatorGrant({scope:principalScope,allowed}) })
+        .catch(() => { if (active) setCreatorGrant({scope:principalScope,allowed:false}) })
     }
     return () => { active = false }
-  }, [controller, state.phase, state.context?.userId])
+  }, [controller, principalScope])
   useEffect(() => { if (!['authorized', 'restricted', 'no-membership'].includes(state.phase)) setCreatorOpen(false) }, [state.phase])
   useEffect(() => {
     if (import.meta.env.VITE_BT_CREATOR_PRIVATE_ENABLED !== 'true' ||
@@ -106,13 +110,13 @@ export function RealAccess({
   useEffect(() => {
     const stop = controller.start()
     const verify = () => {
-      void controller.validate()
+      if (document.visibilityState !== 'hidden') controller.requestRevalidation()
     }
     const visibility = () => {
       if (document.visibilityState === 'visible') verify()
     }
     const offline = () => {
-      void controller.validate()
+      controller.goOffline()
     }
     window.addEventListener('focus', verify)
     window.addEventListener('online', verify)
@@ -159,22 +163,22 @@ export function RealAccess({
       )}
     </div>
   )
-  if (page==='login' && creatorOpen && creatorAccess && ['authorized','restricted','no-membership'].includes(state.phase)) return CreatorPanel
-    ? <CreatorPanel controller={controller} onBack={()=>{setCreatorOpen(false);void controller.validate()}}/>
+  const creatorView = CreatorPanel
+    ? <CreatorPanel key={privateScope} controller={controller} onBack={()=>{setCreatorOpen(false);void controller.validate()}}/>
     : <p role="status">{creatorLoadError?'No se pudo cargar el panel del creador.':'Cargando panel privado del creador…'}</p>
+  if (page==='login' && creatorOpen && creatorAccess && state.phase==='restricted') return creatorView
   if (page==='login' && ['authorized','restricted','no-membership'].includes(state.phase) &&
-      typeof window !== 'undefined' && window.location.hash==='#/auth/aceptar-invitacion' && Invitation) return <main className="personal-home"><Invitation controller={controller}/><button onClick={()=>onNavigate('/acceso')}>Volver a mi cuenta</button></main>
+      typeof window !== 'undefined' && window.location.hash==='#/auth/aceptar-invitacion' && Invitation) return <main className="personal-home"><Invitation key={privateScope} controller={controller}/><button onClick={()=>onNavigate('/acceso')}>Volver a mi cuenta</button></main>
   if (page === 'login' && state.phase === 'no-membership' && import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true') {
-    if (creatorOpen && creatorAccess) return CreatorPanel
-      ? <CreatorPanel controller={controller} onBack={() => { setCreatorOpen(false); void controller.validate() }} />
-      : <p role="status">{creatorLoadError ? 'No se pudo cargar el panel del creador.' : 'Cargando panel privado del creador…'}</p>
-    return <PersonalHome controller={controller} plan={planStatus} name={state.identityName}
-      onCreator={creatorAccess ? () => setCreatorOpen(true) : undefined} />
+    return <><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
+      <PersonalHome key={privateScope} controller={controller} plan={planStatus} name={state.identityName}
+        onCreator={creatorAccess ? () => setCreatorOpen(true) : undefined} />
+      </div>{creatorOpen && creatorAccess && creatorView}</>
   }
   // The only private entry is the login route; public review routes never render this component.
   if (page === 'login' && state.phase === 'authorized' && state.context) {
     const { workshop, role } = state.context
-    if(role==='mechanic' && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && Mechanic) return <Mechanic controller={controller} plan={planStatus} controls={controls}/>
+    if(role==='mechanic' && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && Mechanic) return <Mechanic key={privateScope} controller={controller} plan={planStatus} controls={controls}/>
     if (role === 'mechanic')
       return (
         <TechnicianReview
@@ -195,14 +199,9 @@ export function RealAccess({
         />
       )
     if (role === 'owner' || role === 'admin') {
-      if (creatorOpen && creatorAccess) {
-        if (creatorLoadError) return <p role="alert">No se pudo cargar el panel del creador. Vuelve al inicio.</p>
-        return CreatorPanel
-          ? <CreatorPanel controller={controller} onBack={() => { setCreatorOpen(false); void controller.validate() }} />
-          : <p role="status">Cargando panel privado del creador…</p>
-      }
-      return (
+      return (<><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
         <OfficialWorkspaceView
+          key={[state.context.userId,workshop.id,role].join(':')}
           session={{ workshop: workshop.name, role: roleNames[role],
             displayName: state.context.displayName, controls,
             planStatus: import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true'
@@ -210,6 +209,7 @@ export function RealAccess({
             directoryController: import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
               ? controller : undefined }}
         />
+        </div>{creatorOpen && creatorAccess && creatorView}</>
       )
     }
   }

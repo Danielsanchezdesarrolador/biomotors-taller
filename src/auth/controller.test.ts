@@ -8,7 +8,7 @@ import {
 } from './controller'
 import { authConfig } from './config'
 function fixture(role: Role = 'owner') {
-  let event: (event: string) => void = () => {}
+  let event: (event: string, observedUserId?:string) => void = () => {}
   const gateway: AuthGateway = {
     hasSession: vi.fn(async () => true),
     getUser: vi.fn(async () => ({ id: 'user-a', confirmed: true })),
@@ -26,7 +26,7 @@ function fixture(role: Role = 'owner') {
   return {
     gateway,
     controller: new AuthController(gateway),
-    event: (value: string) => event(value)
+    event: (value: string, observedUserId?:string) => event(value,observedUserId)
   }
 }
 const flush = async () => {
@@ -143,12 +143,13 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     await c.changeWorkshop()
     expect(c.getSnapshot().phase).toBe('choose')
   })
-  it('clears context immediately on reconnect/focus validation and revocation', async () => {
+  it('keeps context during routine validation and clears it when revocation is confirmed', async () => {
     const { controller: c, gateway: g } = fixture()
     await c.validate()
     vi.mocked(g.memberships).mockResolvedValue([])
+    const verified=c.getSnapshot()
     const pending = c.validate()
-    expect(c.getSnapshot().context).toBeUndefined()
+    expect(c.getSnapshot()).toBe(verified)
     await pending
     expect(c.getSnapshot().phase).toBe('no-membership')
   })
@@ -238,15 +239,16 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     await c.validate()
     expect(c.getSnapshot().phase).toBe('anonymous')
   })
-  it('session events invalidate immediately and defer SDK work outside callback lock', async () => {
+  it('token refresh keeps context, verifies outside callback lock; sign-out clears immediately', async () => {
     vi.useFakeTimers()
     const { controller: c, gateway: g, event } = fixture()
     const stop = c.start()
     await flush()
     expect(c.getSnapshot().phase).toBe('authorized')
     const calls = vi.mocked(g.getUser).mock.calls.length
+    const verified=c.getSnapshot()
     event('TOKEN_REFRESHED')
-    expect(c.getSnapshot().context).toBeUndefined()
+    expect(c.getSnapshot()).toBe(verified)
     expect(g.getUser).toHaveBeenCalledTimes(calls)
     await vi.runAllTimersAsync()
     await flush()
@@ -256,6 +258,48 @@ describe('BT-AUTH-01B-R1 controller · SDK stubs, no real Auth/RLS', () => {
     expect(c.getSnapshot().context).toBeUndefined()
     stop()
     vi.useRealTimers()
+  })
+  it('does not replace the anonymous login during a routine check; login supersedes its stale result',async()=>{
+    const {controller:c,gateway:g}=fixture();vi.mocked(g.hasSession).mockResolvedValue(false);await c.validate()
+    const anonymous=c.getSnapshot();let release!:(value:boolean)=>void
+    vi.mocked(g.hasSession).mockImplementationOnce(()=>new Promise(resolve=>{release=resolve}))
+    const pending=c.validate();expect(c.getSnapshot()).toBe(anonymous)
+    vi.mocked(g.hasSession).mockResolvedValue(true)
+    await c.login('synthetic@invalid.test','synthetic-password')
+    release(false);await pending
+    expect(c.getSnapshot().phase).toBe('authorized')
+  })
+  it('coalesces concurrent routine reads, preserving snapshot and repository identity', async () => {
+    const {controller:c,gateway:g}=fixture();await c.validate()
+    const before=c.getSnapshot();let finish!:(rows:Membership[])=>void
+    vi.mocked(g.memberships).mockImplementation(()=>new Promise(resolve=>{finish=resolve}))
+    const a=c.validate(),b=c.validate();await flush()
+    expect(g.memberships).toHaveBeenCalledTimes(2)
+    expect(c.getSnapshot()).toBe(before)
+    finish([{user_id:'user-a',workshop_id:'a',role:'owner',status:'active'}])
+    await Promise.all([a,b]);expect(c.getSnapshot()).toBe(before)
+  })
+  it('coalesces focus/visibility and Auth bursts without leaking listeners after stop',async()=>{
+    vi.useFakeTimers()
+    try{const {controller:c,gateway:g,event}=fixture();const stop=c.start();await flush()
+      c.requestRevalidation();c.requestRevalidation();event('TOKEN_REFRESHED','user-a')
+      await vi.advanceTimersByTimeAsync(60);await flush();expect(g.getUser).toHaveBeenCalledTimes(2)
+      c.requestRevalidation();stop();await vi.runAllTimersAsync();expect(g.getUser).toHaveBeenCalledTimes(2)
+    }finally{vi.useRealTimers()}
+  })
+  it('invalidates a different SDK identity immediately, without trusting that hint to authorize',async()=>{
+    const {controller:c,gateway:g,event}=fixture();const stop=c.start();await flush()
+    event('SIGNED_IN','user-b');expect(c.getSnapshot().context).toBeUndefined()
+    expect(c.getSnapshot().phase).toBe('checking');stop()
+    expect(g.memberships).toHaveBeenCalledTimes(1)
+  })
+  it('offline invalidation defeats an already-running successful validation',async()=>{
+    const {controller:c,gateway:g}=fixture();await c.validate();let finish!:(rows:Membership[])=>void
+    vi.mocked(g.memberships).mockImplementation(()=>new Promise(resolve=>{finish=resolve}))
+    const pending=c.validate();await flush();c.goOffline()
+    expect(c.getSnapshot().phase).toBe('offline');expect(c.getSnapshot().context).toBeUndefined()
+    finish([{user_id:'user-a',workshop_id:'a',role:'owner',status:'active'}]);await pending
+    expect(c.getSnapshot().phase).toBe('offline')
   })
   it('revalidates after returning to access while password login is still pending', async () => {
     const { controller: c, gateway: g } = fixture()

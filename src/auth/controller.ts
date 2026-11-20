@@ -18,7 +18,7 @@ export interface AuthGateway {
   signOut(): Promise<void>
   memberships(userId: string): Promise<Membership[]>
   workshops(ids: string[]): Promise<Workshop[]>
-  subscribe(callback: (event: string) => void): () => void
+  subscribe(callback: (event: string, observedUserId?: string) => void): () => void
 }
 export type AuthState = {
   phase:
@@ -38,6 +38,7 @@ export type AuthState = {
     | 'signing-out'
   message: string
   identityName?: string
+  identityId?: string
   choices?: Choice[]
   context?: Context
 }
@@ -57,6 +58,7 @@ export class AuthController {
   private blocked = false
   private signingIn = false
   private registering = false
+  private validation?: Promise<void>
   constructor(
     private gateway: AuthGateway | null,
     disabledReason = ''
@@ -120,20 +122,25 @@ export class AuthController {
   }
   start() {
     if (!this.gateway || this.cleanup) return () => {}
-    this.cleanup = this.gateway.subscribe((event) => {
-      if (this.eventTimer) clearTimeout(this.eventTimer)
+    this.cleanup = this.gateway.subscribe((event, observedUserId) => {
       if (event === 'SIGNED_OUT') {
         if (this.blocked && this.state.phase === 'signing-out') return
         this.epoch++
+        this.validation = undefined
+        if (this.eventTimer) clearTimeout(this.eventTimer)
         this.selected = undefined
         this.set({ phase: 'anonymous', message: this.blocked ? 'Sesión cerrada.' : expired })
       } else if (!this.blocked && !this.signingIn && !this.registering) {
         // Never await SDK calls inside onAuthStateChange (Auth lock).
-        this.epoch++
-        this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
-        this.eventTimer = setTimeout(() => {
-          void this.validate()
-        }, 0)
+        const known = this.state.context?.userId ?? this.state.identityId
+        if ((observedUserId && known && observedUserId !== known) ||
+            (event === 'SIGNED_IN' && known && !observedUserId)) {
+          this.epoch++
+          this.validation = undefined
+          this.selected = undefined
+          this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
+        }
+        this.requestRevalidation()
       }
     })
     // Explicit sign-out remains blocked across route changes; do not replace
@@ -141,6 +148,7 @@ export class AuthController {
     if (!this.blocked) void this.validate()
     return () => {
       this.epoch++
+      this.validation = undefined
       if (this.eventTimer) clearTimeout(this.eventTimer)
       this.cleanup?.()
       this.cleanup = undefined
@@ -148,11 +156,33 @@ export class AuthController {
       if (!this.blocked) this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
     }
   }
+  /** Coalesce SDK/focus/visibility bursts, without skipping a server check. */
+  requestRevalidation = () => {
+    if (!this.gateway || this.blocked) return
+    if (this.eventTimer) clearTimeout(this.eventTimer)
+    this.eventTimer = setTimeout(() => { this.eventTimer = undefined; void this.validate() }, 60)
+  }
+  goOffline = () => {
+    if (this.blocked || !this.gateway) return
+    this.epoch++
+    this.validation = undefined
+    if (this.eventTimer) clearTimeout(this.eventTimer)
+    this.fail(new AuthFailure('offline'))
+  }
   async validate(selection?: string) {
     if (!this.gateway || this.blocked || this.signingIn || this.registering) return
+    if (selection === undefined && this.validation) return this.validation
+    const request = this.performValidation(selection)
+    this.validation = request
+    try { await request } finally { if (this.validation === request) this.validation = undefined }
+  }
+  private async performValidation(selection?: string) {
+    if (!this.gateway) return
     const epoch = ++this.epoch
-    const requested = selection ?? this.selected
-    this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
+    const previous = this.state
+    let requested = selection ?? this.selected
+    const routine = selection === undefined && ['authorized','restricted','no-membership','anonymous'].includes(previous.phase)
+    if (!routine) this.set({ phase: 'checking', message: 'Verificando sesión y autorización…' })
     try {
       if (typeof navigator !== 'undefined' && navigator.onLine === false)
         throw new AuthFailure('offline')
@@ -167,9 +197,17 @@ export class AuthController {
         return
       }
       const user = await this.gateway.getUser()
+      if (epoch !== this.epoch) return
       if (!user) throw new AuthFailure('expired')
       if (!user.confirmed) throw new AuthFailure('unconfirmed')
+      const priorUser = previous.context?.userId ?? previous.identityId
+      if (priorUser && priorUser !== user.id) {
+        requested = undefined
+        this.selected = undefined
+        this.set({phase:'checking',message:'Verificando sesión y autorización…'})
+      }
       const rows = await this.gateway.memberships(user.id)
+      if (epoch !== this.epoch) return
       const active = rows.filter(
         (row) =>
           row.user_id === user.id && row.status === 'active' && roles.includes(row.role as Role)
@@ -189,7 +227,8 @@ export class AuthController {
         this.set({
           phase: 'no-membership',
           message: 'Cuenta personal verificada. Todavía no tienes un taller autorizado. Tu plan y las invitaciones se verifican en el servidor.',
-          identityName: user.displayName
+          identityName: user.displayName,
+          identityId: user.id
         })
         return
       }
@@ -198,20 +237,25 @@ export class AuthController {
           phase: 'choose',
           message: 'Selecciona un taller autorizado. Se verificará nuevamente la membresía.',
           identityName: user.displayName,
+          identityId: user.id,
           choices
         })
         return
       }
       const choice = choices.find((c) => c.workshop.id === requested) ?? choices[0]
       this.selected = choice.workshop.id
+      const nextContext = { ...choice, userId: user.id, displayName: user.displayName }
+      const sameContext = JSON.stringify(previous.context) === JSON.stringify(nextContext)
+      const phase = choice.role === 'reception' ? 'restricted' : 'authorized'
+      if (routine && previous.phase === phase && sameContext && JSON.stringify(previous.choices) === JSON.stringify(choices)) return
       this.set({
-        phase: choice.role === 'reception' ? 'restricted' : 'authorized',
+        phase,
         message:
           choice.role === 'reception'
             ? 'Acceso restringido. Las funciones de recepción están pendientes de definición.'
             : 'Sesión y membresía verificadas. Operaciones de negocio aún no habilitadas.',
         choices,
-        context: { ...choice, userId: user.id, displayName: user.displayName }
+        context: sameContext ? previous.context : nextContext
       })
     } catch (error) {
       if (epoch === this.epoch) this.fail(error)
@@ -224,6 +268,7 @@ export class AuthController {
     this.selected = undefined
     this.signingIn = true
     const epoch = ++this.epoch
+    this.validation = undefined
     this.set({ phase: 'signing-in', message: 'Comprobando credenciales…' })
     try {
       await this.gateway.signIn(email.trim(), password)
@@ -244,6 +289,7 @@ export class AuthController {
     if (!this.gateway?.register || this.registering || this.signingIn || this.blocked) return
     this.registering = true
     const epoch = ++this.epoch
+    this.validation = undefined
     this.set({ phase: 'registering', message: 'Solicitando confirmación de correo…' })
     try {
       await this.gateway.register(email.trim().toLowerCase(), password, profile)
@@ -267,6 +313,7 @@ export class AuthController {
   async logout() {
     if (!this.gateway || this.state.phase === 'signing-out') return
     const epoch = ++this.epoch
+    this.validation = undefined
     this.blocked = true
     this.selected = undefined
     this.set({ phase: 'signing-out', message: 'Cerrando sesión…' })
@@ -285,7 +332,10 @@ export class AuthController {
   }
   choose = (id: string) => this.validate(id)
   changeWorkshop = () => {
+    this.epoch++
+    this.validation = undefined
     this.selected = undefined
+    this.set({phase:'checking',message:'Verificando sesión y autorización…'})
     return this.validate()
   }
 }
