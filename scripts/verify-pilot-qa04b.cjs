@@ -99,8 +99,10 @@ async function run(browser, id, width, task) {
       await run(browser, 'F04', width, async ({ p, state, requests }) => {
         await p.locator('.cp04-order').first().click()
         await p.locator('.cp04-detail').waitFor()
-        await p.getByLabel('Resultado', { exact: true }).selectOption('attention')
-        await p.getByLabel('Observación técnica *').fill('Revisión de freno sintética')
+        const findingForm = p.locator('.cp04-detail form.cp04-form')
+        assert.equal(await findingForm.count(), 1, 'editable finding form must be present')
+        await findingForm.locator('select').nth(1).selectOption('attention')
+        await findingForm.locator('textarea').fill('Revisión de freno sintética')
         await p.getByRole('button', { name: 'Guardar punto de inspección' }).click()
         await p.getByText(/Inspección guardada en el servidor\. La lista está pendiente/).waitFor()
         assert.equal(state.findings.length, 1)
