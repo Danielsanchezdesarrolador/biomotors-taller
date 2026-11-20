@@ -21,8 +21,6 @@ import {
 } from './contracts'
 const orderCols =
   'workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'
-const findingCols =
-  'workshop_id,id,vehicle_id,order_id,category,result,note,resolution,resolved_at,recorded_by,created_at,updated_at'
 type Row = { workshop_id: string; id: string }
 export function historyRepository(
   client: SupabaseClient,
