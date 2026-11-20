@@ -62,6 +62,8 @@ jobs:
             sleep 1
           done
           CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-cp04-redesign.cjs
+      - name: BT-PILOT-QA-04B · F01–F06 en navegador con HTTP sintético, sin datos alojados
+        run: CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-pilot-qa04b.cjs
       - name: CP05 móvil · Tarjetas compactas, acciones R2 y total (HTTP simulado)
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_BT_CP05_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp05-mobile-build
@@ -91,6 +93,7 @@ jobs:
           name: BT-OFICIAL-01A-Estados-vacios-Capturas
           path: |
             artifacts/cp04-redesign/
+            artifacts/bt-pilot-qa04b/
             artifacts/cp05-mobile/
             artifacts/bt-ui-polish/
             artifacts/bt-com-01d/

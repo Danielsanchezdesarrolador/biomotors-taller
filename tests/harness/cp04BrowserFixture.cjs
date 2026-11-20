@@ -45,6 +45,11 @@ async function cp04Page(browser, width, options = {}) {
     slowList: false,
     failFindings: false,
     slowFindings: false,
+    injectFault: null,
+    failVehiclesRead: false,
+    failOrderDetail: false,
+    failFindingReads: false,
+    customers: [],
     orders: states.map((status, i) => ({
       id: uuid(200 + i),
       workshop_id: tenant,
@@ -113,9 +118,14 @@ async function cp04Page(browser, width, options = {}) {
         (method === 'POST' ? `eq.${request.postDataJSON().workshop_id}` : null),
       'eq.' + tenant
     )
-    const fail =
-      table === 'work_orders' && method === 'GET' && !url.searchParams.has('id') && state.failList
+    const fail = method === 'GET' && (
+      (table === 'work_orders' && (url.searchParams.has('id') ? state.failOrderDetail : state.failList)) ||
+      (table === 'vehicles' && state.failVehiclesRead) ||
+      (table === 'inspection_findings' && state.failFindingReads)
+    )
     if (fail) return reply({ code: 'NETWORK_QA', message: 'Synthetic unavailable' }, 503)
+    if (method === 'POST' && table === 'work_orders' && state.injectFault === 'F06')
+      return reply({ code: 'NETWORK_QA', message: 'Synthetic write rejected' }, 503)
     if (table === 'work_orders' && state.slowList) await new Promise((r) => setTimeout(r, 450))
     if (table === 'inspection_findings' && method !== 'GET') {
       if (state.slowFindings) await new Promise((r) => setTimeout(r, 350))
@@ -129,12 +139,14 @@ async function cp04Page(browser, width, options = {}) {
           ? state.orders
           : table === 'inspection_findings'
             ? state.findings
-            : []
+            : state.customers
     function filtered() {
       return rows.filter((row) =>
         [...url.searchParams].every(([key, value]) => {
           if (['select', 'limit', 'order', 'offset'].includes(key)) return true
           if (value.startsWith('eq.')) return String(row[key]) === value.slice(3)
+          if (value.startsWith('ilike.'))
+            return String(row[key] || '').toLowerCase().includes(value.slice(6).replace(/%/g, '').toLowerCase())
           if (value.startsWith('neq.')) return String(row[key]) !== value.slice(4)
           if (value === 'is.null') return row[key] == null
           if (value.startsWith('in.('))
@@ -151,15 +163,26 @@ async function cp04Page(browser, width, options = {}) {
         ...input,
         id: uuid(++serial),
         updated_at: now,
+        created_at: now,
+        archived_at: null,
+        ...(table === 'vehicles' ? { plate_key: String(input.plate || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase() } : {}),
         ...(table === 'work_orders'
           ? { opened_by: userId, opened_at: now, closed_at: null, status: 'received' }
           : { recorded_by: userId, created_at: now, resolved_at: null })
       }
       rows.push(row)
       result = [row]
+      if (table === 'customers' && state.injectFault === 'F01') state.failVehiclesRead = true
+      if (table === 'vehicles' && state.injectFault === 'F02') state.failVehiclesRead = true
+      if (table === 'work_orders' && state.injectFault === 'F03') {
+        state.failList = true
+        state.failOrderDetail = true
+      }
+      if (table === 'inspection_findings' && state.injectFault === 'F04') state.failFindingReads = true
     } else if (method === 'PATCH') {
       const input = request.postDataJSON()
       for (const row of result) Object.assign(row, input, { updated_at: timestamp() })
+      if (table === 'inspection_findings' && state.injectFault === 'F05') state.failFindingReads = true
     } else assert.equal(method, 'GET', 'No deletes allowed')
     const accept = request.headers().accept || ''
     // PostgREST .single() object header; maybeSingle() can also request JSON arrays.
