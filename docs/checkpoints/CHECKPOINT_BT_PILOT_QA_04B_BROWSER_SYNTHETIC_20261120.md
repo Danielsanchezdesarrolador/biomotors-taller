@@ -1,6 +1,6 @@
 # ByteTorque — CHECKPOINT BT-PILOT-QA-04B: F01–F06 en navegador
 
-**Fecha:** 20/11/2026 · **Única rama:** `main`. **Estado actual:** implementación candidata, QA visual pendiente de nueva ejecución tras corrección de selector. **No desplegada en Render ni conectada a datos reales.**
+**Fecha:** 20/11/2026 · **Única rama:** `main`. **Estado de referencia anterior:** implementación candidata, QA visual pendiente tras el primer selector; **cierre aprobado en la adenda al final**. **No desplegada en Render ni conectada a datos reales.**
 
 ## Continuidad y alcance
 Se leyeron `AGENTS.md`, `agent.md`, `roadmap.md`, el plan preactivación y checkpoint QA04A. Antes del desarrollo `main` apuntaba a `4da446c7` (cambio documental de seguridad); no se alteró trabajo de SEC-07. El propietario autorizó continuar la parte funcional sin afectar seguridad. No se realizaron nuevas exportaciones/restauraciones, cambios de GPG, SQL, RLS, Auth/Storage/Edge alojados, emails, pagos, APK u OTA.
@@ -30,3 +30,14 @@ Se leyeron `AGENTS.md`, `agent.md`, `roadmap.md`, el plan preactivación y check
 1. Verificar QA visual F01–F06, corregir únicamente defectos demostrados e inscribir resultado efectivo.
 2. Ejecutar R05–R08 completos DEMO sin reescribir matrices, además de QA físico R09/R10 según requisitos.
 3. SEC-07 sigue separado: nuevo snapshot cifrado existe pero restauración integral requiere resolver `EXTENSION_UNAVAILABLE`; **piloto Ignacio permanece BLOQUEADO** hasta aprobación y validaciones reales diferenciadas.
+
+## Adenda de cierre — QA04B (20/11/2026)
+
+**Estado final del bloque sintético: APROBADO; no implica autorización piloto real.**
+- Commit de última corrección: `df17b74ca82a5656f4507ccf49d78528bf301616`. Selector de F04 reemplazado por búsqueda acotada al formulario `.cp04-detail form.cp04-form` y selección de control por posición; se añadió aserción de existencia. No se modificó código de CP03/CP04 ni servicios alojados.
+- **QA04B-INC-02:** [corrida 44756351689](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44756351689) **FAIL** después de F01 390, F02 390 y F03 390 **PASS**. Error textual sanitizado: `locator.selectOption: Timeout 30000ms exceeded; waiting for getByLabel('Resultado', { exact: true })`. Causa comprobada inmediata: locator de Playwright no localizó ese control dentro del tiempo; no demuestra error de persistencia. Solución aplicada y validada: selector dentro de `form.cp04-form` y acceso explícito al segundo `select`, con afirmación de presencia; en CI siguiente F04 pasó. La razón interna exacta de la ausencia de coincidencia por etiqueta no se determinó; no se atribuye a backend.
+- **CI general final:** [44757774410](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44757774410) **SUCCESS** en Web/iOS PWA y Android/Expo, sin APK, despliegue o red alojada.
+- **QA visual final:** [44757774392](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/44757774392) **SUCCESS**. Paso exacto `BT-PILOT-QA-04B · F01–F06 en navegador con HTTP sintético, sin datos alojados` **SUCCESS**, de 14:59:03 a 15:00:48 UTC; el script completa **12/12 pruebas F01–F06 (6 x 390, 6 x 1366)** y escribe evidencias sintéticas en artefactos del workflow. También aprobó la etapa CP04 previa y el resto del job visual.
+- **Qué sí demuestra:** caminos de interfaz y HTTP falsos correspondientes a fallo de GET post-confirmación y POST no confirmado, sin segundo POST/PATCH en las condiciones simuladas.
+- **Qué NO demuestra:** exactamente-una-vez ante pérdida del acuse de mutación, integridad alojada real, RLS, sesiones reales, recuperación SEC-07, idempotencia del servidor, Safari físico, APK, todos los 18 recorridos /55 pasos, ni operación con datos personales de Ignacio.
+- **Próximo funcional:** ejecutar/automatizar los **14 pasos originales R05–R08** de `docs/qa/BT_PILOT_QA_02_RECORRIDOS_20261118.md` en el alcance DEMO, usando el registro existente sin reescribir matriz. Para activar servicios/usuarios reales habrá puertas y permisos independientes; **BT-PILOT-QA-04: A REPASAR**.
