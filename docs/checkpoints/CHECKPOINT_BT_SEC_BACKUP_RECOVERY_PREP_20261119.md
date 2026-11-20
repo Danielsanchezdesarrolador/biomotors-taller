@@ -250,3 +250,37 @@ BT_SEC07_GPG_CONFIGURATION: RESTORED
 **Puerta de autorización:** el propietario había autorizado ensayo de restauración aislada y recuperación del backup actual. Esta es **una única repetición focalizada en un contenedor local** con razón nueva (recuperar categoría de falla antes descartada), sin repetir exportación ni conectar PostgreSQL; la ejecución efectiva en Windows requiere que el propietario ejecute personalmente el bloque PowerShell descargado, verifique SHA y lea LEEME; compartir solo etiquetas sanitizadas. Si se considera nueva operación de restauración, esa acción del propietario expresa conformidad, sin inferir acceso permanente. **No ejecutar más reintentos sin evidencia nueva.**
 
 **Ningún cambio en Supabase/Render/Auth/Drive, app, SQL productivo, secretos ni backups históricos.** Docs/commit únicamente, código privado del chat no se incorpora a GitHub. `BT-PILOT-QA-04: A REPASAR`; original `pg_dumpall` roles exit 1/stderr 75B sin raíz comprobada y Google Drive OAuth todavía bloqueado.
+
+## BT-SEC07-EXTENSION-RESTORE-16 · Resultado diagnóstico de restore: EXTENSION_UNAVAILABLE y comparación offline preparada
+
+**Evidencia real del propietario en Windows (19/11/2026):**
+
+```text
+OK
+BT_SEC07_DIAG_TESTS: OK
+BT_SEC07_ISOLATED_DIAG: STARTING
+BT_SEC07_DIAG_MODE: EXISTING_CIPHERTEXT_OFFLINE_ISOLATED_ONLY
+BT_SEC07_SNAPSHOT: ONE_MATCHING_FAILED_RESTORE
+BT_SEC07_CIPHERTEXT_HASHES: OK
+BT_SEC07_RECIPIENT: MATCHED_HISTORICAL_CIPHERTEXT
+BT_SEC07_DOCKER_PG17: LOCAL_LINUX_IMAGE_VERIFIED
+BT_SEC07_RESTORE: RESTORE_FULL_FAILED_IN_ISOLATION
+BT_SEC07_GPG_PROCESS: OK
+BT_SEC07_PG_RESTORE_PROCESS: FAILED
+BT_SEC07_DECRYPTED_STREAM: NONZERO
+BT_SEC07_PG_RESTORE_ERROR_CLASS: EXTENSION_UNAVAILABLE
+BT_SEC07_BACKUP_MANIFEST: UNCHANGED
+BT_SEC07_FINAL: RECOVERY_NOT_CERTIFIED
+DIAG_EXIT_CODE: 3
+BT_SEC07_GPG_CONFIGURATION: RESTORED
+```
+
+**Interpretación rigurosa:** el descifrado GPG funcionó y el flujo a `pg_restore` fue no vacío. Docker PG17 funcionó y el comando de restauración terminó fallando. El clasificador en `BT_SEC07_Restore_Diagnostico_Offline.py` devuelve `EXTENSION_UNAVAILABLE` si encuentra `could not open extension control file` o un patrón `extension ... is not available` dentro de stderr limitado. Es evidencia concreta de **una incompatibilidad de extensión en destino**, no certificado de que ese sea el único bloqueo ni certeza de cuál nombre. No reproducir SQL ni stderr crudo ni inferir corrupción del cifrado. El manifiesto existente conservó `RESTORE_NOT_VALIDATED` y `restoration_verified=false`; el snapshot nuevo sigue creado pero no recuperado.
+
+**Cotejo de documentación oficial (sin conexiones al proyecto):** [Supabase: Restore a Platform Project to Self-Hosted](https://supabase.com/docs/guides/self-hosting/restore-from-platform), troubleshooting «Extension not available», exige verificar `pg_available_extensions` en el destino y versión; [PostgreSQL 17 pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html) documenta `--list` de tabla de contenidos de archivo custom sin ejecutar SQL. Los dumps raw de Supabase incluyen objetos/roles administrados y difieren de la CLI filtrada; la imagen `postgres:17` estándar no es prueba suficiente de compatibilidad de extensiones Supabase. No usar `--use-list` para saltarse errores como validación total.
+
+**Artefacto técnico preparado (ZIP solo en la conversación, NO en GitHub):** `BT_SEC07_EXTENSION_INVENTORY_20261119.zip` **7.677 bytes**, SHA256 `7e3a0a2a16d5d92ec5a2155ff041ab63db5bf4e54aa6d635b834e76c280536f9`. Contiene `BT_SEC07_Extension_Inventory_Offline.py`, `test_BT_SEC07_Extension_Inventory_Offline.py` y `LEEME_SEC07_EXTENSIONES.md`. Programa verifica que el almacén GPG histórico esté seleccionado; encuentra **exactamente una** carpeta de snapshot `RESTORE_NOT_VALIDATED` y `RESTORE_FULL_FAILED_IN_ISOLATION` y comprueba todas las referencias del manifiesto con tamaños y SHA; verifica contexto Docker local/Linux y ejecutable `pg_restore` local; descifra `database.dump.gpg` por bloques solo hacia `pg_restore --list` sin base de datos y sin archivo SQL plano; construye el conjunto de extensiones del TOC en memoria; enumera los archivos de control `.control` ya presentes en una imagen PG17 **local** usando `docker run --rm --network none --pull=never --entrypoint sh` (sin iniciar servidor y sin montar respaldos); compara las dos listas, emite solo conteos y nombres de extensiones públicas allowlisted, redaccion de los demás. No añade ni elimina extensiones, no exporta nuevo dump ni ejecuta restore. **.control presente no equivale a extensión funcional ni garantiza que cargue con preload/roles/ABI**.
+
+**Pruebas en contenedor del asistente:** 16/16 unittest offline PASS; prueba de integración GPG **real con clave y ciphertext totalmente sintéticos** alimentando un lector TOC simulado (no PostgreSQL real) PASS; ZIP `testzip()=OK`, extracción limpia y repetición **16/16 PASS**. No se ejecutó con respaldo real en Windows ni Docker del propietario. Próximo: usuario verifica SHA ZIP, extrae a carpeta NUEVA, corre QA y un solo inventario local; comparte líneas `BT_SEC07_*` y `DIAG_EXIT_CODE` únicamente. Si faltan extensiones compatibles, planificar entorno aislado PostgreSQL17 Supabase con versiones comprobadas, no instalar/modificar extensión en producción. Si no faltan .control, el primer error de carga podría deberse a otras dependencias: se requiere diagnóstico distinto, nunca declararlo resuelto.
+
+**Efectos:** solo registro en `roadmap.md`, `agent.md`, `AGENTS.md` y este checkpoint; paquete privado fuera de GitHub, producción Supabase/Render/Auth/RLS/Drive sin cambios, respaldos nuevos y antiguos intactos. **BT-PILOT-QA-04: A REPASAR; SEC-07 roles original sigue sin causa**.
