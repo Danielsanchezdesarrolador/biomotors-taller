@@ -1,3 +1,7 @@
+## BT-SEC07-S4A-SUPABASE-DEPENDENCY-CLASS-NOT-SPECIFIC-20261121
+
+R11 v04 archivada cifrada y manifest SHA PASS; R4A S4A inició restore contenedor PostgreSQL17 sin red en tmpfs, GPG integrity + header PASS, `RESTORE_CLASS SUPABASE_DEPENDENCY_OR_ROLE_MISSING` y STOP. Esta clase es broad grep (role/extension/function/type/relation); fallo real específico aún desconocido. S4 restaura NO PASS. No remediar a ciegas, no repetir export, no modificar producción. S4B clasificar primera línea ERROR del stderr pg_restore dentro del contenedor y solo emitir códigos, jamás SQL/descripciones/nombres ni datos. S2 sigue cerrado estructural. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S4A_RESTORE_DEPENDENCIA_PENDIENTE_20261121.md).
+
 ## BT-SEC07-S2-R11-CLOSED-STRUCTURAL-20261121
 
 S2 **PASS_BACKUP_AND_TOC** evidenciado Windows: v04 cifrada PGDMP offset0, GPG integridad PASS, PostgreSQL17 Linux TOC PASS, SHA256 PASS y manifest creado, v03 intacto, sin nueva conexión a prod. S2 cerrado para respaldo estructural en PC; S4 RESTORE real PENDIENTE. Siguiente usar solo v04 final + hash manifest, restaurar en contenedor PG17 aislado sin red/volúmenes persistentes e informar dependencias faltantes sin exponer datos. BOM UTF8 + compatibilidad .NET PS5.1 corregidos, mantener UTF8 sin BOM antes de arrancar proceso. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S2_R11_BACKUP_CIFRADO_VALIDADO_20261121.md).
