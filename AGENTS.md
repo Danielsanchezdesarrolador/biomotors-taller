@@ -1,3 +1,9 @@
+## REGLA PERMANENTE — POWERSHELL EN CHAT Y V4 LOCAL AUTORIZADA (CP66, 21/11/2026)
+
+El titular exige TODOS los ejecutores PowerShell como bloques COMPLETOS EN EL CHAT, listos para copiar y pegar. Descarga .ps1 solo opcional y nunca sustituta. También autorizó ejecutar V4 en SU PC en solo lectura: ya recibió el bloque inline, con ZIP V4 SHA 9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f, prueba sintética 69 y selector del manifest 19/11. Aún sin resultado real Windows V4. No GPG/SQL/restore/SSL. [CP66](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_POWERSHELL_INLINE_RULE_V4_AUTHORIZED_20261121.md).
+
+---
+
 ## REGLA SEC-07 — V4 PARCIAL PREPARADO OFFLINE CP65 (21/11/2026)
 
 Autorización del propietario **solo PREPARAR** comprobador V4 para `full_project_backup=false` explícito, que verifique SHA/tamaños sin certificar integralidad. Nuevo ZIP `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V4_20261121.zip`, 8720 B, SHA `9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f`; lanzador `BT_SEC07_EJECUTAR_V4.ps1` 2361 B SHA `a69899bb3adb9c514d8eef0b9325ca3ed80bc53a0dd49db83933fe1c8148985e`. **69/69 pruebas sintéticas PASS antes y después ZIP, Windows V4 real PENDIENTE**; ausencia/tipo inválido de flag STOP. Un PASS solo `PASS_LOCAL_CIPHERTEXT_CONSISTENCY_ONLY` con `PARTIAL_BACKUP_DECLARED` cuando aplica, nunca recuperación íntegra. No tocar respaldo, manifest, GPG, SQL, SSL ni servicios. Pedir permiso NUEVO para ejecutar V4 sobre archivos reales. [CP65](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_PARTIAL_V4_OFFLINE_READY_20261121.md).
