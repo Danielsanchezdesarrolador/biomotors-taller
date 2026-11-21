@@ -1,3 +1,7 @@
+## BT-SEC07-S2R5-RECOVERABLE-MAGIC-WITH-PREFIX-20261121
+
+R5 Windows confirma GPG exit0/integrity, contenido descifrado con firma PGDMP **desplazada dentro primeros 96 bytes**. pg_restore antes devolvía NONZERO; prefijo explica rechazo header, origen exacto del prefijo pendiente. No descartar `.partial`, no nuevo pg_dump ni DB. Corregir sólo archivo derivado cifrado LOCAL eliminando preámbulo antes de PGDMP; verificar TOC/cipher/custodia/manifest antes de certificar; si falla, preservar. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-S2-R4-NOT-PGDMP-20261121
 
 R4 read-only: `PARTIAL FOUND_UNIQUE`, `ARCHIVE_MAGIC NOT_PGDMP`; STOP, producción no conectada y archivos preservados. Evitar reintentar `pg_restore` sobre misma copia: necesita cabecera PGDMP. R3 GPG exit0, TOC exit nonzero. Causa pendiente, NO afirmar contenido/dump recuperable. Una clasificación local segura de stdout descifrado (longitud, tipo de cabecera, status GPG) sin exponer bytes para aislar origen. No nuevos backups ni reexport hasta corregir. Ver [incidentes](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
