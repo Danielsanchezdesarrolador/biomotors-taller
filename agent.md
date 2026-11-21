@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-EXTENSIONS-CONFIRMED-SIZES-PENDING-61
+
+Propietario mostró extensiones en Explorer: `database.dump.gpg` y `roles.sql.gpg` fechados 17/11/2026 11:42, sin `manifest.json` visible. No se conoce tamaño ni integridad/cifrado verdadero de contenido. Próximo: Propiedades > Tamaño de cada archivo, lectura visual de metadatos; no ejecutar V3 de nuevo ni generar manifest ni GPG/SQL/restore. [CP61](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_EXTENSION_CONFIRMED_SIZES_PENDING_20261121.md).
+
 ## BT-SEC07-R3-MANIFEST-NOT-VISIBLE-WINDOWS-60
 
 Capturas Windows del titular: selector V3 muestra cero archivos JSON; filtro sin opción `Todos los archivos`; Explorador en carpeta `bytetorque-local-20261117T1441...` solo muestra `database.dump` y `roles.sql` (17/11 11:42), sin `manifest.json` visible. **No se confirmaron extensiones completas, tamaño, hashes, naturaleza del contenido ni integridad**. Cancelar selector, verificar visualmente extensiones/tamaños con Ver→Mostrar→Extensiones de nombre de archivo y Detalles. No manifest manual, no GPG/SQL/restore ni reintento sin diagnóstico. [CP60](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_NOT_VISIBLE_WINDOWS_20261121.md).
