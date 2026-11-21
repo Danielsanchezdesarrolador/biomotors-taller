@@ -1,3 +1,7 @@
+## BT-SEC07-LOG-OUTPUT-NOT-COMMANDS-20261121
+
+Incidente de uso Windows: usuario ejecutó textos `BT_SEC07_S2_R10_...: PASS` como comandos, provocando `CommandNotFoundException`. No implica fallo técnico S2; R10 PASS y R11 pendiente. Siempre distinguir 'CÓDIGO para ejecutar' y 'RESULTADO esperado, NO pegar'. Instrucción mínima Ctrl+C si línea activa y copiar exclusivamente el bloque completo PowerShell de R11 `& { ... }`. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-S2-R10-WINDOWS-NO-BOM-FIX-TOC-PASS-20261121
 
 Resultado real `PASS_TOC_NO_NEW_FILE`: v03 existente GPG íntegro, payload 3-byte UTF8 BOM + PGDMP, omitido BOM, Linux Docker pg_restore --list PASS; SHA fuente intacto, sin producción. Propiedad StandardInputEncoding .NET Framework unavailable confirmada, uso `Console.InputEncoding=UTF8Encoding(false)` antes de iniciar proceso y restaurar funcionó. No hay v04 partial de R9. R11 debe generar v04 CIFRADO NUEVO sin BOM mediante stream binario no-BOM, validar PGDMP offset 0 y TOC Docker y registrar SHA/manifiesto antes de cerrar S2. Nunca repetir pg_dump ni pedir USB. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S2_R10_LINUX_TOC_PASS_20261121.md); main docs [skip render].
