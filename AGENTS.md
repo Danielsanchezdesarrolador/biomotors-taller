@@ -1,3 +1,9 @@
+## REGLA SEC-07 — INSPECTOR REAL GPG→TOC PREPARADO, SOLO SINTÉTICOS CP69 (21/11/2026)
+
+Luego de CP68, el usuario pidió continuar. Se preparó paquete privado `BT_SEC07_R3_GPG_TOC_READER_PREP_V1_20261121.zip`, **11554 B**, SHA256 `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58`. **37/37 tests sintéticos PASS** antes/después ZIP, no GPG/PG reales. Diseño futuro revalida manifest V4, canaliza **binario** GPG stdout→`pg_restore --list -`, exige GPG exit0/GOODMDC o GOODAEAD y TOC reconocido, no guarda deliberadamente plaintext ni muestra nombres/SQL, pero acceso a keyring/agent GPG y paginación OS posibles. La única orden PowerShell entregada inline es de **preflight sintético**, sin leer backup ni llaves. **Permiso específico pendiente** para ejecutar en backup real. Restore/roles/ACL/SSL siguen pendientes. [CP69](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_REAL_GPG_TOC_READER_PREP_V1_20261121.md).
+
+---
+
 ## REGLA SEC-07 — PREPARACIÓN GPG/TOC SINTÉTICA CP68 (21/11/2026)
 
 El propietario autorizó SOLO preparar el modelo sintético GPG/TOC, sin tocar datos reales. CP67 sigue PASS interno ciphertext SHA/tamaño del respaldo **parcial**, no restore. CP55 auditor TOC sintético 40 PASS ya existente; CP68 añade simulador de estados GPG/TOC con **59/59 tests PASS antes/después ZIP**. Paquete privado `BT_SEC07_R3_GPG_TOC_SYNTHETIC_GATE_20261121.zip` 6475 bytes SHA256 `1c6dfc5111202d2c2f6d97c913a433acbf60ef1a4766dcd3a8d3fc3a59015adb`. No admite archivos/rutas/keys reales, no llama GPG/pg_restore/DB ni lee respaldos. Incidentes sintéticos INC-68A fixture TOC incongruente e INC-68B runner cwd corregidos. **Tres hitos** propuestos para respaldos nuevos verificables: GPG/TOC real aislado, restore aislado/roles ACL y cobertura integral, nueva exportación/automatización; autorización nueva por cada hito. PowerShell siempre inline chat. [CP68](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_SYNTHETIC_HANDOFF_20261121.md).
