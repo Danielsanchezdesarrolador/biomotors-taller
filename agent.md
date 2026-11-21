@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-METADATA-DIAG-AUTHORIZED-73
+
+Permiso nuevo: inspección SOLO manifest y lista metadatos claves privadas GPG locales, sin ciphertext/decrypt. PowerShell completo entregado directo en chat (CP66), sin ZIP; imprime solo marcadores. Compara `recipient_fingerprint` opcional de manifest con `fpr` de `sec/ssb` de `gpg --list-secret-keys --with-colons`; sin imprimir UID, fingerprint ni ruta. MATCH ≠ descifrado posible, NO_MATCH ≠ clave definitivamente ausente; no diagnostica BAD_PASSPHRASE/Pinentry. Aún sin salida Windows, CP71 real decrypt STOP. [CP73](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_DIAG_AUTHORIZED_20261121.md).
+
 ## BT-SEC07-R3-REAL-TOC-STOP-GPG-DECRYPTION-FAILED-72
 
 Win real CP71: manifest PARCIAL + SHA ciphertext MATCH + GPG/PG17 PRESENT; `STOP_GPG_DECRYPTION_FAILED`, no TOC ni restore certificado. Docker luego abierto es irrelevante salvo diseño con contenedor (el inspector usa ejecutables nativos). Fuente ZIP exacta: `gpg --batch --no-tty --status-fd 2 --output - --decrypt` y cualquier exit!=0 devuelve STOP sin causa, stderr se oculta. Puede faltar clave privada, fallar agent/Pinentry, etc; no inferir corrupción ni identificar causa. Antigua herramienta encrypt public-key con fingerprint, 19/11 puede ser exportador distinto. Nueva autorización para diagnóstico de metadatos de destinatario vs secret keys y estado GPG seguro, sin nuevo decrypt. PowerShell siempre íntegro en chat. [CP72](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_REAL_TOC_STOP_GPG_DECRYPTION_FAILED_20261121.md).
