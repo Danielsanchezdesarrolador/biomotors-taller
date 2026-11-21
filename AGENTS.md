@@ -1,3 +1,9 @@
+## SEC-07 — CIERRE VALIDADO DE QA WINDOWS Y SIGUIENTE LABORATORIO GPG EFÍMERO (20/11/2026; BT-SEC07-R3-WINDOWS-QA-PASS-30)
+
+Propietario confirmó `BT_SEC07_ZIP: VERIFIED`, `Ran 18 tests in 4.768s`, `OK`, `BT_SEC07_WINDOWS_QA: PASS`. Se cierran **únicamente** tests sintéticos Windows del paquete R3 anterior. Preparado paquete GPG **real pero exclusivamente sintético y con GNUPGHOME/clave efímeros**, SHA256 `051cbe04f6b7b900310bcab615b7b240ff8ff8b22abfe445b555e537ae4d078e`: 14/14 QA en asistente y tras extraer; en Windows **PENDIENTE**, sin aprobación para usar keyring original ni conectar producción. Ver [checkpoint completo y prompt de traspaso](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_PASS_GPG_EPHEMERAL_PREP_20261120.md). Nunca confundir este laboratorio de GPG con roles/ACL recuperados. Google Drive fuera; `BT-PILOT-QA-04 A REPASAR`.
+
+---
+
 ## REGLA PERMANENTE — SEC-07: CHECKPOINT TRANSFERIBLE EN CADA AVANCE (20/11/2026; BT-SEC07-ROLES-CLI-FLAGS-PASS-29)
 
 Por instrucción explícita reiterada del propietario, **al finalizar cada bloque de trabajo, incluso una comprobación local recibida por chat**, dejar un checkpoint breve pero autosuficiente en `docs/checkpoints/` y actualizar la portada de `roadmap.md` y `agent.md` (y el informe de incidentes si hubo errores). Incluir HEAD/commit, resultado **real vs sintético**, autorizaciones, operaciones prohibidas/no realizadas, evidencia sanitizada, artefactos candidatos privados y hash, límites, error/solución si aplica, siguiente paso exacto y un párrafo listo para retomar en otro chat sin repetir pruebas. Los candidatos ZIP que contengan material no público se entregan solo al propietario, **no al repositorio público**. Esta regla refuerza las obligaciones ya existentes y NO autoriza exportaciones remotas, despliegues, GPG real ni uso de secretos. [Checkpoint SEC-07](docs/checkpoints/CHECKPOINT_BT_SEC07_ROLES_CLI_FLAGS_AND_SYNTHETIC_LAB_20261120.md). 
