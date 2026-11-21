@@ -1,3 +1,7 @@
+## BT-SEC07-R3-MANIFEST-V4-WINDOWS-CIPHERTEXT-PASS-67
+
+V4 ejecutada en Windows por propietario sobre respaldo local 19/11: 69/69 tests PASS, selector YES, `PARTIAL_BACKUP_DECLARED`, proyecto/backup_id MATCH, tamaños MATCH, SHA MATCH_MANIFEST_ONLY, `PASS_LOCAL_CIPHERTEXT_CONSISTENCY_ONLY` y `PASS_CIPHERTEXT_ONLY_NOT_RESTORE`. Cierra verificación de consistencia local, **no** certifica autenticidad externa, GPG, SQL dump recuperable, roles/owners/ACL ni restore. Próximas puertas independientes: referencia externa de hash, GPG aislado/TOC read-only y restauración aislada con permiso nuevo; SSL enforcement pendiente sin tocar. PowerShell siempre completo en chat. [CP67](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_V4_WINDOWS_CIPHERTEXT_PASS_20261121.md).
+
 ## BT-SEC07-POWERSHELL-INLINE-RULE-V4-AUTHORIZED-66
 
 Regla del titular: siempre entregar el ejecutor PowerShell íntegro EN EL CHAT; archivo .ps1 opcional. Autorizada ejecución local V4 de solo lectura, bloque ya entregado con comprobación ZIP V4 SHA 9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f y preflight 69 pruebas. Pendiente salida real Windows; no GPG/SQL/restore/SSL. [CP66](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_POWERSHELL_INLINE_RULE_V4_AUTHORIZED_20261121.md).

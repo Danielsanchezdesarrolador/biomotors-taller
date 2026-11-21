@@ -1,3 +1,9 @@
+## REGLA SEC-07 — V4 WINDOWS PASS CIPHERTEXT, PARCIAL (CP67, 21/11/2026)
+
+Resultado real de usuario V4: `PACKAGE_V4 VERIFIED`, `PASS_69_OF_69_SYNTHETIC`, `BACKUP_SELECTED:YES`, `SCOPE:PARTIAL_BACKUP_DECLARED`, `PROJECT:MATCHED_LOCAL_EXPORTER_REFERENCE`, `BACKUP_ID:MATCHES_FOLDER`, `CIPHERTEXT_SIZES:MATCH`, `CIPHERTEXT_SHA256:MATCH_MANIFEST_ONLY`, `MANIFEST_AUDIT:PASS_LOCAL_CIPHERTEXT_CONSISTENCY_ONLY`, `WINDOWS_V4:PASS_CIPHERTEXT_ONLY_NOT_RESTORE`. Integridad **interna ciphertext↔manifest** comprobada, no autenticidad independiente, descifrado ni restore. La marca `WINDOWS_COMPATIBILITY:SIMULATED_NOT_CERTIFIED` aplica a la simulación del test, no niega que el chequeo real haya corrido. Roles catálogo no son SQL roles; owners/ACL/grants y restauración aún PENDIENTES. No repetir V4 ni alterar archivos. Para GPG/TOC/restore/SSL se requieren nuevas autorizaciones. Mantener regla CP66: PowerShell SIEMPRE inline en chat. [CP67](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_V4_WINDOWS_CIPHERTEXT_PASS_20261121.md).
+
+---
+
 ## REGLA PERMANENTE — POWERSHELL EN CHAT Y V4 LOCAL AUTORIZADA (CP66, 21/11/2026)
 
 El titular exige TODOS los ejecutores PowerShell como bloques COMPLETOS EN EL CHAT, listos para copiar y pegar. Descarga .ps1 solo opcional y nunca sustituta. También autorizó ejecutar V4 en SU PC en solo lectura: ya recibió el bloque inline, con ZIP V4 SHA 9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f, prueba sintética 69 y selector del manifest 19/11. Aún sin resultado real Windows V4. No GPG/SQL/restore/SSL. [CP66](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_POWERSHELL_INLINE_RULE_V4_AUTHORIZED_20261121.md).
