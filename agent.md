@@ -1,3 +1,7 @@
+## BT-SEC07-S2R2-TOC-PIPE-STOP-20261121
+
+Windows S2-R2 confirmó pg17/verify-full/transaction READ ONLY + `ENCRYPTED_DUMP PASS` pero `ARCHIVE_TOC_READBACK_FAILED`. HAY archivo `.partial` candidato, sin manifiesto ni certificación. No repetir S2/db/dump ni usar archivos antiguos. Reanudar localmente desde `.partial`; separar pg_restore --list exit/TOC y GPG decrypt exit/status, drenar stdout completo incluso tras cierre temprano de pipe (posible causa no confirmada). Resolver y registrar en AGENTS, agent, roadmap, incidentes sólo con Windows PASS. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-INCIDENT-LOG-PERMANENT-20261121
 
 Nueva regla explícita usuario: tras encontrar soluciones, documentar siempre en roadmap/agent/AGENTS y registro operativo con error, causa CONFIRMADA vs hipótesis, arreglo, prueba/verificación, prevención. S2 preflight `IDENTIDAD_O_SOLO_LECTURA_INCORRECTA` sigue abierto: psql conectó/terminó exit0 pero CASE mezcló 3 condiciones, `PGOPTIONS` read-only quizá no aplicado por pooler; solución propuesta transacción explícita READ ONLY y verificación por columnas. `pg_dump` S2 NO iniciado, no hay copia real. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). No exigir USB, sin cambios prod.

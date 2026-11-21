@@ -1,3 +1,22 @@
+## INC-S2-02 — Archivo cifrado creado, verificación TOC falló [ABIERTO]
+**Fecha:** 2026-11-21. Salida Windows reportada:
+```text
+BT_SEC07_S2_R2_TLS: CLIENT_VERIFY_FULL_PASS
+BT_SEC07_S2_R2_DATABASE: POSTGRES17_VERIFIED
+BT_SEC07_S2_R2_TRANSACTION: READ_ONLY_PASS
+BT_SEC07_S2_R2_ENCRYPTED_DUMP: PASS
+BT_SEC07_S2_R2_STAGE: ARCHIVE_TOC_READBACK
+BT_SEC07_S2_R2_STOP: ARCHIVE_TOC_READBACK_FAILED
+BT_SEC07_S2_R2_RESULTADO: STOP
+BT_SEC07_S2_R2_PARTIAL: PRESERVED_IF_CREATED
+```
+**Interpretación demostrada:** Pg dump y cifrado emitieron exit0 y archivo cifrado `.partial` no vacío (>1 KiB), bajo condiciones TLS/DB/read-only verificadas para preflight. No se confirma descifrado de `.partial`, contenido TOC, integridad del dump completo ni posibilidad de restauración. No se creó manifiesto ni se conectó una base de restauración.
+**Hipótesis — NO CAUSA CONFIRMADA:** el lector `pg_restore --list` podría cerrar su stdin tras leer TOC, antes de que GPG haya terminado de escribir el archivo completo; el `BaseStream.CopyTo` del script considera cualquier excepción de tubería falla. También podría fallar GPG, pg_restore o el formato, porque el antiguo STOP agrupó estas causas.
+**Plan de corrección mínimo:** NO descargar, borrar ni crear nuevamente respaldo. Escoger únicamente `*.dump.gpg.partial` de S2-R2 sin colisiones, descifrar directamente desde ese archivo de forma local y canalizarlo a `pg_restore --list`, drenando por completo stdout de GPG aunque pg_restore termine y cierre entrada. Exigir GPG exit0, evidencia DECRYPTION_OKAY, pg_restore exit0, TOC reconocible; luego hash SHA256 y renombrar sin reemplazos, crear manifiesto `restore=NOT_ATTEMPTED`. Si falla reportar etapa y estado de cada proceso sin mostrar archivos, claves, rutas, nombres de tablas o stderr. 
+**Estado:** solución NO VERIFICADA aún. La causa concreta se documentará tras resultado Windows. Sin modificar producción, S1/S0 intactos, política PC-only vigente.
+
+---
+
 # ByteTorque SEC-07 — Registro de incidentes operativos de seguridad
 
 **Fecha de apertura:** 2026-11-21 · **Rama:** main. Archivo público: no registrar material secreto ni rutas/identificadores internos innecesarios.

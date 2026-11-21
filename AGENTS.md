@@ -1,3 +1,9 @@
+## BT-SEC07 — S2 R2 DUMP CIFRADO PASS, TOC STOP: REANUDAR SIN NUEVO DUMP (21/11/2026)
+
+Evidencia Windows S2-R2: `STRUCTURE PASS`, `TOOLS PG17_GPG_READY`, `GPG_KEY VERIFIED`, `TLS CLIENT_VERIFY_FULL_PASS`, `DATABASE POSTGRES17_VERIFIED`, `TRANSACTION READ_ONLY_PASS`, `ENCRYPTED_DUMP PASS`, luego `ARCHIVE_TOC_READBACK_FAILED` y `STOP`. Existe candidato `*.dump.gpg.partial` generado nuevo; **NO** declarado respaldo validado. No conectar de nuevo ni ejecutar pg_dump, no borrar/sobrescribir ese `.partial`. Sospecha sin comprobar: pg_restore --list sobre stdin termina temprano/cierra pipe, CopyTo marca error aunque TOC sea válido. Hacer UN readback local de archivo existente, drenando GPG stdout completamente incluso si pg_restore termina antes, comprobar exit ambos + TOC + status GPG, hash readback y promover a final/manifest sólo con PASS. Registrar causa confirmada posteriormente. Ver [registro operativo](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). Solo docs [skip render], main.
+
+---
+
 ## BT-SEC07 — REGISTRO OBLIGATORIO ERRORES / INC-S2-01 ABIERTO (21/11/2026)
 
 Todo STOP debe registrar marcador, causa **comprobada**, hipótesis separada, solución concreta, evidencia de verificación y prevención en `docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md`; al confirmar solución actualizar además `AGENTS.md`, `agent.md` y `roadmap.md`. En S2 `IDENTIDAD_O_SOLO_LECTURA_INCORRECTA` ocurrió en preflight psql; no se inició pg_dump. CA renombrado no causó STOP. Motivo exacto **no confirmado**; el script mezcló BD, `default_transaction_read_only` y versión en CASE único con `PGOPTIONS`. Reemplazar prueba por transacción explícita `BEGIN READ ONLY`, observar `transaction_read_only` + BD + versión por separado. No repetir viejo script, no declarar FIX hasta PASS Windows. S0/S1A conservados. 
