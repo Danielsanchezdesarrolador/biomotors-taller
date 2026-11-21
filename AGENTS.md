@@ -1,3 +1,9 @@
+## REGLA SEC-07 — TAMAÑOS PARCIALES GPG WINDOWS (CP62, 21/11/2026)
+
+Nueva captura de carpeta con 2 ficheros / 0 carpetas: total **89.242 bytes** (87,1 KB); otra captura de un `.gpg` OpenPGP muestra **151 bytes** de tamaño lógico y «0 bytes en disco», **sin nombre visible en el recorte**. NO atribuir 151 bytes a roles ni database sin confirmar; otro archivo serían 89.091 bytes solo si corresponde a la misma carpeta. Tamaño 0 en disco ≠ contenido lógico cero. Sin `manifest.json` visible; V3 no puede certificar esta carpeta, sin generar manifest. Confirmar nombres/tamaños individuales por Propiedades, luego buscar respaldo más reciente; NO GPG/decrypt/SQL/restore/SSL. [CP62](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_SIZES_PARTIAL_20261121.md).
+
+---
+
 ## REGLA SEC-07 — ARCHIVOS GPG VISIBLES, SIN MANIFEST (CP61, 21/11/2026)
 
 Captura Windows confirma en carpeta de respaldo del 17/11 11:42 las entradas **`database.dump.gpg` y `roles.sql.gpg`** tras mostrar extensiones. No aparece `manifest.json` en la vista. Los **tamaños no se han observado** y la extensión no certifica cifrado ni restauración. Solicitar solo Tamaño en Propiedades de cada archivo; ningún descifrado, SQL, backup, cambio o creación de manifest. No suponer que el viejo error SQL0 implica estos archivos en particular. [CP61](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_EXTENSION_CONFIRMED_SIZES_PENDING_20261121.md).

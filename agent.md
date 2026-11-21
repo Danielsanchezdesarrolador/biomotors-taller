@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-SIZES-PARTIAL-62
+
+Capturas Windows: carpeta con 2 archivos total 89.242 bytes, de los cuales un `.gpg` tiene tamaño lógico 151 bytes y 0 bytes en disco (nombre recortado/no identificado). No certificar que el pequeño sea `roles.sql.gpg`; si ambos pertenecen a carpeta, otro ~89.091 bytes. Falta `manifest.json`. Pedir solo identificación del archivo de 151B y tamaño separado de ambos; no descifrar, generar manifest, repetir V3/SQL/restore. [CP62](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_SIZES_PARTIAL_20261121.md).
+
 ## BT-SEC07-R3-GPG-EXTENSIONS-CONFIRMED-SIZES-PENDING-61
 
 Propietario mostró extensiones en Explorer: `database.dump.gpg` y `roles.sql.gpg` fechados 17/11/2026 11:42, sin `manifest.json` visible. No se conoce tamaño ni integridad/cifrado verdadero de contenido. Próximo: Propiedades > Tamaño de cada archivo, lectura visual de metadatos; no ejecutar V3 de nuevo ni generar manifest ni GPG/SQL/restore. [CP61](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_EXTENSION_CONFIRMED_SIZES_PENDING_20261121.md).
