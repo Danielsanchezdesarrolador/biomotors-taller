@@ -65,3 +65,7 @@ Fuentes [PostgreSQL 17 pg_class](https://www.postgresql.org/docs/17/catalog-pg-c
 El propietario descarga la V2, verifica el hash, extrae en nueva carpeta `$HOME\BT-SEC07-PARITY-LAB-V2` sin tocar V1, ejecuta 40 tests, revisa el nuevo preflight. Autoriza por separado **un** ensayo temporal local y envía solo etiquetas `BT_SEC07_*` y `DIAG_EXIT_CODE`. **Si no autoriza, no ejecutar nada**. No generar nuevos dumps, no conectarse a Supabase/Render, no instalar extensiones, no eliminar otros contenedores. Restauración lógica sí comprobada; paridad aún NO CERTIFICADA.
 
 **Alcance de este commit:** solo `AGENTS.md`, `agent.md`, `roadmap.md`, informe y checkpoints; sin nuevas operaciones en Docker de usuario, sin modificar backups ni producción. `[skip render]`.
+
+## BT-SEC07-PARITY-STRUCTURE-PASS-25 · Ejecución REAL V2 y cierre del defecto `physical_tables`
+
+No volver a describir V2 como «aún no ejecutada». El propietario la ejecutó con permiso independiente: 40/40 tests, `PARITY_SQL_PREFLIGHT: PASSED_BEFORE_GPG_RESTORE`, GPG/pg_restore OK y 20 tablas con 37 filas agregadas; 21 políticas RLS, 35 funciones, 4 extensiones, limpieza correcta, exit 0. **Error V1 por columna omitida: RESUELTO OPERATIVAMENTE**; confirmar preflight de consultas en PostgreSQL real antes de futuros restores. La recuperación se ha verificado **solo estructuralmente**, `SOURCE_ROW_PARITY/ORIGINAL_OWNERS_AND_ACL` siguen NOT_VERIFIED. [Checkpoint definitivo de resultados](CHECKPOINT_BT_SEC07_PARITY_STRUCTURE_PASS_20261120.md). No repetir este laboratorio sin hipótesis nueva.
