@@ -1,3 +1,9 @@
+## REGLA SEC-07 — PAQUETE MANIFEST WINDOWS V3 GENERADO (CP59, 21/11/2026)
+
+Tras CP58, V2 original no recuperable como bytes verificables; **V3 NUEVO, no renombrar como V2**: ZIP `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V3_20261121.zip`, 7334 bytes, SHA256 `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484`, 53/53 tests sintéticos Linux PASS antes/después ZIP; Windows real **PENDIENTE**. V3 lee solo manifest manual + `.gpg` whitelisted para cotejo SHA/tamaño; no descifrar, red, SQL, backup, GPG ni restaurar. Solo si SHA y tests PASS abrir selector; STOP sin reintento; compartir solo `BT_SEC07_*`. El antiguo V1 permanece obsoleto, roles/ACL y SSL pendientes. [CP59](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V3_PACKAGE_20261121.md).
+
+---
+
 ## REGLA SEC-07 — TRASPASO DE CHAT CP58 (20/11/2026)
 
 Se confirmó `main` en CP57 (`1be3b7f`) y la continuidad: V2 ZIP SHA `950651ceed451e4156847e3af8b02cdb888f3856a479467e3905cb6ddcab92fe` aún **sin ejecutar en Windows real**; V1 obsoleto, no selector, no backup abierto. Siguiente: propietario valida SHA ZIP V2 en Downloads, corre 53 tests sintéticos y, solo tras PASS, elige `manifest.json` para cotejo local de ciphertext sin descifrar. `STOP` implica detenerse. GitHub reportó repositorio `public` en este traspaso: **no se cambió visibilidad** y requiere decisión del propietario. Sin SQL/GPG/restore/SSL/deploy. [CP58](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_CHAT_CONTINUITY_V2_WINDOWS_PENDING_20261120.md).

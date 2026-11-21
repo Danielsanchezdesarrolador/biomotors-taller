@@ -1,3 +1,7 @@
+## BT-SEC07-R3-MANIFEST-WINDOWS-V3-PACKAGE-59
+
+Entregado paquete ZIP privado nuevo **V3** al propietario al no recuperarse bytes V2 original: `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V3_20261121.zip` SHA256 `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484`, 7334B. 53/53 tests sintéticos Linux PASS antes/después ZIP, compatibilidad Windows simulada NO certificada. El verificador coteja localmente manifest/ciphertext sin descifrar ni SQL/SSL/PG/red. Próximo: propietario valida hash V3 en Downloads, ejecuta runner sintético y solo con PASS selecciona manifest. STOP sin reintento. [CP59](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V3_PACKAGE_20261121.md).
+
 ## BT-SEC07-R3-CHAT-CONTINUITY-V2-WINDOWS-PENDING-58
 
 Verificados `AGENTS.md`, `agent.md`, `roadmap.md`, CP57 y HEAD `1be3b7f` en GitHub. **Sin nuevo Windows real/backup inspeccionado**; ZIP V2 original sólo documentado, SHA `950651ceed451e4156847e3af8b02cdb888f3856a479467e3905cb6ddcab92fe`, 53/53 pruebas sintéticas offline anteriores. Próximo: propietario verifica hash en Descargas y usa bloque PowerShell CP57; con tests PASS se permite selector de `manifest.json`, read-only; ante STOP no reintentar. Github informó repositorio público, no modificado. Sin SQL/GPG/restore/SSL/deploy. [CP58](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_CHAT_CONTINUITY_V2_WINDOWS_PENDING_20261120.md).
