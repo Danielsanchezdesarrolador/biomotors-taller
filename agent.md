@@ -1,3 +1,7 @@
+## BT-SEC07-R3-REAL-TOC-STOP-GPG-DECRYPTION-FAILED-72
+
+Win real CP71: manifest PARCIAL + SHA ciphertext MATCH + GPG/PG17 PRESENT; `STOP_GPG_DECRYPTION_FAILED`, no TOC ni restore certificado. Docker luego abierto es irrelevante salvo diseño con contenedor (el inspector usa ejecutables nativos). Fuente ZIP exacta: `gpg --batch --no-tty --status-fd 2 --output - --decrypt` y cualquier exit!=0 devuelve STOP sin causa, stderr se oculta. Puede faltar clave privada, fallar agent/Pinentry, etc; no inferir corrupción ni identificar causa. Antigua herramienta encrypt public-key con fingerprint, 19/11 puede ser exportador distinto. Nueva autorización para diagnóstico de metadatos de destinatario vs secret keys y estado GPG seguro, sin nuevo decrypt. PowerShell siempre íntegro en chat. [CP72](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_REAL_TOC_STOP_GPG_DECRYPTION_FAILED_20261121.md).
+
 ## BT-SEC07-R3-GPG-TOC-REAL-LOCAL-RUN-AUTHORIZED-71
 
 Usuario autorizó inspección local UNA VEZ del backup 19/11: GPG real con keyring/agent + PG17 `pg_restore --list` por pipes, no conexión ni restore; PowerShell completo entregado directamente en chat. ZIP SHA `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58`, 37/37 sintéticos Windows CP70 y extracción revalidada. Todavía NO tenemos salida GPG/TOC real Windows; si STOP no reintentar sin diagnóstico. Un PASS sería TOC solamente, no roles/ACL/restore, manifest sigue parcial. [CP71](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_REAL_LOCAL_RUN_AUTHORIZED_20261121.md).
