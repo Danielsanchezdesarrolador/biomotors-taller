@@ -1,3 +1,9 @@
+## REGLA SEC-07 R3: INVENTARIO ROLES RECONCILIADO, INC-53 CERRADO (20/11/2026, CP54)
+
+Con autorización expresa para **UNA** segunda SELECT agregada correctiva en `pg_catalog.pg_roles`, Supabase proyecto ByteTorque devolvió **31 total, 31 reservados según CLI v3.0.0 y prefijo literal `pg_`, 0 candidatos personalizados, 0 falsos positivos del anterior `LIKE 'pg_%'`**. **INC-53 WILDCARD CERRADO**: se comprobó que en este origen no cambió los números, aunque el filtro previo era defectuoso. **No se retornaron nombres, claves, datos de clientes ni se hizo escritura.** La autorización de esta SELECT ya se consumió. **Cero roles propios NO certifica owners, ACL, grants, membresías ni recuperación de roles administrados**; viejo `roles.sql.gpg` SQL0 con productor exit1 permanece INVÁLIDO. Siguiente: evaluar inventario/TOC de snapshot cifrado existente y diseño respaldo ACL bajo consentimiento NUEVO, sin GPG histórico ni producción por inercia. SSL enforcement OFF visual CP48, TLS cliente PASS CP46/backend SSL NO, no end-to-end. [CP54](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_ROLE_CATALOG_CORRECTED_WINDOWSLESS_PASS_20261120.md).
+
+---
+
 ## REGLA SEC-07 CP53: R3 INVENTARIO 31/31/0 PROVISIONAL, WILDCARD SQL
 Se ejecutó una única SELECT agregada autorizada contra pg_catalog.pg_roles del proyecto biomotors-taller: total 31, clasificados reservados 31, candidatos 0 según filtro. INC-53: LIKE 'pg_%' usa _ como comodín y sobreexcluye nombres que empiezan pgX. No certificar cero roles personalizados; filtro correcto starts_with(rolname::text, 'pg_') requiere nueva consulta y nueva autorización. No se devolvieron nombres ni datos de clientes; ningún dump, GPG, SQL de escritura o cambio SSL. Owners/ACL siguen pendientes. [CP53](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_ROLE_CATALOG_AGGREGATE_PROVISIONAL_20261120.md).
 ## REGLA PERMANENTE — SEC-07 R3: ADAPTADOR CLI V3 OFFLINE PREPARADO; NO AUTORIZADO EXPORT REAL (20/11/2026, CP52)

@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN POSTERIOR CP54:** se ejecutó CON NUEVA AUTORIZACIÓN la SELECT correctiva: **31 total, 31 reservados, 0 candidatos, 0 falsos positivos**. INC-53 CERRADO; el filtro anterior era defectuoso pero no alteró el recuento real. No se exportaron roles ni se acreditaron owners/ACL. [CP54](CHECKPOINT_BT_SEC07_R3_ROLE_CATALOG_CORRECTED_WINDOWSLESS_PASS_20261120.md).
+
 # CHECKPOINT BT-SEC07-R3-ROLE-CATALOG-AGGREGATE-PROVISIONAL-53
 
 Fecha: 20/11/2026, Chile. Repositorio: Danielsanchezdesarrolador/biomotors-taller. Rama unica: main. HEAD inicial: 7570cd14bdb39162b1a549d5e2e380aeb676b2dd.

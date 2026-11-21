@@ -68,3 +68,7 @@ Aprobado por propietario **solo PREPARAR** el siguiente R3: ZIP privado `BT_SEC0
 
 ## CP53 — Resultado agregado inicial y necesidad de revalidar el filtro
 El proyecto real devolvió 31 roles visibles, 31 clasificados reservados y 0 candidatos en UNA SELECT autorizada, sin nombres. INC-53: el filtro LIKE 'pg_%' incluye otros prefijos pgX por wildcard _. Cero candidatos es PROVISIONAL. Falta autorizar otra SELECT agregada con prefijo literal starts_with y falsos positivos. No interpretar SQL antiguo vacío como respaldo, ni omitir owners/ACL. [CP53](checkpoints/CHECKPOINT_BT_SEC07_R3_ROLE_CATALOG_AGGREGATE_PROVISIONAL_20261120.md).
+
+## CP54 — Resultado FINAL del catálogo bajo criterio oficial, sin dump (20/11/2026)
+
+Una SELECT agregada correctiva autorizada sobre `pg_catalog.pg_roles`, usando `starts_with(rolname,'pg_')` literal y lista `RESERVED_ROLES` de Supabase CLI 3.0.0, retornó **31 roles visibles, 31 reservados, 0 candidatos personalizados adicionales y 0 falsos positivos** del `LIKE 'pg_%'` antiguo. Sin nombres. **INC-53 CERRADO** por verificación real. No es autorización ni evidencia de export `--role-only`: este resultado apunta a que quizá **no hay roles propios que serializar**, pero no hace válido `roles.sql.gpg` histórico SQL 0 / producer exit1 ni recupera owners/ACL/grants. Próxima evaluación: metadatos del snapshot/TOC de owners/ACL y permisos de objetos bajo nuevo consentimiento, evitar datos sensibles. [CP54](checkpoints/CHECKPOINT_BT_SEC07_R3_ROLE_CATALOG_CORRECTED_WINDOWSLESS_PASS_20261120.md).
