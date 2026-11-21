@@ -1,3 +1,7 @@
+## BT-SEC07-S1A-LOCAL-RECOVERY-PASS-20261121
+
+Clave nueva: cert Ed25519, cifrado Curve25519; export privado GPG protegida S2K, canary ficticio desde GNUPGHOME vacío PASS_LOCAL_ONLY comunicado por dueño. NO hay custodia externa ni recovery sin caché y S1 no cerrado globalmente. Incident $home alias $HOME protegida en PowerShell resuelto usando $gpgHome. Ver [S1A checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S1A_RECUPERACION_CRIPTOGRAFICA_LOCAL_PASS_20261121.md). Prioridad: copia real a dos USB físicos distintos, SHA/readback, recovery desde medios; contraseña aparte. Ningún secret/DB/backup/identificador privado en repo público. Main docs [skip render].
+
 ## BT-SEC07-S0-WINDOWS-PASS-S1-PENDIENTE (21/11/2026)
 
 S0 en PC Windows informó PASS de preflight, 8/8 carpetas, ACL/owner, NotContentIndexed, 3 documentos; sin secretos, sin producción, sin modificar legados. Refiere a [checkpoint S0](docs/checkpoints/CHECKPOINT_BT_SEC07_S0_ESTRUCTURA_ACL_WINDOWS_PASS_20261121.md). S1: clave GPG nueva/custodia FUERA de árbol de respaldos, canary cifrado+importación en GNUPGHOME vacío+descifrado, y dos medios físicos externos independientes por verificar. No confundir canary local con recuperación ante pérdida de PC. No usar secretos ni fuentes de producción en S1. Repo en metadatos figura public; no subir contenido sensible. Main y docs [skip render].

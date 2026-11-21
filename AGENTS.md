@@ -1,3 +1,9 @@
+## BT-SEC07 — S1A GPG LOCAL PASS, S1B CUSTODIA EXTERNA PENDIENTE (21/11/2026)
+
+S1A Windows informó creación e inspección de clave primaria Ed25519 y subclave Curve25519, export secreto protegido iter+salt S2K, canary cifrado, importación a GNUPGHOME inicialmente vacío y descifrado idéntico: `BT_SEC07_S1_RESULTADO: PASS_LOCAL_ONLY`. Todavía no hay dos USB externos verificados ni cold recovery sin caché, no usar keyrings ni exportaciones antiguas, no tocar producción. Incidente script diagnosticado: `$home` intentaba modificar `$HOME` (PS case-insensitive), corregido a `$gpgHome`; incidente GPG timeout inicial quedó indeterminado y posteriormente generó correctamente. [Checkpoint S1A](docs/checkpoints/CHECKPOINT_BT_SEC07_S1A_RECUPERACION_CRIPTOGRAFICA_LOCAL_PASS_20261121.md). Seguimos S1B/S1C y luego S2; sólo main docs [skip render].
+
+---
+
 ## BT-SEC07 — S0 WINDOWS PASS, S1 SIGUIENTE (21/11/2026)
 
 Titular informó `BT_SEC07_S0_RESULTADO: PASS`, 8/8 directorios, ACL restringida, propietario, atributos de indexación y 3 documentos locales `PASS`; LEGACY NOT_TOUCHED, SECRETS NOT_CREATED, PRODUCTION NOT_CONNECTED. La validación proviene de su ejecución Windows, no de inspección remota. S0 cerrado como organización, no cifrado/restore/3-2-1. S1: generar NUEVA identidad GPG fuera del backup tree y probar descifrado de canary con GNUPGHOME inicialmente vacío; custodia de dos soportes independientes pendiente hasta verificación física. Nunca usar antiguas claves/backup. [Checkpoint S0](docs/checkpoints/CHECKPOINT_BT_SEC07_S0_ESTRUCTURA_ACL_WINDOWS_PASS_20261121.md). Repo metadata public observado: no subir secretos. Sólo main, docs `[skip render]`.
