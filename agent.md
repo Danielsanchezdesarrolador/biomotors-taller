@@ -1,3 +1,7 @@
+## BT-SEC07-R3-PRIVATE-FILE-ARMORED-MESSAGE-NOT-KEY-78
+
+Windows metadata header: `EXTENSION OTHER_OR_HIDDEN_EXTENSION`, `HEADER ASCII_ENCRYPTED_MESSAGE` para supuesto privado. 160B permiten observar armor PGP MESSAGE, no clave OpenPGP exportada; **no se descifró** ni importó. No asumir contenido interno ni clave perdida; archivo no termina efectivamente en .pgp/.asc/.gpg. Pública .asc PRIMARY_MATCH manifest, privada no validada, GPG real falla por ahora. Próxima: ubicar archivo verdadero de clave privada o proceso de encapsulado con permiso aparte; evitar renombrar/descifrar. [CP78](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PRIVATE_FILE_IS_ARMORED_MESSAGE_NOT_KEY_20261121.md).
+
 ## BT-SEC07-R3-PUBLIC-ASC-PRIMARY-MATCH-PRIVATE-PGP-HEADER-PENDING-77
 
 CP76 PUBCHECK Windows del propietario PASS: `.asc` pública reconocida y PRIMARY_MATCH con manifest; `.pgp` privado NO accedido. El supuesto privado necesitó «Todos los archivos» aunque CP75 filtro incluía *.pgp; verificar extensión real sin exponer nombre. Bloque PowerShell INLINE entregado para leer 160 bytes de encabezado del archivo identificado como privado y clasificar ARMOR/BINARY_PGP_CANDIDATE/OTHER, sin GPG ni import/decrypt. Pendiente salida; no certificar recuperación. [CP77](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PUBLIC_ASC_PRIMARY_MATCH_PRIVATE_PGP_HEADER_PENDING_20261121.md).
