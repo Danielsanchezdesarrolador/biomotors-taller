@@ -1,3 +1,9 @@
+## REGLA SEC-07 — HUELLA ARCHIVO CLAVE PRIVADA, SOLO LECTURA CP75 (21/11/2026)
+
+Usuario dijo tener localizada su clave privada original y AUTORIZÓ **solo verificar la huella sin importar/modificar/descifrar**. PowerShell entero entregado INLINE chat (CP66): selector manifest parcial 19/11 y archivo de clave, ejecuta GPG `--show-keys --with-colons --fingerprint --with-subkey-fingerprint` con `--no-options --no-autostart` y GNUPGHOME TEMP aislado, compara `recipient_fingerprint` con principales/subclaves sin imprimir UID, huellas, rutas ni material secreto. Distingue `SECRET_KEY_RECORDS_PRESENT`, `PRIMARY/SUBKEY_FINGERPRINT_MATCH`, `NO_MATCH` o STOP; no importa, descifra ni toca DB. Test con clave sintética GPG 2.4.7 en Linux PASS; **Windows real/clave usuario PENDIENTE**. No afirmar que matching garantiza desbloqueo ni ciphertext PKESK. Para importar/desbloquear/reanudar TOC exigir nuevos permisos. [CP75](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PRIVATE_KEY_FILE_FINGERPRINT_READONLY_AUTHORIZED_20261121.md).
+
+---
+
 ## REGLA SEC-07 — RESULTADO GPG KEYRING SIN SECRETAS CP74 (21/11/2026)
 
 Propietario ejecutó CP73 PowerShell **metadatos**: manifest PARTIAL y recipient fingerprint DECLARED, GPG FOUND, `SECRET_KEYS: NONE_LISTED`, `RECIPIENT_MATCH: NO_EXACT_MATCH_IN_LIST`, sin decrypt ni passphrase. Clave privada **no listada en keyring GPG consultado**, explicaría CP72 STOP pero no prueba pérdida global ni corrupción. Antes de volver a descifrar: localizar **clave privada ORIGINAL** en otro GNUPGHOME/PC/USB/custodia, cotejar huella localmente, no publicar claves/secretos; no crear nueva para abrir viejo .gpg, no importar ni repetir decrypt sin permiso. CP67 hashes locales PASS pero backup parcial, restore pendiente. PowerShell SIEMPRE completo en chat. [CP74](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_NO_SECRET_KEYS_LISTED_20261121.md).

@@ -1,3 +1,7 @@
+## BT-SEC07-R3-PRIVATE-KEY-FILE-FINGERPRINT-READONLY-AUTHORIZED-75
+
+Permitido SOLO leer metadatos de archivo de clave privada original + manifest para cotejar fingerprints, sin `--import`/`--decrypt`. PowerShell íntegro en chat: OpenFileDialog doble, GNUPGHOME aislado en TEMP con GPG `--show-keys --with-colons`, salida sanitizada MATCH primary/subkey y secreto record list, cleanup TEMP. Test GPG sintético Linux ok, **Windows real pendiente**. Match no certifica clave desbloqueada ni paquete real; permisos separados para importación/descifrado posteriores. CP74 keyring normal NONE_LISTED. [CP75](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PRIVATE_KEY_FILE_FINGERPRINT_READONLY_AUTHORIZED_20261121.md).
+
 ## BT-SEC07-R3-GPG-METADATA-NO-SECRET-KEYS-LISTED-74
 
 Windows CP73 terminó: manifest recipient DECLARED, GPG FOUND, `SECRET_KEYS NONE_LISTED` y `RECIPIENT_MATCH NO_EXACT_MATCH_IN_LIST`, `DECRYPTION NOT_ATTEMPTED`, `PASSPHRASE NOT_REQUESTED`. Conclusión estricta: no hay claves privadas **listadas en keyring local consultado**, no que estén perdidas en absoluto. Posible causa de CP72 GPG STOP. Localizar clave privada original de forma segura, no compartir/importar ni repetir decrypt sin permiso; no crear clave nueva para descifrar copia antigua. CP67 solo consistencia cifrada parcial. PowerShell siempre inline CP66. [CP74](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_NO_SECRET_KEYS_LISTED_20261121.md).
