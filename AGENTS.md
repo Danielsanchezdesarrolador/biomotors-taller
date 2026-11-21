@@ -1,3 +1,9 @@
+## BT-SEC07 — S2-R4 FIRMA NO PGDMP: NO PROMOVER NI REEXPORTAR (21/11/2026)
+
+Windows `BT_SEC07_S2_R4_ARCHIVE_MAGIC: NOT_PGDMP`, `STOP: ARCHIVE_MAGIC_INVALID`, `PRODUCTION: NOT_CONNECTED`, `FILES: PRESERVED`. Primera verificación directa de cabecera descifrada NO encontró `PGDMP`; R3 previamente `GPG_EXIT ZERO` pero `TOC_EXIT NONZERO`. Causa del contenido aún NO demostrada: puede ser salida descifrada vacía, otro formato o datos no previstos. **NO** declarar válido/corrupto definitivo, NO tocar `.partial`, NO repetir exportación ni modificar producción. Siguiente único procedimiento local para determinar LONGITUD descifrada, CATEGORÍA de encabezado (PGDMP/SQL/gzip/armor/empty/other) y estados GPG, sin mostrar bytes ni escribir claro. Si no PGDMP, volver a diseño del productor pg_dump vs GPG con evidencia, no más TOC reintentos. Registrar resultado en registro de incidentes y roadmap; única rama main, docs [skip render].
+
+---
+
 ## BT-SEC07 — S2-R3 GPG EXIT0 / PG_RESTORE NONZERO: INSPECCIÓN BINARIA CONTROLADA (21/11/2026)
 
 Windows S2-R3 informó `PARTIAL FOUND_UNIQUE`, `PRODUCTION NOT_CONNECTED`, `TOOLS AVAILABLE`, `GPG_EXIT ZERO`, `TOC_EXIT NONZERO` y STOP `PG_RESTORE_TOC_EXIT_FAILED`. No hay respaldo validado todavía, `.partial` intacto. La hipótesis previa 'cierre anticipado de pipe' NO fue certificada y probablemente insuficiente: pg_restore falla pese a drenaje. Siguiente: comprobar cabecera `PGDMP` y clasificar stderr de pg_restore sin exponer objetos, tablas, contenido, claves ni rutas; un solo procedimiento read-only local, sin DB ni export de nuevo. Documentar corrección sólo cuando pase. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). No certificar restore/3-2-1.
