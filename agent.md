@@ -1,3 +1,7 @@
+## BT-SEC07-INCIDENT-LOG-PERMANENT-20261121
+
+Nueva regla explícita usuario: tras encontrar soluciones, documentar siempre en roadmap/agent/AGENTS y registro operativo con error, causa CONFIRMADA vs hipótesis, arreglo, prueba/verificación, prevención. S2 preflight `IDENTIDAD_O_SOLO_LECTURA_INCORRECTA` sigue abierto: psql conectó/terminó exit0 pero CASE mezcló 3 condiciones, `PGOPTIONS` read-only quizá no aplicado por pooler; solución propuesta transacción explícita READ ONLY y verificación por columnas. `pg_dump` S2 NO iniciado, no hay copia real. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). No exigir USB, sin cambios prod.
+
 ## BT-SEC07-USER-DECISION-PC-ONLY-BACKUP-20261121
 
 Titular eliminó copias en dos USB: **NO EXIGIR USB ni detener S2**. Custodia sólo PC, S1A GPG y canary PASS_LOCAL_ONLY. Riesgo residual pérdida/compromiso de PC no cubierto, no afirmar resiliencia 3-2-1. S2 primer dump PG17 prod nuevo con TLS verify-full, read-only, stdin/stdout binarios a GPG y manifiesto local; S3 cobertura Auth/Storage/roles, S4 restore real aislado, S5 retención/automatización PC solamente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S1B_PC_SOLO_DECISION_S2_REAL_20261121.md); main docs [skip render].

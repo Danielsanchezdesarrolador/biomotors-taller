@@ -1,3 +1,9 @@
+## BT-SEC07 — REGISTRO OBLIGATORIO ERRORES / INC-S2-01 ABIERTO (21/11/2026)
+
+Todo STOP debe registrar marcador, causa **comprobada**, hipótesis separada, solución concreta, evidencia de verificación y prevención en `docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md`; al confirmar solución actualizar además `AGENTS.md`, `agent.md` y `roadmap.md`. En S2 `IDENTIDAD_O_SOLO_LECTURA_INCORRECTA` ocurrió en preflight psql; no se inició pg_dump. CA renombrado no causó STOP. Motivo exacto **no confirmado**; el script mezcló BD, `default_transaction_read_only` y versión en CASE único con `PGOPTIONS`. Reemplazar prueba por transacción explícita `BEGIN READ ONLY`, observar `transaction_read_only` + BD + versión por separado. No repetir viejo script, no declarar FIX hasta PASS Windows. S0/S1A conservados. 
+
+---
+
 ## BT-SEC07 — DECISIÓN POST S1A: RESPALDOS SÓLO EN PC; NO EXIGIR USB (21/11/2026)
 
 El titular **revocó expresamente** requisito de dos USB/custodias externas: no dispone de USB y ordenó seguir sólo con PC. Esta instrucción vigente SUSTITUYE exigencia USB/3-2-1 de planes SEC07 anteriores; no bloquear S2 por ella ni preguntar de nuevo. S0 PASS, S1A GPG nuevo/canary recuperación PASS_LOCAL_ONLY; S1 aceptado para alcance local, **no** acreditado frente a robo/fallo total/cifrado malicioso PC. Realizar S2 nuevo pg_dump PG17 cifrado streaming TLS verify-full sólo lectura, jamás reutilizar archivos antiguos ni almacenar claro; S3 componentes externos, S4 restore local aislado, S5 automatización local, S6 hardening. No afirmar 3-2-1 o recuperación total certificada. [Checkpoint decisión](docs/checkpoints/CHECKPOINT_BT_SEC07_S1B_PC_SOLO_DECISION_S2_REAL_20261121.md). Solo main docs [skip render], no deploy.
