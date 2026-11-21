@@ -62,3 +62,7 @@ BT_SEC07_GPG_CONFIGURATION: RESTORED
 - [Estándar operativo vigente](../BT_SEGURIDAD_ESTANDAR_OPERATIVO_20261120.md).
 - [AGENTS.md](../../AGENTS.md), [agent.md](../../agent.md), [roadmap.md](../../roadmap.md).
 - Solo documentación, sin cambios a Render, Supabase, PostgreSQL alojado, Docker del usuario, GPG, archivos GPG o claves por este commit. `[skip render]`.
+
+## BT-SEC07-PARITY-PREP-23 · Continuidad posterior al primer restore exitoso
+
+El éxito anterior se preserva como evidencia, **no se repite el mismo experimento de 12 tablas**. Preparado paquete de paridad local `BT_SEC07_PARITY_LAB_20261120.zip`, hash `795b7d2f38b43bd817f4c63e11770a8f4f8c8ccf33c791afa1d9583847c31cf8`, 32/32 pruebas sintéticas PASS, con un nuevo restore solo si el propietario escribe AUTORIZO. [Checkpoint preventivo y plan de paridad](CHECKPOINT_BT_SEC07_PARITY_PREP_20261120.md). No se considera certificado el proyecto ni se altera `restoration_verified=false` del snapshot.
