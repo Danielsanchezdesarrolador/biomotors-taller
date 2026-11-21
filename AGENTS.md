@@ -1,3 +1,9 @@
+## BT-SEC07 — DECISIÓN POST S1A: RESPALDOS SÓLO EN PC; NO EXIGIR USB (21/11/2026)
+
+El titular **revocó expresamente** requisito de dos USB/custodias externas: no dispone de USB y ordenó seguir sólo con PC. Esta instrucción vigente SUSTITUYE exigencia USB/3-2-1 de planes SEC07 anteriores; no bloquear S2 por ella ni preguntar de nuevo. S0 PASS, S1A GPG nuevo/canary recuperación PASS_LOCAL_ONLY; S1 aceptado para alcance local, **no** acreditado frente a robo/fallo total/cifrado malicioso PC. Realizar S2 nuevo pg_dump PG17 cifrado streaming TLS verify-full sólo lectura, jamás reutilizar archivos antiguos ni almacenar claro; S3 componentes externos, S4 restore local aislado, S5 automatización local, S6 hardening. No afirmar 3-2-1 o recuperación total certificada. [Checkpoint decisión](docs/checkpoints/CHECKPOINT_BT_SEC07_S1B_PC_SOLO_DECISION_S2_REAL_20261121.md). Solo main docs [skip render], no deploy.
+
+---
+
 ## BT-SEC07 — S1A GPG LOCAL PASS, S1B CUSTODIA EXTERNA PENDIENTE (21/11/2026)
 
 S1A Windows informó creación e inspección de clave primaria Ed25519 y subclave Curve25519, export secreto protegido iter+salt S2K, canary cifrado, importación a GNUPGHOME inicialmente vacío y descifrado idéntico: `BT_SEC07_S1_RESULTADO: PASS_LOCAL_ONLY`. Todavía no hay dos USB externos verificados ni cold recovery sin caché, no usar keyrings ni exportaciones antiguas, no tocar producción. Incidente script diagnosticado: `$home` intentaba modificar `$HOME` (PS case-insensitive), corregido a `$gpgHome`; incidente GPG timeout inicial quedó indeterminado y posteriormente generó correctamente. [Checkpoint S1A](docs/checkpoints/CHECKPOINT_BT_SEC07_S1A_RECUPERACION_CRIPTOGRAFICA_LOCAL_PASS_20261121.md). Seguimos S1B/S1C y luego S2; sólo main docs [skip render].

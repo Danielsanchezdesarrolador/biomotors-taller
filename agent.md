@@ -1,3 +1,7 @@
+## BT-SEC07-USER-DECISION-PC-ONLY-BACKUP-20261121
+
+Titular eliminó copias en dos USB: **NO EXIGIR USB ni detener S2**. Custodia sólo PC, S1A GPG y canary PASS_LOCAL_ONLY. Riesgo residual pérdida/compromiso de PC no cubierto, no afirmar resiliencia 3-2-1. S2 primer dump PG17 prod nuevo con TLS verify-full, read-only, stdin/stdout binarios a GPG y manifiesto local; S3 cobertura Auth/Storage/roles, S4 restore real aislado, S5 retención/automatización PC solamente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S1B_PC_SOLO_DECISION_S2_REAL_20261121.md); main docs [skip render].
+
 ## BT-SEC07-S1A-LOCAL-RECOVERY-PASS-20261121
 
 Clave nueva: cert Ed25519, cifrado Curve25519; export privado GPG protegida S2K, canary ficticio desde GNUPGHOME vacío PASS_LOCAL_ONLY comunicado por dueño. NO hay custodia externa ni recovery sin caché y S1 no cerrado globalmente. Incident $home alias $HOME protegida en PowerShell resuelto usando $gpgHome. Ver [S1A checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S1A_RECUPERACION_CRIPTOGRAFICA_LOCAL_PASS_20261121.md). Prioridad: copia real a dos USB físicos distintos, SHA/readback, recovery desde medios; contraseña aparte. Ningún secret/DB/backup/identificador privado en repo público. Main docs [skip render].
