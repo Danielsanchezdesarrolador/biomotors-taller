@@ -1,3 +1,7 @@
+## BT-SEC07-S2R9-STANDARDINPUTENCODING-DOTNET-FRAMEWORK-INCOMPATIBLE-20261121
+
+R9 abortó `CREATE_CLEAN_CIPHER / LOCAL_ERROR_UNCLASSIFIED` tras validar Docker local y key. R9 contenía `ProcessStartInfo.StandardInputEncoding`, propiedad NO disponible en .NET Framework (Windows PowerShell 5.1); causa MUY PROBABLE, aún pendiente confirmación en PC. Evitar R9/repetir. No introducir nuevas dependencias ni reutilizar copias históricas; preservar v02/v03 y posible v04. Próxima vía compatible: `Console.InputEncoding= new UTF8Encoding(false)` durante Process.Start para controlar preámbulo StdIn, restaurar enseguida; probar lectura TOC con bytes PGDMP offset0 en Docker antes de crear derivado, sin producción. Ver [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-R8-BOM-CONFIRMADO-STANDARDINPUT-ENCODING-20261121
 
 R8 identificó UTF8_BOM EF BB BF antes de PGDMP en v02 y v03 a offset 3, ambas GPG PASS. R6 retiró 3 bytes pero R8 derivado los contiene otra vez. Causa inmediata: prefijo BOM; origen técnico probable: `.NET StreamWriter Process.StandardInput` y input encoding por defecto en PS5.1. Reparación planeada no verificada: `ProcessStartInfo.StandardInputEncoding = new UTF8Encoding(false)` para GPG stdin y Docker stdin; eliminar sólo el BOM conocido, generar v04 nuevo y exigir PGDMP offset0, GPG+Docker Linux pg_restore TOC+SHA. Conservar v02/v03 intactos, no DB/pg_dump. R8 entrada completa anotada en [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
