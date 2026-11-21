@@ -1,3 +1,9 @@
+## REGLA SEC-07 — HERRAMIENTAS V3 ENTREGADAS (CP63, 21/11/2026)
+
+Propietario encontró respaldo más reciente **19/11** con `database.dump.gpg` (118.105 B), `roles.catalog.json.gpg` (675 B) y `manifest.json`; aún sin SHA ni restore certificado. Se entregaron ZIP V3 SHA `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484` (7334B) y ejecutor PowerShell V3 `BT_SEC07_EJECUTAR_V3.ps1` SHA `f10991a2600cb0ba6f1214ab3525a0c22e5b61af646700f3c8c7598179e6771c` (2195B), ambos **solo archivos de conversación, no código en GitHub**. Test ZIP 53/53 sintéticos Linux PASS, Windows real pendiente. Elegir manualmente manifest 19/11 tras preflight, compartir solo `BT_SEC07_*`. Roles catálogo ≠ SQL, recuperar roles/ACL pendiente. No GPG/SQL/restore/SSL. [CP63](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_LAUNCHER_DELIVERED_20261121.md).
+
+---
+
 ## REGLA SEC-07 — TAMAÑOS PARCIALES GPG WINDOWS (CP62, 21/11/2026)
 
 Nueva captura de carpeta con 2 ficheros / 0 carpetas: total **89.242 bytes** (87,1 KB); otra captura de un `.gpg` OpenPGP muestra **151 bytes** de tamaño lógico y «0 bytes en disco», **sin nombre visible en el recorte**. NO atribuir 151 bytes a roles ni database sin confirmar; otro archivo serían 89.091 bytes solo si corresponde a la misma carpeta. Tamaño 0 en disco ≠ contenido lógico cero. Sin `manifest.json` visible; V3 no puede certificar esta carpeta, sin generar manifest. Confirmar nombres/tamaños individuales por Propiedades, luego buscar respaldo más reciente; NO GPG/decrypt/SQL/restore/SSL. [CP62](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_SIZES_PARTIAL_20261121.md).

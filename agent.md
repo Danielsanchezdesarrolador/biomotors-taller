@@ -1,3 +1,7 @@
+## BT-SEC07-R3-WINDOWS-V3-LAUNCHER-DELIVERED-63
+
+Entregados al dueño ZIP V3 7334B SHA `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484` y lanzador `BT_SEC07_EJECUTAR_V3.ps1` 2195B SHA `f10991a2600cb0ba6f1214ab3525a0c22e5b61af646700f3c8c7598179e6771c`. Hallazgo más reciente 19/11 con manifest y database+roles catalog ciphertexts; todavía **sin resultado Windows V3**. Ejecutar solo PowerShell con ZIP hash validado y 53 tests, luego seleccionar manifest, recibir `BT_SEC07_*`. Sin GPG/SQL/SSL/restore ni certificar roles SQL. [CP63](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_LAUNCHER_DELIVERED_20261121.md).
+
 ## BT-SEC07-R3-GPG-SIZES-PARTIAL-62
 
 Capturas Windows: carpeta con 2 archivos total 89.242 bytes, de los cuales un `.gpg` tiene tamaño lógico 151 bytes y 0 bytes en disco (nombre recortado/no identificado). No certificar que el pequeño sea `roles.sql.gpg`; si ambos pertenecen a carpeta, otro ~89.091 bytes. Falta `manifest.json`. Pedir solo identificación del archivo de 151B y tamaño separado de ambos; no descifrar, generar manifest, repetir V3/SQL/restore. [CP62](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_SIZES_PARTIAL_20261121.md).
