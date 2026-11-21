@@ -1,3 +1,5 @@
+> **RESULTADO POSTERIOR (CP46, 20/11/2026):** el propietario ejecutó el único segundo intento autorizado con ZIP V2 y obtuvo `CLIENT_POOLER_TLS: CONFIRMED_BY_LIBPQ`, `TRANSACTION_READ_ONLY: ON`, `RO_V2_WINDOWS: PASS_CLIENT_TLS_ONLY`. También `DB_BACKEND_SSL: REPORTED_NO` y `END_TO_END_TLS: NOT_CERTIFIED`. **No repetir V2**. INC-44 cerrado; hallazgo TLS backend requiere consultar configuración SSL enforcement con permiso separado. [Checkpoint 46](CHECKPOINT_BT_SEC07_R3_CLIENT_TLS_V2_WINDOWS_PASS_BACKEND_SSL_PENDING_20261120.md).
+
 # CHECKPOINT — BT-SEC07-R3-READONLY-TLS-CLIENT-V2-AUTHORIZED-45
 
 **Fecha:** 20/11/2026 · **Repo:** `Danielsanchezdesarrolador/biomotors-taller` · **rama única:** `main` · **HEAD anterior:** `cbbb87019f39d22561a75b2f0df178da527c4ef7`.
