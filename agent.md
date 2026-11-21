@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-METADATA-NO-SECRET-KEYS-LISTED-74
+
+Windows CP73 terminó: manifest recipient DECLARED, GPG FOUND, `SECRET_KEYS NONE_LISTED` y `RECIPIENT_MATCH NO_EXACT_MATCH_IN_LIST`, `DECRYPTION NOT_ATTEMPTED`, `PASSPHRASE NOT_REQUESTED`. Conclusión estricta: no hay claves privadas **listadas en keyring local consultado**, no que estén perdidas en absoluto. Posible causa de CP72 GPG STOP. Localizar clave privada original de forma segura, no compartir/importar ni repetir decrypt sin permiso; no crear clave nueva para descifrar copia antigua. CP67 solo consistencia cifrada parcial. PowerShell siempre inline CP66. [CP74](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_NO_SECRET_KEYS_LISTED_20261121.md).
+
 ## BT-SEC07-R3-GPG-METADATA-DIAG-AUTHORIZED-73
 
 Permiso nuevo: inspección SOLO manifest y lista metadatos claves privadas GPG locales, sin ciphertext/decrypt. PowerShell completo entregado directo en chat (CP66), sin ZIP; imprime solo marcadores. Compara `recipient_fingerprint` opcional de manifest con `fpr` de `sec/ssb` de `gpg --list-secret-keys --with-colons`; sin imprimir UID, fingerprint ni ruta. MATCH ≠ descifrado posible, NO_MATCH ≠ clave definitivamente ausente; no diagnostica BAD_PASSPHRASE/Pinentry. Aún sin salida Windows, CP71 real decrypt STOP. [CP73](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_DIAG_AUTHORIZED_20261121.md).

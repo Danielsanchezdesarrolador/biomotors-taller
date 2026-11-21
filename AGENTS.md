@@ -1,3 +1,9 @@
+## REGLA SEC-07 — RESULTADO GPG KEYRING SIN SECRETAS CP74 (21/11/2026)
+
+Propietario ejecutó CP73 PowerShell **metadatos**: manifest PARTIAL y recipient fingerprint DECLARED, GPG FOUND, `SECRET_KEYS: NONE_LISTED`, `RECIPIENT_MATCH: NO_EXACT_MATCH_IN_LIST`, sin decrypt ni passphrase. Clave privada **no listada en keyring GPG consultado**, explicaría CP72 STOP pero no prueba pérdida global ni corrupción. Antes de volver a descifrar: localizar **clave privada ORIGINAL** en otro GNUPGHOME/PC/USB/custodia, cotejar huella localmente, no publicar claves/secretos; no crear nueva para abrir viejo .gpg, no importar ni repetir decrypt sin permiso. CP67 hashes locales PASS pero backup parcial, restore pendiente. PowerShell SIEMPRE completo en chat. [CP74](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_NO_SECRET_KEYS_LISTED_20261121.md).
+
+---
+
 ## REGLA SEC-07 — DIAGNÓSTICO GPG SOLO METADATOS AUTORIZADO CP73 (21/11/2026)
 
 Autorización expresa para revisar SOLO metadatos del keyring local tras CP72 `STOP_GPG_DECRYPTION_FAILED`; NO repetir GPG decrypt, importar/crear/exportar claves, SQL/restore/SSL ni tocar backup. Entregado PowerShell **íntegro en chat** (CP66) sin archivo/ZIP: selector `manifest.json` 19/11, `recipient_fingerprint` opcional contra registros `sec`/`ssb`+`fpr` de `gpg --list-secret-keys --with-colons --fingerprint --fingerprint`, stderr y nombres/fingerprints ocultos, sólo salida `BT_SEC07_GPG_DIAG_*`. No abre ciphertext .gpg ni pide contraseña. MATCH es solo huella listada, no clave desbloqueable; NO_MATCH o sin campo no prueba causa. Windows real **pendiente resultados**. [CP73](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_METADATA_DIAG_AUTHORIZED_20261121.md).
