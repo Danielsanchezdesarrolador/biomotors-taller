@@ -1,3 +1,7 @@
+## BT-SEC07-R3-MANIFEST-NOT-VISIBLE-WINDOWS-60
+
+Capturas Windows del titular: selector V3 muestra cero archivos JSON; filtro sin opción `Todos los archivos`; Explorador en carpeta `bytetorque-local-20261117T1441...` solo muestra `database.dump` y `roles.sql` (17/11 11:42), sin `manifest.json` visible. **No se confirmaron extensiones completas, tamaño, hashes, naturaleza del contenido ni integridad**. Cancelar selector, verificar visualmente extensiones/tamaños con Ver→Mostrar→Extensiones de nombre de archivo y Detalles. No manifest manual, no GPG/SQL/restore ni reintento sin diagnóstico. [CP60](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_NOT_VISIBLE_WINDOWS_20261121.md).
+
 ## BT-SEC07-R3-MANIFEST-WINDOWS-V3-PACKAGE-59
 
 Entregado paquete ZIP privado nuevo **V3** al propietario al no recuperarse bytes V2 original: `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V3_20261121.zip` SHA256 `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484`, 7334B. 53/53 tests sintéticos Linux PASS antes/después ZIP, compatibilidad Windows simulada NO certificada. El verificador coteja localmente manifest/ciphertext sin descifrar ni SQL/SSL/PG/red. Próximo: propietario valida hash V3 en Downloads, ejecuta runner sintético y solo con PASS selecciona manifest. STOP sin reintento. [CP59](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V3_PACKAGE_20261121.md).

@@ -1,3 +1,9 @@
+## REGLA SEC-07 — CARPETA WINDOWS SIN MANIFEST VISIBLE (CP60, 21/11/2026)
+
+El propietario mostró selector V3 con cero JSON visibles en carpeta `bytetorque-local-20261117T1441...`; en el Explorador solo aparecen `database.dump` y `roles.sql` (17/11 11:42), **no `manifest.json` visible**. La GUI solo ofrece filtros "Manifiesto JSON"/"JSON", no "Todos los archivos". Extensiones reales y tamaños **desconocidos**, pueden ocultarse `.gpg`. No afirmar backup corrupto ni completo ni que ya pasaron 53 tests en Windows. Paso siguiente **solo visual**: habilitar extensiones de archivo en Explorador, mostrar Tipo/Tamaño y observar si hay manifest en otro backup más reciente; no ejecutar/crear/modificar ni descifrar archivos ni repetir verificador. [CP60](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_NOT_VISIBLE_WINDOWS_20261121.md).
+
+---
+
 ## REGLA SEC-07 — PAQUETE MANIFEST WINDOWS V3 GENERADO (CP59, 21/11/2026)
 
 Tras CP58, V2 original no recuperable como bytes verificables; **V3 NUEVO, no renombrar como V2**: ZIP `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V3_20261121.zip`, 7334 bytes, SHA256 `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484`, 53/53 tests sintéticos Linux PASS antes/después ZIP; Windows real **PENDIENTE**. V3 lee solo manifest manual + `.gpg` whitelisted para cotejo SHA/tamaño; no descifrar, red, SQL, backup, GPG ni restaurar. Solo si SHA y tests PASS abrir selector; STOP sin reintento; compartir solo `BT_SEC07_*`. El antiguo V1 permanece obsoleto, roles/ACL y SSL pendientes. [CP59](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V3_PACKAGE_20261121.md).
