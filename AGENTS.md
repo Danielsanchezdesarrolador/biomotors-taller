@@ -1,3 +1,9 @@
+## BT-SEC07 — S0 WINDOWS PASS, S1 SIGUIENTE (21/11/2026)
+
+Titular informó `BT_SEC07_S0_RESULTADO: PASS`, 8/8 directorios, ACL restringida, propietario, atributos de indexación y 3 documentos locales `PASS`; LEGACY NOT_TOUCHED, SECRETS NOT_CREATED, PRODUCTION NOT_CONNECTED. La validación proviene de su ejecución Windows, no de inspección remota. S0 cerrado como organización, no cifrado/restore/3-2-1. S1: generar NUEVA identidad GPG fuera del backup tree y probar descifrado de canary con GNUPGHOME inicialmente vacío; custodia de dos soportes independientes pendiente hasta verificación física. Nunca usar antiguas claves/backup. [Checkpoint S0](docs/checkpoints/CHECKPOINT_BT_SEC07_S0_ESTRUCTURA_ACL_WINDOWS_PASS_20261121.md). Repo metadata public observado: no subir secretos. Sólo main, docs `[skip render]`.
+
+---
+
 ## REGLA SEC-07 — REINICIO INTEGRAL ORDENADO DE SEGURIDAD REAL CP79 (21/11/2026)
 
 **Decisión final y prioritaria del propietario:** comenzar YA seguridad REAL de ByteTorque y **crear toda la nueva cadena de claves, carpetas, backups, restores, runbooks y custodia desde cero**, **sin reutilizar** claves OpenKeychain/PGP, copias/manifest antiguos o scripts heredados como infraestructura nueva. **Conservar los legados intactos**, no borrar ni sobrescribir ni recuperar la clave antigua como paso obligado. No reconstruir app, no cambiar producción inadvertidamente. Un buen resultado de SHA cifra NO significa recovery. Plan maestro [Nueva base SEC-07](docs/BT_SEC07_NUEVA_BASE_SEGURIDAD_REAL_20261121.md) y [CP79](docs/checkpoints/CHECKPOINT_BT_SEC07_REINICIO_SEGURIDAD_REAL_ORGANIZADO_20261121.md).

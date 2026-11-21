@@ -1,3 +1,5 @@
+> **Avance operativo S0 (21/11/2026):** ejecución Windows comunicada por el titular: `BT_SEC07_S0_RESULTADO: PASS`, 8/8 carpetas, ACL/owner, NotContentIndexed y 3 documentos; ni secretos ni conexión a producción. Evidencia: [Checkpoint S0](docs/checkpoints/CHECKPOINT_BT_SEC07_S0_ESTRUCTURA_ACL_WINDOWS_PASS_20261121.md). La prueba no certifica custodia de claves, backups, restore ni 3-2-1. S1 sigue: identidad nueva, canary desde almacén GPG inicialmente vacío, dos medios de custodia independientes verificables.
+
 # ByteTorque — Nueva base de seguridad real | SEC-07
 
 **Fecha de decisión:** 21/11/2026 · **Proyecto:** ByteTorque · **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · **Rama permitida:** `main`.
