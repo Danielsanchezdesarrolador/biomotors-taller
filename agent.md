@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-TOC-REAL-LOCAL-RUN-AUTHORIZED-71
+
+Usuario autorizó inspección local UNA VEZ del backup 19/11: GPG real con keyring/agent + PG17 `pg_restore --list` por pipes, no conexión ni restore; PowerShell completo entregado directamente en chat. ZIP SHA `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58`, 37/37 sintéticos Windows CP70 y extracción revalidada. Todavía NO tenemos salida GPG/TOC real Windows; si STOP no reintentar sin diagnóstico. Un PASS sería TOC solamente, no roles/ACL/restore, manifest sigue parcial. [CP71](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_REAL_LOCAL_RUN_AUTHORIZED_20261121.md).
+
 ## BT-SEC07-R3-GPG-TOC-PREP-V1-WINDOWS-SYNTHETIC-PASS-70
 
 Windows propietario verificó ZIP y aprobó **37/37 tests sintéticos**, GPG real NO llamado, pg_restore real NO llamado, keyring y backup real NO accedidos. `REAL_TOC_WINDOWS: NOT_CERTIFIED` esperado para pruebas ficticias. No repetir. CP67 SHA internos de copia parcial sí PASS. Puerta siguiente requiere autorización expresa para descifrado LOCAL read-only de `database.dump.gpg` con keyring histórico y pg_restore --list sin DB/restore; después permiso distinto para restore aislado. Regla PowerShell íntegro en chat. [CP70](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_PREP_V1_WINDOWS_SYNTHETIC_PASS_20261121.md).

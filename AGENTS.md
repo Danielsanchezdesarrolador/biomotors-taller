@@ -1,3 +1,9 @@
+## REGLA SEC-07 — AUTORIZADA INSPECCIÓN REAL GPG/TOC LOCAL CP71 (21/11/2026)
+
+El propietario autorizó expresamente **UNA inspección LOCAL** GPG→`pg_restore --list` del backup cifrado del 19/11 con keyring histórico, sin DB, SQL restore ni Supabase. SHA ZIP inspector CP69/70 recalculada: `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58` (11554B); 37/37 pruebas sintéticas tras extraer aún PASS. Bloque **PowerShell completo entregado INLINE CHAT** (CP66), sin repetir tests; revalida manifest parcial V4, GPG descifra por pipes hacia TOC PostgreSQL17 sin guardar deliberadamente plaintext, suprime nombres privados. GPG agent/Pinentry/caché y swap posibles. `--batch` puede STOP si no permite desbloquear; no pedir contraseña en chat. **Salida Windows real PENDIENTE**, no afirmar certificado; ante STOP, investigar antes de repetir. [CP71](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_REAL_LOCAL_RUN_AUTHORIZED_20261121.md).
+
+---
+
 ## REGLA SEC-07 — PREP GPG/TOC WINDOWS SINTÉTICO PASS CP70 (21/11/2026)
 
 Evidencia PowerShell dueño: `BT_SEC07_TOC_PACKAGE: VERIFIED`, `REAL_TOC_TESTS: PASS_37_OF_37_SYNTHETIC`, `REAL_TOC_GPG/PG_RESTORE: NOT_CALLED_IN_TESTS`, `REAL_TOC_WINDOWS: NOT_CERTIFIED`, `TOC_WINDOWS: PASS_SYNTHETIC_ONLY`, `REAL_BACKUP: NOT_ACCESSED`, `GPG_KEYRING: NOT_ACCESSED`. Solo certifica tests ficticios en Windows, NO GPG/TOC real. CP67 copia 19/11 parcialmente declarada con hashes/sizes cotejados, no restaurabilidad. Próximo consentimiento específico para **GPG real + TOC solo lectura local, sin DB ni restore**, nunca heredar permiso de tests. PowerShell siempre completo en chat CP66. [CP70](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_PREP_V1_WINDOWS_SYNTHETIC_PASS_20261121.md).
