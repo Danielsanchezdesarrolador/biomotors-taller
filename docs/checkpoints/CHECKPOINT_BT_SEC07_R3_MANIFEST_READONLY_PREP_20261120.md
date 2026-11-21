@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN POSTERIOR CP57 (20/11/2026):** V1 falló en Windows ANTES del selector: `48 tests`, `15 fails`, `5 errors`, `2 skipped`; `MANIFEST_TESTS: STOP`. Falso STOP causado por comparación `Path.lstat` vs `os.fstat` Windows. **No se abrió ningún respaldo real.** V1 obsoleto. V2 ZIP privado `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V2_20261120.zip` SHA256 `950651ceed451e4156847e3af8b02cdb888f3856a479467e3905cb6ddcab92fe`, **53/53 synthetic tests PASS en Linux con Windows simulado**, ejecución real Windows pendiente. [CP57](CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V2_REGRESSION_FIX_20261120.md).
+
 # CHECKPOINT 56 — BT-SEC07-R3-MANIFEST-READONLY-PREP
 
 **Fecha:** 20/11/2026 (America/Santiago) · **Repo:** `Danielsanchezdesarrolador/biomotors-taller` · **rama única:** `main` · **HEAD de inicio:** `42508b412738f8d7099d977d97d45acd3a212ab6`.
