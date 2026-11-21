@@ -1,3 +1,7 @@
+## BT-SEC07-S2R6-THREE-BYTE-PREFIX-TOC-STILL-FAILS (21/11/2026)
+
+R6: prefix 3, PGDMP found, source decrypt GPG PASS, derived encrypt PASS, derived GPG readback PASS; `pg_restore --list` NONZERO, error class OTHER. El error de cabecera R4 se explica por prefijo de 3 bytes, pero retirar prefijo NO arregló todo. Preservar original `_v02...partial` y nuevo derivado `_clean_v03...partial` sin re-ejecutar R6, no usar producción. Próxima acción: clasificar error real `pg_restore` desde derivado v03 en un único chequeo local, sin salida con datos. Ver [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-S2R5-RECOVERABLE-MAGIC-WITH-PREFIX-20261121
 
 R5 Windows confirma GPG exit0/integrity, contenido descifrado con firma PGDMP **desplazada dentro primeros 96 bytes**. pg_restore antes devolvía NONZERO; prefijo explica rechazo header, origen exacto del prefijo pendiente. No descartar `.partial`, no nuevo pg_dump ni DB. Corregir sólo archivo derivado cifrado LOCAL eliminando preámbulo antes de PGDMP; verificar TOC/cipher/custodia/manifest antes de certificar; si falla, preservar. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
