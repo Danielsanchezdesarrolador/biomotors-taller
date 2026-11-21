@@ -1,3 +1,7 @@
+## BT-SEC07-S2R3-RESTORE-NONZERO-20261121
+
+Desde archivo cifrado S2-R2 existente: GPG exit0, pg_restore --list exit nonzero. No promueve archivo, no manifiesto nuevo, no toca prod. No asumir corrupción o pipe; consulta oficial PostgreSQL17 confirma stdin válido para pg_restore sin --jobs. Próxima lectura puntual cabecera `PGDMP` y clasificación sanitizada de stderr/estado pg_restore para causa comprobada. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). No repetir dump.
+
 ## BT-SEC07-S2R2-TOC-PIPE-STOP-20261121
 
 Windows S2-R2 confirmó pg17/verify-full/transaction READ ONLY + `ENCRYPTED_DUMP PASS` pero `ARCHIVE_TOC_READBACK_FAILED`. HAY archivo `.partial` candidato, sin manifiesto ni certificación. No repetir S2/db/dump ni usar archivos antiguos. Reanudar localmente desde `.partial`; separar pg_restore --list exit/TOC y GPG decrypt exit/status, drenar stdout completo incluso tras cierre temprano de pipe (posible causa no confirmada). Resolver y registrar en AGENTS, agent, roadmap, incidentes sólo con Windows PASS. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).

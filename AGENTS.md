@@ -1,3 +1,9 @@
+## BT-SEC07 — S2-R3 GPG EXIT0 / PG_RESTORE NONZERO: INSPECCIÓN BINARIA CONTROLADA (21/11/2026)
+
+Windows S2-R3 informó `PARTIAL FOUND_UNIQUE`, `PRODUCTION NOT_CONNECTED`, `TOOLS AVAILABLE`, `GPG_EXIT ZERO`, `TOC_EXIT NONZERO` y STOP `PG_RESTORE_TOC_EXIT_FAILED`. No hay respaldo validado todavía, `.partial` intacto. La hipótesis previa 'cierre anticipado de pipe' NO fue certificada y probablemente insuficiente: pg_restore falla pese a drenaje. Siguiente: comprobar cabecera `PGDMP` y clasificar stderr de pg_restore sin exponer objetos, tablas, contenido, claves ni rutas; un solo procedimiento read-only local, sin DB ni export de nuevo. Documentar corrección sólo cuando pase. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). No certificar restore/3-2-1.
+
+---
+
 ## BT-SEC07 — S2 R2 DUMP CIFRADO PASS, TOC STOP: REANUDAR SIN NUEVO DUMP (21/11/2026)
 
 Evidencia Windows S2-R2: `STRUCTURE PASS`, `TOOLS PG17_GPG_READY`, `GPG_KEY VERIFIED`, `TLS CLIENT_VERIFY_FULL_PASS`, `DATABASE POSTGRES17_VERIFIED`, `TRANSACTION READ_ONLY_PASS`, `ENCRYPTED_DUMP PASS`, luego `ARCHIVE_TOC_READBACK_FAILED` y `STOP`. Existe candidato `*.dump.gpg.partial` generado nuevo; **NO** declarado respaldo validado. No conectar de nuevo ni ejecutar pg_dump, no borrar/sobrescribir ese `.partial`. Sospecha sin comprobar: pg_restore --list sobre stdin termina temprano/cierra pipe, CopyTo marca error aunque TOC sea válido. Hacer UN readback local de archivo existente, drenando GPG stdout completamente incluso si pg_restore termina antes, comprobar exit ambos + TOC + status GPG, hash readback y promover a final/manifest sólo con PASS. Registrar causa confirmada posteriormente. Ver [registro operativo](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). Solo docs [skip render], main.
