@@ -1,3 +1,7 @@
+## BT-SEC07-R3-GPG-TOC-PREP-V1-WINDOWS-SYNTHETIC-PASS-70
+
+Windows propietario verificó ZIP y aprobó **37/37 tests sintéticos**, GPG real NO llamado, pg_restore real NO llamado, keyring y backup real NO accedidos. `REAL_TOC_WINDOWS: NOT_CERTIFIED` esperado para pruebas ficticias. No repetir. CP67 SHA internos de copia parcial sí PASS. Puerta siguiente requiere autorización expresa para descifrado LOCAL read-only de `database.dump.gpg` con keyring histórico y pg_restore --list sin DB/restore; después permiso distinto para restore aislado. Regla PowerShell íntegro en chat. [CP70](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_PREP_V1_WINDOWS_SYNTHETIC_PASS_20261121.md).
+
 ## BT-SEC07-R3-REAL-GPG-TOC-READER-PREP-V1-69
 
 Preparado inspector GPG→TOC en ZIP **PRIVADO**, 11554 bytes SHA256 `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58`; 37/37 tests ficticios PASS antes/después ZIP. Bloque PowerShell INLINE recibido por propietario solo para validar paquete y fixtures; no se ejecuta inspector real todavía. Futuro GPG→pg_restore --list mediante pipes binarios, con estado de cifrado e indicadores de MDC, sin archivo plaintext escrito deliberadamente y sin salida de metadatos privados. Exige permiso nuevo para leer keyring y ciphertext, GPG agent puede mantener caché. Restores/ACL/roles/SSL pendientes. [CP69](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_REAL_GPG_TOC_READER_PREP_V1_20261121.md).

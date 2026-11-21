@@ -1,3 +1,9 @@
+## REGLA SEC-07 — PREP GPG/TOC WINDOWS SINTÉTICO PASS CP70 (21/11/2026)
+
+Evidencia PowerShell dueño: `BT_SEC07_TOC_PACKAGE: VERIFIED`, `REAL_TOC_TESTS: PASS_37_OF_37_SYNTHETIC`, `REAL_TOC_GPG/PG_RESTORE: NOT_CALLED_IN_TESTS`, `REAL_TOC_WINDOWS: NOT_CERTIFIED`, `TOC_WINDOWS: PASS_SYNTHETIC_ONLY`, `REAL_BACKUP: NOT_ACCESSED`, `GPG_KEYRING: NOT_ACCESSED`. Solo certifica tests ficticios en Windows, NO GPG/TOC real. CP67 copia 19/11 parcialmente declarada con hashes/sizes cotejados, no restaurabilidad. Próximo consentimiento específico para **GPG real + TOC solo lectura local, sin DB ni restore**, nunca heredar permiso de tests. PowerShell siempre completo en chat CP66. [CP70](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_GPG_TOC_PREP_V1_WINDOWS_SYNTHETIC_PASS_20261121.md).
+
+---
+
 ## REGLA SEC-07 — INSPECTOR REAL GPG→TOC PREPARADO, SOLO SINTÉTICOS CP69 (21/11/2026)
 
 Luego de CP68, el usuario pidió continuar. Se preparó paquete privado `BT_SEC07_R3_GPG_TOC_READER_PREP_V1_20261121.zip`, **11554 B**, SHA256 `dd6e5b7851039eefbc5d01c3245899fa9f13e689f402b645829984bebbc24a58`. **37/37 tests sintéticos PASS** antes/después ZIP, no GPG/PG reales. Diseño futuro revalida manifest V4, canaliza **binario** GPG stdout→`pg_restore --list -`, exige GPG exit0/GOODMDC o GOODAEAD y TOC reconocido, no guarda deliberadamente plaintext ni muestra nombres/SQL, pero acceso a keyring/agent GPG y paginación OS posibles. La única orden PowerShell entregada inline es de **preflight sintético**, sin leer backup ni llaves. **Permiso específico pendiente** para ejecutar en backup real. Restore/roles/ACL/SSL siguen pendientes. [CP69](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_REAL_GPG_TOC_READER_PREP_V1_20261121.md).
