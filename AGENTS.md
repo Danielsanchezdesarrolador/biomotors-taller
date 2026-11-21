@@ -1,3 +1,9 @@
+## BT-SEC07 — S2-R11 PASS_BACKUP_AND_TOC; S4 RESTAURACIÓN AISLADA SIGUIENTE (21/11/2026)
+
+Windows reportó S2-R11 `NEW_CIPHER CREATED`, `MAGIC PGDMP_OFFSET_ZERO`, `GPG_INTEGRITY PASS`, `LINUX_TOC PASS`, `SOURCE UNCHANGED`, `SHA256 PASS`, `MANIFEST CREATED`, `BACKUP ENCRYPTED_FINALIZED`, `RESULTADO PASS_BACKUP_AND_TOC`. **S2 cierre ESTRUCTURAL** del primer archivo nuevo v04 cifrado y manifiesto, solo en PC; no implica restore real. Incidente BOM reparado y demostrado, no reexportar ni repetir v02/v03; secreto no subido. Próximo S4 restauración Docker PG17 aislada `--network none`, datos tmpfs, sin puertos/volúmenes persistentes, `pg_restore --no-owner --no-acl --exit-on-error`, resultados sanitizados. S3 otros componentes Supabase/roles pendiente. Ver [checkpoint R11](docs/checkpoints/CHECKPOINT_BT_SEC07_S2_R11_BACKUP_CIFRADO_VALIDADO_20261121.md). Si STOP registrar causa/solución en AGENTS, agent, roadmap y registro. main docs [skip render].
+
+---
+
 ## BT-SEC07 — LOGS NO SON COMANDOS POWERSHELL (21/11/2026)
 
 El titular copió y ejecutó por accidente varias líneas de SALIDA `BT_SEC07_S2_R10_*: ...` como si fueran comandos PowerShell; Windows devolvió `CommandNotFoundException` para cada etiqueta. Solución: detener línea pendiente con Ctrl+C y copiar SÓLO el bloque de código completo que inicia `& {` y termina `}`; las líneas `BT_SEC07_*` son únicamente resultados para compartir en chat. No reejecutar R10. `R10 PASS_TOC_NO_NEW_FILE` conserva validez y R11 no ha sido ejecutado según esta salida. NO hay evidencia de cambio en la base ni archivos causada por ejecutar etiquetas. Mantener aviso breve inmediatamente antes de próximos bloques: **No pegar ejemplos de resultados en PowerShell.** Actualizado en [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).

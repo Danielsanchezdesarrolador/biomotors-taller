@@ -1,3 +1,7 @@
+## BT-SEC07-S2-R11-CLOSED-STRUCTURAL-20261121
+
+S2 **PASS_BACKUP_AND_TOC** evidenciado Windows: v04 cifrada PGDMP offset0, GPG integridad PASS, PostgreSQL17 Linux TOC PASS, SHA256 PASS y manifest creado, v03 intacto, sin nueva conexión a prod. S2 cerrado para respaldo estructural en PC; S4 RESTORE real PENDIENTE. Siguiente usar solo v04 final + hash manifest, restaurar en contenedor PG17 aislado sin red/volúmenes persistentes e informar dependencias faltantes sin exponer datos. BOM UTF8 + compatibilidad .NET PS5.1 corregidos, mantener UTF8 sin BOM antes de arrancar proceso. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S2_R11_BACKUP_CIFRADO_VALIDADO_20261121.md).
+
 ## BT-SEC07-LOG-OUTPUT-NOT-COMMANDS-20261121
 
 Incidente de uso Windows: usuario ejecutó textos `BT_SEC07_S2_R10_...: PASS` como comandos, provocando `CommandNotFoundException`. No implica fallo técnico S2; R10 PASS y R11 pendiente. Siempre distinguir 'CÓDIGO para ejecutar' y 'RESULTADO esperado, NO pegar'. Instrucción mínima Ctrl+C si línea activa y copiar exclusivamente el bloque completo PowerShell de R11 `& { ... }`. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
