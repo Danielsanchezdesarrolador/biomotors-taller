@@ -1,3 +1,9 @@
+## REGLA SEC-07 — V4 PARCIAL PREPARADO OFFLINE CP65 (21/11/2026)
+
+Autorización del propietario **solo PREPARAR** comprobador V4 para `full_project_backup=false` explícito, que verifique SHA/tamaños sin certificar integralidad. Nuevo ZIP `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V4_20261121.zip`, 8720 B, SHA `9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f`; lanzador `BT_SEC07_EJECUTAR_V4.ps1` 2361 B SHA `a69899bb3adb9c514d8eef0b9325ca3ed80bc53a0dd49db83933fe1c8148985e`. **69/69 pruebas sintéticas PASS antes y después ZIP, Windows V4 real PENDIENTE**; ausencia/tipo inválido de flag STOP. Un PASS solo `PASS_LOCAL_CIPHERTEXT_CONSISTENCY_ONLY` con `PARTIAL_BACKUP_DECLARED` cuando aplica, nunca recuperación íntegra. No tocar respaldo, manifest, GPG, SQL, SSL ni servicios. Pedir permiso NUEVO para ejecutar V4 sobre archivos reales. [CP65](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_PARTIAL_V4_OFFLINE_READY_20261121.md).
+
+---
+
 ## REGLA SEC-07 — WINDOWS V3 STOP POR DECLARACIÓN INCOMPLETA (CP64, 21/11/2026)
 
 Resultados reales del propietario: ZIP V3 VERIFIED, 53/53 tests sintéticos PASS en Windows, marcador `SIMULATED_NOT_CERTIFIED`, dos `BACKUP_SELECTED:NO`, `MANIFEST_AUDIT: STOP_INCOMPLETE_BACKUP_DECLARED` y `MANIFEST_WINDOWS_V3: STOP`. Código V3 revisado: lee y parsea `manifest.json`, verifica proyecto y backup_id, **exige `full_project_backup is True` antes de leer ciphertexts**. No hay SHA/tamaños comparados ni éxito de restore. `BACKUP_SELECTED:NO` se imprime antes del selector, no demuestra ausencia de selección. El STOP por declaración incompleta no prueba corrupción: nunca cambiar manifest a true para forzar PASS. Siguiente propuesta: nuevo comprobador offline que reporte PARTIAL_BACKUP_DECLARED y coteje SOLO tamaños/SHA sin certificar respaldo integral, con nuevo permiso de ejecución. No GPG/SQL/restore/SSL. [CP64](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_INCOMPLETE_DECLARATION_STOP_20261121.md).

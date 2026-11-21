@@ -1,3 +1,7 @@
+## BT-SEC07-R3-MANIFEST-PARTIAL-V4-OFFLINE-READY-65
+
+Con autorización para PREPARAR (no ejecutar backup real), reconstruido V4 sobre V3: `full_project_backup=false` explícito ahora reporta `PARTIAL_BACKUP_DECLARED` pero permite verificar tamaño/SHA cifrado; flags inválidos/missing STOP. ZIP V4 SHA `9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f`, 8720B; ejecutor PowerShell SHA `a69899bb3adb9c514d8eef0b9325ca3ed80bc53a0dd49db83933fe1c8148985e`, 2361B. 69/69 sintéticos PASS antes y después ZIP. Windows V4, manifiesto real SHA aún pendientes. Fallos preparatorios de mocks sys.argv y falso positivo gpg textual corregidos. No GPG/SQL/restore/SSL. [CP65](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_PARTIAL_V4_OFFLINE_READY_20261121.md).
+
 ## BT-SEC07-R3-WINDOWS-V3-INCOMPLETE-DECLARATION-STOP-64
 
 Windows propietario: `PACKAGE_V3 VERIFIED`, `PASS_53_OF_53_SYNTHETIC`, `MANIFEST_AUDIT STOP_INCOMPLETE_BACKUP_DECLARED`, `MANIFEST_WINDOWS_V3 STOP`. Fuente V3 ZIP SHA verificado: `full_project_backup` debe ser exactamente true o se detiene **antes de comparar hashes/tamaños de .gpg**. Dos `BACKUP_SELECTED:NO` son marcadores al inicio, no evidencia de selección fallida. No editar manifiesto ni afirmar cifrado inválido. Proponer versión verificador de **consistencia parcial** que informe bandera incompleta sin convertirla en PASS global, bajo nuevo permiso. Sin GPG/SQL/restore/SSL. [CP64](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_INCOMPLETE_DECLARATION_STOP_20261121.md).

@@ -1,0 +1,26 @@
+# CHECKPOINT 65 — BT-SEC07-R3-MANIFEST-PARTIAL-V4-OFFLINE-READY
+**Fecha:** 21/11/2026 (Chile) · **Repo:** `Danielsanchezdesarrolador/biomotors-taller` · **rama única:** `main` · **HEAD inicial:** `2115eea28f2e7e2edde711ccafc21b883401a1e0`.
+
+## Autorización y límite
+El propietario respondió «autorizo» a la propuesta de CP64 para **PREPARAR** una herramienta V4 que acepte declaraciones explícitas de respaldo parcial al verificar hashes y tamaños de archivos cifrados, manteniendo todos los controles de seguridad. **No autorizó ejecutar sobre respaldo real, acceder a clave histórica, GPG, PG, SQL, Supabase, restaurar ni modificar SSL**. No se abrió el backup real del 19/11 ni se pidió subirlo.
+
+## Paquete privado nuevo, sin código en el repo público
+- ZIP: `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V4_20261121.zip` — **8720 bytes** — SHA-256 `9fea99fb10eab18e6ba2ee78b51ad78e54b82f407f8fe7d45d284bc237fbdd0f`.
+- Ejecutable PowerShell **para futura ejecución autorizada**, no ejecutado: `BT_SEC07_EJECUTAR_V4.ps1` — **2361 bytes** — SHA-256 `a69899bb3adb9c514d8eef0b9325ca3ed80bc53a0dd49db83933fe1c8148985e`; verifica antes de extraer la SHA del ZIP, ejecuta pruebas sintéticas y solo después ofrece selector manual de manifest.
+- ZIP contiene `README.md`, `bt_sec07_manifest_readonly.py`, `test_bt_sec07_manifest_readonly.py`, `run_bt_sec07_manifest_offline_tests.py`. Comprobación CRC ZIP/testzip aprobada. Hash ZIP recalculado y cotejado con PowerShell, coincidente.
+- **Código/ZIP de la herramienta permanecen como descargables privados del chat; solo documentos y referencias hash se registraron en GitHub.**
+
+## Cambio exacto respecto a V3
+- V3 paraba con `STOP_INCOMPLETE_BACKUP_DECLARED` cuando `full_project_backup` no era `true`, antes de calcular SHA. En V4, `full_project_backup=false` booleano explícito devuelve `BT_SEC07_MANIFEST_SCOPE: PARTIAL_BACKUP_DECLARED` y **permite comparar tamaños y SHA del ciphertext listado**. Si el valor es `true`, devuelve `DECLARED_FULL_NOT_CERTIFIED`; ni siquiera ese estado certifica integralidad.
+- Campo ausente, `null`, número, cadena u otro tipo: `STOP_FULL_PROJECT_FLAG_INVALID` — no se infiere contenido. No se reescribe ni corrige el manifiesto.
+- Comprobaciones conservadas: proyecto, backup_id/carpeta, JSON duplicados/invalid UTF8, whitelist exacta de tres archivos aprobados (`database.dump.gpg`, `roles.sql.gpg`, `roles.catalog.json.gpg`), un `database.dump.gpg` obligatorio, tamaños positivos e hashes SHA-256 hex, lectura y comparación real por bloques, no links/junctions, snapshots de ruta pre/post y descriptor de lectura Windows limitado tipo/tamaño.
+- Resultado exitoso **solo**: `BT_SEC07_MANIFEST_AUDIT: PASS_LOCAL_CIPHERTEXT_CONSISTENCY_ONLY`, seguido por lanzador `BT_SEC07_MANIFEST_WINDOWS_V4: PASS_CIPHERTEXT_ONLY_NOT_RESTORE`. Esto **no** es autenticidad independiente ni integridad OpenPGP certificada, ni descifrado, restaurabilidad, roles, ACL, GRANT, owners, TLS extremo a extremo. La marca `BACKUP_SELECTED: YES` indica que se ingresó una ruta al selector; no prueba pertenencia a un respaldo real antes de validaciones.
+
+## Pruebas y correcciones de laboratorio
+- Partiendo del ZIP V3 original SHA `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484`, leído en entorno del asistente; se mantuvo fuente y suite y se añadieron **16 pruebas** específicas de parciales, hashes de DB y catálogo, tamaños, JSON, rol SQL no certificado, nombres, proyecto, backup id, fichero faltante, no mutación y salida CLI segura.
+- Resultado definitivo: **69/69 tests sintéticos PASS** antes de comprimir con `unittest discover` y runner; **69/69 PASS tras extracción aislada del ZIP**. Regresiones de diferencias de metadatos Windows permanecen simuladas; **V4 no se ha probado en Windows real**.
+- Durante preparación, primer intento de ejecución `unittest discover` arrojó **2 fallos de fixtures de `main()`** porque `sys.argv` heredaba argumentos del runner; se corrigió aislando `sys.argv` con mock sin modificar lógica de backup. Primer control estático de paquetes emitió **falso positivo** por encontrar el texto `.gpg` en nombres de archivos y considerarlo una llamada a GPG; se afinó la lista de términos, conservando AST de imports permitidos. **Después de ambas correcciones: suite completa aprobada**. Estos incidentes afectaron solo fixtures/código de preparación.
+- Inspección AST del script principal mostró solo imports estándar `hashlib`, `json`, `os`, `pathlib`, `re`, `stat`, `sys`, `tkinter`; no importa red, GPG, PostgreSQL ni subprocess, y no usa operaciones explícitas de escritura del respaldo. No hay prueba formal de ausencia de carreras complejas Windows.
+
+## Próxima puerta
+**Windows real V4 / backup real 19/11: PENDIENTE de nuevo permiso explícito**. Cuando se autorice, el propietario guarda ZIP V4 en Descargas, ejecuta bloque PowerShell con SHA exacta, preflight 69 sintéticos, y elige manualmente el `manifest.json` original del 19/11. Enviar solo marcadores `BT_SEC07_*`, sin rutas, archivos, claves ni hashes concretos. Ante STOP, no insistir ni cambiar manifest. R3 owners/ACL, roles SQL reales, restauración aislada y SSL upstream siguen abiertos. No se modificó aplicación, DB, Render ni SSL; solo docs `main` con `[skip render]`.
