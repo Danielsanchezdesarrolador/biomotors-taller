@@ -1,3 +1,5 @@
+> **EVIDENCIA SSL ENFORCEMENT CP48:** screenshot del panel muestra `Enforce SSL on incoming connections` **OFF**; dato visual del propietario, sin API. Es consistente con `DB_BACKEND_SSL: REPORTED_NO` pero no significa que todos los clientes carezcan de TLS; PC→pooler TLS PASS. Cambio a ON reinicia DB y no está autorizado. [CP48](CHECKPOINT_BT_SEC07_SSL_ENFORCEMENT_OFF_UI_OBSERVED_20261120.md).
+
 > **CONSULTA SUBSIGUIENTE CP47 (20/11/2026):** propietario autorizó inspeccionar configuración SSL enforcement sin cambios. App Supabase verificó proyecto activo, pero `get_project` no devuelve ese valor y no expone GET `/ssl-enforcement`. **ESTADO TODAVÍA DESCONOCIDO**, no inferir de backend SSL NO. Observar manualmente en Dashboard → Database Settings → SSL Configuration sin tocar el interruptor. [CP47](CHECKPOINT_BT_SEC07_SSL_ENFORCEMENT_READONLY_LIMIT_20261120.md).
 
 # CHECKPOINT — BT-SEC07-R3-CLIENT-TLS-V2-WINDOWS-PASS-46 · TLS cliente PASS; tramo backend SSL=NO; end-to-end pendiente

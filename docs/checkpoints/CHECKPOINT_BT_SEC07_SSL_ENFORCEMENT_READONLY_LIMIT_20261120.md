@@ -1,3 +1,5 @@
+> **EVIDENCIA POSTERIOR CP48:** el propietario aportó captura del interruptor `Enforce SSL on incoming connections`, que aparece **OFF** (gris, perilla izquierda). **Observación visual del usuario, NO resultado GET del conector ni verificación API independiente.** CP47 era UNKNOWN porque no existía acción GET; ahora conocemos el estado visto en el panel, sin haber cambiado nada. **Activarlo requiere permiso independiente por reinicio de DB**. [CP48](CHECKPOINT_BT_SEC07_SSL_ENFORCEMENT_OFF_UI_OBSERVED_20261120.md).
+
 # CHECKPOINT BT-SEC07-SSL-ENFORCEMENT-READONLY-LIMIT-47 — valor de SSL enforcement aún no comprobado
 
 **Fecha:** 20/11/2026 (Chile). **Proyecto:** ByteTorque, Supabase `biomotors-taller`. **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller`, única rama `main`; **HEAD antes del checkpoint:** `231606c8dda8c27d97e50861203413caf30787ef`.
