@@ -31,3 +31,7 @@ El comando `Get-Command supabase.cmd,supabase.exe,supabase` de PowerShell no enc
 Ejecutar preflight local de disponibilidad de Node.js >= 20 y npx; si están presentes, ofrecer consentimiento concreto para ejecutar `npx --yes supabase@3.0.0 --version` y `npx --yes supabase@3.0.0 db dump --help` **solo desde una carpeta temporal ajena al repositorio**. Conservar como salida solo la versión y los flags presentes, sin comandos que contacten Supabase. Si no existen Node/npx, tratar Scoop como alternativa con autorización separada.
 
 **Status R3:** `CLI_NO_PATH` conocido, ruta documentada, ejecutable/versión aún por confirmar. **Sin mutaciones y sin certificación completa**, piloto Ignacio `A REPASAR`.
+
+## BT-SEC07-ROLES-CLI-V3-READY-27 · Prerrequisito CLI cerrado mediante npx, no instalación global
+
+El propietario ejecutó `npx --yes supabase@3.0.0` desde TEMP con permiso y confirmó `ROLE_ONLY=True`, `REMOTE=True`, `VERSION=3.0.0`, `DB_URL=False`, `SUCCESS_NO_DB_ACCESS`. Confirmación oficial: `--db-url` se oculta por obsoleto en v3, se reemplaza por `--remote`; no afirmar que está roto por ausencia en --help. [Nuevo checkpoint](CHECKPOINT_BT_SEC07_ROLES_CLI_V3_READY_20261120.md). Solo ayuda/version, sin dump ni credenciales, ningún cambio remoto. El archivo de roles SQL antiguo de 0 bytes sigue requiriendo solución.
