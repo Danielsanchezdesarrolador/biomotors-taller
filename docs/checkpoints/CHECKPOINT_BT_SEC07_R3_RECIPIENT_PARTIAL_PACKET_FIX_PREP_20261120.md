@@ -1,3 +1,5 @@
+> **CIERRE POSTERIOR (CHECKPOINT 40, 20/11/2026):** el propietario ejecutó V2 con su respaldo principal en Windows y obtuvo `RECIPIENT_COUNT: 1`, `PUBLIC_MATCH: ALL_VISIBLE_MATCH`, `SECRET_MATCH: NO_VISIBLE_MATCH` solo en keyring predeterminado, `RECOVERABILITY: NOT_PROVEN`, `META_V2_WINDOWS: PASS_HEADER_CHECK_ONLY`. **INC-39 CERRADO**; V1 superada. Hay evidencia histórica de clave privada coincidente en `GNUPGHOME` aislado + descifrado y restore estructural R2; no confundir ausencia en default con pérdida. Ver [checkpoint 40](CHECKPOINT_BT_SEC07_R3_RECIPIENT_V2_WINDOWS_PASS_HISTORICAL_KEYRING_20261120.md).
+
 # CHECKPOINT — BT-SEC07-R3-RECIPIENT-PARTIAL-FIX-PREP-39 · longitud parcial OpenPGP y lectura solo cabecera
 
 **Fecha:** 20/11/2026 (America/Santiago) · **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · **rama exclusiva:** `main` · **HEAD antes de cambio:** `16bc64ba64fa7e3ec5d4a0da5e52362e2c8c4b6d`. **Alcance autorizado:** lectura SOLO de metadatos de un archivo GPG seleccionado por propietario; sin descifrar, modificar respaldos ni conexión a Supabase. No se ejecutó operación contra equipo o respaldo real desde el asistente.
