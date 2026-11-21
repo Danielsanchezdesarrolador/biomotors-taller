@@ -1,3 +1,7 @@
+## BT-SEC07-R3-CHAT-CONTINUITY-V2-WINDOWS-PENDING-58
+
+Verificados `AGENTS.md`, `agent.md`, `roadmap.md`, CP57 y HEAD `1be3b7f` en GitHub. **Sin nuevo Windows real/backup inspeccionado**; ZIP V2 original sólo documentado, SHA `950651ceed451e4156847e3af8b02cdb888f3856a479467e3905cb6ddcab92fe`, 53/53 pruebas sintéticas offline anteriores. Próximo: propietario verifica hash en Descargas y usa bloque PowerShell CP57; con tests PASS se permite selector de `manifest.json`, read-only; ante STOP no reintentar. Github informó repositorio público, no modificado. Sin SQL/GPG/restore/SSL/deploy. [CP58](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_CHAT_CONTINUITY_V2_WINDOWS_PENDING_20261120.md).
+
 ## BT-SEC07-R3-MANIFEST-WINDOWS-V2-REGRESSION-FIX-57
 
 Usuario reportó V1 `BT_SEC07_PACKAGE: VERIFIED`, tests `48` fallidos `15 fails/5 errors/2 skipped`, `MANIFEST_TESTS: STOP` y **NO SELECTOR**. Preflight se detuvo ANTES de abrir backup real. INC-57: comparación cruzada demasiado estricta `Path.lstat()` contra `os.fstat()` en Windows. V2 ZIP privado `BT_SEC07_R3_MANIFEST_READONLY_WINDOWS_V2_20261120.zip` SHA256 `950651ceed451e4156847e3af8b02cdb888f3856a479467e3905cb6ddcab92fe`, 10777 B, 53/53 nuevos tests completos PASS antes y después de extracción, incluye fstat Windows simulado y runner sanitizado. **Windows real de V2 pendiente**, no atribuir PASS al backup. V1 obsoleto. Sin GPG, PostgreSQL, escritura o acceso real. [CP57](./docs/checkpoints/CHECKPOINT_BT_SEC07_R3_MANIFEST_WINDOWS_V2_REGRESSION_FIX_20261120.md). R3 ACL/owners pendientes, TLS enforcement OFF.
