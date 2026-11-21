@@ -1,3 +1,5 @@
+> **CONSULTA SUBSIGUIENTE CP47 (20/11/2026):** propietario autorizó inspeccionar configuración SSL enforcement sin cambios. App Supabase verificó proyecto activo, pero `get_project` no devuelve ese valor y no expone GET `/ssl-enforcement`. **ESTADO TODAVÍA DESCONOCIDO**, no inferir de backend SSL NO. Observar manualmente en Dashboard → Database Settings → SSL Configuration sin tocar el interruptor. [CP47](CHECKPOINT_BT_SEC07_SSL_ENFORCEMENT_READONLY_LIMIT_20261120.md).
+
 # CHECKPOINT — BT-SEC07-R3-CLIENT-TLS-V2-WINDOWS-PASS-46 · TLS cliente PASS; tramo backend SSL=NO; end-to-end pendiente
 
 **Fecha:** 20/11/2026 (America/Santiago) · **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · **rama exclusiva:** `main` · **HEAD observado antes de los cambios:** `3feff4eb4937b37de8304a3f7fac598a5fdcaf43`. **Fuente de evidencia:** líneas sanitizadas que el propietario copió de Windows después de ejecutar el único segundo intento autorizado en [CP45](CHECKPOINT_BT_SEC07_R3_READONLY_TLS_CLIENT_V2_AUTHORIZED_20261120.md). **Ninguna conexión nueva fue ejecutada por el asistente en esta etapa.**
