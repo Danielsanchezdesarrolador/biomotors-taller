@@ -1,3 +1,7 @@
+## BT-SEC07-R7-NEW-CLEAN-HEADER-INVALID-20261121
+
+R7 Docker ni siquiera recibió archivo: abortó en MAGIC_CHECK antes de pipe con `CLEAN_ARCHIVE_MAGIC_INVALID` de derived `_clean_v03`, archivos preservados, producción no conectada. S2 aún no certificada. R5/R6 muestran prefijo de 3 bytes en original; nuevo derivado podría repetirlo durante descifrado, pero causa NO corroborada. Comparar ambas firmas/offsets y clasificación segura local con GPG decryption complete, sin nuevo ciphertext, sin datos visibles. Actualizar registro al comprobar el origen. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-S2R6-THREE-BYTE-PREFIX-TOC-STILL-FAILS (21/11/2026)
 
 R6: prefix 3, PGDMP found, source decrypt GPG PASS, derived encrypt PASS, derived GPG readback PASS; `pg_restore --list` NONZERO, error class OTHER. El error de cabecera R4 se explica por prefijo de 3 bytes, pero retirar prefijo NO arregló todo. Preservar original `_v02...partial` y nuevo derivado `_clean_v03...partial` sin re-ejecutar R6, no usar producción. Próxima acción: clasificar error real `pg_restore` desde derivado v03 en un único chequeo local, sin salida con datos. Ver [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).

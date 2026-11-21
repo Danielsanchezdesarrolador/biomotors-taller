@@ -1,3 +1,10 @@
+## INC-S2-02 — R7: magia inválida incluso en ciphertext derivado [ABIERTO]
+**Evidencia Windows:** `S2_R7_CIPHERTEXT FOUND_UNIQUE`, `PRODUCTION NOT_CONNECTED`, `TOOLS READY`, `STAGE MAGIC_CHECK`, `STOP CLEAN_ARCHIVE_MAGIC_INVALID`, `FILES PRESERVED_IF_CREATED`.
+**Hechos acreditados:** en R6 se omitieron 3 bytes antes de PGDMP en stdout de GPG original y se creó archivo cifrado derivado v03; R6 pasó descifrado/GPG pero no TOC. En R7 descifrar ese derivado no empieza con PGDMP. Docker fue lanzado pero terminó sin recibir dump validable; NO se ejecutó TOC Linux ni restauración real. No sabemos aún si hay prefijo que reaparece en cada ejecución GPG, si el texto cambia dentro del canal o si hay otro formato/corrupción.
+**Decisión:** NO nuevo pg_dump, no regenerar claves, no editar/delete archivos cifrados, no repetir R7. Diagnóstico limitado LOCAL lectura sólo original y derivado: ubicación del primer PGDMP dentro de 96 bytes, clase de prefijo (BOM de UTF-8 u otro), longitud descifrada e integridad GPG; nada de bytes/SQL/rutas/secretos impresos. Solución confirmada sólo tras verificación independiente del archivo real. S2 continúa abierto.
+
+---
+
 ## INC-S2-02 — R6: reparar prefijo de 3 bytes no resolvió TOC [ABIERTO]
 **Evidencia Windows:** `S2_R6_PREFIX_BYTES: 3`, `MAGIC: PGDMP_FOUND`, `ORIGINAL_DECRYPT: PASS`, `NEW_ENCRYPTION: PASS`, `GPG_READBACK: PASS`, `TOC_ERROR_CLASS: OTHER`, `STAGE: VERIFY_NEW_ARCHIVE`, `STOP: PG_RESTORE_LIST_FAILED`, `FILES: PRESERVED`.
 **Hechos:** derivación cifrada limpia generada, GPG la descifra completamente con integridad reportada. `pg_restore --list` sigue terminando no-cero aunque se retiró el prefijo original de 3 bytes. **El origen del prefijo y el resto del fallo son desconocidos**. Existe un informe histórico PostgreSQL Win32 sobre pipes no seekables, pero el parche fue marcado `Committed` en 2023, por lo que NO adjudicar este fallo al bug histórico sin evidencia: https://commitfest.postgresql.org/patch/4161/ .
