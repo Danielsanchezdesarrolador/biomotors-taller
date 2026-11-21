@@ -1,3 +1,7 @@
+## BT-SEC07-R3-WINDOWS-V3-INCOMPLETE-DECLARATION-STOP-64
+
+Windows propietario: `PACKAGE_V3 VERIFIED`, `PASS_53_OF_53_SYNTHETIC`, `MANIFEST_AUDIT STOP_INCOMPLETE_BACKUP_DECLARED`, `MANIFEST_WINDOWS_V3 STOP`. Fuente V3 ZIP SHA verificado: `full_project_backup` debe ser exactamente true o se detiene **antes de comparar hashes/tamaños de .gpg**. Dos `BACKUP_SELECTED:NO` son marcadores al inicio, no evidencia de selección fallida. No editar manifiesto ni afirmar cifrado inválido. Proponer versión verificador de **consistencia parcial** que informe bandera incompleta sin convertirla en PASS global, bajo nuevo permiso. Sin GPG/SQL/restore/SSL. [CP64](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_INCOMPLETE_DECLARATION_STOP_20261121.md).
+
 ## BT-SEC07-R3-WINDOWS-V3-LAUNCHER-DELIVERED-63
 
 Entregados al dueño ZIP V3 7334B SHA `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484` y lanzador `BT_SEC07_EJECUTAR_V3.ps1` 2195B SHA `f10991a2600cb0ba6f1214ab3525a0c22e5b61af646700f3c8c7598179e6771c`. Hallazgo más reciente 19/11 con manifest y database+roles catalog ciphertexts; todavía **sin resultado Windows V3**. Ejecutar solo PowerShell con ZIP hash validado y 53 tests, luego seleccionar manifest, recibir `BT_SEC07_*`. Sin GPG/SQL/SSL/restore ni certificar roles SQL. [CP63](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_LAUNCHER_DELIVERED_20261121.md).

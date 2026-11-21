@@ -1,3 +1,9 @@
+## REGLA SEC-07 — WINDOWS V3 STOP POR DECLARACIÓN INCOMPLETA (CP64, 21/11/2026)
+
+Resultados reales del propietario: ZIP V3 VERIFIED, 53/53 tests sintéticos PASS en Windows, marcador `SIMULATED_NOT_CERTIFIED`, dos `BACKUP_SELECTED:NO`, `MANIFEST_AUDIT: STOP_INCOMPLETE_BACKUP_DECLARED` y `MANIFEST_WINDOWS_V3: STOP`. Código V3 revisado: lee y parsea `manifest.json`, verifica proyecto y backup_id, **exige `full_project_backup is True` antes de leer ciphertexts**. No hay SHA/tamaños comparados ni éxito de restore. `BACKUP_SELECTED:NO` se imprime antes del selector, no demuestra ausencia de selección. El STOP por declaración incompleta no prueba corrupción: nunca cambiar manifest a true para forzar PASS. Siguiente propuesta: nuevo comprobador offline que reporte PARTIAL_BACKUP_DECLARED y coteje SOLO tamaños/SHA sin certificar respaldo integral, con nuevo permiso de ejecución. No GPG/SQL/restore/SSL. [CP64](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_INCOMPLETE_DECLARATION_STOP_20261121.md).
+
+---
+
 ## REGLA SEC-07 — HERRAMIENTAS V3 ENTREGADAS (CP63, 21/11/2026)
 
 Propietario encontró respaldo más reciente **19/11** con `database.dump.gpg` (118.105 B), `roles.catalog.json.gpg` (675 B) y `manifest.json`; aún sin SHA ni restore certificado. Se entregaron ZIP V3 SHA `07316406274f1b2662e5a5978fb039b6751ab35cd58acb6227b466667308b484` (7334B) y ejecutor PowerShell V3 `BT_SEC07_EJECUTAR_V3.ps1` SHA `f10991a2600cb0ba6f1214ab3525a0c22e5b61af646700f3c8c7598179e6771c` (2195B), ambos **solo archivos de conversación, no código en GitHub**. Test ZIP 53/53 sintéticos Linux PASS, Windows real pendiente. Elegir manualmente manifest 19/11 tras preflight, compartir solo `BT_SEC07_*`. Roles catálogo ≠ SQL, recuperar roles/ACL pendiente. No GPG/SQL/restore/SSL. [CP63](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_WINDOWS_V3_LAUNCHER_DELIVERED_20261121.md).
