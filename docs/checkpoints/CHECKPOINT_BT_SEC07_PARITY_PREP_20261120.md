@@ -55,3 +55,7 @@ Descargar ZIP a Descargas; comprobar SHA256 `795b7d2f38b43bd817f4c63e11770a8f4f8
 **Estado de salida actual:** R1 y restore lógico R2 de alcance anterior PASS; R2 paridad estructural PENDIENTE de PC; R3 roles/Auth/Storage/Edge y R4 matriz seguridad multitenant PENDIENTES; R5 segunda copia externa no-Drive PENDIENTE; `BT-PILOT-QA-04 A REPASAR`.
 
 No cambia Supabase/Render, roles SQL de producción, GPG, Docker ni respaldos existentes. Este checkpoint es solo documental, se publica con `[skip render]`.
+
+## BT-SEC07-PARITY-SQL-INC-24 · El laboratorio V1 se ejecutó y falló después de restore — estado corregido
+
+**Dejar de describir como «no ejecutado» el paquete V1**. El propietario lo ejecutó con nueva autorización; GPG/pg_restore OK, contenedor limpio, backup intacto; primer SQL métricas falló `STOP: PARITY_QUERY_FAILED`. Causa de código verificada: `physical_tables` referenciado pero no definido. V2 preparada con 40/40 QA y preflight SQL antes de restauración, **Windows real pendiente**. [Incidente/solución/código](CHECKPOINT_BT_SEC07_PARITY_SQL_INC_20261120.md). La paridad sigue NO CERTIFICADA.
