@@ -1,3 +1,7 @@
+## BT-SEC07-R8-BOM-CONFIRMADO-STANDARDINPUT-ENCODING-20261121
+
+R8 identificó UTF8_BOM EF BB BF antes de PGDMP en v02 y v03 a offset 3, ambas GPG PASS. R6 retiró 3 bytes pero R8 derivado los contiene otra vez. Causa inmediata: prefijo BOM; origen técnico probable: `.NET StreamWriter Process.StandardInput` y input encoding por defecto en PS5.1. Reparación planeada no verificada: `ProcessStartInfo.StandardInputEncoding = new UTF8Encoding(false)` para GPG stdin y Docker stdin; eliminar sólo el BOM conocido, generar v04 nuevo y exigir PGDMP offset0, GPG+Docker Linux pg_restore TOC+SHA. Conservar v02/v03 intactos, no DB/pg_dump. R8 entrada completa anotada en [registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
+
 ## BT-SEC07-R7-NEW-CLEAN-HEADER-INVALID-20261121
 
 R7 Docker ni siquiera recibió archivo: abortó en MAGIC_CHECK antes de pipe con `CLEAN_ARCHIVE_MAGIC_INVALID` de derived `_clean_v03`, archivos preservados, producción no conectada. S2 aún no certificada. R5/R6 muestran prefijo de 3 bytes en original; nuevo derivado podría repetirlo durante descifrado, pero causa NO corroborada. Comparar ambas firmas/offsets y clasificación segura local con GPG decryption complete, sin nuevo ciphertext, sin datos visibles. Actualizar registro al comprobar el origen. [Registro](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).
