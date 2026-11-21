@@ -1,3 +1,5 @@
+> **RESULTADO POSTERIOR (CP42 20/11/2026):** propietario ejecutó este preflight en Windows; ZIP SHA VERIFIED, PG17 psql/pg_dumpall/pg_dump/pg_restore presentes, Node/NPX encontrados, un candidato TLS sin validar, URL ficticia PASS, `CONN_WINDOWS: PASS_OFFLINE_ONLY`. **No repetir el inventario**, no implica conexión ni validación CA/TLS. [Checkpoint 42](CHECKPOINT_BT_SEC07_R3_CONNECTION_OFFLINE_WINDOWS_PASS_20261120.md).
+
 # CHECKPOINT — BT-SEC07-R3-CONN-OFFLINE-PREP-41 · Contrato de conexión no mutante + preflight local sin red
 
 **Fecha:** 20/11/2026 (Chile) · **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · **rama única:** `main` · **HEAD anterior:** `e4ce76ed1534e2d004e93d6e91e3ce15bf8f3a4d`. **Autorización textual vigente del propietario:** «autorizo» para **preparar y comprobar localmente el método de conexión, SIN conectar a Supabase ni generar nuevos respaldos**. No se ha autorizado exportar roles reales, descifrar claves históricas nuevamente, consultar DB, restaurar, ni modificar configuración persistente.
