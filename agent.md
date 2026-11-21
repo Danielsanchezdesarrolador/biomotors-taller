@@ -1,3 +1,7 @@
+## BT-SEC07-R3-PUBLIC-ASC-PRIMARY-MATCH-PRIVATE-PGP-HEADER-PENDING-77
+
+CP76 PUBCHECK Windows del propietario PASS: `.asc` pública reconocida y PRIMARY_MATCH con manifest; `.pgp` privado NO accedido. El supuesto privado necesitó «Todos los archivos» aunque CP75 filtro incluía *.pgp; verificar extensión real sin exponer nombre. Bloque PowerShell INLINE entregado para leer 160 bytes de encabezado del archivo identificado como privado y clasificar ARMOR/BINARY_PGP_CANDIDATE/OTHER, sin GPG ni import/decrypt. Pendiente salida; no certificar recuperación. [CP77](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PUBLIC_ASC_PRIMARY_MATCH_PRIVATE_PGP_HEADER_PENDING_20261121.md).
+
 ## BT-SEC07-R3-KEY-FILE-FORMAT-STOP-PUBLIC-ASC-FOUND-76
 
 Propietario CP75 `STOP_KEY_FORMAT_OR_READ` con archivo privado `.pgp`; encontró clave pública `.asc`. Causa del STOP desconocida, puede no ser paquete secret-key OpenPGP directamente; no renombrar ni importar. Próximo paso: examinar solo public `.asc` con GPG show-keys y comparar huella con manifest, PowerShell INLINE y salida `BT_SEC07_PUBCHECK_*` sin UID, huellas ni rutas. No decrypt ni GPG/TOC real. [CP76](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_KEY_FILE_FORMAT_STOP_PUBLIC_ASC_FOUND_20261121.md).

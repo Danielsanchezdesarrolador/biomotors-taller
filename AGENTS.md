@@ -1,3 +1,9 @@
+## REGLA SEC-07 — CLAVE PÚBLICA PRIMARY_MATCH; PRIVADA PGP PENDIENTE CP77 (21/11/2026)
+
+CP76 Windows usuario: `.asc` público `PUBLIC_KEY_RECOGNIZED`, `PRIMARY_MATCH` contra `recipient_fingerprint` manifest, sin importar/descifrar. **No prueba** archivo secreto `.pgp` utilizable ni PKESK ciphertext real. CP75 mostró `STOP_KEY_FORMAT_OR_READ` sobre supuesto privado, que solo apareció al elegir «Todos los archivos» pese a filtro `*.pgp` permitido: posible extensión final no visible; no renombrar. Entregado **PowerShell COMPLETO EN CHAT** bajo permiso de metadatos CP75: selecciona solo supuesto archivo privado con filtro ALL, lee exclusivamente hasta **160 bytes** y determina extensión efectiva + encabezado OpenPGP candidato, NO GPG/import/decrypt. Esperar etiquetas `BT_SEC07_PRIVATE_META_*`, no compartir bytes ni archivos. [CP77](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PUBLIC_ASC_PRIMARY_MATCH_PRIVATE_PGP_HEADER_PENDING_20261121.md).
+
+---
+
 ## REGLA SEC-07 — ARCHIVO PRIVADO .PGP NO LEGIBLE, PÚBLICO .ASC ENCONTRADO CP76 (21/11/2026)
 
 CP75 Windows resultó `STOP_KEY_FORMAT_OR_READ` al examinar archivo señalado como privado `.pgp`; propietario identificó también archivo público `.asc`. **Extensiones no certifican contenido** y STOP no prueba clave dañada: podría ser contenedor cifrado/otro formato o IO. Próximo paso mínimo autorizado CP75: comprobar **solo huella del .asc público** frente a `recipient_fingerprint` del manifest 19/11 con GPG `--show-keys`, sin importar, descifrar ni abrir `.pgp`; PowerShell completo en chat según CP66 y salida sanitizada. No repetir GPG real CP71, ni cambiar extensión/nombres. [CP76](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_KEY_FILE_FORMAT_STOP_PUBLIC_ASC_FOUND_20261121.md).
