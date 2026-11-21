@@ -1,3 +1,5 @@
+> **CORRECCIÓN POSTERIOR (INC-35, 20/11/2026): NO REUTILIZAR EL SCRIPT DE ESTE CHECKPOINT.** El propietario ejecutó el comando y obtuvo `GPG_COMMAND: FOUND` seguido de `LOCAL_INVENTORY: FAILED_NO_DB_ACCESS`. El bug `$home = $null` intenta sobrescribir PowerShell `$HOME` read-only. Este checkpoint se conserva como evidencia, pero su script está **superado** por la solución preparada en [checkpoint 35](CHECKPOINT_BT_SEC07_R3_LOCAL_INVENTORY_HOME_COLLISION_INC_20261120.md). Los `PG* NOT_SET` y defaults `ABSENT` no prueban pérdida de credenciales. No repetir el inventario PG previo.
+
 # CHECKPOINT — BT-SEC07-R3-LOCAL-INVENTORY-PREP-34 | Configuración de conexión y claves existentes: consentimiento delimitado
 
 **Fecha:** 20/11/2026 · **Repo:** `Danielsanchezdesarrolador/biomotors-taller` · **rama única:** `main` · **HEAD leído al preparar:** `b9ae5a3b481bc27ee7a55561c209c3c6ad503b07`. **Naturaleza:** autorización del propietario + preparación de un preflight local, **todavía NO ejecutado en Windows**. No autoriza copia, exportación, descifrado, conexión a origen o mutación.
