@@ -1,3 +1,9 @@
+## REGLA SEC-07 — ARCHIVO PRIVADO .PGP NO LEGIBLE, PÚBLICO .ASC ENCONTRADO CP76 (21/11/2026)
+
+CP75 Windows resultó `STOP_KEY_FORMAT_OR_READ` al examinar archivo señalado como privado `.pgp`; propietario identificó también archivo público `.asc`. **Extensiones no certifican contenido** y STOP no prueba clave dañada: podría ser contenedor cifrado/otro formato o IO. Próximo paso mínimo autorizado CP75: comprobar **solo huella del .asc público** frente a `recipient_fingerprint` del manifest 19/11 con GPG `--show-keys`, sin importar, descifrar ni abrir `.pgp`; PowerShell completo en chat según CP66 y salida sanitizada. No repetir GPG real CP71, ni cambiar extensión/nombres. [CP76](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_KEY_FILE_FORMAT_STOP_PUBLIC_ASC_FOUND_20261121.md).
+
+---
+
 ## REGLA SEC-07 — HUELLA ARCHIVO CLAVE PRIVADA, SOLO LECTURA CP75 (21/11/2026)
 
 Usuario dijo tener localizada su clave privada original y AUTORIZÓ **solo verificar la huella sin importar/modificar/descifrar**. PowerShell entero entregado INLINE chat (CP66): selector manifest parcial 19/11 y archivo de clave, ejecuta GPG `--show-keys --with-colons --fingerprint --with-subkey-fingerprint` con `--no-options --no-autostart` y GNUPGHOME TEMP aislado, compara `recipient_fingerprint` con principales/subclaves sin imprimir UID, huellas, rutas ni material secreto. Distingue `SECRET_KEY_RECORDS_PRESENT`, `PRIMARY/SUBKEY_FINGERPRINT_MATCH`, `NO_MATCH` o STOP; no importa, descifra ni toca DB. Test con clave sintética GPG 2.4.7 en Linux PASS; **Windows real/clave usuario PENDIENTE**. No afirmar que matching garantiza desbloqueo ni ciphertext PKESK. Para importar/desbloquear/reanudar TOC exigir nuevos permisos. [CP75](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PRIVATE_KEY_FILE_FINGERPRINT_READONLY_AUTHORIZED_20261121.md).

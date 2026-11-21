@@ -1,3 +1,7 @@
+## BT-SEC07-R3-KEY-FILE-FORMAT-STOP-PUBLIC-ASC-FOUND-76
+
+Propietario CP75 `STOP_KEY_FORMAT_OR_READ` con archivo privado `.pgp`; encontró clave pública `.asc`. Causa del STOP desconocida, puede no ser paquete secret-key OpenPGP directamente; no renombrar ni importar. Próximo paso: examinar solo public `.asc` con GPG show-keys y comparar huella con manifest, PowerShell INLINE y salida `BT_SEC07_PUBCHECK_*` sin UID, huellas ni rutas. No decrypt ni GPG/TOC real. [CP76](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_KEY_FILE_FORMAT_STOP_PUBLIC_ASC_FOUND_20261121.md).
+
 ## BT-SEC07-R3-PRIVATE-KEY-FILE-FINGERPRINT-READONLY-AUTHORIZED-75
 
 Permitido SOLO leer metadatos de archivo de clave privada original + manifest para cotejar fingerprints, sin `--import`/`--decrypt`. PowerShell íntegro en chat: OpenFileDialog doble, GNUPGHOME aislado en TEMP con GPG `--show-keys --with-colons`, salida sanitizada MATCH primary/subkey y secreto record list, cleanup TEMP. Test GPG sintético Linux ok, **Windows real pendiente**. Match no certifica clave desbloqueada ni paquete real; permisos separados para importación/descifrado posteriores. CP74 keyring normal NONE_LISTED. [CP75](docs/checkpoints/CHECKPOINT_BT_SEC07_R3_PRIVATE_KEY_FILE_FINGERPRINT_READONLY_AUTHORIZED_20261121.md).
