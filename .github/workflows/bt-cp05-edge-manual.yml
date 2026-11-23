@@ -1,0 +1,99 @@
+name: ByteTorque CP05 - Edge manual (apagado)
+
+# Solo ejecucion manual. Nunca se ejecuta por push, PR o cron.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe DESPLEGAR_CP05_APAGADO para desplegar SIN habilitar emision'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-cp05-edge-deploy
+  cancel-in-progress: false
+
+jobs:
+  desplegar-cp05:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmacion == 'DESPLEGAR_CP05_APAGADO' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_REF: suxcqqnmcjoezfxltoms
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      BUNDLE_PATH: /tmp/bytetorque-cp05-edge-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Obtener exactamente main
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verificar acceso, proyecto y Docker antes de cualquier cambio
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "::error::La ejecucion solo se permite desde main"
+            exit 1
+          fi
+          if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
+            echo "::error::Falta SUPABASE_ACCESS_TOKEN en GitHub Actions Secrets"
+            exit 1
+          fi
+          if ! docker info >/dev/null 2>&1; then
+            echo "::error::Docker es obligatorio para incluir los recursos binarios; no usar --use-api"
+            exit 1
+          fi
+          echo "BT_CP05_PREFLIGHT: PASS"
+
+      - name: Preparar Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependencias del repositorio
+        shell: bash
+        run: npm install --no-audit --no-fund
+
+      - name: Construir y verificar paquete original CP05 fuera del repositorio
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/package-cp05-edge.mjs "${BUNDLE_PATH}"
+          node scripts/verify-cp05-edge-package.mjs "${BUNDLE_PATH}"
+          echo "BT_CP05_PACKAGE: VERIFIED"
+
+      - name: Instalar Supabase CLI v2 compatible (evita cambios de CLI v3)
+        uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+
+      - name: Desactivar emision y correo ANTES de desplegar
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase secrets set \
+            BT_CP05_ARCHIVE_ENABLED=false \
+            BT_CP05_EMAIL_ENABLED=false \
+            --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_FLAGS: DISABLED_SET_REQUEST_SUCCEEDED"
+
+      - name: Desplegar SOLO bt-cp05-documents con recursos estaticos
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${BUNDLE_PATH}"
+          supabase functions deploy bt-cp05-documents --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_EDGE: DEPLOY_COMMAND_SUCCEEDED"
+
+      - name: Consultar Edge sin activar frontend ni enviar documentos
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase functions list --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_NEXT: VERIFY_HOSTED_STATE_BEFORE_ANY_ACTIVATION"
