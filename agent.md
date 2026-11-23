@@ -1,3 +1,20 @@
+## SEC07-S4B-R7 — BOOTSTRAP_FAILED; conflicto de escritura pgsodium en rootfs RO (23/11/2026)
+
+**Evidencia aportada por propietario:**
+```text
+BT_SEC07_S4B_R7: START
+BT_SEC07_S4B_R7_LAB: BOOTSTRAP_FAILED
+```
+**Confirmado:** R7 llegó a ejecutar una inicialización de laboratorio, pero **no emitió LAB:READY ni inició GPG ni pg_restore**. Los registros del contenedor quedaron en tmpfs y fueron eliminados por --rm; la causa exacta histórica no puede reconstruirse desde esos dos marcadores. S2-R11, GPG aislado, backup v04 y pruebas previas siguen sin necesidad de repetición.
+
+**Defecto comprobado estáticamente del diseño R7 y causa probable de BOOTSTRAP_FAILED:** invocó `docker run --read-only` mientras el mecanismo de arranque oficial del tag `supabase/postgres:17.6.1.136` migra extensiones y utiliza `/usr/lib/postgresql/bin/pgsodium_getkey.sh`, que crea `/etc/postgresql-custom/pgsodium_root.key` si no existe. Ruta dentro del rootfs no montada como escritura temporal en R7. Docker Compose oficial utiliza `db-config:/etc/postgresql-custom` escribible; el script del tag se encuentra en `https://github.com/supabase/postgres/blob/17.6.1.136/ansible/files/pgsodium_getkey_urandom.sh.j2`; Compose `https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml`. **Este conflicto es real; su relación causal exacta con la salida Windows R7 permanece probable, no demostrada**, porque stderr fue ocultado.
+
+**Corrección propuesta R8 (NO ejecutada en PC):** conservar la imagen Supabase PG17 fijada, entrypoint y migraciones propios, `--network none --log-driver none --rm -i --pull=never`, PGDATA `/var/lib/postgresql/data`, `/tmp` y socket `/var/run/postgresql` en tmpfs; **quitar solo `--read-only`** para que Supabase pueda escribir el archivo de clave aleatoria de laboratorio y conservar los archivos de configuración de imagen. Se evita montar tmpfs encima de `/etc/postgresql-custom` porque ocultaría configuraciones originales. La capa overlay temporal de Docker puede escribirse en el almacenamiento del PC con el archivo generado de la clave del LAB, y se elimina al destruir contenedor; **no afirmar ausencia absoluta de huella en disco**, aunque el respaldo en claro fluye por pipe y los datos de PG y logs permanecen en tmpfs. La clave efímera NO es la clave de Supabase producción. Clasificar error bootstrap mediante categorías fijas del log en tmpfs, sin mostrar SQL, rutas ni contraseñas, antes de cualquier GPG. Restaurar una sola vez v04 si boot READY en bt_s4 desde template0, evaluar GPG+exit restore; no alterar S2/R6 ni producción. Shell R8 se comprobó con `sh -n` y transporte FD3 usando bytes de prueba incluido NUL en laboratorio Linux **sin Docker real ni backup**. R8 no es PASS; STOP ante fallo.
+
+**Estado:** S4 FULL RESTORE PENDIENTE. `--no-owner --no-acl` no certifica owners/ACL/RLS A/B. Auth, Storage, Edge, Render, secretos/S3 externos pendientes. Esta investigación y error quedan respaldados para evitar repetición; no Codex, no deploy.
+
+---
+
 ## SEC07 S4B-R6 — informe Astra recibido; bootstrap oficial Supabase propuesto para R7 (23/11/2026)
 
 **Investigación independiente entregada por el propietario:** informe "ByteTorque S4B-R6 — Dictamen para el chat principal" (revisión de PostgreSQL 17, imagen Supabase fijada, migrador y RLS). **Causa de R6 con alta confianza, no demostrada forénsicamente:** el script invocó `initdb` directamente, eludiendo las migraciones oficializadas que crean roles globales Supabase. R6 registró `LAB:READY`, `RESTORE_EXIT:1`, `MISSING_ROLE` pero nunca reveló el nombre. `authenticated` es candidato respaldado por políticas `CREATE POLICY ... TO authenticated` del código aplicado de ByteTorque, NO identidad del primer rol confirmada. `--no-owner --no-acl` no omite referencias a roles en políticas.
