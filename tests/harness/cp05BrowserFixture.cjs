@@ -1,5 +1,6 @@
 // CP05 browser fixture: all hosted API/Edge requests are synthetic and intercepted.
 const assert=require('node:assert/strict'),{createHash}=require('node:crypto')
+const {PDFDocument}=require('pdf-lib')
 const {cp04Page,uuid,tenant,userId}=require('./cp04BrowserFixture.cjs')
 async function cp05Page(browser,width){
  const {p,state,requests,errors}=await cp04Page(browser,width)
@@ -135,10 +136,15 @@ async function cp05Page(browser,width){
    const snapshot={workshop:{id:tenant,name:'Taller QA sintético'},customer:{id:uuid(50),full_name:'Cliente histórico congelado',email:'qa@invalid.test',mobile_e164:null},
      vehicle:state.vehicles.find(v=>v.id===q.vehicle_id),order:state.orders.find(o=>o.id===q.order_id),
      quote:{...structuredClone(q),status:'issued',revision},items:structuredClone(items),totals:{subtotal,tax,total:subtotal+tax},document_date:'2026-11-23T12:00:00Z',notice:'Cotización no tributaria. No acredita ejecución ni aceptación del cliente.'}
-   const bytes=Buffer.from(await p.evaluate(async snapshot=>{
-     const {browserQuotePdf}=await import('/@fs/'+snapshot.__repo+'/src/cp05/pdf.ts');delete snapshot.__repo
-     return Array.from(await browserQuotePdf(snapshot,false))
-   },{...snapshot,__repo:process.cwd()}))
+   // Simulate backend-archived bytes independently of the browser PDF renderer.
+   // CI serves a built app via Vite preview, which cannot resolve dev-only /@fs/ imports.
+   // Browser draft PDF and CP05 renderer remain covered by their own tests.
+   const pdf=await PDFDocument.create()
+   pdf.setTitle('ByteTorque CP05 - synthetic archival fixture')
+   pdf.setAuthor('ByteTorque QA harness')
+   pdf.addPage([595.28,841.89]).drawText('SYNTHETIC QA - revision '+revision,{x:40,y:790,size:12})
+   const bytes=Buffer.from(await pdf.save({useObjectStreams:false}))
+   assert.equal(bytes.subarray(0,5).toString(),'%PDF-')
    const r={workshop_id:tenant,id:uuid(980+revision),quote_id:q.id,revision,payload:snapshot,payload_sha256:'b'.repeat(64),
      pdf_sha256:createHash('sha256').update(bytes).digest('hex'),pdf_size:bytes.length,
      pdf_object_path:tenant+'/quotes/'+q.id+'/r'+revision+'/'+'b'.repeat(64)+'.pdf',issued_at:'2026-11-23T12:00:00Z',issued_by:userId}

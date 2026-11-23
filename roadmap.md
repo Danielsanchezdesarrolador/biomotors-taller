@@ -1,3 +1,9 @@
+## CP05 — Corrección focalizada de CI visual (23/11/2026)
+
+Incidente CP05-CI-VISUAL: la CI de interfaz pública del commit `420f28f` falló en el paso CP05 móvil al intentar importar `src/cp05/pdf.ts` mediante una URL de desarrollo Vite `/@fs/` desde `vite preview` (bundle estático). La solución sustituye **solo el PDF simulado del backend en `tests/harness/cp05BrowserFixture.cjs`** por bytes PDF válidos generados con `pdf-lib` del proyecto, con hash/tamaño y descarga idéntica en los mismos recorridos. El PDF de borrador continúa usando el renderizador ByteTorque real; sin alterar componentes productivos, Edge, datos, permisos ni PDF oficial. No se atribuye éxito hasta ver las CI del nuevo commit y su despliegue Render autorizado.
+
+---
+
 ## CP05 — APROBADO EN QA por el propietario (23/11/2026)
 
 El titular confirma emisión ficticia en `https://bytetorque.cl`: **COT-000001**,
