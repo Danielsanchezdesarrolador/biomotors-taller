@@ -3,6 +3,8 @@
 // Requiere: verify_jwt=true y BYTETORQUE_ONBOARDING_ENABLED=true
 // solo DESPUÉS de superar las pruebas de aislamiento/Auth.
 const allowedOrigins = new Set([
+  "https://bytetorque.cl",
+  "https://www.bytetorque.cl",
   "https://biomotors-taller-demo.onrender.com",
   "http://localhost:5173",
 ]);

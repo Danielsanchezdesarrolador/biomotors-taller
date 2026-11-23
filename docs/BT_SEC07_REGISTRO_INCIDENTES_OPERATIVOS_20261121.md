@@ -1,3 +1,13 @@
+## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
+
+S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.
+
+Preparacion local S4H: guarda de autoridad para clientes pendientes tras logout/cambio de taller y CORS exacto para dominios canonicos. 24 casos nuevos PASS mediante adaptador Node sin red; Deno no disponible y runtime Edge pendiente. Esto no revoca access JWT copiados ni acredita cambios remotos. Mantener identidad confirmada, membresias activas, permisos y RLS.
+
+Leer [procedimiento S4H](recovery/SEC07_S4H_INTEGRACION_SEGURA.md). Historicos inferiores conservados; sus instrucciones de automatizacion/exportacion no reactivan autorizaciones. Solo main, nunca push/deploy/migraciones automaticos. Render On Commit requiere pausa autorizada y verificada antes de publicar; skip render es defensa adicional. No publicar material privado ni copiar el ZIP completo.
+
+---
+
 ## INC-S4-01 — Error SQL de dependencia al restaurar en PG17 Linux limpio [ABIERTO]
 **Evidencia Windows S4A (21/11/2026):** `BACKUP S2_R11_VERIFIED`, `SHA256 PASS`, `DOCKER LOCAL_ENGINE`, `LAB ISOLATED_TMPFS_STARTED`, `ARCHIVE_HEADER PASS`, `GPG_INTEGRITY PASS`, `RESTORE_CLASS SUPABASE_DEPENDENCY_OR_ROLE_MISSING`, `STAGE RESTORE_RESULT`, `STOP ISOLATED_RESTORE_NOT_COMPLETE`.
 **Lo que SÍ comprueba:** ciphertext v04 y manifest/hashes correctos, GPG íntegro, laboratorio iniciado, y comando de restauración SQL falló dentro de PostgreSQL17; archivo fuente no modificado según diseño. `--exit-on-error` detuvo en el primer fallo. La etiqueta broad no identifica cuál error.
@@ -13,7 +23,7 @@
 ---
 
 ## INC-OPERACION-01 — Pegado accidental de líneas de resultados como comandos [RESUELTO EN INSTRUCCIONES, R11 PENDIENTE]
-**21/11/2026:** el dueño pegó en `PS C:\\Users\\...` las etiquetas `BT_SEC07_S2_R10_INICIO: START`, `..._SOURCE`, `..._GPG_INTEGRITY`, `..._RESULTADO` en vez del script PowerShell R11. PowerShell contestó `CommandNotFoundException` porque son textos informativos, no cmdlets. No hay evidencia de escritura/DB/despliegue debido a estas etiquetas. **Solución comunicada:** cancelar entrada actual con Ctrl+C y ejecutar exclusivamente bloque fuente R11 que empieza `& {` y termina `}`; no pegar bloque de 'Resultado esperado'. R10 PASS mantiene validez y R11 no ha ejecutado según evidencia. **Prevención:** en instrucciones futuras separar y nombrar claramente 'copiar este código' versus 'resultados para compartir'; no pedir repetir pasos aprobados.
+**21/11/2026:** el dueño pegó en `PS [ruta local privada omitida en copia para Git]` las etiquetas `BT_SEC07_S2_R10_INICIO: START`, `..._SOURCE`, `..._GPG_INTEGRITY`, `..._RESULTADO` en vez del script PowerShell R11. PowerShell contestó `CommandNotFoundException` porque son textos informativos, no cmdlets. No hay evidencia de escritura/DB/despliegue debido a estas etiquetas. **Solución comunicada:** cancelar entrada actual con Ctrl+C y ejecutar exclusivamente bloque fuente R11 que empieza `& {` y termina `}`; no pegar bloque de 'Resultado esperado'. R10 PASS mantiene validez y R11 no ha ejecutado según evidencia. **Prevención:** en instrucciones futuras separar y nombrar claramente 'copiar este código' versus 'resultados para compartir'; no pedir repetir pasos aprobados.
 
 ---
 

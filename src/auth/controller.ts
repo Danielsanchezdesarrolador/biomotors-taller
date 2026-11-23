@@ -100,9 +100,16 @@ export class AuthController {
       this.state.context?.workshop.id,this.state.context?.role,this.state.authorityVersion].join(':')
   }
   async directoryClient(): Promise<SupabaseClient | null> {
-    if (!this.gateway?.getDataClient ||
+    const scope = this.authorityKey()
+    if (!this.gateway?.getDataClient || !scope ||
         !['authorized', 'restricted'].includes(this.state.phase)) return null
-    return this.gateway.getDataClient()
+    try {
+      const client = await this.gateway.getDataClient()
+      // Lazy SDK resolution must not outlive logout or a change of authority.
+      return this.authorityKey() === scope ? client : null
+    } catch {
+      return null
+    }
   }
   getSnapshot = () => this.state
   subscribe = (listener: () => void) => {

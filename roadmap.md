@@ -1,3 +1,13 @@
+## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
+
+S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.
+
+Preparacion local S4H: guarda de autoridad para clientes pendientes tras logout/cambio de taller y CORS exacto para dominios canonicos. 24 casos nuevos PASS mediante adaptador Node sin red; Deno no disponible y runtime Edge pendiente. Esto no revoca access JWT copiados ni acredita cambios remotos. Mantener identidad confirmada, membresias activas, permisos y RLS.
+
+Leer [procedimiento S4H](docs/recovery/SEC07_S4H_INTEGRACION_SEGURA.md). Historicos inferiores conservados; sus instrucciones de automatizacion/exportacion no reactivan autorizaciones. Solo main, nunca push/deploy/migraciones automaticos. Render On Commit requiere pausa autorizada y verificada antes de publicar; skip render es defensa adicional. No publicar material privado ni copiar el ZIP completo.
+
+---
+
 > **BT-SEC07-S4A-RESTORE-DEPENDENCY-OPEN (21/11/2026):** v04 S2-R11, SHA PASS, Docker local aislado, PGDMP + GPG integrity PASS; pg_restore a BD temporal se detuvo `RESTORE_CLASS SUPABASE_DEPENDENCY_OR_ROLE_MISSING` / `ISOLATED_RESTORE_NOT_COMPLETE`. Es clasificación de regex amplísima (rol/extensión/función/tipo/relación); no significa comprobación específica. **S2 ESTRUCTURAL PASS, S4 RESTORE FULL PENDING**. Próximo S4B un único reintento local de restauración con clasificación segura de PRIMER error, sin mostrar stderr/SQL/objetos, después adaptar laboratorio Supabase17 según dependencia confirmada. No borrar v04 ni manifiesto, no tocar prod. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S4A_RESTORE_DEPENDENCIA_PENDIENTE_20261121.md).
 
 > **BT-SEC07-S2-R11-PASS_BACKUP_AND_TOC (21/11/2026):** archivo cifrado nuevo v04 `PGDMP_OFFSET_ZERO`, `GPG_INTEGRITY PASS`, Docker Linux PG17 `TOC PASS`, SHA256 PASS, manifest CREATED, `ENCRYPTED_FINALIZED`, `SOURCE UNCHANGED`, sin producción. **S2 PASS estructural en PC**; respaldo aún NO probado restaurable. Causa inmediata BOM UTF8 de 3 bytes (R8) y solución no-BOM en PS5.1 comprobada R10/R11; `ProcessStartInfo.StandardInputEncoding` no existe .NET Framework. S4 siguiente: restauración real completa, local y aislada sin red/puertos/volúmenes persistentes, diagnóstico sanitario de dependencias Supabase. S3 roles/Storage/Auth/Edge/Render también pendiente, sin exigir USB ni afirmar recuperación pérdida PC. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S2_R11_BACKUP_CIFRADO_VALIDADO_20261121.md), [incidentes](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md).

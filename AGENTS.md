@@ -1,3 +1,13 @@
+## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
+
+S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.
+
+Preparacion local S4H: guarda de autoridad para clientes pendientes tras logout/cambio de taller y CORS exacto para dominios canonicos. 24 casos nuevos PASS mediante adaptador Node sin red; Deno no disponible y runtime Edge pendiente. Esto no revoca access JWT copiados ni acredita cambios remotos. Mantener identidad confirmada, membresias activas, permisos y RLS.
+
+Leer [procedimiento S4H](docs/recovery/SEC07_S4H_INTEGRACION_SEGURA.md). Historicos inferiores conservados; sus instrucciones de automatizacion/exportacion no reactivan autorizaciones. Solo main, nunca push/deploy/migraciones automaticos. Render On Commit requiere pausa autorizada y verificada antes de publicar; skip render es defensa adicional. No publicar material privado ni copiar el ZIP completo.
+
+---
+
 ## BT-SEC07 — S4A RESTAURACIÓN PARCIAL, PRIMER ERROR SQL CLASIFICADO GENÉRICAMENTE (21/11/2026)
 
 Salida Windows S4A: `BACKUP S2_R11_VERIFIED`, `SHA256 PASS`, `DOCKER LOCAL_ENGINE`, `LAB ISOLATED_TMPFS_STARTED`, `ARCHIVE_HEADER PASS`, `GPG_INTEGRITY PASS`, `RESTORE_CLASS SUPABASE_DEPENDENCY_OR_ROLE_MISSING`, `STOP ISOLATED_RESTORE_NOT_COMPLETE`. La clase anterior fue asignada por un `grep` con múltiples patrones: role missing / extension missing / function/type/relation missing; **NO prueba cuál faltó**. El laboratorio fue efímero y no conservó stderr, por tanto la causa exacta NO es recuperable sin otra corrida restringida. **S2 sigue PASS estructural; S4 completo sigue abierto.** No repetir S2, no tocar Supabase, no cambiar cifrado, no asumir corrupción del archivo ni declarar restauración terminada. Próxima comprobación S4B: misma v04 verificada, laboratorio aislado PG17, mejorar clasificación del PRIMER error de `pg_restore` en shell usando regex **sin imprimir** SQL/objetos/datos, reportar sólo clase permitida y si hay extensiones o roles incompatibles. Si dependencia de Supabase, diseñar runtime Supabase PG17 y migrar roles/servicios por procedimiento oficial antes de intentar final. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S4A_RESTORE_DEPENDENCIA_PENDIENTE_20261121.md), [incidente](docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md). Main docs [skip render].
