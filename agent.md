@@ -1,3 +1,13 @@
+## S4B — incidencia nueva de ejecución local (23/11/2026)
+
+**Evidencia reportada por el propietario en PowerShell 5.1 (NO PASS):**
+1. Primer intento: `BT_SEC07_S4B_INICIO: START` seguido de error Docker al acceder a `npipe:////./pipe/dockerDesktopLinuxEngine`: no existe la canalización / daemon Linux no disponible en esa ejecución. No se inició restauración; **no es fallo del backup**.
+2. Intento posterior: `BT_SEC07_S4B_INICIO: START`, `BT_SEC07_S4B_STOP: GPG_DECRYPTION_FAILED`. La prueba original oculta el motivo detallado y **no demuestra corrupción de v04, falta de clave, contraseña incorrecta ni dependencia de Supabase**. No se obtuvo el primer error de `pg_restore`.
+**Diagnóstico pendiente y solución propuesta no verificada:** no reejecutar el S4B completo; comprobar motor Linux Docker y aislar UNA operación GPG sobre el mismo v04, enviando salida binaria directamente a `Stream.Null`, clasificando solo `--status-fd 2`/exit code sin imprimir stderr, claves, rutas o datos. Si GPG funciona, revisar exclusivamente tubería/preparación de Docker; si no, resolver causa concreta de GPG. No repetir GPG/SHA/PGDMP/TOC estructurales S2-R11 de rutina ni generar otro respaldo. **S4 sigue PENDIENTE**.
+**Regla de documentación:** conservar error y resultado exactos, separar hipótesis/solución/validación, y actualizar los mismos archivos con la causa comprobada cuando se obtenga. Solo documentación en `main`, `[skip render]`, sin deploy ni escritura Supabase.
+
+---
+
 ## Regla permanente SEC07 — investigación, errores y soluciones verificadas (23/11/2026)
 
 **Orden del propietario:** toda investigación técnica relevante, error real, causa, corrección y resultado debe quedar respaldada en `AGENTS.md`, `agent.md`, `roadmap.md` y, para seguridad, en `docs/BT_SEC07_REGISTRO_INCIDENTES_OPERATIVOS_20261121.md`. Anotar **fecha, etapa, evidencia verificable, distinción entre hechos e hipótesis, corrección propuesta/aplicada, verificación real, estado y próxima acción**; sin volcar SQL, stderr sin sanitizar, nombres privados, datos de clientes, rutas locales, secretos o respaldos. Las investigaciones externas se revisan críticamente antes de incorporarlas. No convertir recomendaciones en PASS; dejar un solo checkpoint consolidado para el trabajo terminado, no una secuencia de micro-checkpoints. No repetir pruebas aprobadas ni usar Codex/Work sin necesidad concreta. Actualizar documentación tras cada error/corrección comprobada, sin alterar retrospectivamente el sentido de checkpoints anteriores.
