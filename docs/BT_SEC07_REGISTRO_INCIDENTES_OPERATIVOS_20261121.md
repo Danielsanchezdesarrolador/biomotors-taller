@@ -1,3 +1,16 @@
+## SEC07-S4B — Revisión independiente del método de restauración (23/11/2026)
+
+- **Fuente y alcance:** investigación aportada por el propietario sobre PG17, Supabase, Docker y PowerShell 5.1. Es una revisión técnica para optimizar S4, **no evidencia de restauración ejecutada**.
+- **Resultado anterior comprobado:** S2-R11 v04 GPG/SHA256/PGDMP/TOC PASS; S4A restauración detenida, clasificador demasiado amplio `SUPABASE_DEPENDENCY_OR_ROLE_MISSING`.
+- **Defectos/riesgos identificados en el procedimiento anterior:** volumen `tmpfs` de PGDATA no garantizado explícitamente; entorno `postgres:17-alpine` no equivalente a Supabase; posible atasco si termina anticipadamente el consumidor stdin; no confundir códigos de salida GPG/Docker/Postgres; `--no-owner --no-acl` omite verificar propiedad y privilegios.
+- **Corrección candidata entregada al propietario:** script S4B revisado (fecha 23/11), PGDATA y `/tmp` en `tmpfs`, Docker sin red/puertos/bind mounts, streams binarios PowerShell 5.1 y lectura concurrente de stderr, clasificación privada del primer `ERROR/FATAL`. Conserva v04 y no reexporta.
+- **Hipótesis pendiente:** falta concretar primer error de la restauración antes de instalar/crear extensiones o roles; imagen compatible Supabase PG17 únicamente si el error lo demanda.
+- **Validación real:** **PENDIENTE, sin marcadores S4B de Windows y sin `pg_restore` completo**. No declarar S4 PASS. Las verificaciones de S3 (Auth, Storage, Edge, Render, secretos y owners/ACL) siguen abiertas; tmpfs configurado no prueba por sí solo ausencia absoluta de trazas en el host.
+- **Próxima acción única:** ejecutar una vez el procedimiento S4B ya revisado en PC personal, recibir solo `BT_SEC07_S4B_*`, corregir dependencia confirmada y hacer restauración integral consolidada. Registrar error, solución y resultado en estos cuatro documentos y un solo checkpoint final. Sin datos privados en logs/GitHub.
+- **Regla establecida por el propietario:** registrar toda investigación, error y solución en `AGENTS.md`, `agent.md`, `roadmap.md` e incidentes SEC07, separando hipótesis, corrección y evidencia, sin duplicar auditorías.
+
+---
+
 ## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
 
 S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.
