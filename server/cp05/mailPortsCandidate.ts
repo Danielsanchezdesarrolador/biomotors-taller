@@ -50,6 +50,18 @@ export function deliveryPortsCandidate(
     })
     if (result.error) throw Error('DELIVERY_NOT_CONFIRMED')
   }
+  async function verifyCurrentRecipient(revision: Revision) {
+    const historic = revision.payload?.customer
+    if (!historic?.id || !historic?.email) throw Error('RECIPIENT_NOT_CURRENT')
+    const current = await userClient.from('customers')
+      .select('id,workshop_id,email')
+      .eq('workshop_id', wid)
+      .eq('id', historic.id)
+      .maybeSingle()
+    if (current.error || !current.data || current.data.workshop_id !== wid ||
+        current.data.id !== historic.id || current.data.email !== historic.email)
+      throw Error('RECIPIENT_NOT_CURRENT')
+  }
   async function verifyActor() {
     const user = await userClient.auth.getUser()
     if (user.error || !user.data.user?.email_confirmed_at) throw Error('VERIFIED_USER_REQUIRED')
@@ -105,6 +117,7 @@ export function deliveryPortsCandidate(
         quote.data.issued_revision !== r.data.revision
       )
         throw Error('DOCUMENT_NOT_CURRENT')
+      await verifyCurrentRecipient(r.data as Revision)
       const pdf = await restoreRevisionCandidate(
         userClient,
         trusted,
@@ -145,6 +158,7 @@ export function deliveryPortsCandidate(
       await verifyActor()
       if (revision.workshop_id !== wid || recipient !== revision.payload.customer.email)
         throw Error('AUTHORIZED_RECIPIENT_REQUIRED')
+      await verifyCurrentRecipient(revision)
       const pdf = attachments.get(revision.id)
       if (!pdf) throw Error('PDF_ATTACHMENT_REQUIRED')
       return provider.send({

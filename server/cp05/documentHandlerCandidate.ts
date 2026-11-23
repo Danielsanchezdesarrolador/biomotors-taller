@@ -125,7 +125,8 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
             emailApproved: true
           }),
           rid,
-          attempt
+          attempt,
+          body.review
         )
         return reply({ delivery: result || 'sent' })
       }

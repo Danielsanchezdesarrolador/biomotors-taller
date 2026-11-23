@@ -1,3 +1,13 @@
+.cp05-mail-review { margin-top:14px; display:grid; gap:12px; padding:16px; border:1px solid #d4e2f4; border-radius:14px; background:#f8fbff; min-width:0; }
+.cp05-mail-review > strong { color:#0b315d; font-size:15px; }
+.cp05-mail-review p { margin:0; color:#55708f; font-size:12px; line-height:1.5; }
+.cp05-mail-summary { display:grid; gap:3px; padding:12px; background:#fff; border:1px solid #dde8f6; border-radius:10px; overflow-wrap:anywhere; }
+.cp05-mail-summary span { color:#6b829f; font-size:12px; }
+.cp05-mail-summary strong { color:#153c6a; }
+.cp05-mail-review label.cp05-mail-check { display:flex; align-items:flex-start; gap:10px; font-size:12px; line-height:1.4; font-weight:500; }
+.cp05-mail-review .cp05-mail-check input { width:18px; min-height:18px; height:18px; flex-shrink:0; margin:0; accent-color:#1268d8; }
+.cp05-mail-review button { min-height:44px; justify-self:start; max-width:100%; }
+@media(max-width:760px){ .cp05-mail-review{ padding:12px; } .cp05-mail-review button{width:100%;} }
 .cp05-panel {
   color: #18345b;
   min-width: 0;

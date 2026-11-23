@@ -29,7 +29,8 @@ function fixture() {
     lastFinishRequest: '',
     quoteStatus: 'issued',
     latestRevision: 1,
-    sendMode: 'success'
+    sendMode: 'success',
+    customerEmail: 'qa@invalid.test'
   }
   const snapshot = {
     quote: { id: qid, workshop_id: wid, version: 1, number: 1, revision: 1 },
@@ -52,7 +53,9 @@ function fixture() {
             issued_revision: state.latestRevision
           }
         ]
-      : table === 'workshop_memberships'
+      : table === 'customers'
+        ? [{ id: id(9), workshop_id: wid, email: state.customerEmail }]
+        : table === 'workshop_memberships'
         ? state.active
           ? [{ workshop_id: wid, user_id: uid, status: 'active', role: state.role }]
           : []
@@ -199,7 +202,14 @@ const request = (action: string, args: Record<string, unknown> = {}) =>
   new Request(origin + '/documents', {
     method: 'POST',
     headers: { origin, authorization: 'Bearer synthetic-only', 'content-type': 'application/json' },
-    body: JSON.stringify({ action, workshopId: wid, quoteId: qid, version: 1, requestId, ...args })
+    body: JSON.stringify({
+      action, workshopId: wid, quoteId: qid, version: 1, requestId,
+      ...(action === 'send' ? { review: {
+        reviewedRevisionId: rid, confirmedRecipient: 'qa@invalid.test',
+        recipientChecked: true, documentChecked: true, contactAuthorized: true
+      } } : {}),
+      ...args
+    })
   })
 describe('Pilot document HTTP, private bytes and delivery integration (synthetic services)', () => {
   it('pilot gate denies missing or different workshop before opening privileged clients', async () => {
@@ -304,6 +314,21 @@ describe('Pilot document HTTP, private bytes and delivery integration (synthetic
     expect(Buffer.from(f.state.stored.values().next().value!)).toEqual(before)
     f.state.downloadFails=true
     expect((await handler(request('issue'))).status).toBe(409)
+    expect(f.send).not.toHaveBeenCalled()
+  })
+  it('refuses unreviewed or stale-contact sending without queue or provider', async () => {
+    const f = setup(), handler = documentHandlerCandidate(policy, f.deps)
+    await handler(request('issue'))
+    for(const review of [
+      null,
+      { reviewedRevisionId: rid, confirmedRecipient: 'wrong@invalid.test', recipientChecked: true, documentChecked: true, contactAuthorized: true },
+      { reviewedRevisionId: rid, confirmedRecipient: 'qa@invalid.test', recipientChecked: true, documentChecked: false, contactAuthorized: true }
+    ]) expect((await handler(request('send',{revisionId:rid,attempt:1,review}))).status).toBe(409)
+    expect(f.state.events).toHaveLength(0)
+    expect(f.send).not.toHaveBeenCalled()
+    f.state.customerEmail='changed@invalid.test'
+    expect((await handler(request('send',{revisionId:rid,attempt:1}))).status).toBe(409)
+    expect(f.state.events).toHaveLength(0)
     expect(f.send).not.toHaveBeenCalled()
   })
   it('does not report sent for missing attachment or ambiguous ack; blocks blind queued retry', async () => {
@@ -423,7 +448,12 @@ describe('Download integrity and provider acknowledgement boundaries', () => {
       { userId: uid, workshop: { id: wid, name: 'QA', status: 'active' }, role: 'owner' },
       { archive: true, email: true }
     )
-    await expect(documents.send({ id: rid, workshop_id: wid } as any, 1)).rejects.toMatchObject({
+    await expect(documents.send({
+      id: rid, workshop_id: wid, payload: { customer: { email: 'qa@invalid.test' } }
+    } as any, 1, {
+      reviewedRevisionId: rid, confirmedRecipient: 'qa@invalid.test',
+      recipientChecked: true, documentChecked: true, contactAuthorized: true
+    })).rejects.toMatchObject({
       kind: 'delivery_pending'
     })
   })

@@ -35,7 +35,7 @@ export function QuoteHistory({bundle,busy,archiveEnabled,onDownload}:{
    </div>}
    {!!bundle.events.length&&<details className="cp05-ledger"><summary>Movimientos de la cotización ({bundle.events.length})</summary>{bundle.events.map(e=><p key={e.id}>{e.kind==='voided'?'Anulación':'Nueva revisión'} R{e.revision} · {new Date(e.created_at).toLocaleString('es-CL')} · {e.reason}</p>)}</details>}
    <details className="cp05-ledger"><summary><Send size={15}/> Envíos y trazabilidad ({bundle.deliveries.length})</summary>
-     {!bundle.deliveries.length?<p>Sin envíos registrados. Correo externo desactivado.</p>:bundle.deliveries.map(d=><p key={d.id}>Intento {d.attempt} · {d.status==='queued'?'En cola, no confirmado':d.status==='sent'?'Aceptado por el proveedor (no acredita recepción)':'Error confirmado'} · {new Date(d.created_at).toLocaleString('es-CL')}{d.error_code?' · '+d.error_code:''}</p>)}
+     {!bundle.deliveries.length?<p>Sin intentos de envío registrados. La disponibilidad del correo depende de autorización del servidor.</p>:bundle.deliveries.map(d=><p key={d.id}>Intento {d.attempt} · {d.status==='queued'?'En cola, no confirmado':d.status==='sent'?'Aceptado por el proveedor (no acredita recepción)':'Error confirmado'} · {new Date(d.created_at).toLocaleString('es-CL')}{d.error_code?' · '+d.error_code:''}</p>)}
    </details>
  </section>
 }

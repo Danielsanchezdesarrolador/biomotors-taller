@@ -1,5 +1,11 @@
 # ByteTorque — CP05: plan de activación del archivo privado
 
+## Correo CP05 — revisión previa y activación pendiente (23/11/2026)
+
+Se publica la interfaz y validación de correo CP05 **sin habilitar envíos**. La revisión humana exige comprobar identidad del destinatario, documento y declaración de autorización de contacto. El backend compara el email histórico de la revisión emitida con la ficha actual CP03 del mismo cliente y taller, además de revalidar rol, sesión y SHA-256 del PDF original. Las evidencias del operador no constituyen consentimiento independiente ni recepción del correo. Estado provider-accepted no demuestra bandeja ni lectura.
+
+Para activar: S4 cifrado/restauración verificados; aprobación expresa del remitente/dominio Resend y secreto privado en Edge; activar únicamente taller de QA con flags de correo previamente apagados; enviar **solo a una dirección propia del propietario** asociada al cliente ficticio y revisar `quote_delivery_events` tras logout/login. Reconciliar `queued` ambiguo antes de cualquier reintento; no realizar envíos automáticos. Correo triple de cierre BT-COM-01 permanece separado.
+
 **Fecha:** 18/11/2026. **Estado:** candidato probado con almacenamiento simulado, NO instalado en el proyecto alojado. Este documento no autoriza una migración ni el envío de correos.
 
 ## Por qué es necesario

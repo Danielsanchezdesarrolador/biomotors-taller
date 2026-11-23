@@ -1,5 +1,9 @@
 # CP05 — entrega funcional coherente de cotizaciones (22/11/2026)
 
+## Adenda de correo CP05 / BT-COM-01 · 23/11/2026
+
+Propietario aprobó visualmente BT-COM-01 y autorizó su **despliegue manual de código en Render** junto con publicación de CP05 correo en `main` y la CI existente. Se agrega revisión humana para el correo de una revisión emitida con revalidación backend de contacto CP03, en vez de envío directo. No se habilitan Resend, SMTP, flags reales, SQL, Storage, Edge ni otros talleres. S4 integral y prueba de recepción real con email propio del propietario permanecen pendientes. La versión de producción debe confirmarse tras deploy real; no deducirla de este texto.
+
 **Estado:** código local en `main`, sin push, despliegue ni cambios productivos.
 **Base:** `f6937a1d4e03d14f9d66036ac56b2b78c1a4ee43`, comprobada y actualizada por
 fast-forward. Se preservaron el PDF multipunto, S4I y `artifacts/` no versionados.

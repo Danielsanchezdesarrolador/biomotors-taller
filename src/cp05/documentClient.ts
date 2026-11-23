@@ -2,6 +2,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
 import { QuoteFailure, quoteId, type Quote, type Revision } from './contracts'
+import { matchesQuoteEmailReview, type QuoteEmailReview } from './emailReview'
 const key = 'bt:cp05:document-operation:v1'
 export function documentOperation(context: Context, quote: Quote) {
   const scope = [context.userId, context.workshop.id, quote.id, quote.version].join(':')
@@ -106,9 +107,10 @@ export function documentClient(
       if (hash !== revision.pdf_sha256) throw new QuoteFailure('unavailable')
       return bytes
     },
-    async send(revision: Revision, attempt: number) {
+    async send(revision: Revision, attempt: number, review: QuoteEmailReview) {
       if (revision.workshop_id !== context.workshop.id) throw new QuoteFailure('denied')
-      const data = await call('send', { revisionId: quoteId(revision.id), attempt }, true)
+      if (!matchesQuoteEmailReview(revision, review)) throw new QuoteFailure('invalid')
+      const data = await call('send', { revisionId: quoteId(revision.id), attempt, review }, true)
       if (!['sent', 'already_sent', 'failed'].includes(data.delivery))
         throw new QuoteFailure('unavailable')
       return data.delivery as 'sent' | 'already_sent' | 'failed'

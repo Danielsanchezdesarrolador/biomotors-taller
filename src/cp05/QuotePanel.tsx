@@ -5,7 +5,6 @@ import {
   FileDown,
   Plus,
   Save,
-  Send,
   RefreshCw,
   FileText,
   LockKeyhole,
@@ -41,6 +40,8 @@ import { FlowLive02Loader } from './FlowLive02Loader'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
 import {QuoteHistory} from './QuoteHistory'
+import { QuoteEmailReviewPanel } from './QuoteEmailReviewPanel'
+import type { QuoteEmailReview } from './emailReview'
 import {workspaceQuotes,quoteStateLabel} from './workspacePresentation'
 const empty: Draft = { price_basis: 'net', valid_days: 10, terms: '', comments: '', items: [] }
 export function QuotePanel({
@@ -356,22 +357,20 @@ export function QuotePanel({
       if (active.current) setBusy(false)
     }
   }
-  async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision) {
+  async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision, review?: QuoteEmailReview) {
     if (!bundle || lock.current || !canWrite || readPending) return
     if (kind === 'issue' && dirty) {
       setError('Guarda y revisa el borrador antes de emitir.')
       return
     }
-    if (
-      !window.confirm(
-        kind === 'issue'
-          ? '¿Emitir y archivar esta revisión inmutable?'
-          : kind === 'cancel'
-            ? '¿Cancelar la reserva pendiente sin emitir?'
-            : `¿Enviar ${quoteNumber(bundle.quote)} revisión ${revision?.revision} a ${revision?.payload.customer.full_name || ''} <${revision?.payload.customer.email || ''}>? ${bundle.quote.status === 'draft' ? 'Los cambios del borrador actual no se incluyen.' : ''}`
-      )
-    )
-      return
+    if (kind === 'send' && (!revision || !review ||
+        revision.revision !== bundle.quote.issued_revision ||
+        !repository.documents.emailEnabled ||
+        bundle.quote.status === 'voided')) return
+    if (kind !== 'send' && !window.confirm(
+      kind === 'issue' ? '¿Emitir y archivar esta revisión inmutable?'
+        : '¿Cancelar la reserva pendiente sin emitir?'
+    )) return
     lock.current = true
     setBusy(true)
     setError('')
@@ -388,7 +387,7 @@ export function QuotePanel({
       } else if (revision) {
         const attempts = bundle.deliveries.filter((d) => d.revision_id === revision.id)
         const attempt = 1 + Math.max(0, ...attempts.map((d) => d.attempt))
-        const result = await repository.documents.send(revision, attempt)
+        const result = await repository.documents.send(revision, attempt, review!)
         status =
           result === 'failed'
             ? 'El proveedor rechazó el envío. Revisa la trazabilidad.'
@@ -746,25 +745,20 @@ export function QuotePanel({
             </div>
             <div role="tabpanel" id={workspaceId+'-panel-historial'} aria-labelledby={workspaceId+'-tab-historial'} hidden={tab!=='historial'} className="cp05-tab-content" tabIndex={0}>
               <QuoteHistory key={bundle.quote.id} bundle={bundle} busy={busy||!!readPending} archiveEnabled={repository.documents.enabled} onDownload={r=>void pdf(r)}/>
-              <details className="cp05-ledger cp05-email-controls"><summary>Comunicaciones</summary>
-                <button
-                  disabled={
-                    busy ||
-                    !canWrite ||
-                    !repository.documents.emailEnabled ||
-                    bundle.quote.status === 'voided' ||
-                    !bundle.revisions.length
-                  }
-                  className="cp04-secondary"
-                  title="El backend debe autorizar el proveedor"
-                  onClick={() => void documentAction('send', bundle.revisions[0])}
-                >
-                  <Send size={17} />{' '}
-                  {repository.documents.emailEnabled
-                    ? 'Enviar última revisión'
-                    : 'Enviar correo · desactivado'}
-                </button>
-
+              <details className="cp05-ledger cp05-email-controls"><summary>Comunicaciones · revisar destinatario</summary>
+                {issuedRevision ? (
+                  <QuoteEmailReviewPanel key={issuedRevision.id}
+                    revision={issuedRevision}
+                    enabled={repository.documents.emailEnabled}
+                    busy={busy || !!readPending}
+                    canWrite={canWrite && bundle.quote.status !== 'voided' && !bundle.quote.issue_pending}
+                    sent={bundle.deliveries.some(d => d.revision_id === issuedRevision.id && d.status === 'sent')}
+                    pending={bundle.deliveries.some(d => d.revision_id === issuedRevision.id && d.status === 'queued' &&
+                      !bundle.deliveries.some(end => end.revision_id === issuedRevision.id &&
+                        end.attempt === d.attempt && (end.status === 'sent' || end.status === 'failed')))}
+                    onSend={review => void documentAction('send', issuedRevision, review)}
+                  />
+                ) : <p>No existe una revisión emitida para preparar el correo.</p>}
               </details>
             </div>
           </>}

@@ -1,3 +1,12 @@
+## CP05 correo revisado / BT-COM-01 Render autorizado · 23/11/2026
+
+El propietario **aprobó visualmente BT-COM-01**, CI general y visual de `5a837409` SUCCESS. Autoriza publicar esta integración CP05 en `main` y desplegar manualmente el código BT-COM-01 en el **servicio Render existente**, Auto-Deploy OFF. **No implica activar** variables de correo, migraciones SQL, Storage, funciones alojadas LIVE-02, envío externo, clientes reales ni configuraciones Supabase. Verificar SHA LIVE en Render antes de declarar despliegue completado.
+
+Para el correo CP05 de cotización anterior al trabajo, se reutiliza `server/cp05`, Resend candidato y `quote_delivery_events`. El usuario operador confirma destinatario, revisión exacta y declaración de autorización de contacto; el servidor relee la revisión, archivo PDF, sesión, rol/taller y **dirección actual CP03** antes de pasar al proveedor. Nunca inferir consentimiento externo, recepción, firma o pago de esa declaración. El correo consolidado final de BT-COM-01 es **otra capacidad**, no activada.
+
+Correo sigue OFF. **Antes de activar:** recuperación integral S4 verificada, permiso independiente para proveedor, remitente verificado y secretos solo del servidor, piloto inicial del propietario con correo propio y datos ficticios. Luego cierre de CP05 y CP06; no repetir otras auditorías o crear ramas.
+---
+
 ## BT-COM-01 — ajuste focalizado de CI para ZIP privado (23/11/2026)
 
 El commit `0f4af648` incluyó `src/entrega/closingZip.ts`.
