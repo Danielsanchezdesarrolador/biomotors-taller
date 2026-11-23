@@ -653,9 +653,11 @@ export function QuotePanel({
                       <button type="button" className="cp04-secondary"
                         disabled={busy}
                         onClick={() => setExecutionOpen(!executionOpen)}>
-                        {executionOpen
-                          ? 'Cerrar revisión técnica preliminar'
-                          : 'Preparar informe técnico preliminar (sin guardar)'}
+                        {import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
+                          ? executionOpen ? 'Cerrar registro técnico y entrega'
+                            : 'Abrir registro de aprobación, trabajos y entrega'
+                          : executionOpen ? 'Cerrar revisión técnica preliminar'
+                            : 'Preparar informe técnico preliminar (sin guardar)'}
                       </button>
                       {executionOpen && (
                         import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient

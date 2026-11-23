@@ -1,3 +1,26 @@
+## BT-FLOW-LIVE-02 — continuidad funcional y autorización de publicación (23/11/2026)
+
+El propietario **aprobó visualmente CP05** en bytetorque.cl y autorizó expresamente
+**una publicación de código y documentación en la única rama `main`**, con
+la CI existente, **sin desplegar Render ni modificar Supabase**.
+Base verificada antes de integrar: `e0fee642f41516968023c52a14fc2583f2bb0636`; Render Auto-Deploy **OFF**.
+No se activaron flags LIVE-02, migraciones, escrituras, correos ni datos reales.
+
+Cambio focalizado: el panel LIVE-02 muestra al volver desde una sesión las
+decisiones guardadas por partida, notas de aprobación/ejecución/entrega y totales;
+el transporte comprueba concordancia de recibos y lectura RLS con el snapshot CP05.
+`WorkExecutionDraft` diferencia borrador local de declaración persistible.
+Un único commit `main` y una ejecución habitual de CI para validación, sin
+repetir auditorías. **CI no certifica aceptación alojada ni piloto Ignacio.**
+
+Bloqueo vigente: recuperación integral S4 pendiente desde el PC personal.
+SQL candidato `docs/sql/BT_FLOW_LIVE_02_CANDIDATE.sql` sin aplicar, las tres
+tablas BT-FLOW-LIVE-02 ausentes en Supabase; no instalar ni habilitar servidor,
+Render o datos de clientes sin aprobación específica posterior.
+CP05 QA emitido y rediseño visual aprobado **no** reemplazan S4.
+
+---
+
 ## CP05 — APROBADO EN QA por el propietario (23/11/2026)
 
 El titular confirma emisión ficticia en `https://bytetorque.cl`: **COT-000001**,

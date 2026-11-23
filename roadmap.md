@@ -1,3 +1,29 @@
+## BT-FLOW-LIVE-02 — publicación de código autorizada (23/11/2026)
+
+- [x] Revisión visual CP05 **aprobada por propietario**; despliegue
+  `dep-dc26hok9v7es73ch95u0` LIVE (base `e0fee642f41516968023c52a14fc2583f2bb0636`).
+- [x] Código funcional candidato previo LIVE-02 reutilizado; mejora focal:
+  lectura visible de partidas/no realizadas y notas recuperadas desde servidor,
+  validación de recibos de escritura, lectura del snapshot y rótulos claros.
+- [x] Autorización específica para **un commit de código/docs en `main`**;
+  CI principal de GitHub debe verificar TypeScript, pruebas y compilación privada
+  LIVE-02 sin desplegar.
+- [ ] Resultado de CI de este nuevo commit por comprobar tras publicación.
+- [ ] S4 integral (respaldo cifrado/restauración aislada) sigue pendiente;
+  requiere PC personal, no se presume aprobado.
+- [ ] Bajo autorización separada tras S4, aplicar SQL LIVE-02 aditivo con gate
+  privado apagado; luego habilitar sólo taller QA, publicar flag LIVE-02 de Render
+  manualmente, confirmar aprobación → partidas → OT lista → entrega declarada →
+  logout/login → consulta CP06 con datos ficticios.
+- [ ] Prueba de Ignacio con datos reales y correos externos sólo en etapas
+  posteriores, no incluidos en esta entrega.
+
+**Sin cambios Supabase/Render, auto-deploy OFF, correo OFF.**
+La aprobación/entrega del cliente aquí son sólo declaraciones del operador;
+no firma digital, factura ni evidencia independiente de reparación.
+
+---
+
 ## CP05 — Corrección focalizada de CI visual (23/11/2026)
 
 Incidente CP05-CI-VISUAL: la CI de interfaz pública del commit `420f28f` falló en el paso CP05 móvil al intentar importar `src/cp05/pdf.ts` mediante una URL de desarrollo Vite `/@fs/` desde `vite preview` (bundle estático). La solución sustituye **solo el PDF simulado del backend en `tests/harness/cp05BrowserFixture.cjs`** por bytes PDF válidos generados con `pdf-lib` del proyecto, con hash/tamaño y descarga idéntica en los mismos recorridos. El PDF de borrador continúa usando el renderizador ByteTorque real; sin alterar componentes productivos, Edge, datos, permisos ni PDF oficial. No se atribuye éxito hasta ver las CI del nuevo commit y su despliegue Render autorizado.

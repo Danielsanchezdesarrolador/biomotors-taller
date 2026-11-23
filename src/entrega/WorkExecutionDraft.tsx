@@ -82,8 +82,9 @@ export function WorkExecutionDraft({
     <section className="dashboard-card cp05-execution" aria-label="Informe técnico preliminar">
       <h3>Trabajos realizados · revisión preliminar</h3>
       <p role="status" className="cp05-notice">
-        Selección local SIN GUARDAR. Esta pantalla no registra reparaciones ni aceptación del
-        cliente; el documento será un borrador interno, nunca una constancia de entrega.
+        {onRecord
+          ? 'Las marcas permanecen locales hasta confirmar «Registrar declaración de trabajos» con el servidor. No equivalen a prueba independiente de reparación ni aceptación del cliente.'
+          : 'Selección local SIN GUARDAR. Esta pantalla no registra reparaciones ni aceptación del cliente; el documento será un borrador interno, nunca una constancia de entrega.'}
       </p>
       {!review ? (
         <p role="alert">La revisión no coincide con la orden, vehículo o cotización actual. No se puede preparar el informe.</p>

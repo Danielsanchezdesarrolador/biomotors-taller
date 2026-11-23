@@ -1,3 +1,16 @@
+## BT-FLOW-LIVE-02 — entrega de código autorizada (23/11/2026)
+
+Propietario: aprobación visual de CP05 confirmada y **autorización puntual**
+para publicar código+documentación LIVE-02 sólo a `main`, con CI habitual.
+Base e0fee642f41516968023c52a14fc2583f2bb0636. No hay autorización para Render/Supabase/flags/
+migración/rollout ni ejecución con clientes reales. Recuperación S4 integral pendiente.
+Se reutilizó el SQL, interfaz, RPC e historial existentes; se añadió lectura
+visible de partidas/notas persistidas en CP05 y validación de respuestas RLS/RPC.
+Escrituras remotas de LIVE-02 siguen OFF. Consultar roadmap y checkpoint LIVE-02;
+el resultado de CI se reportará tras su ejecución y no debe inferirse aquí.
+
+---
+
 ## CP05 — APROBADO EN QA por el propietario (23/11/2026)
 
 El titular confirma emisión ficticia en `https://bytetorque.cl`: **COT-000001**,

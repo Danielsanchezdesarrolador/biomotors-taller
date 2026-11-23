@@ -176,7 +176,8 @@ export function FlowLive02Panel({
         <>
           <h4>1. Autorización de cotización · declaración del operador</h4>
           {records.approval ? (
-            <p>Declaración registrada ({records.approval.method}). Asociada a esta revisión; no es una firma verificada.</p>
+            <p>Declaración registrada ({records.approval.method}). Nota guardada:
+              {' '}{records.approval.note}. Asociada a esta revisión; no es una firma verificada.</p>
           ) : (
             <div className="cp05-execution-form">
               <label>Medio declarado de aprobación
@@ -205,9 +206,20 @@ export function FlowLive02Panel({
           <h4>2. Trabajos seleccionados como realizados · registro del operador</h4>
           {records.execution ? (
             <div className="cp05-execution-totals">
-              <p>Registro confirmado por servidor. No es comprobante de pago ni garantía de ejecución.</p>
+              <p>Registro confirmado por el servidor. No es comprobante de pago ni garantía de ejecución.</p>
               <p>Total cotizado: <strong>{clp(records.execution.quoted_total)}</strong></p>
               <p>Total declarado: <strong>{clp(records.execution.performed_total)}</strong></p>
+              <ul aria-label="Partidas declaradas de esta revisión">
+                {revision.payload.items.map(item => (
+                  <li key={item.id}>
+                    <strong>{records.execution!.decisions[item.id] === 'performed'
+                      ? 'Marcado realizado' : 'No realizado'}</strong>
+                    {' · '}{item.description} · Neto cotizado: {clp(item.line_net)}
+                  </li>
+                ))}
+              </ul>
+              {records.execution.pending_note &&
+                <p>Trabajos pendientes: {records.execution.pending_note}</p>}
             </div>
           ) : records.approval ? (
             <WorkExecutionDraft revision={revision} quote={quote} onRecord={recordExecution} />
@@ -217,6 +229,7 @@ export function FlowLive02Panel({
           <h4>3. Constancia de entrega · declaración del operador</h4>
           {records.handover ? (
             <p>Constancia registrada por el operador ({records.handover.handover_method}).
+              Nota guardada: {records.handover.handover_note}.
               No acredita firma, lectura del correo ni pago del cliente.</p>
           ) : records.execution ? (
             <div className="cp05-execution-form">

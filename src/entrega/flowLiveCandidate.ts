@@ -27,6 +27,7 @@ export type ApprovalRecord = {
   recorded_by: string
   evidence_status: 'operator_attested'
   method: ApprovalMethod
+  note: string
 }
 export type ExecutionRecord = {
   id: string
@@ -42,6 +43,8 @@ export type ExecutionRecord = {
   performed_total: number
   performed_net: number
   performed_tax: number
+  decisions: Record<string, 'performed' | 'not_performed'>
+  pending_note: string
   evidence_status: 'operator_attested'
 }
 export type HandoverRecord = {
@@ -56,6 +59,7 @@ export type HandoverRecord = {
   recorded_by: string
   evidence_status: 'operator_attested'
   handover_method: HandoverMethod
+  handover_note: string
 }
 export class FlowLiveFailure extends Error {
   constructor(public readonly kind: 'disabled' | 'denied' | 'invalid' |
@@ -141,7 +145,8 @@ export function flowLiveCandidate(
     checkResponse(record, rid)
     if (record.quote_id !== quote.id || record.revision_id !== revision.id ||
       record.order_id !== quote.order_id || record.recorded_by !== userId ||
-      record.method !== method) reject('unconfirmed')
+      record.method !== method || record.note !== textNote(note, 12, 1000))
+      reject('unconfirmed')
     return record
   }
   async function execution(
@@ -169,7 +174,13 @@ export function flowLiveCandidate(
       record.quoted_total !== review.quoted.total ||
       record.performed_net !== review.executed.subtotal ||
       record.performed_tax !== review.executed.tax ||
-      record.performed_total !== review.executed.total) reject('unconfirmed')
+      record.performed_total !== review.executed.total ||
+      record.pending_note !== review.pendingExplanation ||
+      !record.decisions || typeof record.decisions !== 'object' ||
+      Array.isArray(record.decisions) ||
+      Object.keys(record.decisions).length !== Object.keys(input.decisions).length ||
+      Object.keys(input.decisions).some(id => record.decisions[id] !== input.decisions[id]))
+      reject('unconfirmed')
     return record
   }
   async function handover(
@@ -195,7 +206,8 @@ export function flowLiveCandidate(
     if (record.report_id !== report.id || record.order_id !== report.order_id ||
       record.vehicle_id !== report.vehicle_id ||
       record.quote_id !== report.quote_id || record.revision_id !== report.revision_id ||
-      record.recorded_by !== userId || record.handover_method !== method)
+      record.recorded_by !== userId || record.handover_method !== method ||
+      record.handover_note !== textNote(note, 12, 1000))
       reject('unconfirmed')
     return record
   }
@@ -244,10 +256,29 @@ export function flowLiveCandidate(
           item.evidence_status !== 'operator_attested' ||
           !item.id || validId(item.id) !== item.id) reject('unconfirmed')
     }
+    if (a && (!(['in_person', 'phone', 'written', 'other'] as string[]).includes(a.method) ||
+        typeof a.note !== 'string' || a.note.trim().length < 12 ||
+        a.note.length > 1000)) reject('unconfirmed')
     if (e && (!a || e.approval_id !== a.id ||
         e.vehicle_id !== quote.vehicle_id)) reject('unconfirmed')
+    if (e) {
+      try {
+        const verified = executionPreview(revision, quote, {
+          decisions: e.decisions, pendingExplanation: e.pending_note,
+          operatorReviewed: true
+        })
+        if (!verified.readyForDraftPdf ||
+            verified.quoted.total !== e.quoted_total ||
+            verified.executed.subtotal !== e.performed_net ||
+            verified.executed.tax !== e.performed_tax ||
+            verified.executed.total !== e.performed_total)
+          reject('unconfirmed')
+      } catch { reject('unconfirmed') }
+    }
     if (d && (!e || d.report_id !== e.id ||
-        d.vehicle_id !== quote.vehicle_id)) reject('unconfirmed')
+        d.vehicle_id !== quote.vehicle_id ||
+        typeof d.handover_note !== 'string' || d.handover_note.trim().length < 12 ||
+        d.handover_note.length > 1000)) reject('unconfirmed')
     return { approval: a, execution: e, handover: d }
   }
   return Object.freeze({

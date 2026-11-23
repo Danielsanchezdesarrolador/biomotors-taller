@@ -49,20 +49,22 @@ const input = { decisions, pendingExplanation: pendingNote, operatorReviewed: tr
 const approval: ApprovalRecord = {
   id: id(60), workshop_id: wid, order_id: oid, quote_id: qid,
   revision_id: revid, request_id: rid, recorded_by: uid,
-  evidence_status: 'operator_attested', method: 'in_person'
+  evidence_status: 'operator_attested', method: 'in_person', note
 }
 const report: ExecutionRecord = {
   id: id(70), workshop_id: wid, order_id: oid, vehicle_id: vid,
   quote_id: qid, revision_id: revid, approval_id: approval.id,
   request_id: rid, reviewed_by: uid, quoted_total: 179,
   performed_net: 100, performed_tax: 19, performed_total: 119,
+  decisions, pending_note: pendingNote,
   evidence_status: 'operator_attested'
 }
 const handover: HandoverRecord = {
   id: id(80), workshop_id: wid, order_id: oid, vehicle_id: vid,
   quote_id: qid, revision_id: revid, report_id: report.id,
   request_id: rid, recorded_by: uid, evidence_status: 'operator_attested',
-  handover_method: 'in_person'
+  handover_method: 'in_person',
+  handover_note: 'Vehículo entregado según declaración de prueba, sin firma'
 }
 const checklist = {
   vehicleChecked: true, workChecked: true,
@@ -157,6 +159,9 @@ describe('BT-FLOW-LIVE-02 real-data transport candidate (OFF)', () => {
     f.rpc.mockResolvedValueOnce({ data: { ...handover, report_id: id(99) }, error: null })
     await expect(port.handover(report, checklist, 'in_person', note, true, rid))
       .rejects.toMatchObject({ kind: 'unconfirmed' })
+    f.rpc.mockResolvedValueOnce({ data: { ...report, decisions: { ...decisions, [id(11)]: 'performed' } }, error: null })
+    await expect(port.execution(quote, revision, input, rid))
+      .rejects.toMatchObject({ kind: 'unconfirmed' })
   })
   it('denies session switching/revocation after RPC before reporting success', async () => {
     const f = setup(), port = flowLiveCandidate(f.client, context, { explicitlyApproved: true })
@@ -239,6 +244,11 @@ describe('BT-FLOW-LIVE-02 real-data transport candidate (OFF)', () => {
     expect(await port.history(quote, revision)).toEqual({
       approval, execution: null, handover: null
     })
+    rows.bt_flow_execution_reports = {
+      ...report, decisions: { ...decisions, [id(11)]: 'performed' }
+    }
+    await expect(port.history(quote, revision))
+      .rejects.toMatchObject({ kind: 'unconfirmed' })
   })
   it('keeps user identity as the session identity, not a client supplied actor', async () => {
     const f = setup(), port = flowLiveCandidate(f.client, context, { explicitlyApproved: true })

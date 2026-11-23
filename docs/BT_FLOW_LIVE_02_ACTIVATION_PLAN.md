@@ -1,3 +1,15 @@
+## Adenda de publicación de código — 23/11/2026
+
+El propietario aprobó el diseño CP05 y autorizó integrar exclusivamente los
+ajustes de código/documentación LIVE-02 en `main` y validarlos con CI.
+El recorrido candidato ya existe y no debe reconstruirse; la mejora muestra
+decisiones/notas del servidor al volver a CP05 y valida recibos/historial.
+Se mantienen **desactivados** SQL LIVE-02, gate servidor, flags de Render
+y correo. No se ejecutará instalación alojada antes del respaldo/restauración
+integral S4 y autorización específica. No confundir CI con aceptación LIVE.
+
+---
+
 # ByteTorque — BT-FLOW-LIVE-02 · Activación controlada (NO autoriza ejecutar)
 
 **Fecha:** 18/11/2026 · **Rama:** `main` · **Estado:** esquema, UI y cliente candidatos probados offline; no instalados en producción.

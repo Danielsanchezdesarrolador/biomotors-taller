@@ -1,3 +1,23 @@
+## Adenda de código y continuidad — 23/11/2026
+
+Rediseño CP05 **aprobado visualmente por propietario**, emisión QA previa aprobada.
+El propietario autorizó una sola publicación en `main` de la mejora LIVE-02
+(código+documentación y CI), excluyendo SQL alojado, Render, flags y correos.
+
+Se corrigió el vacío localizado de presentación: al recuperar evidencias RLS,
+CP05 pasa a mostrar las decisiones por partida, notas y totales registrados
+de esa revisión emitida, y evita llamar «sin guardar» a la ruta de registro.
+Se fortaleció la validación de recibos RPC y datos recuperados frente al
+snapshot CP05; se agregaron regresiones focalizadas de decisiones alteradas.
+No se modifica el SQL candidato ni se afirma firma/entrega independiente.
+
+Base de trabajo: `e0fee642f41516968023c52a14fc2583f2bb0636`. La CI y el SHA de publicación deben confirmarse
+en GitHub; **no declarar este nuevo commit aprobado en QA** sólo por publicar.
+Las tres tablas LIVE-02 siguen ausentes de Supabase. S4 integral pendiente;
+sin despliegue LIVE-02, sin escritura alojada y sin uso con clientes reales.
+
+---
+
 # ByteTorque — Checkpoint BT-FLOW-LIVE-02 · Persistencia de ejecución y constancia de entrega
 
 **Fecha:** 18/11/2026 · **Repositorio:** `Danielsanchezdesarrolador/biomotors-taller` · **Rama única:** `main`.
