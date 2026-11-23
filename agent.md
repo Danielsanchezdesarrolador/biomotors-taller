@@ -1,3 +1,15 @@
+## BT-INS-PDF-02 — formato oficial CP04 A4 único (22/11/2026)
+
+Implementado y validado **localmente** sobre `0bb0ea5`, única main; sin push/deploy.
+34 componentes, estados guardados y tres colores; notas completas en expediente.
+47 pruebas pertinentes PASS, TypeScript/builds público/privado PASS; UI PDF
+1366/390 byte-idéntico entre preview/descarga, geometría A4/34 X verificadas;
+regresión CP04/autosave 11 resultados PASS. PDF02-INC-01…04 resueltos en
+[checkpoint](docs/checkpoints/CHECKPOINT_BT_INS_PDF_02_DISENO_OFICIAL_A4_20261122.md).
+Técnico/combustible/horas no persistidos muestran «—»; nombres extremos que no
+caben bloquean PDF sin truncar. Falta aprobación visual, publicación y deploy
+expresos. No tocar S4H, backups, Supabase ni CP05 para continuar este formato.
+
 ## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
 
 S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.

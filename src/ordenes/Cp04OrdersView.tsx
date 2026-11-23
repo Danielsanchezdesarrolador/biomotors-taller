@@ -42,6 +42,7 @@ import { hasCurrentProvisionalFindings } from './cp04Autosave'
 import './cp04.css'
 export type Cp04Port = Pick<
   ReturnType<typeof cp04Repository>,
+  | 'pdfIdentity'
   | 'findVehicleByPlate'
   | 'recentOrders'
   | 'getOrder'
@@ -836,6 +837,7 @@ export function Cp04OrdersView({
             </small>
           </div>
           <Cp04MultipuntoPdfPreview
+            loadIdentity={repository.pdfIdentity}
             workshopName={context.workshop.name}
             order={selected}
             findings={findings}

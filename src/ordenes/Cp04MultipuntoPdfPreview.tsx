@@ -1,15 +1,17 @@
-import {useEffect,useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import {Download,Eye,FileText,X} from 'lucide-react'
-import type {Finding,OrderWithVehicle} from './cp04Contracts'
+import type {Finding,OrderWithVehicle,InspectionPdfIdentity} from './cp04Contracts'
 import {hasCurrentProvisionalFindings} from './cp04Autosave'
 
 /** CP04 document preview only. It never sends, stores, or marks a PDF as issued. */
 export function Cp04MultipuntoPdfPreview({
- workshopName,order,findings,outstanding,incomplete,disabled
+ workshopName,order,findings,outstanding,incomplete,disabled,loadIdentity
 }:{
  workshopName:string;order:OrderWithVehicle;findings:readonly Finding[]
  outstanding:number;incomplete:boolean;disabled:boolean
+ loadIdentity?:(orderId:string)=>Promise<InspectionPdfIdentity>
 }){
+ const generation=useRef(0),cached=useRef<Uint8Array|null>(null)
  const [url,setUrl]=useState<string|null>(null)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState('')
@@ -23,14 +25,24 @@ export function Cp04MultipuntoPdfPreview({
  useEffect(()=>()=>{if(url)URL.revokeObjectURL(url)},[url])
  // An existing preview is a point-in-time local export; invalidate it if
  // server-confirmed findings or the selected order change.
- useEffect(()=>{setUrl(null);setDisplay(false);setError('')},[order.order.id,findings])
+ useEffect(()=>{generation.current++;cached.current=null;setUrl(null);setDisplay(false);setError('');setBusy(false)
+   return ()=>{generation.current++;cached.current=null}
+ },[order,findings,workshopName,disabled,blocked])
  async function generate(download:boolean){
    if(busy||disabled)return
    if(blocked){setError(reason);return}
+   const current=generation.current
    setBusy(true);setError('')
    try{
      const {browserMultipuntoPdf,downloadMultipuntoPdf}=await import('./cp04InspectionPdf')
-     const bytes=await browserMultipuntoPdf({workshopName,order,findings})
+     let bytes=cached.current
+     if(!bytes){
+       const identity=await loadIdentity?.(order.order.id)
+       if(current!==generation.current)return
+       bytes=await browserMultipuntoPdf({workshopName,order,findings,identity})
+       if(current!==generation.current)return
+       cached.current=bytes
+     }
      if(download){
        const plate=(order.vehicle.plate||'sin-patente').replace(/[^a-z0-9-]/gi,'')
        downloadMultipuntoPdf(bytes,'INS-'+plate+'-'+order.order.id.slice(0,8)+'-borrador.pdf')
@@ -38,14 +50,16 @@ export function Cp04MultipuntoPdfPreview({
        const next=URL.createObjectURL(new Blob([bytes.slice().buffer],{type:'application/pdf'}))
        setUrl(next);setDisplay(true)
      }
-   }catch{setError('No fue posible crear el PDF local. Comprueba tu conexión y vuelve a intentarlo.')}
-   finally{setBusy(false)}
+   }catch(error){if(current===generation.current)setError(error instanceof Error&&error.message==='MULTIPUNTO_PDF_FIELD_TOO_LONG'
+     ?'Un dato de identificación excede el espacio legible de una hoja A4. Revisa el expediente; no se creó un PDF incompleto.'
+     :'No fue posible crear el PDF local. Comprueba tu conexión y vuelve a verificar tu acceso.')}
+   finally{if(current===generation.current)setBusy(false)}
  }
  return <section className="cp04-pdf-controls" aria-label="Informe PDF de inspección multipunto">
    <div className="cp04-pdf-intro">
      <FileText size={20} aria-hidden="true"/>
      <div><strong>Informe técnico multipunto · PDF</strong>
-       <p>Vista previa A4 con las 34 X y observaciones confirmadas de esta orden. Solo borrador: no se envía ni se archiva.</p>
+       <p>Resumen A4 de una página con 34 componentes y sus estados confirmados. Observaciones completas en el expediente. Solo borrador: no se envía ni se archiva.</p>
      </div>
    </div>
    <div className="cp04-pdf-actions">

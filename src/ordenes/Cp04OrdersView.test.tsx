@@ -7,6 +7,7 @@ role:'owner',workshop:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Synthetic
 function api():Cp04Port{
  const no=vi.fn(async()=>null)
  return {
+  pdfIdentity:vi.fn(async()=>{throw Error('not in SSR')}),
   recentOrders:vi.fn(async()=>[]),
   getOrder:no,findVehicleByPlate:no,
   findingsForOrder:vi.fn(async()=>[]),

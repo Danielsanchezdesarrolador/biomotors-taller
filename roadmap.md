@@ -1,3 +1,5 @@
+> **BT-INS-PDF-02 · 22/11/2026 — IMPLEMENTADO/PROBADO LOCAL, NO PUBLICADO:** nuevo resumen multipunto exactamente 1 A4 vertical, 34 componentes/estados reales, diseño de referencia con logos oficiales. Notas completas en expediente; campos ausentes «—», no inventados. 47 pruebas pertinentes, TypeScript, builds público/CP04, preview=descarga en 1366/390 y geometría PDF PASS; regresión autosave CP04 11 resultados PASS. Incidentes PDF02-INC-01…04 (fuente, celda, comprobador, mock TS) resueltos y documentados. Base main `0bb0ea5`; sin ramas nuevas, push/deploy ni cambios alojados. Pendiente aprobación visual del propietario y autorización expresa de publicación; SEC07 S4H separado. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_INS_PDF_02_DISENO_OFICIAL_A4_20261122.md).
+
 ## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
 
 S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.

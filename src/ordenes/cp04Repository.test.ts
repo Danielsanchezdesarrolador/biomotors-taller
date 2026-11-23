@@ -73,6 +73,20 @@ describe('CP04 private data repository and lifecycle',()=>{
     expect(touched.slice(-1)).toEqual(['vehicles'])
     await expect(r.findVehicleByPlate('INVALID!!! TOO LONG')).rejects.toMatchObject({kind:'invalid'})
   })
+  it('reads only persisted PDF identification in the guarded workshop',async()=>{
+    const {client,reads}=fake()
+    reads.work_orders.rows=[{id:a,workshop_id:b,vehicle_id:a}]
+    reads.vehicles.rows=[{id:a,workshop_id:b,customer_id:a,model_year:2023}]
+    reads.customers={rows:[{id:a,workshop_id:b,full_name:'Cliente sintético'}]}
+    const r=cp04Repository(client,ctx)
+    await expect(r.pdfIdentity(a)).resolves.toEqual({workshop_id:b,order_id:a,vehicle_id:a,customer_id:a,ownerName:'Cliente sintético',modelYear:2023})
+    reads.customers.rows=[{id:a,workshop_id:a,full_name:'Otro taller'}]
+    await expect(r.pdfIdentity(a)).rejects.toMatchObject({kind:'unavailable'})
+    reads.customers.rows=[{id:b,workshop_id:b,full_name:'Otro cliente'}]
+    await expect(r.pdfIdentity(a)).rejects.toMatchObject({kind:'unavailable'})
+    reads.workshop_memberships.rows=[]
+    await expect(r.pdfIdentity(a)).rejects.toMatchObject({kind:'denied'})
+  })
   it('hides older multipoint pending after OK, retains broad pending issue',async()=>{
     const {client,reads}=fake()
     const earlier:Finding={workshop_id:b,id:a,order_id:a,vehicle_id:a,

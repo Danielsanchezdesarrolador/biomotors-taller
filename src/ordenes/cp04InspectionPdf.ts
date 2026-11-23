@@ -1,12 +1,13 @@
 /** BT-INS-PDF-01: read-only PDF from confirmed CP04 visit findings. No network writes. */
-import {PDFDocument,rgb,type PDFPage} from 'pdf-lib'
+import {PDFDocument,rgb,pushGraphicsState,popGraphicsState,setTextRenderingMode,TextRenderingMode,setLineWidth,setStrokingColor,type RGB as Color,type PDFImage} from 'pdf-lib'
+import lightLogoUrl from '../../apps/android/assets/brand/logo-horizontal.png?url'
+import darkLogoUrl from '../../apps/android/assets/brand/logo-horizontal-dark.png?url'
 import fontkit from '@pdf-lib/fontkit'
-import {categories} from '../informes/multipunto/multipuntoTemplate'
 import {multipuntoTemplateItems,latestForMultipuntoItem,CP04_IMMEDIATE_PREFIX} from './cp04Multipunto'
 import {provisionalFinding,CP04_PROVISIONAL_NOTE} from './cp04Autosave'
-import type {Finding,OrderWithVehicle} from './cp04Contracts'
+import type {Finding,OrderWithVehicle,InspectionPdfIdentity} from './cp04Contracts'
 
-export type MultipuntoPdfInput={workshopName:string;order:OrderWithVehicle;findings:readonly Finding[]}
+export type MultipuntoPdfInput={workshopName:string;order:OrderWithVehicle;findings:readonly Finding[];identity?:InspectionPdfIdentity}
 export type MultipuntoPdfRow={id:string;group:string;label:string;
  state:'ok'|'attention'|'immediate'|'unreviewed';note:string;
  resolution:'pending'|'resolved'|'not_applicable'|null;provisional:boolean}
@@ -14,6 +15,10 @@ export function multipuntoPdfModel(source:MultipuntoPdfInput){
  const {order}=source
  if(!source.workshopName.trim()||order.order.workshop_id!==order.vehicle.workshop_id||
    order.order.vehicle_id!==order.vehicle.id)throw Error('MULTIPUNTO_PDF_CONTEXT_MISMATCH')
+ const identity=source.identity
+ if(identity&&(identity.workshop_id!==order.order.workshop_id||identity.order_id!==order.order.id||
+    identity.vehicle_id!==order.vehicle.id||identity.customer_id!==order.vehicle.customer_id))
+   throw Error('MULTIPUNTO_PDF_CONTEXT_MISMATCH')
  const allowed=source.findings.filter(f=>f.workshop_id===order.order.workshop_id&&
    f.order_id===order.order.id&&f.vehicle_id===order.vehicle.id)
  const rows:MultipuntoPdfRow[]=multipuntoTemplateItems().map(item=>{
@@ -29,154 +34,156 @@ export function multipuntoPdfModel(source:MultipuntoPdfInput){
  })
  const count=(state:MultipuntoPdfRow['state'])=>rows.filter(x=>x.state===state).length
  return {rows,order,workshop:source.workshopName.trim(),
-   counts:{total:rows.length,ok:count('ok'),attention:count('attention'),
+   identity,counts:{total:rows.length,ok:count('ok'),attention:count('attention'),
     immediate:count('immediate'),unreviewed:count('unreviewed'),
     provisional:rows.filter(x=>x.provisional).length}}
 }
 
-const W=595.28,H=841.89,M=39,CW=W-2*M
-const navy=rgb(.06,.14,.29),blue=rgb(.07,.37,.84),muted=rgb(.34,.44,.56)
-const pale=rgb(.95,.97,.99),line=rgb(.83,.87,.92),white=rgb(1,1,1)
-const green=rgb(.14,.49,.34),amber=rgb(.65,.42,.09),red=rgb(.71,.2,.22)
+const W=595.28,H=841.89,M=29,CW=W-2*M
+const navy=rgb(.025,.085,.19),blue=rgb(0,.36,.72),cyan=rgb(0,.57,1)
+const muted=rgb(.20,.29,.43),pale=rgb(.94,.97,1),line=rgb(.65,.74,.88),white=rgb(1,1,1)
+const colors=[rgb(.48,.88,.05),rgb(1,.80,0),rgb(1,.06,.12)]
 const clean=(value:string)=>value.replace(/[\u0000-\u001f\u007f]/g,' ').trim()
 const dateText=(value:string)=>{const d=new Date(value);return Number.isFinite(d.valueOf())
- ?d.toLocaleDateString('es-CL',{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit'})
- :'Sin fecha registrada'}
-
-export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Array):Promise<Uint8Array>{
+ ?d.toLocaleDateString('es-CL',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'}):'—'}
+export type MultipuntoPdfAssets={light:Uint8Array;dark:Uint8Array}
+/** Fixed one-page summary. Notes never drive pagination or get discarded from the record. */
+export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Array,logos:MultipuntoPdfAssets):Promise<Uint8Array>{
  const model=multipuntoPdfModel(source),pdf=await PDFDocument.create()
  pdf.registerFontkit(fontkit)
- const font=await pdf.embedFont(fontBytes,{subset:true})
- pdf.setTitle('Inspección multipunto - borrador no enviado')
- pdf.setProducer('ByteTorque')
- let page:PDFPage=pdf.addPage([W,H]),y=0
- let firstPage=true
- const measure=(text:string,size:number)=>font.widthOfTextAtSize(clean(text),size)
- const put=(text:string,x:number,at:number,size=9,color=navy)=>
-   page.drawText(clean(text),{x,y:at,size,font,color})
- function lines(value:string,size:number,width:number):string[]{
-   const result:string[]=[]
-   for(const paragraph of value.replace(/\r/g,'').split('\n')){
-     let current=''
-     for(const token of clean(paragraph).split(/\s+/).filter(Boolean)){
-       let remaining=token
-       const parts:string[]=[]
-       while(measure(remaining,size)>width&&remaining.length>1){
-         let take=1
-         while(take<remaining.length&&measure(remaining.slice(0,take+1),size)<=width)take++
-         parts.push(remaining.slice(0,take));remaining=remaining.slice(take)
-       }
-       parts.push(remaining)
-       for(const part of parts){
-         if(!current)current=part
-         else if(measure(current+' '+part,size)<=width)current+=' '+part
-         else{result.push(current);current=part}
-       }
-     }
-     if(current)result.push(current)
-   }
-   return result.length?result:['Sin información']
+ const [font,lightLogo,darkLogo]=await Promise.all([
+   pdf.embedFont(fontBytes,{subset:true}),
+   pdf.embedPng(logos.light),pdf.embedPng(logos.dark)])
+ pdf.setTitle('Inspección Multi Punto · Resumen · Borrador no enviado')
+ pdf.setProducer('ByteTorque');pdf.setCreator('ByteTorque · CP04')
+ const page=pdf.addPage([W,H])
+ const rect=(x:number,t:number,w:number,h:number,color:Color)=>page.drawRectangle({x,y:H-t-h,width:w,height:h,color})
+ function rounded(x:number,t:number,w:number,h:number,color:Color,border?:Color,r=9){
+   page.drawSvgPath(`M ${r} 0 H ${w-r} Q ${w} 0 ${w} ${r} V ${h-r} Q ${w} ${h} ${w-r} ${h} H ${r} Q 0 ${h} 0 ${h-r} V ${r} Q 0 0 ${r} 0 Z`,
+     {x,y:H-t,color,borderColor:border,borderWidth:border? .55:0})
  }
- function newPage(continued=false){
-   if(firstPage)firstPage=false
-   else page=pdf.addPage([W,H])
-   page.drawRectangle({x:0,y:H-101,width:W,height:101,color:navy})
-   page.drawRectangle({x:M,y:H-102,width:85,height:3,color:blue})
-   put('BYTETORQUE  /  INFORME TÉCNICO',M,H-27,9.5,white)
-   put('INSPECCIÓN MULTIPUNTO',M,H-56,18,white)
-   put(continued?'CONTINUACIÓN · BORRADOR NO ENVIADO':'VISTA PREVIA · BORRADOR NO ENVIADO',M,H-78,8.2,white)
-   const workshop=lines(model.workshop,8.5,180)[0]
-   put(workshop,W-M-measure(workshop,8.5),H-27,8.5,white)
-   y=H-123
+ const rule=(x:number,t:number,w:number)=>page.drawLine({start:{x,y:H-t},end:{x:x+w,y:H-t},thickness:.5,color:line})
+ const vertical=(x:number,t:number,h:number)=>page.drawLine({start:{x,y:H-t},end:{x,y:H-t-h},thickness:.6,color:line})
+ function put(value:string,x:number,t:number,size=9,color:Color=navy,strong=false){
+   // Embed every glyph: no platform-dependent Helvetica fallback or duplicate text.
+   if(strong)page.pushOperators(pushGraphicsState(),setStrokingColor(color),setLineWidth(.22),setTextRenderingMode(TextRenderingMode.FillAndOutline))
+   page.drawText(clean(value),{x,y:H-t-size,size,font,color})
+   if(strong)page.pushOperators(popGraphicsState())
  }
- function reserve(height:number){if(y-height<63)newPage(true)}
- function section(name:string){
-   reserve(40);y-=8
-   page.drawRectangle({x:M,y:y-23,width:CW,height:25,color:pale})
-   put(name.toUpperCase(),M+9,y-16,9.1)
-   y-=31
+ function fit(value:string|null|undefined,x:number,t:number,width:number,size=11,strong=false,min=7.5){
+   const text=clean(value||'')||'—',face=font
+   let actual=size
+   while(actual>min&&face.widthOfTextAtSize(text,actual)>width)actual-=.25
+   if(face.widthOfTextAtSize(text,actual)>width)throw Error('MULTIPUNTO_PDF_FIELD_TOO_LONG')
+   put(text,x,t,actual,navy,strong)
  }
- const heads=[['COMPONENTE',M+7],['OK',M+311],['AT.',M+354],['URG.',M+408],['S/R',M+469]] as const
- function columnHeads(){heads.forEach(([name,x])=>put(name,x,y,7.1,muted));y-=12}
- newPage()
- const o=model.order.order,v=model.order.vehicle,c=model.counts
- put('TALLER',M,y,7.8,muted);put(lines(model.workshop,10,215)[0],M,y-16,10)
- put('ORDEN DE TRABAJO',M+247,y,7.8,muted);put(o.id,M+247,y-16,7.7)
- y-=41
- page.drawLine({start:{x:M,y},end:{x:W-M,y},color:line,thickness:.8});y-=20
- put('VEHÍCULO',M,y,7.8,muted);put(lines(v.make+' '+v.model,10.2,216)[0],M,y-15,10.2)
- put('PATENTE',M+247,y,7.8,muted);put(v.plate||'Sin patente',M+247,y-15,10.2)
- y-=38
- put('FECHA DE INGRESO',M,y,7.8,muted);put(dateText(o.opened_at),M,y-15,9.2)
- put('KILOMETRAJE',M+247,y,7.8,muted)
- put(o.intake_odometer===null?'Sin registrar':o.intake_odometer.toLocaleString('es-CL')+' km',M+247,y-15,9.2)
- y-=40
- put('MOTIVO DE INGRESO',M,y,7.8,muted);y-=14
- for(const l of lines(o.complaint,8.5,CW-12)){reserve(12);put(l,M+7,y,8.5);y-=12}
- y-=14
- reserve(56)
- page.drawRectangle({x:M,y:y-33,width:CW,height:40,color:pale})
- const badges=[
-   ['OK',String(c.ok),green],['ATENCIÓN',String(c.attention),amber],
-   ['INMEDIATO',String(c.immediate),red],['SIN REVISAR',String(c.unreviewed),muted]
- ] as const
- badges.forEach(([label,value,color],i)=>{const x=M+13+127*i
-   put(label,x,y-7,7.4,muted);put(value,x,y-24,12,color)})
- y-=53
- for(const cat of categories){
-   section(cat.name)
-   columnHeads()
-   for(const item of model.rows.filter(r=>r.group===cat.id)){
-     const note=item.note?lines(item.note,7.4,CW-24):[]
-     const res=item.resolution==='resolved'?'Resolución registrada':
-       item.resolution==='pending'?'Reparación pendiente':''
-     if(y-19<63){newPage(true);section(cat.name+' (continuación)');columnHeads()}
-     page.drawLine({start:{x:M,y:y+8},end:{x:W-M,y:y+8},color:line,thickness:.55})
-     put(item.label,M+7,y-3,8.1)
-     for(const [state,x] of [['ok',M+312],['attention',M+356],
-       ['immediate',M+410],['unreviewed',M+471]] as const){
-       page.drawRectangle({x,y:y-8,width:12,height:12,borderWidth:.8,borderColor:line,
-         color:item.state===state
-           ?state==='ok'?green:state==='attention'?amber:state==='immediate'?red:muted:white})
-       if(item.state===state)put('X',x+2,y-5,8,white)
-     }
-     y-=14
-     // Notes can be as long as the server's 2000-character limit. Wrap them
-     // across new A4 pages instead of drawing off the paper.
-     for(const l of [...note,...(res?[res]:[])]){
-       if(y-11<63){
-         newPage(true);section(cat.name+' (continuación)');columnHeads()
-         put(item.label+' (continuación)',M+7,y-3,8.1);y-=14
-       }
-       put(l,M+14,y,7.4,muted);y-=10
-     }
-     y-=2
+ function gradient(x:number,t:number,w:number,h:number,left:Color,right:Color,r=0){
+   for(let i=0;i<100;i++){
+     const f=i/99
+     const edge=Math.min(w*i/100,w-w*(i+1)/100),inset=r&&edge<r?r-Math.sqrt(r*r-(r-edge)**2):0
+     rect(x+w*i/100,t+inset,w/100+.1,h-inset,rgb(left.red+(right.red-left.red)*f,left.green+(right.green-left.green)*f,left.blue+(right.blue-left.blue)*f))
    }
  }
- section('Observaciones del informe')
- const notices=[
-   c.unreviewed>0?c.unreviewed+' puntos permanecen sin revisar; no equivalen a OK.':'Se revisaron los 34 componentes del catálogo.',
-   c.provisional>0?c.provisional+' observaciones provisionales requieren completar su detalle técnico.':'',
-   'Vista previa local: no enviado ni firmado por cliente o taller.',
-   'Este documento no certifica la seguridad de circulación ni reparaciones efectuadas.'
- ].filter(Boolean)
- for(const statement of notices){
-   for(const l of lines(statement,8.1,CW-20)){reserve(14);put(l,M+7,y,8.1,muted);y-=12}
-   y-=5
+ function logo(image:PDFImage,x:number,t:number,w:number){
+   const h=w*image.height/image.width
+   page.drawImage(image,{x,y:H-t-h,width:w,height:h})
  }
- const pages=pdf.getPages()
- pages.forEach((p,i)=>{
-   p.drawRectangle({x:0,y:0,width:W,height:31,color:navy})
-   p.drawText('ByteTorque · Informe multipunto · BORRADOR NO ENVIADO',{x:M,y:12,size:7.5,font,color:white})
-   const label=(i+1)+' / '+pages.length
-   p.drawText(label,{x:W-M-font.widthOfTextAtSize(label,7.5),y:12,size:7.5,font,color:white})
- })
+ const icons={
+  general:'M 3 7 L 0 7 L 0 13 L 3 13 L 5 17 L 9 17 L 11 13 L 15 13 L 15 7 L 12 7 L 10 3 L 6 3 Z M 7 8 L 9 8 L 9 11 L 7 11 Z',
+  capo:'M 0 5 H 4 V 2 H 9 V 5 H 14 V 8 H 17 V 15 H 3 V 12 H 0 Z',
+  bajo:'M 2 8 L 5 2 H 14 L 17 8 V 15 H 0 V 8 Z M 1 10 H 16 M 3 15 V 18 M 14 15 V 18',
+  frenos:'M 9 0 A 9 9 0 1 0 9 18 A 9 9 0 1 0 9 0 M 9 5 A 4 4 0 1 0 9 13 A 4 4 0 1 0 9 5 M 9 0 V 3 M 9 15 V 18 M 0 9 H 3 M 15 9 H 18',
+  neumaticos:'M 9 0 A 9 9 0 1 0 9 18 A 9 9 0 1 0 9 0 M 9 3 A 6 6 0 1 0 9 15 A 6 6 0 1 0 9 3 M 9 4 L 11 9 L 9 14 L 7 9 Z',
+  person:'M 9 0 A 4 4 0 1 0 9 8 A 4 4 0 1 0 9 0 M 1 19 V 16 Q 1 10 9 10 Q 17 10 17 16 V 19 Z',
+  clock:'M 10 0 A 10 10 0 1 0 10 20 A 10 10 0 1 0 10 0 M 10 4 V 11 L 15 14',
+  tool:'M 12 0 L 9 4 L 12 7 L 16 4 Q 19 11 11 11 L 4 19 L 0 15 L 8 7 Q 5 0 12 0 Z',
+  calendar:'M 1 3 H 18 V 20 H 1 Z M 1 8 H 18 M 5 0 V 6 M 14 0 V 6 M 5 11 H 7 M 11 11 H 13 M 5 15 H 7 M 11 15 H 13',
+  clipboard:'M 4 3 H 1 V 24 H 20 V 3 H 16 M 7 0 H 14 V 6 H 7 Z M 4 11 L 6 13 L 9 9 M 12 11 H 17 M 4 18 L 6 20 L 9 16 M 12 18 H 17'
+ }
+ function icon(name:keyof typeof icons,x:number,t:number,scale=1,color:Color=navy){
+   page.drawSvgPath(icons[name],{x,y:H-t,scale,borderColor:color,borderWidth:1.2})
+ }
+ // Institutional banner, official transparent logo and geometric navy/blue detail.
+ gradient(0,0,W,49,navy,rgb(.015,.20,.36))
+ page.drawSvgPath('M 0 49 L 33 0 H 58 L 25 49 Z',{x:376,y:H,color:cyan})
+ page.drawSvgPath('M 0 49 L 33 0 H 53 L 20 49 Z',{x:413,y:H,color:blue})
+ logo(darkLogo,31,7,153)
+ vertical(207,11,26);put('GESTIÓN DE TALLER',227,11,9,white);put('AUTOMOTRIZ',227,25,9,white)
+ rounded(M,62,41,37,rgb(.88,.94,1));icon('clipboard',M+12,68,1.05,cyan)
+ put('Inspección Multi Punto',82,61,24,navy,true)
+ rounded(84,94,51,4,cyan,undefined,2)
+ // Two-tier identification card. Inspection-specific fields absent in CP04 remain unavailable.
+ rounded(M,108,CW,68,pale,line)
+ icon('person',M+15,116,.85);put('Propietario del vehículo',M+58,113,8.6)
+ fit(model.identity?.ownerName,M+58,125,168,12,true)
+ vertical(M+232,116,20);icon('tool',M+255,116,.95)
+ put('Técnico asignado',M+294,113,8.6);put('—',M+294,125,12)
+ rule(M+7,141,CW-14)
+ icon('calendar',M+17,148,.8);put('Fecha de visita',M+58,146,8.4);put(dateText(model.order.order.opened_at),M+58,157,11,navy,true)
+ vertical(M+184,148,20);icon('clock',M+218,150,.75)
+ put('Hora de inicio',M+247,146,8.4);put('—',M+247,157,11)
+ vertical(M+362,148,20);icon('clock',M+401,150,.75)
+ put('Hora de término',M+430,146,8.4);put('—',M+430,157,11)
+ // Vehicle card: use only persisted intake odometer, not a later vehicle reading.
+ rounded(M,186,CW,70,pale,line)
+ gradient(M+1,187,CW-2,22,rgb(.81,.90,1),rgb(.68,.83,.99),8)
+ icon('bajo',M+15,190,.9);put('Vehículo',M+46,188,14,navy,true)
+ const v=model.order.vehicle,o=model.order.order
+ put('Marca:',M+38,217,8.5);fit(v.make,M+83,215,118,10.5,true)
+ vertical(M+207,216,12);put('Modelo:',M+227,217,8.5);fit(v.model,M+275,215,122,10.5,true)
+ vertical(M+410,216,12);put('Año:',M+428,217,8.5);fit(model.identity?.modelYear?.toString(),M+468,215,58,10.5,true)
+ rule(M+7,232,CW-14)
+ put('Combustible:',M+38,241,8.5);put('—',M+112,239,10.5)
+ vertical(M+256,238,12);put('Kilometraje:',M+288,241,8.5)
+ fit(o.intake_odometer===null?null:o.intake_odometer.toLocaleString('es-CL')+' km',M+402,239,120,10.5,true)
+ rounded(M,266,CW,29,rgb(.87,.93,1))
+ const legends=[['OK',72],['Requiere Atención',187],['Cambio Inmediato',370]] as const
+ legends.forEach(([label,x],i)=>{rounded(x,271,29,18,colors[i],undefined,4);put(label,x+39,274,9.2,navy,true)})
+ vertical(173,273,15);vertical(361,273,15)
+ const labelOverrides:Record<string,string>={'general/neblina':'Luces de neblinero','capo/aceite-motor':'Aceite de motor',
+   'bajo/fuga-aceite':'Fuga de aceite','bajo/fuga-refrigerante':'Fuga de refrigerante','bajo/cremallera':'Cremallera',
+   'frenos/discos':'Frenos de disco','frenos/tambores':'Frenos de tambor'}
+ function group(id:keyof Pick<typeof icons,'general'|'capo'|'bajo'|'frenos'|'neumaticos'>,title:string,x:number,t:number,w:number,twoColumns:boolean){
+   const rows=model.rows.filter(r=>r.group===id),n=twoColumns?rows.length/2:rows.length
+   const rowH=14.5,header=24,height=header+7+n*rowH+5
+   rounded(x,t,w,height,pale,line)
+   gradient(x+1,t+1,w-2,header+4,rgb(.10,.39,.61),rgb(0,.27,.53),8)
+   page.drawSvgPath('M 0 24 L 18 0 H 31 L 13 24 Z',{x:x+w-51,y:H-t-1,color:cyan})
+   rounded(x+1,t+header-1,w-2,height-header,pale,undefined,8)
+   icon(id,x+14,t+4,.86,white);put(title,x+46,t+3,13,white,true)
+   const columns=twoColumns?2:1,gap=10,colW=(w-20-(columns-1)*gap)/columns
+   rows.forEach((row,i)=>{
+     const col=Math.floor(i/n),index=i%n,at=t+header+3+index*rowH,rx=x+10+col*(colW+gap)
+     for(let s=0;s<3;s++)rect(rx+s*26,at,26,rowH-.3,colors[s])
+     const chosen=['ok','attention','immediate'].indexOf(row.state)
+     if(chosen>=0)put('X',rx+chosen*26+9,at-.15,11.6,navy,true)
+     rule(rx,at+rowH,colW)
+     fit(labelOverrides[row.id]??row.label,rx+88,at+1,colW-90,9.1,false,8)
+   })
+ }
+ group('general','General',M,305,CW,true)
+ group('capo','Bajo Capó',M,419,CW,true)
+ group('bajo','Bajo Vehículo',M,518,CW,true)
+ group('frenos','Estado de Frenos',M,617,(CW-10)/2,false)
+ group('neumaticos','Estado de Neumáticos',M+(CW+10)/2,617,(CW-10)/2,false)
+ // Institutional footer: no promises of email delivery or certification.
+ rounded(M-5,734,CW+10,45,rgb(.94,.96,.99))
+ logo(lightLogo,M+6,741,122);vertical(M+143,742,27)
+ put('Informe generado por ByteTorque',M+159,740,9,navy,true)
+ put('Resumen visual · Borrador no enviado',M+159,754,8)
+ put('Observaciones completas en el expediente.',M+159,766,7.5)
+ fit('Taller: '+model.workshop,M,791,CW,8,false,6.5)
+ fit('OT: '+o.id+'  ·  Patente: '+(v.plate||'—'),M,804,CW,7.5,false,6.5)
+ put('Sin X: no evaluado. No certifica reparaciones ni seguridad de circulación.',M,816,7,muted)
+ gradient(0,830,W,12,navy,blue)
+ // Deliberately only one addPage call; long notes never enter this fixed layout.
  return pdf.save({useObjectStreams:false})
 }
 export async function browserMultipuntoPdf(input:MultipuntoPdfInput):Promise<Uint8Array>{
- const response=await fetch('/cp05/DejaVuSans.ttf')
- if(!response.ok)throw Error('MULTIPUNTO_PDF_FONT_UNAVAILABLE')
- return multipuntoPdf(input,new Uint8Array(await response.arrayBuffer()))
+ const responses=await Promise.all([fetch('/cp05/DejaVuSans.ttf'),fetch(lightLogoUrl),fetch(darkLogoUrl)])
+ if(responses.some(r=>!r.ok))throw Error('MULTIPUNTO_PDF_ASSET_UNAVAILABLE')
+ const [font,light,dark]=await Promise.all(responses.map(async r=>new Uint8Array(await r.arrayBuffer())))
+ return multipuntoPdf(input,font,{light,dark})
 }
 export function downloadMultipuntoPdf(bytes:Uint8Array,fileName:string){
  const url=URL.createObjectURL(new Blob([bytes.slice().buffer],{type:'application/pdf'}))

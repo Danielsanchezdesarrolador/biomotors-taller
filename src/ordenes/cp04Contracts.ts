@@ -25,6 +25,11 @@ export type VehicleChoice=Readonly<{
   workshop_id:string;id:string;customer_id:string;plate:string|null;
   plate_key:string|null;make:string;model:string;odometer_km:number|null
 }>
+/** Only persisted, tenant-checked identity for the local inspection summary. */
+export type InspectionPdfIdentity=Readonly<{
+ workshop_id:string;order_id:string;vehicle_id:string;customer_id:string;
+ ownerName:string|null;modelYear:number|null
+}>
 export type OrderWithVehicle=Readonly<{order:WorkOrder;vehicle:VehicleChoice}>
 export type NewOrder=Readonly<{vehicle_id:string;complaint:string;intake_odometer:number|null}>
 export type NewFinding=Readonly<{

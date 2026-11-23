@@ -11,7 +11,7 @@ import {
   WorkOrderFailure, workFailure, validId, validPlateSearch, orderInput,
   effectivePendingFindings,
   findingInput, workStatuses, recentOrdersLimit, type WorkOrder, type Finding, type NewOrder,
-  type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle
+  type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle, type InspectionPdfIdentity
 } from './cp04Contracts'
 
 const orderCols='workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'
@@ -115,6 +115,28 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     valid(version)
     if(!vehicleRes.data)throw new WorkOrderFailure('unavailable')
     return {order,vehicle:check<VehicleChoice>(vehicleRes.data,tenant)}
+  }
+  async function pdfIdentity(orderId:string):Promise<InspectionPdfIdentity>{
+    const version=await guard()
+    const record=await getOrder(orderId)
+    if(!record)throw new WorkOrderFailure('unavailable')
+    const {vehicle,order}=record
+    const result=await client.from('customers').select('workshop_id,id,full_name')
+      .eq('workshop_id',tenant).eq('id',vehicle.customer_id).maybeSingle()
+    if(result.error)workFailure(result.error)
+    const customer=result.data?check<{workshop_id:string;id:string;full_name:string}>(result.data,tenant):null
+    if(customer&&(customer.id!==vehicle.customer_id||typeof customer.full_name!=='string'))
+      throw new WorkOrderFailure('unavailable')
+    const vehicleResult=await client.from('vehicles').select('workshop_id,id,customer_id,model_year')
+      .eq('workshop_id',tenant).eq('id',vehicle.id).maybeSingle()
+    if(vehicleResult.error)workFailure(vehicleResult.error)
+    const details=check<{workshop_id:string;id:string;customer_id:string;model_year:number|null}>(vehicleResult.data,tenant)
+    valid(version)
+    if(details.id!==vehicle.id||details.customer_id!==vehicle.customer_id||
+      (details.model_year!=null&&(!Number.isInteger(details.model_year)||details.model_year<1900||details.model_year>2100)))
+      throw new WorkOrderFailure('unavailable')
+    return {workshop_id:tenant,order_id:order.id,vehicle_id:vehicle.id,customer_id:vehicle.customer_id,
+      ownerName:customer?.full_name??null,modelYear:details.model_year??null}
   }
   async function findingsForOrder(orderId:string):Promise<Finding[]>{
     const id=validId(orderId),version=await guard()
@@ -253,5 +275,5 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     return check<Finding>(result.data,tenant)
   }
   return Object.freeze({findVehicleByPlate,getVehicle,recentOrders,getOrder,
-    findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
+    pdfIdentity,findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
 }

@@ -1,7 +1,8 @@
 import {describe,it,expect} from 'vitest'
 import {multipuntoPdfModel,multipuntoPdf} from './cp04InspectionPdf'
-import {readFileSync} from 'node:fs'
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs'
 import {PDFDocument} from 'pdf-lib'
+import {multipuntoTemplateItems} from './cp04Multipunto'
 import type {Finding,OrderWithVehicle} from './cp04Contracts'
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 const b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
@@ -47,14 +48,54 @@ describe('CP04 multipoint local PDF model',()=>{
    expect(()=>multipuntoPdfModel({workshopName:'Taller',
      order:{...order,vehicle:{...order.vehicle,workshop_id:b}},findings:[]})).toThrow('MULTIPUNTO_PDF_CONTEXT_MISMATCH')
  })
- it('creates a real A4 PDF with many pages for long technician notes',async()=>{
+ it('rejects an identity belonging to another customer, order or workshop',()=>{
+   const identity={workshop_id:a,order_id:o,vehicle_id:v,customer_id:o,ownerName:'Cliente sintético',modelYear:2023}
+   for(const patch of [{customer_id:b},{order_id:b},{workshop_id:b},{vehicle_id:b}])
+     expect(()=>multipuntoPdfModel({workshopName:'Taller',order,findings:[],identity:{...identity,...patch}}))
+       .toThrow('MULTIPUNTO_PDF_CONTEXT_MISMATCH')
+ })
+ it('creates a complete, one-page dynamic summary with all 34 persisted states',async()=>{
+   const findings=multipuntoTemplateItems().map((item,i)=>finding('Multipunto · '+item.name,
+     i%3===0?'ok':'attention',i%3===0?null:(i%3===1?'':'PRIORIDAD INMEDIATA: ')+'Observación sintética '.repeat(70)))
+   const input={workshopName:'Taller de ensayo · Datos ficticios',order,findings,
+     identity:{workshop_id:a,order_id:o,vehicle_id:v,customer_id:o,ownerName:'Cliente de prueba · Sin datos reales',modelYear:2023}}
+   const before=JSON.stringify(input),model=multipuntoPdfModel(input)
+   expect(model.rows.map(r=>r.state)).toEqual(multipuntoTemplateItems().map((_,i)=>['ok','attention','immediate'][i%3]))
+   const bytes=await multipuntoPdf(input,new Uint8Array(readFileSync('public/cp05/DejaVuSans.ttf')),
+     {light:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal.png')),
+      dark:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal-dark.png'))})
+   expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1)
+   expect(JSON.stringify(input)).toBe(before)
+   if(process.env.BT_MULTIPUNTO_PDF_OUTPUT){
+     mkdirSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT,{recursive:true})
+     writeFileSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT+'/multipunto-sintetico.pdf',bytes)
+     writeFileSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT+'/expected.json',JSON.stringify(model,null,2))
+   }
+ })
+ it('leaves every box empty for an unevaluated inspection, and never truncates oversized identity',async()=>{
+   const font=new Uint8Array(readFileSync('public/cp05/DejaVuSans.ttf'))
+   const logos={light:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal.png')),dark:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal-dark.png'))}
+   const input={workshopName:'Taller de ensayo',order,findings:[]}
+   const bytes=await multipuntoPdf(input,font,logos)
+   expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1)
+   expect(multipuntoPdfModel(input).rows.every(row=>row.state==='unreviewed')).toBe(true)
+   if(process.env.BT_MULTIPUNTO_PDF_OUTPUT){
+     mkdirSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT,{recursive:true})
+     writeFileSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT+'/sin-evaluar.pdf',bytes)
+     writeFileSync(process.env.BT_MULTIPUNTO_PDF_OUTPUT+'/sin-evaluar.json',JSON.stringify(multipuntoPdfModel(input)))
+   }
+   await expect(multipuntoPdf({...input,identity:{workshop_id:a,order_id:o,vehicle_id:v,customer_id:o,
+     ownerName:'Nombre muy extenso '.repeat(20),modelYear:null}},font,logos))
+     .rejects.toThrow('MULTIPUNTO_PDF_FIELD_TOO_LONG')
+ })
+ it('creates exactly one A4 page even for long technician notes',async()=>{
    const font=new Uint8Array(readFileSync('public/cp05/DejaVuSans.ttf'))
    const x=await multipuntoPdf({workshopName:'Taller de ensayo',order,findings:[
      finding('Multipunto · Pastillas de freno','attention','Desgaste '.repeat(210))
-   ]},font)
+   ]},font,{light:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal.png')),dark:new Uint8Array(readFileSync('apps/android/assets/brand/logo-horizontal-dark.png'))})
    expect(Array.from(x.slice(0,5))).toEqual([37,80,68,70,45])
    const doc=await PDFDocument.load(x)
-   expect(doc.getPageCount()).toBeGreaterThan(1)
+   expect(doc.getPageCount()).toBe(1)
    for(const p of doc.getPages()){
      expect(Math.abs(p.getWidth()-595.28)).toBeLessThan(1)
      expect(Math.abs(p.getHeight()-841.89)).toBeLessThan(1)

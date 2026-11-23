@@ -1,3 +1,9 @@
+## BT-INS-PDF-02 — resumen multipunto oficial en una hoja A4 (22/11/2026)
+
+Por orden del titular, el PDF CP04 es **exactamente una página A4 vertical** con los 34 componentes, tres casillas y X solo en el estado persistido; no evaluado queda sin X. Sustituye la paginación histórica de BT-INS-PDF-01: observaciones completas permanecen en expediente, PDF es resumen con aviso explícito. Reutilizar logos oficiales; no inventar técnico, combustible ni horarios si faltan. No tocar PDF CP05. Implementación local probada, sin push/deploy: [checkpoint](docs/checkpoints/CHECKPOINT_BT_INS_PDF_02_DISENO_OFICIAL_A4_20261122.md). No confundir candidato local con publicación ni habilitar correo por el texto de una referencia visual.
+
+---
+
 ## SEC07 S4H - continuidad y publicacion controlada (22/11/2026)
 
 S4 integral PARCIAL. Respaldo manual PostgreSQL OPERATIVO; uso por el titular cada 2 dias, sin programacion automatica ni borrado. No reactivar S5C-R6 ni repetir pruebas de respaldo aprobadas.
