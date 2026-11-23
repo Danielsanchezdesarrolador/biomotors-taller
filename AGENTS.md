@@ -1,3 +1,22 @@
+## SEC07 S4B-R6 — imagen Supabase PG17 READY; primera dependencia MISSING_ROLE (23/11/2026)
+
+**Resultado real reportado desde Windows PowerShell 5.1 (no contiene datos sensibles):**
+```text
+BT_SEC07_S4B_R6_IMAGE: READY
+BT_SEC07_S4B_R6_LAB: READY
+BT_SEC07_S4B_R6_RESTORE_EXIT: 1
+BT_SEC07_S4B_R6_FIRST_ERROR: MISSING_ROLE
+BT_SEC07_S4B_R6_RESULT: RESTORE_NOT_COMPLETE
+```
+**Hechos:** la imagen local `supabase/postgres:17.6.1.136` quedó disponible, `initdb`/cluster temporal y `createdb` pasaron, `pg_restore` inició y salió con código 1. El clasificador encontró texto compatible con un rol no existente. **No sabemos qué rol ni en qué instrucción del archive**, ni debemos inventarlo o dar por lograda la restauración. No se toca producción ni se repite S2-R11 (GPG, SHA, PGDMP y TOC previamente PASS).
+
+**Investigación focalizada y evidencia externa:** la imagen Supabase no equivale a ejecutar su despliegue oficial de inicialización: el `docker-compose.yml` oficial fija `supabase/postgres:17.6.1.136` e incorpora explícitamente `./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql`. La documentación oficial CONFIG.md describe migraciones/roles semilla del entorno self-hosted. El script R6 usa `initdb` directo y **no aplica esos roles**, lo que explica razonablemente `MISSING_ROLE` aun teniendo la imagen con extensiones. Referencias: `https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml` y `https://github.com/supabase/supabase/blob/master/docker/CONFIG.md`, `https://supabase.com/docs/guides/database/postgres/roles`, `https://www.postgresql.org/docs/17/app-pgrestore.html`. Es **hipótesis fuerte**, no rol identificado. `--no-owner --no-acl` omite propietarios/privilegios pero no elimina referencias a roles dentro de políticas RLS, definiciones de objetos o SQL de funciones.
+
+**Decisión del propietario:** solicitar de nuevo revisión independiente de Astra; **no emitir nuevas variantes R7 ni ejecuciones diagnósticas hasta recibirla**. Alcance Astra: decidir mecanismo reproducible mínimo de precarga de roles y configuraciones a partir de fuentes oficiales fijadas, dentro del contenedor aislado y con datos ficticios o ningún dato persistente; no crear roles indiscriminadamente ni conceder `SUPERUSER`/`BYPASSRLS` a roles de aplicación; determinar si hay forma de reconocer solo nombres de roles públicos estándar y mantener secretos/identificadores de usuario ocultos. Entregar **una sola solución consolidada**, no una cadena de pruebas, y sus criterios de PASS/STOP. R6 `MISSING_ROLE` no es evidencia de que falten roles en producción. **S4 RESTORE NO PASS; S3 servicios externos, ACL y RLS sin certificar.**
+
+Continuar registro en los cuatro documentos obligatorios; un único checkpoint al cierre verificado. Solo `main`, docs-only `[skip render]`, sin deploy ni llamadas a producción.
+---
+
 ## SEC07-S4B-R5 — RESTORE_EXIT 1, clasificación MISSING_EXTENSION (23/11/2026)
 
 **Evidencia Windows del propietario:**
