@@ -1,3 +1,25 @@
+## Publicación Render de BT-COM-01 y CP05 correo — 23/11/2026
+
+**Autorización del propietario recibida y ejecución confirmada.**
+Servicio estático Render existente `srv-dbqe4quc6qcc73f275jg` (`bytetorque.cl`), Auto-Deploy OFF.
+Deploy manual por API **`dep-dc288ot6e07s73b23qo0`** terminado **LIVE**
+el 23/11/2026 18:22:50 UTC, código exacto **`871b4835c94b1cb738046d96f45b28db753d70cf`**.
+Despliegue anterior `dep-dc26hok9v7es73ch95u0` (`e0fee642`) quedó `deactivated`.
+La CI principal del código [45237203282](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45237203282)
+**SUCCESS**, incluidas pruebas TypeScript/Vitest Web/PWA, Android y compilación candidata
+BT-COM-01D con variables solo en CI. La CI visual [45237203385](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45237203385)
+estaba todavía ejecutándose al documentar; aprobación visual BT-COM-01 previa por propietario.
+
+**Alcance:** se publicó el código BT-COM-01 ZIP y la interfaz candidata de
+revisión de correo CP05; **no se cambiaron flags ni servicios de Supabase,
+SQL, Storage, Edge ni proveedor de correos**. No se activó LIVE-02 ni el
+correo real. Por ello BT-COM-01 no es aún utilizable por taller en Render:
+requiere gate privado / S4 integral restaurado y aprobación independiente.
+El piloto CP05 lo ejecutará el propietario con datos y destinatario de prueba;
+CP06 viene después. Esta nota de cierre documental no cambia el código desplegado.
+
+---
+
 ## CP05 correo revisado / BT-COM-01 Render autorizado · 23/11/2026
 
 El propietario **aprobó visualmente BT-COM-01**, CI general y visual de `5a837409` SUCCESS. Autoriza publicar esta integración CP05 en `main` y desplegar manualmente el código BT-COM-01 en el **servicio Render existente**, Auto-Deploy OFF. **No implica activar** variables de correo, migraciones SQL, Storage, funciones alojadas LIVE-02, envío externo, clientes reales ni configuraciones Supabase. Verificar SHA LIVE en Render antes de declarar despliegue completado.
