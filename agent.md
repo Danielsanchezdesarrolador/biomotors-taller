@@ -1,3 +1,14 @@
+## BT-COM-01 — desarrollo de paquete documental (23/11/2026)
+
+Partiendo de `main` posterior a LIVE-02 `1efdceb`, se publica con autorización
+una acción de ZIP local con cotización CP05 original validada y las dos copias
+históricas generadas desde LIVE-02. Se revalidan sesión/taller al comienzo y
+antes de descargar; nada se envía ni archiva. Se añade un lector de bytes
+al helper de archivo CP06 sin cambiar su validación. Sin cambiar backend,
+Render, Auth ni datos. CI del candidato aún no ejecutada.
+CP05 QA aprobada != CP05 integral del piloto terminada. Consultar
+`docs/checkpoints/CHECKPOINT_BT_COM_01_PAQUETE_LOCAL_20261123.md`.
+
 ## BT-FLOW-LIVE-02 — entrega de código autorizada (23/11/2026)
 
 Propietario: aprobación visual de CP05 confirmada y **autorización puntual**

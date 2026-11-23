@@ -1,3 +1,21 @@
+## BT-COM-01 — descarga conjunta del cierre (23/11/2026)
+
+- [x] BT-FLOW-LIVE-02 `1efdceb` CI principal y visual: **SUCCESS**; no desplegado.
+- [x] CP05: emisión QA y revisión visual aprobadas por el propietario.
+- [x] Diseño y código candidato: ZIP local de exactamente tres PDF, usando
+  01 CP05 archivado y SHA-256 verificado, 02 informe declarado y 03 constancia
+  declarada; bloqueado sin las tres evidencias y flags privados existentes.
+- [x] Prueba puntual del contenedor ZIP (lectura externa y CRC) en entorno local.
+- [x] Propietario autoriza publicación del candidato en `main` y CI existente.
+- [ ] Verificar el resultado final de la CI integrada de BT-COM-01.
+- [ ] Desplegar manualmente sólo después de S4 y habilitar LIVE-02/CP06.
+- [ ] Completar S4 integral, recuperación documental después de nueva sesión,
+  correo único transaccional autorizado y validación de Ignacio para dar por
+  cerrado CP05/BT-COM-01 en el piloto.
+
+No se activan correos ni proveedores. **El ZIP es descarga local, no comprobante
+tributario, firma digital ni constancia física verificada.**
+
 ## BT-FLOW-LIVE-02 — publicación de código autorizada (23/11/2026)
 
 - [x] Revisión visual CP05 **aprobada por propietario**; despliegue

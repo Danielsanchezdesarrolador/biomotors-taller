@@ -16,6 +16,7 @@ export type ClosingReviewProps = {
   evidence: FlowEvidence
   onQuotePdf?: () => void
   onCopyPdf?: (kind: Kind) => void
+  onPackageZip?: () => void
   downloading: boolean
 }
 const clp = (n: number) => new Intl.NumberFormat('es-CL', {
@@ -26,7 +27,7 @@ const date = (iso: string) => new Date(iso).toLocaleString('es-CL', {
 })
 
 export function ClosingReviewPanel({
-  quote, revision, evidence, onQuotePdf, onCopyPdf, downloading
+  quote, revision, evidence, onQuotePdf, onCopyPdf, onPackageZip, downloading
 }: ClosingReviewProps) {
   const [visible, setVisible] = useState(false)
   const [recipientChecked, setRecipientChecked] = useState(false)
@@ -138,6 +139,17 @@ export function ClosingReviewPanel({
                   </button>
                 </article>
               </div>
+              <div className="cp06-closing-actions">
+                <button type="button" className="cp03-primary"
+                  disabled={downloading || !packet || !hasArchive || !hasCopies || !onPackageZip}
+                  onClick={onPackageZip}>
+                  Descargar paquete ZIP (3 PDF)
+                </button>
+              </div>
+              <p className="cp06-closing-state">
+                Incluye el PDF archivado original y dos copias informativas generadas
+                desde constancias históricas. Solo descarga local: no se envía correo.
+              </p>
               <div className="cp06-closing-review">
                 <strong>Lista de revisión local</strong>
                 <p>Las marcas son temporales en esta pantalla. No se guardan en

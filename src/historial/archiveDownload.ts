@@ -5,13 +5,12 @@
 import { QuoteFailure, type Revision } from '../cp05/contracts'
 import { historyId } from './contracts'
 
-export async function archivedRevisionPdf(
+export async function archivedRevisionBytes(
   revision: Revision,
   vehicleId: string,
   workshopId: string,
-  port: { download: (revision: Revision) => Promise<Uint8Array> } | null,
-  save: (pdf: Uint8Array, name: string) => void
-): Promise<void> {
+  port: { download: (revision: Revision) => Promise<Uint8Array> } | null
+): Promise<Uint8Array> {
   if (!port) throw new QuoteFailure('blocked')
   if (revision.workshop_id !== historyId(workshopId) ||
       revision.payload?.quote?.workshop_id !== workshopId ||
@@ -21,7 +20,18 @@ export async function archivedRevisionPdf(
       !Number.isSafeInteger(revision.revision) || revision.revision < 1 ||
       !Number.isSafeInteger(revision.payload?.quote?.number) ||
       revision.payload.quote.number < 1) throw new QuoteFailure('denied')
-  const bytes = await port.download(revision)
+  // documentClient.download validates Auth, tenant, PDF header, size and SHA-256.
+  return port.download(revision)
+}
+
+export async function archivedRevisionPdf(
+  revision: Revision,
+  vehicleId: string,
+  workshopId: string,
+  port: { download: (revision: Revision) => Promise<Uint8Array> } | null,
+  save: (pdf: Uint8Array, name: string) => void
+): Promise<void> {
+  const bytes = await archivedRevisionBytes(revision, vehicleId, workshopId, port)
   const name = 'COT-' + String(revision.payload.quote.number).padStart(6, '0') +
     '-R' + revision.revision + '.pdf'
   save(bytes, name)

@@ -214,6 +214,7 @@ export function HistoryView({
   onQuote,
   onDownload,
   onFinalDownload,
+  onPackageDownload,
   ClosingReview,
   onAccessLost
 }: {
@@ -227,6 +228,10 @@ export function HistoryView({
   onFinalDownload?: (
     quote: QuoteHistory['quotes'][number], revision: Revision,
     evidence: FlowEvidence, kind: 'report' | 'handover'
+  ) => Promise<void>
+  onPackageDownload?: (
+    quote: QuoteHistory['quotes'][number], revision: Revision,
+    evidence: FlowEvidence
   ) => Promise<void>
   ClosingReview?: ComponentType<ClosingReviewProps>
 }) {
@@ -383,6 +388,23 @@ export function HistoryView({
       setDownloading(null)
     }
   }
+  async function downloadPackage(revision: Revision) {
+    if (!onPackageDownload || downloading || busy) return
+    const quote = quotes.quotes.find(q => q.id === revision.quote_id)
+    if (!quote || quotes.evidence.status !== 'ready') return
+    setDownloading(revision.id + ':package')
+    setDownloadError('')
+    try {
+      await onPackageDownload(quote, revision, quotes.evidence)
+    } catch (e) {
+      if (e instanceof HistoryFailure && e.kind === 'denied') failure(e)
+      else if (e instanceof QuoteFailure && e.kind === 'denied')
+        failure(new HistoryFailure('denied'))
+      else setDownloadError('No se descargó el paquete. Verifica el PDF archivado, las tres constancias y la sesión.')
+    } finally {
+      setDownloading(null)
+    }
+  }
   return (
     <section className="cp03-pilot cp06-history" aria-label="Historial del vehículo">
       <header>
@@ -534,6 +556,9 @@ export function HistoryView({
                                     : undefined}
                                   onCopyPdf={onFinalDownload
                                     ? (kind) => void downloadFinal(r, kind)
+                                    : undefined}
+                                  onPackageZip={onPackageDownload
+                                    ? () => void downloadPackage(r)
                                     : undefined} />
                               )}
                               {onDownload && (
@@ -710,6 +735,35 @@ export function VehicleHistory({
                     await repository.vehicle(vehicleId)
                     downloadPdf(bytes, kind === 'report'
                       ? packet.report.fileName : packet.handover.fileName)
+                  }
+                : undefined
+            }
+            onPackageDownload={
+              import.meta.env.VITE_BT_COM_01D_PREVIEW_ENABLED === 'true' &&
+              import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
+              import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
+              import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED === 'true' &&
+              archive?.scope === scope && closingPreview?.scope === scope &&
+              ['owner', 'admin', 'reception'].includes(context.role)
+                ? async (quote, revision, evidence) => {
+                    // Never use a browser draft as document 01: fetch the exact
+                    // archived PDF through the existing Auth/SHA-256-verifying port.
+                    await repository.vehicle(vehicleId)
+                    const { prepareClosingPacket } = await import('../entrega/finalPackage')
+                    const { archivedRevisionBytes } = await import('./archiveDownload')
+                    const { browserClosingDocumentPdf } = await import('../entrega/finalPdf')
+                    const { closingPackageZip, downloadClosingZip } =
+                      await import('../entrega/closingZip')
+                    const packet = prepareClosingPacket(quote, revision, evidence)
+                    const quotation = await archivedRevisionBytes(
+                      revision, vehicleId, context.workshop.id, archive.port
+                    )
+                    const report = await browserClosingDocumentPdf(packet, 'report')
+                    const handover = await browserClosingDocumentPdf(packet, 'handover')
+                    const zip = closingPackageZip(packet, { quotation, report, handover })
+                    // Recheck context after all asynchronous work and before download.
+                    await repository.vehicle(vehicleId)
+                    downloadClosingZip(zip.bytes, zip.fileName)
                   }
                 : undefined
             }

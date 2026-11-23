@@ -1,3 +1,20 @@
+## BT-COM-01 — paquete documental de 3 PDF (23/11/2026, candidato local)
+
+El Director solicita desarrollar **una descarga conjunta** desde el cierre documental
+CP06 existente. Reutilizar `prepareClosingPacket`, `documentClient.download`,
+`archivedRevisionBytes`, `browserClosingDocumentPdf` y `ClosingReviewPanel`.
+Solo permitir un ZIP local de tres PDF si existen cotización archivada íntegra y
+los tres registros LIVE-02 de la misma revisión/taller. El PDF 01 es exactamente
+el del archivo CP05 (SHA-256/tamaño verificados por el puerto privado), no
+regenerado desde un borrador; los PDF 02/03 son copias informativas.
+
+Sin proveedores nuevos, sin email real, sin activación de flags, sin SQL ni
+Render. Código publicado en `main` por autorización expresa del propietario el 23/11/2026; CI pendiente de confirmar, no declarar PASS antes de comprobarla.
+CP05: QA de emisión/rediseño aprobada, **NO cerrado 100% del piloto**:
+restauración S4 integral, descarga física del archivo tras nueva sesión, correo
+único autorizado y conformidad de Ignacio pendientes. Cualquier flujo de
+aprobación/entrega representa declaración del operador, no firma verificable.
+
 ## BT-FLOW-LIVE-02 — continuidad funcional y autorización de publicación (23/11/2026)
 
 El propietario **aprobó visualmente CP05** en bytetorque.cl y autorizó expresamente
