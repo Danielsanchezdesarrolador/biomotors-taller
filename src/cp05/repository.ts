@@ -4,6 +4,7 @@ import type { Context } from '../auth/controller'
 import { cp04Repository } from '../ordenes/cp04Repository'
 import {
   QuoteFailure,
+  QuoteReadPending,
   quoteId,
   draftPayload,
   type Quote,
@@ -121,7 +122,7 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     const quote = row<Quote>(r.data)
     if (quote.id !== qid) throw new QuoteFailure('denied')
     const [source, items, revisions, events] = await Promise.all([
-      orders.getOrder(quote.order_id),
+      orders.getOrder(quote.order_id).catch(error=>{throw new QuoteFailure(error?.kind==='denied'?'denied':'unavailable')}),
       client
         .from('quote_items')
         .select('*')
@@ -145,7 +146,7 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     check(revisions.error)
     check(events.error)
     if (
-      !source ||
+      !source || source.order.id!==quote.order_id ||
       source.vehicle.id !== quote.vehicle_id ||
       source.vehicle.customer_id !== quote.customer_id
     )
@@ -178,9 +179,12 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     const rows = (items.data || []).map((x) => row<QuoteItem>(x))
     if (
       rows.some((x) => x.quote_id !== qid) ||
+      (events.data || []).some(x=>row<QuoteEvent>(x).quote_id!==qid) ||
       archived.some(
         (x) =>
-          x.quote_id !== qid || x.payload.quote.id !== qid || x.payload.quote.workshop_id !== wid
+          x.quote_id !== qid || x.payload.quote.id !== qid || x.payload.quote.workshop_id !== wid ||
+          x.payload.workshop.id!==wid || x.payload.quote.revision!==x.revision ||
+          x.payload.customer.id!==quote.customer_id || x.payload.vehicle.id!==quote.vehicle_id || x.payload.order.id!==quote.order_id
       )
     )
       throw new QuoteFailure('denied')
@@ -216,10 +220,18 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     valid(epoch)
     if (!r.data || typeof r.data.id !== 'string' || !Number.isSafeInteger(r.data.version))
       throw new QuoteFailure('unavailable')
-    const b = await load(r.data.id)
-    valid(epoch)
-    if (b.quote.version !== r.data.version) throw new QuoteFailure('conflict')
-    return b
+    quoteId(r.data.id)
+    try {
+      const b = await load(r.data.id)
+      valid(epoch)
+      if (b.quote.version < r.data.version) throw new QuoteFailure('unavailable')
+      // A subsequent authorized edit may already have advanced the version.
+      return b
+    } catch(error) {
+      valid(epoch)
+      if(error instanceof QuoteFailure && error.kind==='denied')throw error
+      throw new QuoteReadPending(r.data.id,r.data.version)
+    }
   }
   return {
     documents,

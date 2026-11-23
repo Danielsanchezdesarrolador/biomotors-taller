@@ -742,3 +742,8 @@
     max-width: min(280px, calc(100vw - 24px));
   }
 }
+
+.cp05-revision-detail { min-width:0; margin:12px 0; }
+.cp05-revision-detail summary { cursor:pointer; color:var(--premium-blue,#0065db); font-weight:700; padding:8px 0; }
+.cp05-revision-detail p { overflow-wrap:anywhere; }
+.cp05-preserve-text { white-space:pre-wrap; }

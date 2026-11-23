@@ -1,3 +1,18 @@
+## Actualización 22/11/2026 — entrega local consolidada
+
+Base `f6937a1`. Se reutiliza CP05 existente (OT/cliente/vehículo, borrador SQL,
+IVA, PDF oficial, revisión/archivo candidatos) y se completan conciliación de
+escrituras confirmadas, recuperación de emisiones ya completadas desde sus bytes
+originales y detalle histórico inmutable. SQL nuevo de recuperación y backend
+preparados offline; **no instalados ni activados**. 66 pruebas CP05, PostgreSQL
+local y builds público/privado PASS; navegador y límites en el único
+[checkpoint de entrega](checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+S4 integral sigue siendo puerta previa para emisión, SQL, Storage y Edge reales.
+Sin push/deploy ni correo; instrucciones inferiores conservadas como contrato
+e historia, no como prueba de activación productiva.
+
+---
+
 # ByteTorque — CP05: entrega funcional única de cotizaciones, PDF y trazabilidad
 
 **Instrucción técnica del Director (16/11/2026).** Estado: especificación para implementación; **NO significa CP05 implementado ni SQL autorizado**. Prioridad: piloto usable por Ignacio, no comercialización. Rama única `main`. Punto de partida verificado: `42438637163ff8628fd42eecf9e4cbddea232126`; comprobar HEAD fresco antes de modificar. Este documento no es un checkpoint ni una división en fases artificiales.

@@ -10,7 +10,7 @@ export function issuancePortsCandidate(
   userClient: SupabaseClient,
   trustedClient: SupabaseClient,
   workshopId: string,
-  assets: { font: Uint8Array; logo: Uint8Array },
+  assets: { font: Uint8Array; logo: Uint8Array } | (()=>Promise<{font:Uint8Array;logo:Uint8Array}>),
   policy: { archiveApproved: boolean }
 ): IssuePorts {
   const wid = quoteId(workshopId),
@@ -41,6 +41,19 @@ export function issuancePortsCandidate(
         .eq('id', quoteId)
         .maybeSingle()
       if (visible.error || visible.data?.id !== quoteId) throw Error('QUOTE_NOT_AUTHORIZED')
+      // A completed retry must recover the original immutable file, even if
+      // renderer code or optional template assets have since changed.
+      const completed=await trustedClient.rpc('bt_cp05_completed_issue',{
+        p_workshop_id:wid,p_quote_id:quoteId,p_expected_version:version,p_actor_id:actorId
+      })
+      if(completed.error)throw Error('ISSUE_NOT_CONFIRMED')
+      if(completed.data){
+        const reservation=completed.data as Reservation
+        if(reservation.completed?.workshop_id!==wid||reservation.completed.quote_id!==quoteId)
+          throw Error('INVALID_TENANT')
+        await restoreRevisionCandidate(userClient,trustedClient,{approved:true},wid,reservation.completed.id)
+        return reservation
+      }
       const recovery = await trustedClient.rpc('bt_cp05_issue_status', {
         p_workshop_id: wid,
         p_quote_id: quoteId,
@@ -93,7 +106,7 @@ export function issuancePortsCandidate(
         if (![37,80,68,70,45].every((n,i)=>templatePdf![i]===n))
           throw Error('INVALID_PRIVATE_TEMPLATE')
       }
-      return quotePdf(snapshot, {...assets,workshopLogo,templatePdf})
+      return quotePdf(snapshot, {...(typeof assets==='function'?await assets():assets),workshopLogo,templatePdf})
     },
     archive: (path, bytes) => {
       gate()

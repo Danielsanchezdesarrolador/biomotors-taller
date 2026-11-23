@@ -146,7 +146,7 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
         return reply({ error: 'INVALID_REQUEST' }, 400)
       const revision: Revision = await issueQuoteCandidate(
         { archiveApproved: true },
-        issuancePortsCandidate(userClient, trusted, wid, await deps.assets(), {
+        issuancePortsCandidate(userClient, trusted, wid, deps.assets, {
           archiveApproved: true
         }),
         { id, version },

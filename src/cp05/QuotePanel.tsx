@@ -18,6 +18,7 @@ import { currency } from '../informes/trabajos/workItemCore'
 import { calculateTotals } from '../ordenes/orderMoney'
 import {
   QuoteFailure,
+  QuoteReadPending,
   draftFrom,
   draftPayload,
   previewSnapshot,
@@ -31,7 +32,7 @@ import {
 } from './contracts'
 import type { Cp05Port } from './repository'
 import { documentOperation } from './documentClient'
-import { localDraft, rememberDraft, clearLocalDraft } from './temporaryDraft'
+import { localDraft, rememberDraft, clearLocalDraft, rememberCommittedDraft } from './temporaryDraft'
 import { readQuoteSelection, rememberQuoteSelection } from './quoteSelection'
 import { WorkExecutionDraft } from '../entrega/WorkExecutionDraft'
 import { FlowLive02Loader } from './FlowLive02Loader'
@@ -61,6 +62,7 @@ export function QuotePanel({
     [busy, setBusy] = useState(true),
     [message, setMessage] = useState(''),
     [error, setError] = useState('')
+  const [readPending,setReadPending]=useState<{id:string;version:number}|null>(null)
   const [editing, setEditing] = useState<WorkItem | true | null>(null),
     [reason, setReason] = useState(''),
     [recovery, setRecovery] = useState<Draft | null>(null),
@@ -73,7 +75,7 @@ export function QuotePanel({
       id: crypto.randomUUID()
     })
   const canWrite = ['owner', 'admin', 'reception'].includes(context.role),
-    editable = canWrite && bundle?.quote.status === 'draft' && !bundle.quote.issue_pending
+    editable = !readPending && canWrite && bundle?.quote.status === 'draft' && !bundle.quote.issue_pending
   const dirty =
     !!bundle &&
     JSON.stringify(draftPayload(draft)) !== JSON.stringify(draftPayload(draftFrom(bundle)))
@@ -127,7 +129,7 @@ export function QuotePanel({
     if (bundle) rememberQuoteSelection(context.userId, context.workshop.id, bundle.quote.id)
   }, [bundle?.quote.id, context.userId, context.workshop.id])
   useEffect(() => {
-    if (!bundle || !dirty || !canWrite) return
+    if (!bundle || !dirty || !canWrite || readPending) return
     const fingerprint =
       'save:' +
       bundle.quote.id +
@@ -145,10 +147,16 @@ export function QuotePanel({
       fingerprint,
       at: Date.now()
     })
-  }, [bundle, draft, dirty, canWrite, context.userId, context.workshop.id])
+  }, [bundle, draft, dirty, canWrite, readPending, context.userId, context.workshop.id])
   function failure(e: unknown) {
+    if(e instanceof QuoteReadPending){
+      setReadPending({id:e.quoteId,version:e.version})
+      rememberCommittedDraft(context.userId,context.workshop.id,e.quoteId,e.version)
+      rememberQuoteSelection(context.userId,context.workshop.id,e.quoteId)
+    }
     if (e instanceof QuoteFailure && e.kind === 'denied') {
       clearLocalDraft()
+      setReadPending(null)
       setBundle(null)
       setDraft(empty)
       setQuotes([])
@@ -159,7 +167,7 @@ export function QuotePanel({
     setError(quoteMessage(e))
   }
   async function open(id: string) {
-    if (dirty && !window.confirm('Hay cambios sin guardar. ¿Abrir otra cotización?')) return
+    if (!readPending && dirty && !window.confirm('Hay cambios sin guardar. ¿Abrir otra cotización?')) return
     const request = ++sequence.current
     setBusy(true)
     setError('')
@@ -167,12 +175,17 @@ export function QuotePanel({
     try {
       const loaded = await repository.load(id)
       if (!active.current || request !== sequence.current) return
+      if(readPending?.id===id&&loaded.quote.version<readPending.version)throw new QuoteFailure('unavailable')
       const cached = localDraft(context.userId, context.workshop.id)
+      setReadPending(null)
       setRecovery(null)
       setEditing(null)
       setBundle(loaded)
       setOrderId(loaded.quote.order_id)
-      if (
+      if(cached?.quoteId===id&&cached.committedVersion&&loaded.quote.version>=cached.committedVersion){
+        setDraft(draftFrom(loaded));clearLocalDraft()
+        setMessage('Guardado confirmado y versión recuperada del servidor.')
+      } else if (
         cached &&
         cached.quoteId === id &&
         cached.version === loaded.quote.version &&
@@ -199,7 +212,7 @@ export function QuotePanel({
     }
   }
   async function action(kind: 'create' | 'save' | 'revise' | 'void') {
-    if (lock.current || !canWrite) return
+    if (lock.current || !canWrite || readPending) return
     lock.current = true
     setBusy(true)
     setError('')
@@ -234,14 +247,18 @@ export function QuotePanel({
           op('void:' + bundle.quote.id + ':' + bundle.quote.version + ':' + reason)
         )
       if (!active.current) return
-      const list = await repository.list(initialVehicleId)
-      if (!active.current) return
       clearLocalDraft()
       setEditing(null)
       setBundle(next)
       setDraft(draftFrom(next))
       setReason('')
-      setQuotes(list)
+      try {
+        const list=await repository.list(initialVehicleId)
+        if(active.current)setQuotes(list)
+      } catch(error) {
+        if(error instanceof QuoteFailure&&error.kind==='denied')throw error
+        if(active.current)setError('Operación confirmada. No se pudo actualizar el listado; recarga la versión guardada sin repetir la operación.')
+      }
       if (active.current)
         setMessage(
           kind === 'save'
@@ -274,7 +291,7 @@ export function QuotePanel({
     setEditing(null)
   }
   async function pdf(revision?: Revision) {
-    if (!bundle || lock.current) return
+    if (!bundle || lock.current || readPending) return
     lock.current = true
     setBusy(true)
     setError('')
@@ -312,18 +329,15 @@ export function QuotePanel({
           bytes,
           `${quoteNumber(bundle.quote)}-${revision ? 'r' + revision.revision : 'borrador'}.pdf`
         )
-    } catch {
-      if (active.current)
-        setError(
-          'No se pudo generar el PDF. El archivo privado emitido sigue bloqueado hasta autorizar su almacenamiento.'
-        )
+    } catch (error) {
+      if (active.current)failure(error)
     } finally {
       lock.current = false
       if (active.current) setBusy(false)
     }
   }
   async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision) {
-    if (!bundle || lock.current || !canWrite) return
+    if (!bundle || lock.current || !canWrite || readPending) return
     if (kind === 'issue' && dirty) {
       setError('Guarda y revisa el borrador antes de emitir.')
       return
@@ -362,7 +376,12 @@ export function QuotePanel({
               ? 'El proveedor ya confirmó esta revisión; no se generó otro envío.'
               : 'Envío aceptado por el proveedor; no acredita lectura ni entrega en la bandeja.'
       }
-      const next = await repository.load(bundle.quote.id)
+      let next:Bundle
+      try { next=await repository.load(bundle.quote.id) }
+      catch(error){
+        if(error instanceof QuoteFailure&&error.kind==='denied')throw error
+        throw new QuoteReadPending(bundle.quote.id,bundle.quote.version+(kind==='issue'?1:0))
+      }
       if (!active.current) return
       setBundle(next)
       setDraft(draftFrom(next))
@@ -392,6 +411,12 @@ export function QuotePanel({
           : 'Emisión archivada y correos desactivados.'}{' '}
         No se registra aceptación del cliente.
       </p>
+      {readPending && <div className="cp05-notice" role="status">
+        <p>El servidor confirmó la operación. La edición queda pausada hasta recuperar su versión.</p>
+        <button className="cp04-secondary" disabled={busy} onClick={()=>void open(readPending.id)}>
+          Recuperar operación confirmada
+        </button>
+      </div>}
       {busy && <p role="status">Consultando o guardando la cotización…</p>}
       {error && (
         <p className="cp04-error" role="alert">
@@ -416,7 +441,7 @@ export function QuotePanel({
           {!busy && !quotes.length && <p>Sin cotizaciones registradas.</p>}
           {quotes.map((q) => (
             <button
-              disabled={busy}
+              disabled={busy || !!readPending}
               key={q.id}
               className="cp04-secondary"
               onClick={() => void open(q.id)}
@@ -443,7 +468,7 @@ export function QuotePanel({
           {canWrite && (
             <button
               className="cp04-primary"
-              disabled={busy || !orderId}
+              disabled={busy || !!readPending || !orderId}
               onClick={() => {
                 if (!dirty || window.confirm('¿Continuar sin guardar los cambios actuales?'))
                   void action('create')
@@ -620,6 +645,7 @@ export function QuotePanel({
                 </div>
                 <div className="cp05-action-group cp05-action-group-advanced">
                   <p className="cp05-action-group-label">Emisión y comunicaciones</p>
+                {bundle.quote.status==='draft'&&draft.terms.trim().length<3&&<small>Completa las condiciones (al menos 3 caracteres) antes de emitir.</small>}
                 <button
                   disabled={
                     busy ||
@@ -627,6 +653,8 @@ export function QuotePanel({
                     !repository.documents.enabled ||
                     bundle.quote.status !== 'draft' ||
                     dirty ||
+                    !!readPending ||
+                    draft.terms.trim().length<3 ||
                     !draft.items.length
                   }
                   className="cp04-secondary"
@@ -741,6 +769,19 @@ export function QuotePanel({
                       Total histórico: {currency(r.payload.totals.total)} · Cliente:{' '}
                       {r.payload.customer.full_name} · {r.payload.vehicle.plate}
                     </p>
+                    <details className="cp05-revision-detail">
+                      <summary>Ver contenido de la revisión {r.revision}</summary>
+                      <p>{r.payload.workshop.name} · OT {r.payload.order.id}</p>
+                      <WorkItemsTable document={{mode:'quote',items:r.payload.items.map(i=>({
+                        id:i.id,description:i.description,type:i.type,quantity:i.quantity100/100,
+                        price:i.unit_price,performed:false}))}}
+                        onEdit={()=>{}} onDelete={()=>{}} onPerformed={()=>{}} readOnly />
+                      <p>Neto: {currency(r.payload.totals.subtotal)} · IVA: {currency(r.payload.totals.tax)} · Total: {currency(r.payload.totals.total)}</p>
+                      <p>Vigencia: {r.payload.quote.valid_days} días</p>
+                      <p className="cp05-preserve-text">Condiciones: {r.payload.quote.terms||'—'}</p>
+                      <p className="cp05-preserve-text">Observaciones: {r.payload.quote.comments||'—'}</p>
+                      <small>Contenido congelado al emitir; no utiliza el borrador actual.</small>
+                    </details>
                     <code>SHA-256: {r.pdf_sha256}</code>
                     <button
                       disabled={busy || !repository.documents.enabled}

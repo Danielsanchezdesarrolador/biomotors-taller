@@ -7,6 +7,7 @@ export type Reservation = {
   revision: number
   payload: Snapshot
   payload_sha256: string
+  completed?: Revision
 }
 export type ArchiveReceipt = {
   path: string
@@ -46,11 +47,20 @@ export async function issueQuoteCandidate(
   if (
     snapshot.quote.id !== quote.id ||
     snapshot.quote.version !== quote.version ||
-    !Number.isSafeInteger(frozen.revision) ||
+    !Number.isSafeInteger(frozen.revision) || frozen.revision<1 ||
     !frozen.payload_sha256.match(/^[a-f0-9]{64}$/)
   )
     throw Error('INVALID_RESERVATION')
   const path = `${snapshot.quote.workshop_id}/quotes/${quote.id}/r${frozen.revision}/${frozen.payload_sha256}.pdf`
+  if(frozen.completed){
+    const r=frozen.completed
+    if(r.workshop_id!==snapshot.quote.workshop_id||r.quote_id!==quote.id||r.revision!==frozen.revision||
+      r.pdf_object_path!==path||r.payload_sha256!==frozen.payload_sha256||
+      r.payload?.quote?.id!==quote.id||r.payload?.quote?.version!==quote.version||
+      !/^[a-f0-9]{64}$/.test(r.pdf_sha256)||!Number.isSafeInteger(r.pdf_size)||r.pdf_size<12)
+      throw Error('ISSUE_NOT_CONFIRMED')
+    return r
+  }
   const pdf = await ports.render(snapshot)
   if (!isArchivedPdf(pdf))
     throw Error('INVALID_PDF')

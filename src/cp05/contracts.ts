@@ -101,10 +101,14 @@ export type Draft = {
 }
 export class QuoteFailure extends Error {
   constructor(
-    public kind: 'denied' | 'invalid' | 'conflict' | 'unavailable' | 'blocked' | 'delivery_pending'
+    public kind: 'denied' | 'invalid' | 'conflict' | 'unavailable' | 'blocked' | 'delivery_pending' | 'read_pending'
   ) {
     super(kind)
   }
+}
+/** RPC acknowledged a write, but a separate read has not refreshed the editor. */
+export class QuoteReadPending extends QuoteFailure {
+  constructor(public quoteId:string, public version:number){super('read_pending')}
 }
 export const quoteId = (value: string) => {
   if (!UUID.test(value)) throw new QuoteFailure('invalid')
@@ -194,6 +198,7 @@ export function previewSnapshot(bundle: Bundle, draft: Draft): Snapshot {
 }
 export function quoteMessage(error: unknown) {
   const kind = error instanceof QuoteFailure ? error.kind : 'unavailable'
+  if (kind === 'read_pending') return 'Operación confirmada por el servidor. Falta recuperar la versión guardada; concilia la lectura sin volver a guardar.'
   if (kind === 'delivery_pending')
     return 'El envío está pendiente de conciliación con el proveedor. No lo repitas hasta verificar el resultado.'
   return kind === 'conflict'

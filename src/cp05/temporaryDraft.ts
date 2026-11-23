@@ -11,6 +11,7 @@ export type LocalDraft = {
   requestId: string
   fingerprint: string
   at: number
+  committedVersion?:number
 }
 export function rememberDraft(value: LocalDraft) {
   try {
@@ -35,7 +36,8 @@ export function localDraft(userId: string, workshopId: string): LocalDraft | nul
       if (
         !Number.isSafeInteger(data.version) ||
         data.version < 1 ||
-        typeof data.fingerprint !== 'string'
+        typeof data.fingerprint !== 'string' ||
+        (data.committedVersion!==undefined&&(!Number.isSafeInteger(data.committedVersion)||data.committedVersion<data.version))
       )
         throw Error('Invalid draft')
       draftPayload(data.draft)
@@ -53,4 +55,11 @@ export function clearLocalDraft() {
   } catch {
     /* best effort */
   }
+}
+
+/** The hint does not authorize data; a fresh repository load must confirm it. */
+export function rememberCommittedDraft(userId:string,workshopId:string,quoteId:string,version:number){
+ const current=localDraft(userId,workshopId)
+ if(current?.quoteId===quoteId&&version>=current.version)
+   rememberDraft({...current,committedVersion:version})
 }

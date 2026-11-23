@@ -27,7 +27,7 @@ fi
 psql_lab(){ "${docker_cmd[@]}" exec -i "$lab" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque "$@"; }
 for file in scripts/security/bt-cp03-lab-bootstrap.sql docs/sql/applied/20261112144646_bt_cp02_c_core_tenants_rls.sql docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql; do psql_lab < "$file" >/dev/null; done
 psql_lab -c 'ALTER TABLE auth.users ADD COLUMN email_confirmed_at timestamptz DEFAULT now();' >/dev/null
-for file in docs/sql/BT_CP05_QUOTES_CANDIDATE.sql scripts/security/bt-cp05-lab-fixtures.sql scripts/security/bt-cp05-lab-assertions.sql; do psql_lab < "$file"; done
+for file in docs/sql/BT_CP05_QUOTES_CANDIDATE.sql docs/sql/BT_CP05_COMPLETED_ISSUE_RECOVERY_CANDIDATE.sql scripts/security/bt-cp05-lab-fixtures.sql scripts/security/bt-cp05-lab-assertions.sql scripts/security/bt-cp05-completed-assertions.sql; do psql_lab < "$file"; done
 # Separate connections = fresh session and subsequent durable read, never sessionStorage.
 psql_lab <<'SQL'
 SET ROLE authenticated;

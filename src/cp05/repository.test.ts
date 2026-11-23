@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { QuoteReadPending } from './contracts'
 import { cp05Repository } from './repository'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -33,13 +34,13 @@ function fake(role = 'owner') {
       neq: () => chain,
       insert: () => chain,
       update: () => chain,
-      maybeSingle: async () => ({ data: reads[table]?.rows[0] ?? null, error: null }),
+      maybeSingle: async () => ({ data: reads[table]?.rows[0] ?? null, error: reads[table]?.fail?{code:reads[table].fail}:null }),
       single: async () => ({ data: reads[table]?.rows[0] ?? null, error: null }),
-      then: (fn: (v: { data: unknown[]; error: null }) => unknown) =>
+      then: (fn: (v: { data: unknown[]; error: {code:string}|null }) => unknown) =>
         Promise.resolve(
           fn({
             data: reads[table]?.rows ?? [],
-            error: null
+            error: reads[table]?.fail?{code:reads[table].fail}:null
           })
         )
     }
@@ -55,7 +56,7 @@ function fake(role = 'owner') {
     },
     from: vi.fn(from)
   }
-  return { client: client as unknown as SupabaseClient, reads, touched }
+  return { client: client as unknown as SupabaseClient, reads, touched, rpc:client.rpc }
 }
 describe('CP05 authorized repository', () => {
   it('guards every query and rejects switched or revoked membership', async () => {
@@ -85,6 +86,31 @@ describe('CP05 authorized repository', () => {
     }
     reads.quotes.rows = [{ workshop_id: a, id: a }]
     await expect(cp05Repository(client, ctx).list()).rejects.toMatchObject({ kind: 'unavailable' })
+  })
+  it('distinguishes acknowledged save from failed read and reconciles without another RPC',async()=>{
+    const {client,reads}=fake()
+    reads.quotes.rows=[{workshop_id:b,id:a,order_id:a,vehicle_id:a,customer_id:a,version:2}]
+    reads.work_orders.rows=[{workshop_id:b,id:a,vehicle_id:a}]
+    reads.vehicles.rows=[{workshop_id:b,id:a,customer_id:a}]
+    reads.customers={rows:[{workshop_id:b,id:a,full_name:'QA'}]}
+    reads.quote_items={rows:[],fail:'NETWORK'}
+    vi.mocked(client.rpc).mockResolvedValue({data:{id:a,version:2},error:null} as never)
+    const r=cp05Repository(client,ctx)
+    await expect(r.open(a,a)).rejects.toMatchObject({kind:'read_pending',quoteId:a,version:2})
+    reads.quote_items.fail=undefined
+    expect((await r.load(a)).quote.version).toBe(2)
+    expect(client.rpc).toHaveBeenCalledOnce()
+  })
+  it('never converts loss of authorization after an acknowledged write into reusable private access',async()=>{
+    const {client,reads,rpc}=fake()
+    rpc.mockImplementation(async()=>{
+      reads.workshop_memberships.rows=[]
+      return {data:{id:a,version:2},error:null} as never
+    })
+    await expect(cp05Repository(client,ctx).open(a,a)).rejects.toMatchObject({kind:'denied'})
+  })
+  it('exports a sanitized read-pending error, without database/customer data',()=>{
+    expect(new QuoteReadPending(a,2).message).toBe('read_pending')
   })
   it('expired verified user cannot even read quotations', async () => {
     const { client } = fake()

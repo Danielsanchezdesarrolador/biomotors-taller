@@ -84,6 +84,7 @@ function fixture() {
     return chain
   }
   const rpc = vi.fn(async (name: string, args: any) => {
+    if (name === 'bt_cp05_completed_issue')return {data:state.revision?{...state.reserved,completed:state.revision}:null,error:null}
     if (name === 'bt_cp05_issue_status')
       return {
         data: state.pending ? { request_id: state.reserved.request_id, expected_version: 1 } : null,
@@ -276,6 +277,21 @@ describe('Pilot document HTTP, private bytes and delivery integration (synthetic
     expect((await handler(request('issue', { requestId: id(99) }))).status).toBe(200)
     expect(f.state.lastFinishRequest).toBe(requestId)
     expect(f.state.stored.size).toBe(1)
+  })
+  it('recovers a completed issuance from original archived bytes without rendering again',async()=>{
+    const f=setup(),handler=documentHandlerCandidate({...policy,emailApproved:false},f.deps)
+    expect((await handler(request('issue'))).status).toBe(200)
+    const original=structuredClone(f.state.revision),before=Buffer.from(await f.state.stored.values().next().value!)
+    f.deps.assets.mockRejectedValueOnce(Error('Renderer upgraded or asset unavailable'))
+    // No current assets are needed to confirm the completed revision.
+    const response=await handler(request('issue'))
+    expect(response.status).toBe(200)
+    expect((await response.json()).revision).toEqual(original)
+    expect(f.state.stored.size).toBe(1)
+    expect(Buffer.from(f.state.stored.values().next().value!)).toEqual(before)
+    f.state.downloadFails=true
+    expect((await handler(request('issue'))).status).toBe(409)
+    expect(f.send).not.toHaveBeenCalled()
   })
   it('does not report sent for missing attachment or ambiguous ack; blocks blind queued retry', async () => {
     const f = setup(),

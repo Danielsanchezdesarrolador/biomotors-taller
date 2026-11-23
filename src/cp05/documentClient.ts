@@ -78,7 +78,8 @@ export function documentClient(
       const r = data.revision as Revision
       if (
         r?.workshop_id !== context.workshop.id ||
-        r.quote_id !== quote.id ||
+        r.quote_id !== quote.id || r.payload?.quote?.id!==quote.id ||
+        r.payload.quote.workshop_id!==context.workshop.id || r.payload.quote.version!==quote.version ||
         !Number.isInteger(r.revision) ||
         r.revision < 1
       )

@@ -1,3 +1,15 @@
+## CP05 — entrega funcional local consolidada (22/11/2026)
+
+Sobre main `f6937a1`, sin tocar CP04/CP06. Se reutilizan editor, RPC de borrador,
+IVA, PDF R3 y archivo candidato; se completan conciliación GET tras escritura
+confirmada, recuperación de emisión completada sin volver a renderizar y detalle
+histórico. 66/66 pruebas CP05, PostgreSQL local, paquete Edge offline y builds
+PASS; navegador 390/1366 e historial congelado PASS. Incidentes CP05-FUNC-01/02 y TEST-01…04, archivos exactos y resultados de
+navegador en [checkpoint único](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+Código/SQL solo locales, sin push/deploy. S4 integral pendiente: no activar SQL,
+Storage, Edge, emisión ni correo reales. Revisión/publicación requieren permiso.
+No reabrir S4I ni repetir multipunto para continuar este bloque.
+
 ## Continuidad consolidada - main publicado, despliegue pendiente (22/11/2026)
 
 GitHub main verificado en efc87801caefe1e501805e46d5733f72507f43d0: el multipunto oficial YA ESTA IMPLEMENTADO y PUBLICADO en codigo.47/47 pruebas y A4 unica corresponden a la evidencia del entorno desarrollador y al checkpoint BT-INS-PDF-02; no se repitieron ni modificaron aqui. Despliegue efectivo de esta revision NO verificado; no confundir publicacion con disponibilidad productiva. Las notas inferiores que dicen sin push son historicas.

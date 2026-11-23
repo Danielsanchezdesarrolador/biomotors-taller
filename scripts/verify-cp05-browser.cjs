@@ -12,11 +12,12 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
   fs.mkdirSync(out, { recursive: true })
   const results = []
   try {
-    for (const width of [360, 390, 430, 768, 1366, 1440, 1920]) {
+    for (const width of (process.env.CP05_WIDTHS||'360,390,430,768,1366,1440,1920').split(',').map(Number)) {
       const { p, state, requests, errors } = await cp04Page(browser, width)
       const quotes = [],
         items = [],
-        commands = new Map()
+        commands = new Map(), revisions=[]
+      let failQuoteRead=false,failQuoteList=false
       let serial = 900
       const filter = (rows, url) =>
         rows.filter((row) =>
@@ -74,6 +75,8 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
             q = quotes.find((q) => q.id === d.p_quote_id)
             assert.equal(d.p_expected_version, q.version)
             Object.assign(q, { ...d.p_data, items: undefined, version: q.version + 1 })
+            if(width===390)failQuoteRead=true
+            if(width===1366)failQuoteList=true
             items.splice(
               0,
               items.length,
@@ -100,6 +103,10 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
             'customers'
           ].includes(table)
         ) {
+          if(table==='quotes'&&((failQuoteRead&&url.searchParams.has('id'))||(failQuoteList&&!url.searchParams.has('id')&&!url.searchParams.has('order_id')))){
+            failQuoteRead=false;failQuoteList=false
+            return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({code:'SYNTHETIC_READ_ERROR'})})
+          }
           assert.equal(req.method(), 'GET')
           requests.push({ path: url.pathname, method: 'GET' })
           assert.equal(url.searchParams.get('workshop_id'), 'eq.' + tenant)
@@ -109,6 +116,7 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
                 ? quotes
                 : table === 'quote_items'
                   ? items
+                  : table === 'quote_revisions' ? revisions
                   : table === 'customers'
                     ? [
                         {
@@ -147,7 +155,14 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
         .getByLabel('Condiciones', { exact: true })
         .fill('Validez de diez días. Repuestos sujetos a disponibilidad.')
       await p.getByRole('button', { name: 'Guardar borrador en Supabase' }).click()
-      await p.getByText('Borrador confirmado en Supabase.', { exact: true }).waitFor()
+      if(width===390){
+        await p.getByRole('button',{name:'Recuperar operación confirmada',exact:true}).waitFor()
+        assert.equal(commands.size,2,'Read failure must not replay the save')
+        await p.getByRole('button',{name:'Recuperar operación confirmada',exact:true}).click()
+        await p.getByText('Guardado confirmado y versión recuperada del servidor.',{exact:true}).waitFor()
+        assert.equal(commands.size,2)
+      } else await p.getByText('Borrador confirmado en Supabase.', { exact: true }).waitFor()
+      if(width===1366)await p.getByText(/Operación confirmada. No se pudo actualizar el listado/).waitFor()
       assert.match(await p.getByLabel('Totales netos').innerText(), /154.879/)
       assert.equal(items.length, 3)
       assert.equal(quotes.length, 1)
@@ -250,8 +265,30 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
         await p.locator('.cp05-list select:enabled').waitFor()
         assert.equal(await p.locator('.cp05-list select').inputValue(),uuid(201))
       }
+      if(width===1366||width===390){
+        if(width===390){
+          await p.getByRole('button',{name:/COT-000001 · R0/}).click()
+          await p.locator('.cp05-conditions textarea').first().waitFor()
+        }
+        const q=quotes[0],frozenItems=structuredClone(items)
+        revisions.push({workshop_id:tenant,id:uuid(980),quote_id:q.id,revision:1,
+          payload:{workshop:{id:tenant,name:'Taller histórico QA'},customer:{id:uuid(50),full_name:'Cliente histórico congelado',email:null,mobile_e164:null},
+            vehicle:state.vehicles[0],order:state.orders[0],quote:{...structuredClone(q),status:'issued',revision:1,terms:'Condiciones históricas inmutables'},
+            items:frozenItems,totals:{subtotal:130150,tax:24729,total:154879},document_date:'2026-11-22T12:00:00Z',notice:'Histórico sintético'},
+          payload_sha256:'b'.repeat(64),pdf_sha256:'a'.repeat(64),pdf_size:1000,pdf_object_path:'synthetic-not-stored',issued_at:'2026-11-22T12:00:00Z',issued_by:userId})
+        await p.getByRole('button',{name:'Recargar versión guardada',exact:true}).click()
+        await p.locator('.cp05-revision-detail summary').click()
+        const detail=p.locator('.cp05-revision-detail')
+        assert.match(await detail.innerText(),/Condiciones históricas inmutables/)
+        assert.equal(await detail.locator('tbody tr').count(),3)
+        assert.equal(await detail.locator('button:enabled').count(),0,'Historic snapshot is read-only')
+        await p.screenshot({path:`${out}/historial-${width}.png`,fullPage:true})
+        fs.writeFileSync(`${out}/historial-${width}.html`,await p.locator('.cp05-panel').innerHTML())
+        console.log('HISTORY_QA_STATE',JSON.stringify({status:q.status,conditions:await p.locator('.cp05-conditions textarea').count(),alerts:await p.locator('[role=alert]').allTextContents()}))
+        assert.equal(await p.locator('.cp05-conditions textarea').first().inputValue(),'Validez de diez días. Repuestos sujetos a disponibilidad.')
+      }
       assert.equal(errors.length, 0, errors.join('\n'))
-      assert.ok(!requests.some((r) => /storage|functions|deliver/i.test(r.path)))
+      assert.ok(!requests.some((r) => /storage|functions/i.test(r.path)||(r.method!=='GET'&&/deliver/i.test(r.path))))
       results.push({
         width,
         items: 3,
