@@ -9,6 +9,7 @@ export type DocumentPolicy = {
   archiveApproved: boolean
   emailApproved: boolean
   allowedOrigin: string
+  pilotWorkshopId: string
 }
 export type DocumentDependencies = {
   userClient: (authorization: string) => SupabaseClient
@@ -56,6 +57,10 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
       if (!['issue', 'download', 'cancel', 'send'].includes(String(action)))
         return reply({ error: 'INVALID_REQUEST' }, 400)
       if (!policy.archiveApproved || (action === 'send' && !policy.emailApproved))
+        return reply({ error: 'SERVICE_DISABLED' }, 503)
+      // Pilot allowlist is server-owned. An unset or mismatched workshop fails closed.
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(policy.pilotWorkshopId) ||
+          body.workshopId !== policy.pilotWorkshopId)
         return reply({ error: 'SERVICE_DISABLED' }, 503)
       const authorization = request.headers.get('authorization') || ''
       if (!/^Bearer [^\s]+$/.test(authorization)) return reply({ error: 'SESSION_REQUIRED' }, 401)

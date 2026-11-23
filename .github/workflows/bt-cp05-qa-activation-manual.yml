@@ -1,0 +1,106 @@
+name: ByteTorque CP05 - Habilitar SOLO taller QA (manual)
+
+# NUNCA corre por push ni por fecha. El frontend y los correos siguen OFF.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe ACTIVAR_CP05_SOLO_QA para habilitar archivo SOLO en taller QA'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-cp05-edge-deploy
+  cancel-in-progress: false
+
+jobs:
+  cp05-qa-only:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmacion == 'ACTIVAR_CP05_SOLO_QA' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_REF: suxcqqnmcjoezfxltoms
+      BT_CP05_PILOT_WORKSHOP_ID: c943ad51-6d90-447b-8aa7-68866f69a4bc
+      CP05_PUBLISHABLE_KEY: 'sb_publishable_xedB5xXlpENNj7i_Z2BIyg_UpKxAaFy'
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      BUNDLE_PATH: /tmp/bytetorque-cp05-qa-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Descargar HEAD de main
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Comprobar token, taller permitido y Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${GITHUB_REF}" == "refs/heads/main" ]]
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]] || { echo "::error::Falta token scoped"; exit 1; }
+          [[ "${BT_CP05_PILOT_WORKSHOP_ID}" == "c943ad51-6d90-447b-8aa7-68866f69a4bc" ]]
+          [[ "${CP05_PUBLISHABLE_KEY}" == sb_publishable_* ]]
+          docker info >/dev/null
+          echo "BT_CP05_QA_PREFLIGHT: PASS"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar y verificar paquete original con guardia de taller QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          grep -q 'pilotWorkshopId' server/cp05/documentHandlerCandidate.ts
+          grep -q 'BT_CP05_PILOT_WORKSHOP_ID' server/cp05/edgeEntryCandidate.ts
+          node scripts/package-cp05-edge.mjs "${BUNDLE_PATH}"
+          node scripts/verify-cp05-edge-package.mjs "${BUNDLE_PATH}"
+          echo "BT_CP05_QA_PACKAGE: VERIFIED"
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+
+      - name: Configurar taller QA y clave publicable, mantener emision y correo APAGADOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase secrets set \
+            BT_CP05_ARCHIVE_ENABLED=false \
+            BT_CP05_EMAIL_ENABLED=false \
+            BT_CP05_PILOT_WORKSHOP_ID="${BT_CP05_PILOT_WORKSHOP_ID}" \
+            BT_CP05_PUBLISHABLE_KEY="${CP05_PUBLISHABLE_KEY}" \
+            BT_CP05_ALLOWED_ORIGIN=https://bytetorque.cl \
+            --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_QA_STAGE_1: DISABLED"
+
+      - name: Desplegar PRIMERO el backend restringido a QA mientras sigue apagado
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${BUNDLE_PATH}"
+          supabase functions deploy bt-cp05-documents --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_QA_GUARD: DEPLOY_SUCCEEDED_WHILE_OFF"
+
+      - name: Habilitar archivo solo tras desplegar la restriccion; correo siempre OFF
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase secrets set \
+            BT_CP05_ARCHIVE_ENABLED=true \
+            BT_CP05_EMAIL_ENABLED=false \
+            --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_QA_STAGE_2: ARCHIVE_TRUE_EMAIL_FALSE"
+
+      - name: Redesplegar solo Edge CP05 con el taller QA permitido
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${BUNDLE_PATH}"
+          supabase functions deploy bt-cp05-documents --project-ref "${PROJECT_REF}"
+          supabase functions list --project-ref "${PROJECT_REF}"
+          echo "BT_CP05_QA_DEPLOY: SUCCEEDED_FRONTEND_UNCHANGED_EMAIL_OFF"

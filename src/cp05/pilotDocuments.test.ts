@@ -15,7 +15,7 @@ const wid = id(1),
   requestId = id(5),
   origin = 'https://bytetorque.cl'
 const pdf = new TextEncoder().encode('%PDF-1.7\nSynthetic archived PDF bytes\n%%EOF')
-const policy: DocumentPolicy = { archiveApproved: true, emailApproved: true, allowedOrigin: origin }
+const policy: DocumentPolicy = { archiveApproved: true, emailApproved: true, allowedOrigin: origin, pilotWorkshopId: wid }
 function fixture() {
   const state = {
     role: 'owner',
@@ -202,6 +202,19 @@ const request = (action: string, args: Record<string, unknown> = {}) =>
     body: JSON.stringify({ action, workshopId: wid, quoteId: qid, version: 1, requestId, ...args })
   })
 describe('Pilot document HTTP, private bytes and delivery integration (synthetic services)', () => {
+  it('pilot gate denies missing or different workshop before opening privileged clients', async () => {
+    const f = setup()
+    const missing = documentHandlerCandidate({ ...policy, pilotWorkshopId: '' }, f.deps)
+    const other = documentHandlerCandidate({ ...policy, pilotWorkshopId: id(100) }, f.deps)
+    for (const handler of [missing, other]) {
+      const response = await handler(request('issue'))
+      expect(response.status).toBe(503)
+      expect((await response.json()).error).toBe('SERVICE_DISABLED')
+    }
+    expect(f.deps.userClient).not.toHaveBeenCalled()
+    expect(f.deps.trustedClient).not.toHaveBeenCalled()
+    expect(f.deps.assets).not.toHaveBeenCalled()
+  })
   it('OFF does not instantiate SDK, assets or provider', async () => {
     const f = setup(),
       handler = documentHandlerCandidate({ ...policy, archiveApproved: false }, f.deps)

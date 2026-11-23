@@ -1,3 +1,9 @@
+## CP05 — Activación de prueba QA preparada (23/11/2026)
+
+Edge `bt-cp05-documents` v1 activa con JWT obligatorio; tablas CP05, política de Storage restrictiva y RPC de recuperación alojados. Emisión y correos OFF. Se incorpora guardia obligatoria de servidor por UUID de taller piloto, que falla cerrado sin configuración válida, con un test enfocado; y un workflow de activación manual de un solo taller con despliegue de código guardado primero en modo OFF. Su creación/publicación NO ejecuta la activación ni modifica Supabase o Render. El workflow CP05 manual apagado existente permite regresar a OFF. S4 integral pendiente: no emitir documentos de clientes reales ni confundir QA alojada con recuperación certificada. No se repiten migraciones.
+
+---
+
 > **CP05 · 22/11/2026 — ENTREGA LOCAL CONSOLIDADA, SIN PUBLICAR:** reutilizados OT/cliente/vehículo, borradores SQL, partidas/IVA, PDF R3, snapshots y archivo candidatos. Completadas conciliación sin repetir RPC tras guardado confirmado, recuperación de emisiones completadas con archivo original íntegro y consulta histórica detallada. 66 pruebas CP05, PostgreSQL aislado (persistencia/concurrencia/permisos/recuperación), paquete Edge, builds público/privado y navegador/historial 390/1366 PASS. Incidentes FUNC-01/02 y TEST-01…04 documentados, sin repetir multipunto ni S4I. S4 integral y autorización específica siguen bloqueando SQL/Storage/Edge/emisión reales; correo OFF, sin push/deploy. [Checkpoint único y lista exacta](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
 
 ## Continuidad consolidada - main publicado, despliegue pendiente (22/11/2026)

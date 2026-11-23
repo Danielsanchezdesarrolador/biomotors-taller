@@ -12,6 +12,7 @@ const required = (name: string) => {
   if (!value) throw Error('SERVER_NOT_CONFIGURED')
   return value
 }
+const pilotWorkshopId = Deno.env.get('BT_CP05_PILOT_WORKSHOP_ID') || ''
 const archiveApproved = Deno.env.get('BT_CP05_ARCHIVE_ENABLED') === 'true'
 const emailApproved = archiveApproved && Deno.env.get('BT_CP05_EMAIL_ENABLED') === 'true'
 async function asset(filename: string, expected: string) {
@@ -29,6 +30,7 @@ Deno.serve(
     {
       archiveApproved,
       emailApproved,
+      pilotWorkshopId,
       allowedOrigin:
         Deno.env.get('BT_CP05_ALLOWED_ORIGIN') || 'https://bytetorque.cl'
     },
