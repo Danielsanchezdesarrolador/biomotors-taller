@@ -1,3 +1,15 @@
+## SEC07 S4B-R3 — DOCKER_START_FAILED por defecto en empaquetado del script (23/11/2026)
+
+**Salida real informada por propietario:** `BT_SEC07_S4B_R3: START`, `BT_SEC07_S4B_R3_STOP: DOCKER_START_FAILED`. No hay marcador `LAB:READY`; **no se confirmó** que `initdb` se invocara ni que empezara `pg_restore`.
+
+**Defecto determinado mediante revisión estática del script R3 entregado:** `$linux = ($linux -replace '[\r\n]+', ' ').Trim()` convirtió líneas de código shell en espacios aunque varias carecían de `;` al final. Ejemplo `set -u\ngrep -q ...` pasó a `set -u grep -q ...`; sentencias `if/case` también quedaron concatenadas inválidamente. Esto puede explicar que Docker no emitiera marcador; **sin stderr del intento no puede asegurarse que sea la única causa**. El script R3 no debe reejecutarse.
+
+**Corrección R4 propuesta (pendiente en PC):** preservar script POSIX completo en UTF-8 usando Base64 en la línea de comandos del contenedor, sin sustituir saltos de línea; decodificar dentro con `base64 -d | /bin/sh`. Duplicar entrada binaria Docker a descriptor `3` con `exec 3<&0`, y pasar `<&3` a `pg_restore` para que el script y el dump utilicen streams diferentes sin escribir payload en disco. Se comprobó en laboratorio Linux local la sintaxis `sh -n` del texto corregido y la conservación de fd3 en una prueba ficticia; **NO se comprobó Docker/Windows ni restore de v04**. Corregir `su-exec` por `gosu`, presente en Dockerfile oficial postgres 17 alpine; iniciar PGDATA y /tmp en tmpfs, network none, read-only, sin puertos; no tocar Supabase ni S2. Clasificar fase de laboratorio antes de invocar GPG y primer `ERROR/FATAL` solo por categoría. No imprimir SQL, secretos ni logs completos.
+
+**Estado:** GPG aislado `PASS`; S4 restauración `PENDIENTE`. Si R4 devuelve clase PostgreSQL real, atender esa causa y no sumar otro ciclo de diagnóstico genérico. Sin despliegue; documentar validación posterior como hecho separado, en un checkpoint final único.
+
+---
+
 ## SEC07-S4B — causa raíz INIT_FAILED: `su-exec` ausente (23/11/2026)
 
 **Evidencia Windows del propietario:** `BT_SEC07_S4B_INIT_DIAG: START`, `BT_SEC07_S4B_INIT_DIAG: INITDB_FAILED`, `<PATH>: su-exec: not found`, `BT_SEC07_S4B_INIT_DIAG: COMPLETED`.
