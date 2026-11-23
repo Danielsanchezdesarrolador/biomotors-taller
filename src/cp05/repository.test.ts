@@ -59,6 +59,24 @@ function fake(role = 'owner') {
   return { client: client as unknown as SupabaseClient, reads, touched, rpc:client.rpc }
 }
 describe('CP05 authorized repository', () => {
+  it('enables archived documents only for the configured pilot workshop and never email', () => {
+    vi.stubEnv('VITE_BT_CP05_DOCUMENTS_ENABLED', 'true')
+    vi.stubEnv('VITE_BT_CP05_EMAIL_ENABLED', 'false')
+    vi.stubEnv('VITE_BT_CP05_PILOT_WORKSHOP_ID', b)
+    try {
+      const { client } = fake()
+      const pilot = cp05Repository(client, ctx)
+      const other = cp05Repository(client, { ...ctx, workshop: { ...ctx.workshop, id: a } })
+      expect(pilot.documents.enabled).toBe(true)
+      expect(pilot.documents.emailEnabled).toBe(false)
+      expect(other.documents.enabled).toBe(false)
+      pilot.dispose()
+      other.dispose()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('guards every query and rejects switched or revoked membership', async () => {
     const { client, reads } = fake()
     const r = cp05Repository(client, ctx)

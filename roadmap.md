@@ -1,3 +1,9 @@
+## CP05 — interfaz solo QA preparada para Render (23/11/2026)
+
+Activación manual Edge CP05 QA confirmada en GitHub (workflow SUCCESS), función `bt-cp05-documents` ACTIVE v4 con JWT; correos OFF. El frontend ahora exige simultáneamente `VITE_BT_CP05_DOCUMENTS_ENABLED=true` y `VITE_BT_CP05_PILOT_WORKSHOP_ID` igual al taller autenticado antes de mostrar la emisión archivada; `VITE_BT_CP05_EMAIL_ENABLED=false`. Backend conserva su propia validación estricta del taller y RLS. Cambio limitado a interfaz, prueba enfocada y variables Render; no reactivar emails ni expandir el piloto; S4 integral pendiente. Un deploy del frontend no equivale a la primera emisión real validada.
+
+---
+
 ## CP05 — Activación de prueba QA preparada (23/11/2026)
 
 Edge `bt-cp05-documents` v1 activa con JWT obligatorio; tablas CP05, política de Storage restrictiva y RPC de recuperación alojados. Emisión y correos OFF. Se incorpora guardia obligatoria de servidor por UUID de taller piloto, que falla cerrado sin configuración válida, con un test enfocado; y un workflow de activación manual de un solo taller con despliegue de código guardado primero en modo OFF. Su creación/publicación NO ejecuta la activación ni modifica Supabase o Render. El workflow CP05 manual apagado existente permite regresar a OFF. S4 integral pendiente: no emitir documentos de clientes reales ni confundir QA alojada con recuperación certificada. No se repiten migraciones.
