@@ -1,3 +1,19 @@
+## SEC07 S4B-R4 — dictamen técnico independiente Sol; R5 corregido y aún no ejecutado (2026-11-23)
+
+**Fuente:** informe técnico externo entregado por el propietario, contrastado con documentación oficial PostgreSQL 17 (`https://www.postgresql.org/docs/17/app-pgrestore.html`) y su fuente en `REL_17_STABLE/src/bin/pg_dump/pg_restore.c`. El chat principal conserva el bloque R4 original completo (no hace falta pedírselo al usuario).
+**Defectos comprobados por revisión estática del R4:**
+1. R4 invocó `gosu postgres pg_restore ... --no-acl - <&3`; en PostgreSQL 17 el argumento posicional final `-` se interpreta como nombre de archivo, mientras que **omitir** el argumento de archivo activa lectura desde stdin. Probable causa del `RESTORE_TOOL_OR_STREAM_ERROR` de R4, **alta confianza pero no recuperado el stderr original**.
+2. R4 buscaba solamente `grep -m1 -E 'ERROR:|FATAL:'`; no clasificaba `pg_restore: error:` en minúsculas. Etiqueta `RESTORE_TOOL_OR_STREAM_ERROR` es un fallo del clasificador y NO demuestra pérdida del respaldo ni dependencia Supabase.
+
+**Corrección R5 consolidada (propuesta, no comprobada en Windows):** conservar imagen local `postgres:17-alpine`, aislamiento (`--network none --read-only --rm --tmpfs /var/lib/postgresql/data --tmpfs /tmp`), `gosu`, Base64 del script shell preservando líneas, FD3 binario, `GNUPGHOME` S1A explícito, GPG BaseStream y stderr concurrentes; **eliminar el último argumento `-`** en `pg_restore`, agregar `--single-transaction --no-password` manteniendo `--no-owner --no-acl`, registrar exit code y clasificar diagnósticos cliente/servidor en minúsculas sin imprimir SQL, nombres o rutas. Si `pg_restore` sale 0, consultar solo conteo de tablas de usuario a nivel catálogo (sin nombres ni filas), emitir `CATALOG:CHECK_PASS` al éxito de la consulta y destruir el contenedor; esto NO prueba conteos de filas ni RLS.
+
+**Comprobaciones locales (no en PC usuario):** `/bin/sh -n` PASS sobre texto Linux extraído del R5 y prueba sintética POSIX de `exec 3<&0; printf BASE64 | base64 -d | /bin/sh` con bytes incluidos NUL, preservados en salida; revisión estática comprobó ausencia del `-` posicional y presencia de clasificación y marcadores R5. **No contamos con PowerShell 5.1 ni Docker del titular en este entorno:** la ejecución de R5 y restauración PostgreSQL siguen PENDIENTES; no inferir PASS de S4.
+**Límites:** `--no-owner --no-acl` no valida owners/GRANT/ACL ni tenant A/B; futura comprobación con identidades sin BYPASSRLS, Auth/Storage/Edge/Render/secrets externos siguen S3 abiertos; tmpfs no excluye por sí solo swap físico. No repetir S2-R11 ni pruebas aisladas de GPG.
+
+**Decisión operacional:** propietario pidió no realizar más pruebas sin sentido. Presentar una sola ejecución integral R5, después de la revisión del informe y su aprobación, con salida reducida a `BT_SEC07_S4B_R5_*` y STOP ante el primer fallo. No crear nueva rama, no push de aplicación, no desplegar Render ni conectar producción. El R5 completo para uso PC se entrega como archivo `ByteTorque_S4B_R5.ps1` en el chat principal, no se suben backups/secretos.
+
+---
+
 ## SEC07 — S4B-R4 laboratorio READY, restore no completado: escalar revisión a Astra (23/11/2026)
 
 **Evidencia nueva del propietario (Windows):** `BT_SEC07_S4B_R4: START`, `BT_SEC07_S4B_R4_LAB: READY`, `BT_SEC07_S4B_R4_FIRST_ERROR: RESTORE_TOOL_OR_STREAM_ERROR`, `BT_SEC07_S4B_R4_RESULT: RESTORE_NOT_COMPLETE`. El laboratorio PG17 aislado arrancó; **`pg_restore` falló, pero el script ocultó su diagnóstico real al buscar solo `ERROR:|FATAL:`**. La etiqueta no demuestra defecto de backup ni de Supabase, y puede deberse a mensajes `pg_restore: error:` en minúsculas o falla de stdin/FD3. GPG aislado PASS, S2-R11 PASS estructural; no volver a probar claves/TOC. R4 ya terminó y el log tmpfs no persiste.
