@@ -1,3 +1,17 @@
+## BT-COM-01 — ajuste focalizado de CI para ZIP privado (23/11/2026)
+
+El commit `0f4af648` incluyó `src/entrega/closingZip.ts`.
+En CI `45231658760`: TypeScript, Vitest, PWA, Android y builds previos
+pasaron; falló únicamente el build privado BT-COM-01D porque el guardia
+`official-public-boundary` no reconocía el módulo nuevo en su allowlist.
+La corrección permite `closingZip.ts` **solo con** COM-01D preview, LIVE-02,
+CP05 documentos y CP06 privado habilitados simultáneamente.
+`verify-official-bundle.mjs` impide incluir ese módulo en compilaciones OFF.
+No se relajan permisos SQL/servidor ni se altera lógica del ZIP.
+La nueva CI debe confirmar el resultado; no anunciar PASS antes de verlo.
+
+---
+
 ## BT-COM-01 — descarga conjunta del cierre (23/11/2026)
 
 - [x] BT-FLOW-LIVE-02 `1efdceb` CI principal y visual: **SUCCESS**; no desplegado.

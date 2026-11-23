@@ -32,3 +32,13 @@ acceso al vehículo antes y después de preparar el conjunto.
 
 **CP05 está aprobada en QA de emisión y diseño, pero no terminada al 100 % para
 Ignacio hasta descarga real, S4, correo y validación de taller.**
+
+## Corrección de integración privada de CI — 23/11/2026
+
+La primera CI del commit `0f4af648` aprobó TypeScript/Vitest/PWA/Android,
+pero el build privado con `VITE_BT_COM_01D_PREVIEW_ENABLED=true` encontró
+`closingZip.ts` no declarado en el límite de módulos de Vite. Se añadió
+la autorización estrictamente condicionada a COM-01D + LIVE-02 + CP05
+Documentos + CP06 y una regla explícita de exclusión para builds OFF.
+No habilita producción, no despliega Render, no cambia Supabase ni correos.
+El resultado de la nueva CI queda pendiente de verificación.

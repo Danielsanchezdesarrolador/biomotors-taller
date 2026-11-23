@@ -51,6 +51,8 @@ if (closingReviewEnabled) {
 } else {
   assert.ok(modules.every(id => !/src\/historial\/ClosingReviewPanel\.(?:ts|tsx|js)$/.test(id)),
     'Closing review candidate must not appear in OFF/public bundles')
+  assert.ok(modules.every(id => !/src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)),
+    'Closing ZIP must not appear in OFF/public bundles')
 }
 if (flowLiveEnabled) {
   assert.equal(process.env.VITE_BT_CP05_DOCUMENTS_ENABLED,'true',
@@ -116,6 +118,9 @@ assert.ok(
         )) ||
       (flowLiveEnabled &&
         /src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate|finalPackage|finalPdf)\.(?:ts|tsx|js)$/.test(id)) ||
+      (closingReviewEnabled && flowLiveEnabled && cp06PrivateEnabled &&
+        process.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
+        /src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)) ||
       /src\/plans\/planStatus\.ts$/.test(id) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&

@@ -69,6 +69,13 @@ export default defineConfig(({ mode }) => {
                   /\/src\/entrega\/(?:FlowLive02Panel|flowLiveCandidate|finalPackage|finalPdf)\.(?:ts|tsx|js)$/.test(id)
                 ) &&
                 !(
+                  env.VITE_BT_COM_01D_PREVIEW_ENABLED === 'true' &&
+                  env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
+                  env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
+                  env.VITE_BT_CP06_PRIVATE_ENABLED === 'true' &&
+                  /\/src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)
+                ) &&
+                !(
                   env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' &&
                   /\/src\/ordenes\/(?:Cp04(?:PrivatePanel|OrdersView|MultipuntoChecklist|MultipuntoPdfPreview)|cp04(?:Contracts|Repository|Draft|Multipunto|Autosave|InspectionPdf))\.(?:ts|tsx|js)/.test(
                     id
