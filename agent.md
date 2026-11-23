@@ -1,3 +1,13 @@
+## Continuidad consolidada - main publicado, despliegue pendiente (22/11/2026)
+
+GitHub main verificado en efc87801caefe1e501805e46d5733f72507f43d0: el multipunto oficial YA ESTA IMPLEMENTADO y PUBLICADO en codigo.47/47 pruebas y A4 unica corresponden a la evidencia del entorno desarrollador y al checkpoint BT-INS-PDF-02; no se repitieron ni modificaron aqui. Despliegue efectivo de esta revision NO verificado; no confundir publicacion con disponibilidad productiva. Las notas inferiores que dicen sin push son historicas.
+
+S4I integrado anteriormente en0bb0ea59d78d:11 archivos,CI general/oficial SUCCESS,sin deploy. Auth/CORS se conservan. S4 integral PARCIAL;respaldo manual operativo cada2dias;automatizacion R6 cancelada. Mantener Render OFF hasta autorizacion especifica; After CI Checks Pass es propuesta futura,no permiso para desplegar.
+
+No reimplementar,investigar o probar el multipunto. Siguiente publicacion propuesta SOLO documental,tras revision y autorizacion de staging/commit/push;sin ramas nuevas,SQL,flags,Storage,Edge,correo o cambios productivos. Nunca copiar carpetas o documentos privados completos desde ZIP sobre main.
+
+---
+
 ## BT-INS-PDF-02 — formato oficial CP04 A4 único (22/11/2026)
 
 Implementado y validado **localmente** sobre `0bb0ea5`, única main; sin push/deploy.
