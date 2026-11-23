@@ -1,3 +1,11 @@
+## SEC07 — S4B-R4 laboratorio READY, restore no completado: escalar revisión a Astra (23/11/2026)
+
+**Evidencia nueva del propietario (Windows):** `BT_SEC07_S4B_R4: START`, `BT_SEC07_S4B_R4_LAB: READY`, `BT_SEC07_S4B_R4_FIRST_ERROR: RESTORE_TOOL_OR_STREAM_ERROR`, `BT_SEC07_S4B_R4_RESULT: RESTORE_NOT_COMPLETE`. El laboratorio PG17 aislado arrancó; **`pg_restore` falló, pero el script ocultó su diagnóstico real al buscar solo `ERROR:|FATAL:`**. La etiqueta no demuestra defecto de backup ni de Supabase, y puede deberse a mensajes `pg_restore: error:` en minúsculas o falla de stdin/FD3. GPG aislado PASS, S2-R11 PASS estructural; no volver a probar claves/TOC. R4 ya terminó y el log tmpfs no persiste.
+
+**Decisión explícita del propietario:** `No mas pruebas si sentido, ocupemos astra para que lo solucione.` Suspender ejecuciones iterativas y pedir revisión de causa y UNA corrección consolidada a Astra; no pueden invocarse modelos externos automáticamente desde este chat. Traspaso técnico: `docs/recovery/BT_SEC07_S4B_R4_ASTRA_HANDOFF_20261123.md`. No afirmar S4 PASS; no tocar producción, Render, Supabase ni backup v04. El siguiente intento solo tras revisión técnica razonada y aprobación del propietario; documentación continuada en cuatro archivos.
+
+---
+
 ## SEC07 S4B-R3 — DOCKER_START_FAILED por defecto en empaquetado del script (23/11/2026)
 
 **Salida real informada por propietario:** `BT_SEC07_S4B_R3: START`, `BT_SEC07_S4B_R3_STOP: DOCKER_START_FAILED`. No hay marcador `LAB:READY`; **no se confirmó** que `initdb` se invocara ni que empezara `pg_restore`.
