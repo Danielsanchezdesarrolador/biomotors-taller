@@ -1,3 +1,23 @@
+## SEC07-S4B-R5 — RESTORE_EXIT 1, clasificación MISSING_EXTENSION (23/11/2026)
+
+**Evidencia Windows del propietario:**
+```text
+BT_SEC07_S4B_R5: START
+BT_SEC07_S4B_R5_LAB: READY
+BT_SEC07_S4B_R5_RESTORE_EXIT: 1
+BT_SEC07_S4B_R5_FIRST_ERROR: MISSING_EXTENSION
+BT_SEC07_S4B_R5_RESULT: RESTORE_NOT_COMPLETE
+```
+**Hechos:** el laboratorio PG17 Alpine aislado inicializó y `pg_restore` se ejecutó pero terminó con código 1. El clasificador R5 encontró un patrón compatible con extensión ausente en el comienzo de stderr; **esto es categoría diagnóstica, no identifica el nombre exacto de la extensión ni demuestra la causa completa**. No existe registro del stderr crudo porque el contenedor se destruyó; no afirmar S4 PASS o daño del v04. S2-R11 GPG/SHA/TOC y GPG aislado PASS continúan; no repetir.
+
+**Investigación posterior (fuentes oficiales):** Supabase guía `https://supabase.com/docs/guides/self-hosting/restore-from-platform` requiere habilitar extensiones de origen que falten. Registro oficial de versiones `https://github.com/supabase/supabase/blob/master/docker/versions.md` fija la imagen PG17 de autoalojamiento `supabase/postgres:17.6.1.136` desde 2026-06-17. La imagen de Supabase trae más extensiones y configuración que `postgres:17-alpine`; por tanto, se propone **cambiar solo la imagen de destino del laboratorio** en un siguiente intento de restauración consolidada, sin alterar backup ni producción. El Dockerfile PG17 actual de Supabase (`https://github.com/supabase/postgres/blob/develop/Dockerfile-17`) contiene `su-exec` mientras Docker Postgres oficial usa `gosu`; no asumir que una imagen es idéntica a la otra: elegir el ejecutor disponible en el contenedor. Fijar tag verificado y verificar su presencia/descarga sin conexiones de red **dentro** del laboratorio. La imagen fijada de Supabase puede diferir del servidor managed original en extensiones/versiones/roles; no garantizar que R6 pase.
+
+**Propuesta operativa:** respetando la orden de evitar pruebas inconducentes, ofrecer una sola ejecución R6 con imagen Supabase PG17 fijada, PGDATA y /tmp en tmpfs, contenedor sin red/puertos ni bind mounts, GPG local streaming usando GNUPGHOME correcto, script shell transportado como Base64 por argumento y stdin por FD3, `pg_restore` **sin argumento '-'**, y salida de primer error sanitizada. No repetir GPG/PGDMP/TOC, no instalar extensiones aleatorias. Verificar códigos GPG + restore + Docker y un chequeo del catálogo si restaura. STOP ante cualquier falla nueva, sin reruns automáticos. El nombre de la extensión no es conocido y no debe inventarse.
+
+**Límites:** `--no-owner --no-acl` no certifica propietarios/ACL/RLS/talleres A-B; el éxito de restauración PostgreSQL no implica recuperación integral de Auth/Storage/Edge/Render/secrets; tmpfs puede usar swap. S4 sigue PENDIENTE, no publicar datos/contraseñas ni modificar Supabase/Render.
+
+---
+
 ## SEC07 S4B-R4 — dictamen técnico independiente Sol; R5 corregido y aún no ejecutado (2026-11-23)
 
 **Fuente:** informe técnico externo entregado por el propietario, contrastado con documentación oficial PostgreSQL 17 (`https://www.postgresql.org/docs/17/app-pgrestore.html`) y su fuente en `REL_17_STABLE/src/bin/pg_dump/pg_restore.c`. El chat principal conserva el bloque R4 original completo (no hace falta pedírselo al usuario).
