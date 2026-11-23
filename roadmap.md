@@ -1,3 +1,13 @@
+## CP05 correo — corrección TS focalizada (23/11/2026)
+
+Primer CI del commit `47f57860`: fallo TS2554 en tres llamadas de prueba
+`src/cp05/cp05.test.ts` al nuevo argumento obligatorio de revisión previa.
+Se corrigieron únicamente fixtures sintéticas con revisión exacta y se agregó
+caso de rechazo por revisión ausente. No se altera el permiso de servidor,
+no se activa correo ni Supabase; verificar CI del nuevo commit antes del Render.
+
+---
+
 ## CP05 correo revisado / BT-COM-01 Render autorizado · 23/11/2026
 
 El propietario **aprobó visualmente BT-COM-01**, CI general y visual de `5a837409` SUCCESS. Autoriza publicar esta integración CP05 en `main` y desplegar manualmente el código BT-COM-01 en el **servicio Render existente**, Auto-Deploy OFF. **No implica activar** variables de correo, migraciones SQL, Storage, funciones alojadas LIVE-02, envío externo, clientes reales ni configuraciones Supabase. Verificar SHA LIVE en Render antes de declarar despliegue completado.

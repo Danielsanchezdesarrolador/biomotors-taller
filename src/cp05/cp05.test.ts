@@ -259,6 +259,13 @@ describe('CP05 backend candidato sin activación', () => {
     expect(await p.restore(path, receipt.sha256)).toEqual(bytes)
     await expect(p.putIfAbsent(path, new Uint8Array([1, 2, 3]))).rejects.toThrow('INVALID_PDF')
   })
+  const reviewed = {
+    reviewedRevisionId: id,
+    confirmedRecipient: 'synthetic@invalid.test',
+    recipientChecked: true,
+    documentChecked: true,
+    contactAuthorized: true
+  } as const
   const delivery = (): DeliveryPorts => ({
     authorize: vi.fn(async () => revision),
     queue: vi.fn(async () => {}),
@@ -267,16 +274,23 @@ describe('CP05 backend candidato sin activación', () => {
   })
   it('correo OFF no hace peticiones ni marca enviados', async () => {
     const p = delivery()
-    await expect(deliverQuoteCandidate({ emailApproved: false }, p, id, 1)).rejects.toThrow(
+    await expect(deliverQuoteCandidate({ emailApproved: false }, p, id, 1, reviewed)).rejects.toThrow(
       'EMAIL_DISABLED'
     )
     expect(p.authorize).not.toHaveBeenCalled()
     expect(p.send).not.toHaveBeenCalled()
   })
+  it('rechaza envío sin declaración previa del operador', async () => {
+    const p = delivery()
+    await expect(deliverQuoteCandidate({ emailApproved: true }, p, id, 1, null))
+      .rejects.toThrow('MAIL_REVIEW_REQUIRED')
+    expect(p.queue).not.toHaveBeenCalled()
+    expect(p.send).not.toHaveBeenCalled()
+  })
   it('acuse ambiguo queda en cola y nunca figura enviado', async () => {
     const p = delivery()
     p.send = vi.fn(async () => ({ confirmed: false }))
-    await expect(deliverQuoteCandidate({ emailApproved: true }, p, id, 1)).rejects.toThrow(
+    await expect(deliverQuoteCandidate({ emailApproved: true }, p, id, 1, reviewed)).rejects.toThrow(
       'PROVIDER_ACK_UNKNOWN'
     )
     expect(p.record).not.toHaveBeenCalled()
@@ -288,7 +302,7 @@ describe('CP05 backend candidato sin activación', () => {
       definitiveFailure: true,
       errorCode: 'REJECTED'
     }))
-    await deliverQuoteCandidate({ emailApproved: true }, p, id, 1)
+    await deliverQuoteCandidate({ emailApproved: true }, p, id, 1, reviewed)
     expect(p.record).toHaveBeenCalledWith(id, 1, 'failed', null, 'REJECTED')
     expect(p.send).toHaveBeenCalledWith(
       expect.objectContaining({
