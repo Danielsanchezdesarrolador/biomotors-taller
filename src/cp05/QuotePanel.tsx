@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useId } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   ArrowLeft,
@@ -8,7 +8,9 @@ import {
   Send,
   RefreshCw,
   FileText,
-  LockKeyhole
+  LockKeyhole,
+  ChevronDown,
+  History
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
 import type { OrderWithVehicle } from '../ordenes/cp04Contracts'
@@ -38,6 +40,8 @@ import { WorkExecutionDraft } from '../entrega/WorkExecutionDraft'
 import { FlowLive02Loader } from './FlowLive02Loader'
 import '../informes/trabajos/trabajos.css'
 import './cp05.css'
+import {QuoteHistory} from './QuoteHistory'
+import {workspaceQuotes,quoteStateLabel} from './workspacePresentation'
 const empty: Draft = { price_basis: 'net', valid_days: 10, terms: '', comments: '', items: [] }
 export function QuotePanel({
   repository,
@@ -62,6 +66,9 @@ export function QuotePanel({
     [busy, setBusy] = useState(true),
     [message, setMessage] = useState(''),
     [error, setError] = useState('')
+  const [tab,setTab]=useState<'trabajos'|'condiciones'|'historial'>('trabajos')
+  const [browseOpen,setBrowseOpen]=useState(false),[revisionOpen,setRevisionOpen]=useState(false)
+  const workspaceId=useId(),toolbar=useRef<HTMLDivElement>(null),workspace=useRef<HTMLElement>(null)
   const [readPending,setReadPending]=useState<{id:string;version:number}|null>(null)
   const [editing, setEditing] = useState<WorkItem | true | null>(null),
     [reason, setReason] = useState(''),
@@ -80,6 +87,16 @@ export function QuotePanel({
     !!bundle &&
     JSON.stringify(draftPayload(draft)) !== JSON.stringify(draftPayload(draftFrom(bundle)))
   const totals = calculateTotals(draft.items)
+  const visibleQuotes=workspaceQuotes(quotes,bundle?.quote??null)
+  const issuedRevision=bundle?.revisions.find(r=>r.revision===bundle.quote.issued_revision)
+  const tabs=[['trabajos','Trabajos y repuestos'],['condiciones','Condiciones'],['historial','Historial']] as const
+  useEffect(()=>{
+    const node=toolbar.current,root=workspace.current
+    if(!node||!root)return
+    const observer=new ResizeObserver(()=>root.style.setProperty('--cp05-toolbar-height',node.offsetHeight+'px'))
+    observer.observe(node)
+    return()=>observer.disconnect()
+  },[!!bundle])
   const op = (fingerprint: string) => {
     if (operation.current.fingerprint !== fingerprint)
       operation.current = { fingerprint, id: crypto.randomUUID() }
@@ -178,6 +195,7 @@ export function QuotePanel({
       if(readPending?.id===id&&loaded.quote.version<readPending.version)throw new QuoteFailure('unavailable')
       const cached = localDraft(context.userId, context.workshop.id)
       setReadPending(null)
+      setBrowseOpen(false)
       setRecovery(null)
       setEditing(null)
       setBundle(loaded)
@@ -252,6 +270,8 @@ export function QuotePanel({
       setBundle(next)
       setDraft(draftFrom(next))
       setReason('')
+      setRevisionOpen(false)
+      if(kind==='create'||kind==='revise')setTab('trabajos')
       try {
         const list=await repository.list(initialVehicleId)
         if(active.current)setQuotes(list)
@@ -385,6 +405,7 @@ export function QuotePanel({
       if (!active.current) return
       setBundle(next)
       setDraft(draftFrom(next))
+      if(kind==='issue')setTab('trabajos')
       setMessage(status)
     } catch (e) {
       if (active.current) failure(e)
@@ -394,7 +415,7 @@ export function QuotePanel({
     }
   }
   return (
-    <section className="cp05-panel wt-panel" aria-label="Cotizaciones privadas CP05">
+    <section ref={workspace} className="cp05-panel wt-panel" aria-label="Cotizaciones privadas CP05">
       <header className="cp05-heading">
         <button className="cp04-secondary" onClick={onBack}>
           <ArrowLeft size={17} /> Volver al panel anterior
@@ -428,18 +449,95 @@ export function QuotePanel({
           {message}
         </p>
       )}
-      {bundle && (
-        <output className="cp05-floating-total" aria-label="Total siempre visible">
-          <span>Total · IVA incluido</span>
-          <strong>{currency(totals.total)}</strong>
-        </output>
-      )}
+      {bundle&&<div className="cp05-workspace-toolbar" ref={toolbar}>
+        <div className="cp05-context" aria-label="Cotización actual confirmada">
+          <div className="cp05-title-line"><h2>{quoteNumber(bundle.quote)}</h2><span className={'cp05-status cp05-status-'+bundle.quote.status}>{quoteStateLabel[bundle.quote.status]}</span><span className="cp05-revision-tag">R{bundle.quote.issued_revision} · V{bundle.quote.version}</span></div>
+          <p className="cp05-client-vehicle"><strong>{bundle.source.customer.full_name}</strong><span>{bundle.source.vehicle.make} {bundle.source.vehicle.model} · {bundle.source.vehicle.plate||'Sin patente'}</span></p>
+          <small>{bundle.quote.status==='draft'?(dirty?'Cambios locales sin guardar':'Borrador guardado'):bundle.quote.status==='issued'?'Emitida e inmutable':'Anulada'}{bundle.quote.issue_pending?' · Archivo pendiente; edición bloqueada.':''}</small>
+          <output className="cp05-header-total" aria-label="Total siempre visible"><span>Total · IVA incluido</span><strong>{currency(bundle.quote.status==='issued'&&issuedRevision?issuedRevision.payload.totals.total:totals.total)}</strong></output>
+        </div>
+              <div className="cp05-action-board" aria-label="Acciones de cotización">
+                <div className="cp05-action-group cp05-action-group-main">
+                {editable && (
+                  <button
+                    className="cp04-primary"
+                    disabled={busy}
+                    onClick={() => void action('save')}
+                  >
+                    <Save size={17} /> Guardar borrador en Supabase
+                  </button>
+                )}
+                <button
+                  className="cp04-secondary"
+                  disabled={busy}
+                  onClick={() => void open(bundle.quote.id)}
+                >
+                  <RefreshCw size={17} /> Recargar versión guardada
+                </button>
+                {bundle.quote.status === 'draft' && (
+                  <button
+                    className="cp04-secondary"
+                    disabled={busy || !draft.items.length}
+                    onClick={() => void pdf()}
+                  >
+                    <FileDown size={17} /> Descargar PDF de borrador
+                  </button>
+                )}
+                </div>
+                <div className="cp05-action-group cp05-action-group-advanced">
+                {bundle.quote.status==='draft'&&<button
+                  disabled={
+                    busy ||
+                    !canWrite ||
+                    !repository.documents.enabled ||
+                    bundle.quote.status !== 'draft' ||
+                    dirty ||
+                    !!readPending ||
+                    draft.terms.trim().length<3 ||
+                    !draft.items.length
+                  }
+                  className="cp04-secondary"
+                  title="Requiere archivo privado y backend autorizados"
+                  onClick={() => void documentAction('issue')}
+                >
+                  {repository.documents.enabled
+                    ? bundle.quote.issue_pending
+                      ? 'Retomar emisión pendiente'
+                      : 'Emitir revisión archivada'
+                    : 'Emitir revisión archivada · pendiente'}
+                </button>}
+                {bundle.quote.status!=='draft'&&<>
+                  {bundle.quote.status==='issued'&&<button className="cp04-primary" disabled={busy||!!readPending||!repository.documents.enabled||!issuedRevision} onClick={()=>issuedRevision&&void pdf(issuedRevision)}><FileDown size={17}/> Descargar PDF emitido</button>}
+                  <button className="cp04-secondary" onClick={()=>setTab('historial')}><History size={17}/> Ver historial</button>
+                  {canWrite&&<button className="cp04-secondary" disabled={busy||!!readPending} onClick={()=>{setTab('condiciones');setRevisionOpen(true)}}>Abrir nueva revisión</button>}
+                </>}
+                {bundle.quote.issue_pending && repository.documents.enabled && canWrite && (
+                  <button
+                    className="cp04-secondary"
+                    disabled={busy}
+                    onClick={() => void documentAction('cancel')}
+                  >
+                    Cancelar reserva pendiente
+                  </button>
+                )}
+                </div>
+              </div>
+
+        <div className="cp05-tabs" role="tablist" aria-label="Secciones de cotización">
+          {tabs.map(([key,label],i)=><button type="button" key={key} role="tab" id={workspaceId+'-tab-'+key} aria-selected={tab===key} aria-controls={workspaceId+'-panel-'+key} tabIndex={tab===key?0:-1} onClick={()=>setTab(key)} onKeyDown={event=>{
+            const next=event.key==='ArrowRight'?(i+1)%3:event.key==='ArrowLeft'?(i+2)%3:event.key==='Home'?0:event.key==='End'?2:-1
+            if(next>=0){event.preventDefault();setTab(tabs[next][0]);document.getElementById(workspaceId+'-tab-'+tabs[next][0])?.focus({preventScroll:true})}
+          }}>{label}</button>)}
+        </div>
+      </div>}
       <div className="cp05-layout">
-        <aside className="dashboard-card cp05-list">
+        <aside className={"dashboard-card cp05-list "+(bundle&&!browseOpen?"cp05-source-collapsed":"")}>
+          <button type="button" className="cp04-secondary cp05-source-toggle" aria-expanded={!bundle||browseOpen} onClick={()=>setBrowseOpen(!browseOpen)}>Cambiar cotización u OT <ChevronDown size={16}/></button>
+          <div className="cp05-list-body">
           <h2>{initialVehicleId ? 'Cotizaciones del vehículo' : 'Documentos recientes'}</h2>
           <p>Hasta 50 cotizaciones autorizadas.</p>
-          {!busy && !quotes.length && <p>Sin cotizaciones registradas.</p>}
-          {quotes.map((q) => (
+          {!busy && !visibleQuotes.length && <p>Sin cotizaciones registradas.</p>}
+          {visibleQuotes.map((q) => (
             <button
               disabled={busy || !!readPending}
               key={q.id}
@@ -447,7 +545,7 @@ export function QuotePanel({
               onClick={() => void open(q.id)}
             >
               {quoteNumber(q)} · R{q.issued_revision} ·{' '}
-              {q.status === 'draft' ? 'Borrador' : q.status === 'issued' ? 'Emitida' : 'Anulada'}
+              {quoteStateLabel[q.status]}
             </button>
           ))}
           <label>
@@ -477,46 +575,11 @@ export function QuotePanel({
               <Plus size={16} /> Crear / recuperar borrador de la OT
             </button>
           )}
+          </div>
         </aside>
         <div className="cp05-editor">
-          {!bundle && !busy && (
-            <div className="dashboard-card cp05-empty">
-              <FileText />
-              <h2>Prepara una cotización desde una orden</h2>
-              <p>Solo se utilizan registros confirmados de CP03 y CP04.</p>
-            </div>
-          )}
-          {bundle && (
-            <>
-              <div className="dashboard-card cp05-context">
-                <h2>
-                  {quoteNumber(bundle.quote)} ·{' '}
-                  {bundle.quote.issued_revision
-                    ? `Revisión emitida ${bundle.quote.issued_revision}`
-                    : 'Sin revisiones emitidas'}
-                </h2>
-                <strong>{bundle.source.customer.full_name}</strong>
-                <p>
-                  {bundle.source.vehicle.make} {bundle.source.vehicle.model} ·{' '}
-                  {bundle.source.vehicle.plate || 'Sin patente'}
-                </p>
-                <small>
-                  OT {bundle.quote.order_id} · {bundle.source.workshop.name}
-                </small>
-                <p>
-                  {bundle.quote.status === 'draft'
-                    ? dirty
-                      ? 'Cambios locales sin guardar'
-                      : 'Borrador guardado'
-                    : bundle.quote.status === 'issued'
-                      ? 'Emitida e inmutable'
-                      : 'Anulada'}{' '}
-                  · Versión {bundle.quote.version}
-                </p>
-                {bundle.quote.issue_pending && (
-                  <p>Preparación de archivo pendiente; edición bloqueada.</p>
-                )}
-              </div>
+          {!bundle&&!busy&&<div className="dashboard-card cp05-empty"><FileText/><h2>Prepara una cotización desde una orden</h2><p>Solo se utilizan registros confirmados de CP03 y CP04.</p></div>}
+          {bundle&&<>
               {recovery && editable && (
                 <div className="cp05-notice">
                   <p>
@@ -541,6 +604,8 @@ export function QuotePanel({
                   </button>
                 </div>
               )}
+
+            <div role="tabpanel" id={workspaceId+'-panel-trabajos'} aria-labelledby={workspaceId+'-tab-trabajos'} hidden={tab!=='trabajos'} className={'cp05-tab-content '+(!editable?'cp05-readonly':'')} tabIndex={0}>
               <WorkItemsTable
                 document={{ mode: 'quote', items: draft.items }}
                 onEdit={(v) => setEditing(v || true)}
@@ -565,6 +630,47 @@ export function QuotePanel({
                   </button>
                 </div>
               )}
+              <div className="dashboard-card cp05-totals" aria-label="Totales netos">
+                <div>
+                  Subtotal neto <strong>{currency(totals.subtotal)}</strong>
+                </div>
+                <div>
+                  IVA (19 %) <strong>{currency(totals.tax)}</strong>
+                </div>
+                <div>
+                  Total <strong>{currency(totals.total)}</strong>
+                </div>
+                <small>
+                  Cada línea se redondea a pesos CLP; IVA sobre el subtotal neto. No es documento
+                  tributario.
+                </small>
+              </div>
+              {canWrite && bundle.quote.status === 'issued' &&
+                bundle.revisions
+                  .filter(r => r.revision === bundle.quote.issued_revision)
+                  .map(revision => (
+                    <section key={revision.id} aria-label="Preparación de informe técnico">
+                      <button type="button" className="cp04-secondary"
+                        disabled={busy}
+                        onClick={() => setExecutionOpen(!executionOpen)}>
+                        {executionOpen
+                          ? 'Cerrar revisión técnica preliminar'
+                          : 'Preparar informe técnico preliminar (sin guardar)'}
+                      </button>
+                      {executionOpen && (
+                        import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
+                          ? <FlowLive02Loader key={revision.id}
+                              client={privateClient} context={context}
+                              revision={revision} quote={bundle.quote} />
+                          : <WorkExecutionDraft key={revision.id}
+                              revision={revision} quote={bundle.quote} />
+                      )}
+                    </section>
+                  ))}
+
+            </div>
+            <div role="tabpanel" id={workspaceId+'-panel-condiciones'} aria-labelledby={workspaceId+'-tab-condiciones'} hidden={tab!=='condiciones'} className="cp05-tab-content" tabIndex={0}>
+              <div className="cp05-section-heading"><div><h2>Condiciones de la cotización</h2><p>Vigencia y detalle comercial del documento actual.</p></div></div>
               <fieldset disabled={!editable || busy} className="dashboard-card cp05-conditions">
                 <legend>Condiciones y observaciones</legend>
                 <label>
@@ -600,103 +706,8 @@ export function QuotePanel({
                   />
                 </label>
               </fieldset>
-              <div className="dashboard-card cp05-totals" aria-label="Totales netos">
-                <div>
-                  Subtotal neto <strong>{currency(totals.subtotal)}</strong>
-                </div>
-                <div>
-                  IVA (19 %) <strong>{currency(totals.tax)}</strong>
-                </div>
-                <div>
-                  Total <strong>{currency(totals.total)}</strong>
-                </div>
-                <small>
-                  Cada línea se redondea a pesos CLP; IVA sobre el subtotal neto. No es documento
-                  tributario.
-                </small>
-              </div>
-              <div className="cp05-action-board" aria-label="Acciones de cotización">
-                <div className="cp05-action-group cp05-action-group-main">
-                {editable && (
-                  <button
-                    className="cp04-primary"
-                    disabled={busy}
-                    onClick={() => void action('save')}
-                  >
-                    <Save size={17} /> Guardar borrador en Supabase
-                  </button>
-                )}
-                <button
-                  className="cp04-secondary"
-                  disabled={busy}
-                  onClick={() => void open(bundle.quote.id)}
-                >
-                  <RefreshCw size={17} /> Recargar versión guardada
-                </button>
-                {bundle.quote.status === 'draft' && (
-                  <button
-                    className="cp04-secondary"
-                    disabled={busy || !draft.items.length}
-                    onClick={() => void pdf()}
-                  >
-                    <FileDown size={17} /> Descargar PDF de borrador
-                  </button>
-                )}
-                </div>
-                <div className="cp05-action-group cp05-action-group-advanced">
-                  <p className="cp05-action-group-label">Emisión y comunicaciones</p>
-                {bundle.quote.status==='draft'&&draft.terms.trim().length<3&&<small>Completa las condiciones (al menos 3 caracteres) antes de emitir.</small>}
-                <button
-                  disabled={
-                    busy ||
-                    !canWrite ||
-                    !repository.documents.enabled ||
-                    bundle.quote.status !== 'draft' ||
-                    dirty ||
-                    !!readPending ||
-                    draft.terms.trim().length<3 ||
-                    !draft.items.length
-                  }
-                  className="cp04-secondary"
-                  title="Requiere archivo privado y backend autorizados"
-                  onClick={() => void documentAction('issue')}
-                >
-                  {repository.documents.enabled
-                    ? bundle.quote.issue_pending
-                      ? 'Retomar emisión pendiente'
-                      : 'Emitir revisión archivada'
-                    : 'Emitir revisión archivada · pendiente'}
-                </button>
-                <button
-                  disabled={
-                    busy ||
-                    !canWrite ||
-                    !repository.documents.emailEnabled ||
-                    bundle.quote.status === 'voided' ||
-                    !bundle.revisions.length
-                  }
-                  className="cp04-secondary"
-                  title="El backend debe autorizar el proveedor"
-                  onClick={() => void documentAction('send', bundle.revisions[0])}
-                >
-                  <Send size={17} />{' '}
-                  {repository.documents.emailEnabled
-                    ? 'Enviar última revisión'
-                    : 'Enviar correo · desactivado'}
-                </button>
-                {bundle.quote.issue_pending && repository.documents.enabled && canWrite && (
-                  <button
-                    className="cp04-secondary"
-                    disabled={busy}
-                    onClick={() => void documentAction('cancel')}
-                  >
-                    Cancelar reserva pendiente
-                  </button>
-                )}
-                </div>
-              </div>
               {canWrite && bundle.quote.status !== 'draft' && (
-                <div className="dashboard-card cp05-conditions">
+                <details className="dashboard-card cp05-conditions cp05-new-revision" open={revisionOpen} onToggle={e=>setRevisionOpen(e.currentTarget.open)}><summary>Nueva revisión o anulación</summary>
                   <label>
                     Motivo de nueva revisión o anulación
                     <textarea
@@ -727,106 +738,34 @@ export function QuotePanel({
                       </button>
                     )}
                   </div>
-                </div>
+                </details>
               )}
-              {canWrite && bundle.quote.status === 'issued' &&
-                bundle.revisions
-                  .filter(r => r.revision === bundle.quote.issued_revision)
-                  .map(revision => (
-                    <section key={revision.id} aria-label="Preparación de informe técnico">
-                      <button type="button" className="cp04-secondary"
-                        disabled={busy}
-                        onClick={() => setExecutionOpen(!executionOpen)}>
-                        {executionOpen
-                          ? 'Cerrar revisión técnica preliminar'
-                          : 'Preparar informe técnico preliminar (sin guardar)'}
-                      </button>
-                      {executionOpen && (
-                        import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
-                          ? <FlowLive02Loader key={revision.id}
-                              client={privateClient} context={context}
-                              revision={revision} quote={bundle.quote} />
-                          : <WorkExecutionDraft key={revision.id}
-                              revision={revision} quote={bundle.quote} />
-                      )}
-                    </section>
-                  ))}
-              <section className="dashboard-card cp05-history">
-                <h2>Revisiones y trazabilidad</h2>
-                {!bundle.revisions.length && (
-                  <div className="cp05-history-empty">
-                    <FileText size={19} aria-hidden="true" />
-                    <p>No hay revisiones emitidas ni archivos privados confirmados.</p>
-                  </div>
-                )}
-                <div className="cp05-history-entries">
-                {bundle.revisions.map((r) => (
-                  <article key={r.id}>
-                    <strong>
-                      Revisión {r.revision} · {new Date(r.issued_at).toLocaleString('es-CL')}
-                    </strong>
-                    <p>
-                      Total histórico: {currency(r.payload.totals.total)} · Cliente:{' '}
-                      {r.payload.customer.full_name} · {r.payload.vehicle.plate}
-                    </p>
-                    <details className="cp05-revision-detail">
-                      <summary>Ver contenido de la revisión {r.revision}</summary>
-                      <p>{r.payload.workshop.name} · OT {r.payload.order.id}</p>
-                      <WorkItemsTable document={{mode:'quote',items:r.payload.items.map(i=>({
-                        id:i.id,description:i.description,type:i.type,quantity:i.quantity100/100,
-                        price:i.unit_price,performed:false}))}}
-                        onEdit={()=>{}} onDelete={()=>{}} onPerformed={()=>{}} readOnly />
-                      <p>Neto: {currency(r.payload.totals.subtotal)} · IVA: {currency(r.payload.totals.tax)} · Total: {currency(r.payload.totals.total)}</p>
-                      <p>Vigencia: {r.payload.quote.valid_days} días</p>
-                      <p className="cp05-preserve-text">Condiciones: {r.payload.quote.terms||'—'}</p>
-                      <p className="cp05-preserve-text">Observaciones: {r.payload.quote.comments||'—'}</p>
-                      <small>Contenido congelado al emitir; no utiliza el borrador actual.</small>
-                    </details>
-                    <code>SHA-256: {r.pdf_sha256}</code>
-                    <button
-                      disabled={busy || !repository.documents.enabled}
-                      className="cp04-secondary"
-                      onClick={() => void pdf(r)}
-                      title="Descarga autenticada del archivo emitido"
-                    >
-                      {repository.documents.enabled
-                        ? 'Descargar PDF emitido'
-                        : 'Archivo PDF privado · pendiente de acceso'}
-                    </button>
-                  </article>
-                ))}
-                {bundle.events.map((e) => (
-                  <p key={e.id}>
-                    {e.kind === 'voided' ? 'Anulación' : 'Nueva revisión'} R{e.revision} ·{' '}
-                    {new Date(e.created_at).toLocaleString('es-CL')} · {e.reason}
-                  </p>
-                ))}
-                </div>
-                <div className="cp05-history-deliveries">
-                <h3>Envíos</h3>
-                {!bundle.deliveries.length ? (
-                  <div className="cp05-history-empty">
-                    <Send size={19} aria-hidden="true" />
-                    <p>Sin envíos registrados. Correo externo desactivado.</p>
-                  </div>
-                ) : (
-                  bundle.deliveries.map((d) => (
-                    <p key={d.id}>
-                      Intento {d.attempt} ·{' '}
-                      {d.status === 'queued'
-                        ? 'En cola, no confirmado'
-                        : d.status === 'sent'
-                          ? 'Aceptado por el proveedor (no acredita recepción)'
-                          : 'Error confirmado'}{' '}
-                      · {new Date(d.created_at).toLocaleString('es-CL')}
-                      {d.error_code ? ' · ' + d.error_code : ''}
-                    </p>
-                  ))
-                )}
-                </div>
-              </section>
-            </>
-          )}
+
+            </div>
+            <div role="tabpanel" id={workspaceId+'-panel-historial'} aria-labelledby={workspaceId+'-tab-historial'} hidden={tab!=='historial'} className="cp05-tab-content" tabIndex={0}>
+              <QuoteHistory key={bundle.quote.id} bundle={bundle} busy={busy||!!readPending} archiveEnabled={repository.documents.enabled} onDownload={r=>void pdf(r)}/>
+              <details className="cp05-ledger cp05-email-controls"><summary>Comunicaciones</summary>
+                <button
+                  disabled={
+                    busy ||
+                    !canWrite ||
+                    !repository.documents.emailEnabled ||
+                    bundle.quote.status === 'voided' ||
+                    !bundle.revisions.length
+                  }
+                  className="cp04-secondary"
+                  title="El backend debe autorizar el proveedor"
+                  onClick={() => void documentAction('send', bundle.revisions[0])}
+                >
+                  <Send size={17} />{' '}
+                  {repository.documents.emailEnabled
+                    ? 'Enviar última revisión'
+                    : 'Enviar correo · desactivado'}
+                </button>
+
+              </details>
+            </div>
+          </>}
         </div>
       </div>
     </section>

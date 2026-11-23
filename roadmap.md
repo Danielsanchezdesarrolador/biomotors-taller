@@ -1,3 +1,26 @@
+## CP05 — APROBADO EN QA por el propietario (23/11/2026)
+
+El titular confirma emisión ficticia en `https://bytetorque.cl`: **COT-000001**,
+**Taller ByteTorque de Pruebas**, vehículo **QA1234**, revisión **1**, total
+histórico **$107.411 CLP**, mensaje «Revisión emitida y archivo privado verificado»,
+estado **emitida e inmutable**, historial visible y botón «Descargar PDF emitido»
+disponible. **APROBADO EN QA** para esa emisión y registro de revisión.
+Fuente: evidencia funcional declarada por el propietario, no una ejecución nueva
+de este agente. No acredita descarga efectiva del PDF, S4 integral ni permiso
+para clientes reales. Correo externo OFF y backend limitado al taller QA se
+conservan. No modificar estados manualmente en Supabase para registrar aprobación.
+
+Rediseño compacto implementado y validado localmente sobre `ec5a665`: cabecera y
+acciones sticky, pestañas persistentes, estado coherente y detalle histórico.
+15/15 pruebas focalizadas, builds público/privado y seis recorridos Chromium PASS
+(OFF: 390/1366; QA simulado: 360/390/768/1366). Sin operaciones alojadas nuevas.
+Un único commit local `feat(cp05): compact quote workspace and record owner QA approval [skip render]`.
+No publicar ni desplegar sin autorización posterior; aprobación visual nueva y
+Safari/iPhone físicos pendientes.
+Continuidad en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+
+---
+
 ## CP05 — interfaz solo QA preparada para Render (23/11/2026)
 
 Activación manual Edge CP05 QA confirmada en GitHub (workflow SUCCESS), función `bt-cp05-documents` ACTIVE v4 con JWT; correos OFF. El frontend ahora exige simultáneamente `VITE_BT_CP05_DOCUMENTS_ENABLED=true` y `VITE_BT_CP05_PILOT_WORKSHOP_ID` igual al taller autenticado antes de mostrar la emisión archivada; `VITE_BT_CP05_EMAIL_ENABLED=false`. Backend conserva su propia validación estricta del taller y RLS. Cambio limitado a interfaz, prueba enfocada y variables Render; no reactivar emails ni expandir el piloto; S4 integral pendiente. Un deploy del frontend no equivale a la primera emisión real validada.

@@ -1,3 +1,26 @@
+## CP05 — APROBADO EN QA por el propietario (23/11/2026)
+
+El titular confirma emisión ficticia en `https://bytetorque.cl`: **COT-000001**,
+**Taller ByteTorque de Pruebas**, vehículo **QA1234**, revisión **1**, total
+histórico **$107.411 CLP**, mensaje «Revisión emitida y archivo privado verificado»,
+estado **emitida e inmutable**, historial visible y botón «Descargar PDF emitido»
+disponible. **APROBADO EN QA** para esa emisión y registro de revisión.
+Fuente: evidencia funcional declarada por el propietario, no una ejecución nueva
+de este agente. No acredita descarga efectiva del PDF, S4 integral ni permiso
+para clientes reales. Correo externo OFF y backend limitado al taller QA se
+conservan. No modificar estados manualmente en Supabase para registrar aprobación.
+
+Rediseño compacto implementado y validado localmente sobre `ec5a665`: cabecera y
+acciones sticky, pestañas persistentes, estado coherente y detalle histórico.
+15/15 pruebas focalizadas, builds público/privado y seis recorridos Chromium PASS
+(OFF: 390/1366; QA simulado: 360/390/768/1366). Sin operaciones alojadas nuevas.
+Un único commit local `feat(cp05): compact quote workspace and record owner QA approval [skip render]`.
+No publicar ni desplegar sin autorización posterior; aprobación visual nueva y
+Safari/iPhone físicos pendientes.
+Continuidad en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+
+---
+
 ## Continuidad consolidada - main publicado, despliegue pendiente (22/11/2026)
 
 GitHub main verificado en efc87801caefe1e501805e46d5733f72507f43d0: el multipunto oficial YA ESTA IMPLEMENTADO y PUBLICADO en codigo.47/47 pruebas y A4 unica corresponden a la evidencia del entorno desarrollador y al checkpoint BT-INS-PDF-02; no se repitieron ni modificaron aqui. Despliegue efectivo de esta revision NO verificado; no confundir publicacion con disponibilidad productiva. Las notas inferiores que dicen sin push son historicas.

@@ -184,3 +184,131 @@ No se modificaron Supabase, SQL/Storage/Edge alojados, Render, secretos, datos,
 Auth, políticas, correo, pagos, CP04 ni CP06. No cuentas/concesiones para Ignacio,
 respaldo, exportación ni restauración realizados. No se certifica piloto con
 clientes reales ni recuperación integral por aprobar un laboratorio CP05.
+
+
+## Adenda única — QA aprobada y rediseño compacto (23/11/2026)
+
+### Aprobación funcional del propietario
+
+**CP05 APROBADO EN QA** por el titular: emisión real de una **cotización ficticia**
+en bytetorque.cl, `COT-000001`, Taller ByteTorque de Pruebas, vehículo `QA1234`,
+revisión 1, total histórico **$107.411 CLP**. Mensaje confirmado por él: «Revisión
+emitida y archivo privado verificado»; emitida/inmutable, historial visible y botón
+«Descargar PDF emitido» disponible. Se registra avance del proyecto, sin editar
+estados ni consultar datos productivos. **No** se atribuye descarga efectiva,
+restauración S4 integral, recepción de correo ni habilitación de clientes reales.
+Correo externo OFF y restricción al taller QA permanecen. Las secciones anteriores
+«no activado» describen el estado histórico del 22/11; esta adenda actualiza
+únicamente el avance QA evidenciado, sin declarar despliegue del rediseño.
+
+### Implementación local, fuente y alcance
+
+Base main/origin/main `ec5a665be5741466a3e9f351b31a1de029b24500`, fast-forward sin
+sobrescribir trabajo previo. Se conservan .github manuales, backend QA, JWT,
+allowlist, CORS, RLS, archivos y motor PDF. **No push/deploy autorizado**.
+
+- Cabecera compacta sticky en flujo normal con número, cliente/vehículo,
+  estado confirmado, revisión/versión, total CLP y acciones según estado.
+  Se retira el output flotante; el total pasa a la cabecera y no tapa controles.
+- Guardar/recargar/PDF/emitir siguen usando los handlers y bloqueos existentes.
+  Emitida: acceso superior inmediato al PDF de la revisión confirmada, historial
+  y nueva revisión (solo roles habilitados). Reserva pendiente/operación sin
+  lectura conciliada mantienen sus bloqueos y confirmaciones originales.
+- Pestañas accesibles Trabajos y repuestos / Condiciones / Historial: roles
+  tablist/tab/tabpanel, relación ARIA, foco roving, flechas/Home/End. Paneles
+  ocultos permanecen montados para conservar formularios y cambios sin enviar;
+  no cambian URL, documento ni permisos, ni agregan consultas al navegar.
+- Listado y cabecera utilizan el mismo bundle confirmado: `workspaceQuotes`
+  sustituye la fila seleccionada obsoleta sin modificar datos. No inventa estado
+  emitido por pulsar el botón: espera lectura autorizada/confirmación existente.
+- Historial: selector compacto y un único detalle de snapshot en el área principal,
+  lateral en anchos amplios. Partidas/importes/condiciones/observaciones congeladas,
+  PDF autenticado e integridad visibles; eventos/envíos en disclosures compactos.
+  Iconos editar/eliminar/agregar se ocultan solo en CP05 de lectura, sin modificar
+  el componente compartido ni su lógica de autorización.
+- Contenido con altura acotada y scroll interno, controles en cabecera y navegación
+  responsive; origen/cambio de OT colapsado en celular al tener una cotización.
+  Colores, tipografía, superficies y radios mantienen R2. Comunicaciones permanecen
+  desactivadas y separadas de las acciones esenciales; no se cambian flags.
+
+### Archivos del rediseño
+
+1. `src/cp05/QuotePanel.tsx`
+2. `src/cp05/cp05.css`
+3. `src/cp05/QuoteHistory.tsx` (presentación nueva; reutiliza tabla/modelo)
+4. `src/cp05/workspacePresentation.ts` (reconciliación visual pura)
+5. `src/cp05/workspacePresentation.test.ts`
+6. `scripts/verify-cp05-browser.cjs` (recorridos afectados actualizados)
+7. `tests/harness/cp05BrowserFixture.cjs` (HTTP sintético CP05 reutilizado)
+8. `AGENTS.md`
+9. `agent.md`
+10. `roadmap.md`
+11. Este checkpoint existente; no se crea otro.
+
+### Validación consolidada
+
+Resultados en `/workspace/work/cp05-compact/`; solo datos sintéticos, nunca nuevas
+emisiones alojadas ni pruebas CP04/S4. Las pruebas de navegador emplean SDK/React
+reales y respuestas HTTP/Edge interceptadas. En modalidad QA, el fixture usa el
+renderer R3 existente para producir PDF desde un snapshot sintético; la descarga
+se compara byte por byte. No es nueva QA productiva ni ensayo de Storage alojado.
+
+- Pruebas focalizadas de presentación, repositorio/guardia QA, selección y borrador:
+  **15/15 PASS en 4 archivos**.
+- TypeScript + builds público/privado: PASS, con verificadores de grafo, PWA,
+  exclusión de fixtures y marca. Flags solo para procesos locales de compilación;
+  no se modifica .env, configuración Render ni valores alojados.
+- **6 recorridos Chromium PASS**: OFF 390/1366 y QA simulado 360/390/768/1366.
+  Teléfonos a 780 px de alto. Pestañas preservan formulario incompleto y condiciones,
+  navegación por teclado, subtotal $90.261 + IVA $17.150 = $107.411 CLP,
+  guardado confirmado y reconciliación sin duplicar RPC, PDF de borrador real,
+  emisión/descarga HTTP simuladas con bytes idénticos al PDF R3 generado, estado
+  R1/Emitida consistente, acciones de lectura sin editar/eliminar, correo bloqueado,
+  nuevo borrador sin alterar snapshot y selección local entre dos revisiones.
+  Sin errores JS ni desborde horizontal. Scroll interno y externo comprobados:
+  área de contenido debajo del dock y botón de cambio de origen sin obstrucción.
+  Capturas móviles/escritorio inspeccionadas; el PDF emitido es visible arriba.
+- Correcciones tras fallos: especificidad CSS móvil antigua imponía `display:flex`
+  al contenedor de editar/eliminar; selector de lectura CP05 más específico lo
+  oculta. Scroll externo podía pasar el cambio de origen bajo el dock: layout
+  anclado debajo de altura observada, con altura interna que reserva navegación
+  móvil. No se modifica el editor compartido ni la autorización.
+- Ajustes de fixture: lectura fallida usa HTTP 400 no reintentable para verificar
+  reconciliación explícita; al simular una revisión externa con cambios locales,
+  el test acepta el diálogo original de descarte antes de recargar. No se suprime
+  la confirmación en producto. Guardar conserva la pestaña; crear/nueva revisión
+  vuelve a Trabajos. Una invocación local de build con flags incompletos fue
+  rechazada por la guarda vigente; repetida con los nombres `_PRIVATE_ENABLED`
+  correctos, sin cambiar configuración ni código de la guarda.
+
+Reproducción focalizada: `npm test -- src/cp05/workspacePresentation.test.ts
+src/cp05/repository.test.ts src/cp05/quoteSelection.test.ts
+src/cp05/temporaryDraft.test.ts`. Navegador: `node scripts/verify-cp05-browser.cjs`
+con `CP04_BASE_URL` apuntando al harness loopback (se reutiliza su shell, sin
+probar CP04), `CP05_WIDTHS=390,1366` para OFF y `CP05_QA_DOCUMENTS=true`,
+`CP05_WIDTHS=360,390,768,1366` para el harness con documentos y taller sintético
+habilitados. `OUTPUT_DIR` debe apuntar fuera del repositorio. Estos flags de prueba
+no habilitan funciones en producción.
+
+### Causas comprobadas y límites
+
+- **CP05-UX-01:** el crecimiento vertical se debía al render simultáneo del editor,
+  condiciones, acciones, todos los detalles históricos y trazabilidad. Se separa
+  presentación en pestañas persistentes y se acota el área de trabajo; sin tocar
+  emisión, modelos o persistencia.
+- **CP05-UX-02:** `documentAction` actualizaba bundle, pero no la lista independiente
+  de cotizaciones. Una fila anterior podía seguir R0/Borrador mientras la cabecera
+  ya recibía R1/Emitida. Solución visual pura desde el bundle confirmado, probada
+  con lista obsoleta y refresco ausente; no se escriben estados por frontend.
+- QA anterior queda aprobada en su alcance. No se promete continuidad ante cierre
+  forzado/recarga completa más allá de borradores existentes. WebKit/Safari físicos
+  y aprobación visual del propietario del nuevo diseño siguen pendientes.
+
+No se modificaron Supabase, SQL, Storage, Edge, secretos, Render, emisión, correo,
+pagos, CP03/CP04/CP06, documentos PDF ni seguridad S4/S4I. No se repitieron sus
+pruebas/auditorías. Entrega en un único commit local de `main` con asunto:
+`feat(cp05): compact quote workspace and record owner QA approval [skip render]`.
+Base `ec5a665be5741466a3e9f351b31a1de029b24500`; el SHA final se identifica mediante
+`git log -1` y se entrega al titular. Publicación y despliegue posteriores requieren
+autorización; esta entrega no incluye push ni deploy. Se conserva `artifacts/`
+preexistente sin incorporarlo al commit.
