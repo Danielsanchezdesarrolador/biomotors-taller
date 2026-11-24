@@ -1,3 +1,13 @@
+## SEC07 cierre B — BLOCK_B_PASS_INFRASTRUCTURE
+
+**Estado al 23/11/2026 (Chile): A y B aprobados en su alcance. C en curso.** El titular confirmó acceso administrativo a las cinco plataformas, ajustes de Auth registrados, 12 variables de Render inventariadas (nueve flags confirmados en `true`), ausencia de reglas personalizadas Redirects/Rewrites y custodia privada de la ficha de recuperación. El detalle privado y los valores de configuración quedan fuera del repositorio. La documentación refleja la evidencia del titular. No se cambió la configuración alojada.
+
+**Alcance del piloto inicial:** cuenta ya gestionada y cotización normal. El onboarding público no forma parte del piloto. Archivo documental CP05 y envío externo fuera del recorrido inicial. El único PDF observado en Storage pertenece al taller QA. Ver [checkpoint del bloque B](docs/checkpoints/CHECKPOINT_BT_SEC07_CIERRE_B_PASS_INFRAESTRUCTURA.md).
+
+**Bloque C:** cargó la entrada pública canónica de ByteTorque y se mostró la pantalla de inicio de sesión. Falta el recorrido autenticado y la evidencia de persistencia del taller piloto. Cubre login, cliente/vehículo, orden de trabajo, borrador de cotización, recarga e historial. Las escrituras alojadas requieren autorización específica. Conservar la pauta de respaldo manual local cada dos días y antes de cambios de datos. No reabrir A ni B. SEC07 permanece pendiente de C.
+
+---
+
 ## SEC07 cierre A — BLOCK_A_PASS_V04 (evidencia del propietario)
 
 **Bloque A aprobado sobre v04**: ATTACHED_R8, BOOTSTRAP READY, GPG PASS, CONTRACT MATCH, QA PASS, CLEANUP PASS, STATUS BLOCK_A_PASS_V04, PRODUCTION NOT_TOUCHED. Según informe recibido: propietarios/ACL de 281 entradas de aplicación y dependencias Auth recuperados; 20 tablas, 35 funciones de propietario postgres, 21 políticas RLS y 6 DEFAULT ACL; positivos admin A/B, aislamiento lectura/escritura A→B y comprobación de B intacto, mecánico restringido, dos mutaciones de planes rechazadas para no creador incluso AAL2 y creador AAL1; creador AAL2 autorizado con eventos, denegados sin eventos. Fixtures sintéticos revertidos, sin roles ficticios/grants añadidos ni datos reales recargados.
