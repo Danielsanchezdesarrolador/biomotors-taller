@@ -316,3 +316,120 @@ Base `ec5a665be5741466a3e9f351b31a1de029b24500`; el SHA final se identifica medi
 `git log -1` y se entrega al titular. Publicación y despliegue posteriores requieren
 autorización; esta entrega no incluye push ni deploy. Se conserva `artifacts/`
 preexistente sin incorporarlo al commit.
+
+
+## Adenda única — reparación focalizada del selector CP05 (24/11/2026)
+
+### Continuidad y autorización
+
+El titular confirma CP04 aprobado funcional y visualmente en producción; CP04 y
+SEC07 permanecen cerrados. Autoriza repositorio público temporal hasta renovar
+minutos GitHub Actions, sustituyendo la restricción privada. Se publican primero
+solo los cuatro documentos CP04 pendientes (`f2b528e` + aceptación del titular)
+en `3f5d962086a678cf7b7a1495f76fea64512e7bdf`, por avance rápido sobre remoto
+`bf2d0ef...`. No se toca Render: LIVE sigue en `bf2d0ef...`, Auto-Deploy OFF.
+
+La implementación funcional CP05 parte de ese main publicado y está autorizada
+**únicamente de forma local**. Ningún código de esta adenda se publica o despliega
+sin aprobación posterior. No se crean ramas, tablas, migraciones ni checkpoints.
+
+### Causa comprobada
+
+`useWorkspaceNavigation` conserva hasta cinco paneles montados y cambia `hidden`/
+`inert` al navegar. `QuotePanel` cargaba órdenes junto a la lista de cotizaciones
+solo en el efecto `[repository]`. La instancia del repositorio se conserva al ir
+a CP04 y regresar, así que el selector quedaba con la instantánea inicial y no
+incluía una OT recién creada. El ingreso directo desde una OT cambiaba la key del
+contexto y ocultaba el problema al montar otro panel.
+
+No se trataba de una pérdida del registro alojado ni requería rehacer módulos,
+añadir tablas, cambiar RLS o ejecutar una migración.
+
+### Corrección y alcance exacto
+
+- `src/App.tsx`: pasa `isActive={navigation.screen === 'informes'}` al panel CP05
+  conservado. Se usa la pantalla activa real, no la variable de cada vista montada.
+  No cambia keys, historial del navegador, foco ni conservación de módulos.
+- `src/cp05/Cp05PrivatePanel.tsx`: propaga ese dato por el binding autenticado hasta
+  `QuotePanel`. El binding conserva sus dependencias y su ciclo de dispose; no se
+  reemplaza el repositorio para provocar una recarga artificial. Valor por defecto
+  true mantiene los consumidores que no usan navegación conservada.
+- `src/cp05/QuotePanel.tsx`: separa la lectura de órdenes del inicio de cotización.
+  Al entrar/reingresar, o reintentar, consulta `repository.orders()` existente,
+  conserva el filtro de vehículo y actualiza únicamente las opciones del selector.
+  No toca bundle, borrador, partidas, condiciones, edición incompleta o ID elegido.
+- Carga, error y reintento del selector no bloquean guardar/editar el borrador.
+  Durante lectura fallida o pendiente no se puede crear desde un listado no
+  actualizado. Una respuesta anterior no se aplica después de ocultar/salir del
+  panel, cambiar binding/filtro o iniciar otra lectura. Sin polling ni listeners
+  globales de focus ni consultas en cada render.
+- Si la OT elegida ya no aparece entre las 40 recientes, una opción contextual
+  conserva su ID y explica que está fuera del listado. No se elige automáticamente
+  la primera OT ni se modifica el vínculo de la cotización. Sigue siendo el backend
+  existente quien valida crear/recuperar y la elegibilidad real de la fuente.
+- Una denegación del port CP04 se traduce a la denegación CP05 existente, limpia
+  datos/borrador local según su comportamiento previo y también la OT seleccionada.
+  El mensaje no promete conservar el borrador cuando se revocó el acceso.
+- `src/official/useWorkspaceNavigation.ts` revisado y **sin cambios**: se aprovecha
+  su estado actual. Repositorios, SQL, Auth/RLS, emisión, PDF, permisos por taller,
+  planes, CP04, SEC07, Edge, Storage, variables y correos sin cambios.
+
+### Validación consolidada y evidencia
+
+- **21/21 pruebas PASS**, seis archivos existentes: repository, quoteSelection,
+  temporaryDraft, workspacePresentation, privateScreen, privateScreenRendering.
+  Alcance: guardas por identidad/taller/rol, recuperación y selección, proyección
+  confirmada y navegación privada. No se repiten auditorías CP04/SEC07.
+- **Build público y privado PASS**, TypeScript, exclusión de fixtures, grafo de
+  módulos y marca/PWA. El build privado final incluye la limpieza de OT denegada.
+  Configuración solo por variables del proceso de compilación, sin escribir .env
+  ni modificar variables alojadas. Sin cambios de diseño CSS o assets.
+- **2/2 recorridos de navegador PASS**, anchos 390 y 1366. Script nuevo focalizado
+  `scripts/verify-cp05-order-selector.cjs`, reutilizando `cp05BrowserFixture` y
+  `cp04BrowserFixture` con React/SDK reales y HTTP completamente simulado.
+- Cada ancho abre primero el selector general, crea dos vehículos ficticios
+  QS8001/QS8002 y dos OT nuevas mediante la recepción existente, y verifica que
+  ambas aparecen al volver sin recarga del documento. No se realizan inspecciones
+  ni auditorías CP04: solo se usa recepción para preparar las fuentes sintéticas.
+- Mismo nodo del selector y de formularios; partida de 2 × $15.000 y total $35.700,
+  texto de partida sin confirmar, condiciones y OT seleccionada permanecen al
+  cambiar de sección. No se vuelven a leer cotización/historial ni se emiten RPC
+  de cotización por entrar al módulo.
+- Lectura fallida: selector/crear bloqueados, edición/guardar disponibles; reintento
+  recupera opciones sin tocar el borrador. Respuesta antigua suspendida y nueva
+  lectura completada: liberar la antigua no oculta la OT más reciente.
+- Guardado/recuperación explícitos conservan la relación cotización/OT/vehículo;
+  condiciones se recuperan de la respuesta persistida sintética. La prueba no
+  acredita una escritura nueva en PostgreSQL alojado.
+- Revocación sintética: la lectura guardada se deniega, desaparecen datos de la
+  cotización, opciones y selección previa; no hay RPC de escritura posterior.
+- Sin errores JS ni desborde horizontal. Capturas escritorio/móvil inspeccionadas
+  en `/workspace/work/cp05-selector/selector-{390,1366}.png`.
+- Incidentes corregidos en esta validación: búsqueda exacta de label que incluía
+  texto de sus opciones → selector del control existente; opción contextual de OT
+  retenida tras acceso denegado → limpieza explícita de `orderId` en esa rama.
+  No se deshabilitaron comprobaciones para obtener PASS.
+
+Comandos focalizados:
+`npm test -- src/cp05/repository.test.ts src/cp05/quoteSelection.test.ts
+src/cp05/temporaryDraft.test.ts src/cp05/workspacePresentation.test.ts
+src/official/privateScreen.test.ts src/official/privateScreenRendering.test.tsx`.
+
+Harness loopback 5240 con Auth R1/CP03_PRIVATE/CP04_PRIVATE/CP05_PRIVATE true;
+`CP04_BASE_URL=http://127.0.0.1:5240 CP05_WIDTHS=390,1366
+OUTPUT_DIR=/workspace/work/cp05-selector node scripts/verify-cp05-order-selector.cjs`.
+No credenciales reales, exportaciones, restauraciones o llamadas autenticadas
+al proyecto alojado. Logs/capturas y `artifacts/` preexistente no se versionan.
+
+### Entrega local y siguiente permiso
+
+Ocho archivos de esta entrega: `src/App.tsx`, `src/cp05/Cp05PrivatePanel.tsx`,
+`src/cp05/QuotePanel.tsx`, `scripts/verify-cp05-order-selector.cjs`, `AGENTS.md`,
+`agent.md`, `roadmap.md` y este checkpoint existente. Un único commit local:
+`fix(cp05): refresh authorized order selector on workspace return [skip render]`.
+El SHA final se entrega al titular y se obtiene con `git log -1`.
+
+Pendiente aprobación para publicar la corrección funcional y, separadamente,
+para desplegarla. No hay CI nueva de la corrección porque no fue publicada.
+La publicación de documentación CP04 es anterior y no contiene este código.
+CP04/SEC07 siguen cerrados, Auto-Deploy OFF; no ampliar el alcance por inferencia.

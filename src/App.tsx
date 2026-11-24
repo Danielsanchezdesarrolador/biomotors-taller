@@ -61,6 +61,7 @@ function PrivateWorkOrders({
 }
 function PrivateQuotes(props: {
   controller: AuthController
+  isActive: boolean
   initialOrderId?: string
   initialVehicleId?: string
   onBack: () => void
@@ -168,6 +169,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
         import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true' ? (
         <PrivateQuotes
           key={quoteOrder ? 'order:'+quoteOrder : quoteVehicle ? 'vehicle:'+quoteVehicle : 'recent'}
+          isActive={navigation.screen === 'informes'}
           controller={session.directoryController}
           initialVehicleId={quoteVehicle}
           initialOrderId={quoteOrder}

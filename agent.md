@@ -1,3 +1,25 @@
+## CP05 — selector de órdenes actualizado al regresar, solo local (24/11/2026)
+
+CP04 aceptado funcional y visualmente en producción por el propietario; CP04 y
+SEC07 permanecen cerrados. Cierre documental y autorización temporal de repositorio
+público publicados en `3f5d962086a678cf7b7a1495f76fea64512e7bdf` (incluye el cierre
+pendiente `f2b528e`). La excepción pública sustituye la restricción privada anterior.
+
+Corrección focalizada local CP05: el panel conservado recibe si su sección está
+activa y vuelve a consultar únicamente las órdenes al entrar. No recarga la
+cotización ni sustituye borrador, partidas, condiciones, formulario o selección.
+Carga/error/reintento del selector independientes; respuestas de visitas anteriores
+se ignoran. Denegación de acceso limpia también la OT seleccionada.
+
+Validación consolidada: 21/21 pruebas focalizadas, builds público/privado y dos
+recorridos HTTP sintéticos (390/1366) PASS, con dos vehículos/OT nuevas por ancho,
+conservación del borrador, guardado/lectura, error/reintento y carreras de lectura.
+No se modifica `useWorkspaceNavigation`, repositorios, SQL, Auth, RLS ni CP04.
+**Código CP05 sin push ni deploy** hasta aprobación posterior. Auto-Deploy OFF.
+Continuidad en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+
+---
+
 ## CP04 aceptado en producción; repositorio público temporal autorizado — 24/11/2026
 
 El propietario confirma la aprobación **funcional y visual de CP04 en producción**.

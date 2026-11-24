@@ -14,12 +14,14 @@ function VerifiedOrderScreen({
   context,
   onBack,
   initialVehicleId,
-  initialOrderId
+  initialOrderId,
+  isActive
 }: {
   client: SupabaseClient
   context: Context
   initialVehicleId?: string
   initialOrderId?: string
+  isActive: boolean
   onBack: () => void
 }) {
   const [repository, setRepository] = useState<ReturnType<typeof cp05Repository> | null>(null)
@@ -39,6 +41,7 @@ function VerifiedOrderScreen({
       onBack={onBack}
       initialVehicleId={initialVehicleId}
       initialOrderId={initialOrderId}
+      isActive={isActive}
     />
   )
 }
@@ -46,11 +49,13 @@ export function Cp05PrivatePanel({
   controller,
   onBack,
   initialVehicleId,
-  initialOrderId
+  initialOrderId,
+  isActive = true
 }: {
   controller: AuthController
   initialVehicleId?: string
   initialOrderId?: string
+  isActive?: boolean
   onBack: () => void
 }) {
   const [ready, setReady] = useState<{ client: SupabaseClient; context: Context } | null>(null)
@@ -91,6 +96,7 @@ export function Cp05PrivatePanel({
       key={ready.context.userId + '-' + ready.context.workshop.id}
       initialVehicleId={initialVehicleId}
       initialOrderId={initialOrderId}
+      isActive={isActive}
       onBack={onBack}
       client={ready.client}
       context={ready.context}

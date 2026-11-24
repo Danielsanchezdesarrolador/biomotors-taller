@@ -12,7 +12,7 @@ import {
   History
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
-import type { OrderWithVehicle } from '../ordenes/cp04Contracts'
+import { WorkOrderFailure, type OrderWithVehicle } from '../ordenes/cp04Contracts'
 import { WorkItemsTable, WorkItemForm } from '../informes/trabajos/WorkItemsEditor'
 import type { WorkItem } from '../informes/trabajos/workItemCore'
 import { currency } from '../informes/trabajos/workItemCore'
@@ -50,6 +50,7 @@ export function QuotePanel({
   context,
   initialVehicleId,
   initialOrderId,
+  isActive = true,
   onBack
 }: {
   repository: Cp05Port
@@ -57,6 +58,7 @@ export function QuotePanel({
   context: Context
   initialVehicleId?: string
   initialOrderId?: string
+  isActive?: boolean
   onBack: () => void
 }) {
   const [quotes, setQuotes] = useState<Quote[]>([]),
@@ -67,6 +69,9 @@ export function QuotePanel({
     [busy, setBusy] = useState(true),
     [message, setMessage] = useState(''),
     [error, setError] = useState('')
+  const [ordersRefreshing,setOrdersRefreshing]=useState(true)
+  const [ordersError,setOrdersError]=useState('')
+  const [ordersRetry,setOrdersRetry]=useState(0)
   const [tab,setTab]=useState<'trabajos'|'condiciones'|'historial'>('trabajos')
   const [browseOpen,setBrowseOpen]=useState(false),[revisionOpen,setRevisionOpen]=useState(false)
   const workspaceId=useId(),toolbar=useRef<HTMLDivElement>(null),workspace=useRef<HTMLElement>(null)
@@ -108,15 +113,9 @@ export function QuotePanel({
     let cancelled = false
     async function start() {
       try {
-        const [list, source] = await Promise.all([
-          repository.list(initialVehicleId),
-          repository.orders()
-        ])
+        const list = await repository.list(initialVehicleId)
         if (cancelled || !active.current) return
         setQuotes(list)
-        setOrders(
-          initialVehicleId ? source.filter((o) => o.vehicle.id === initialVehicleId) : source
-        )
         const cached = localDraft(context.userId, context.workshop.id)
         const selected = readQuoteSelection(context.userId, context.workshop.id)
         if (initialOrderId) {
@@ -143,6 +142,29 @@ export function QuotePanel({
       sequence.current++
     }
   }, [repository])
+  // Kept-alive navigation hides this panel instead of remounting it. Refresh
+  // only the order options on entry; never restore/reload a quote or its draft.
+  useEffect(()=>{
+    if(!isActive)return
+    let cancelled=false
+    setOrdersRefreshing(true)
+    setOrdersError('')
+    void repository.orders().then(source=>{
+      if(cancelled||!active.current)return
+      setOrders(initialVehicleId?source.filter(o=>o.vehicle.id===initialVehicleId):source)
+    }).catch(e=>{
+      if(cancelled||!active.current)return
+      if((e instanceof QuoteFailure||e instanceof WorkOrderFailure)&&e.kind==='denied'){
+        failure(new QuoteFailure('denied'))
+        setOrdersError('No se pudo verificar el acceso a las órdenes. Vuelve a verificar tu sesión.')
+        return
+      }
+      setOrdersError('No se pudo actualizar el selector de órdenes. Tu borrador se conserva; reintenta para continuar.')
+    }).finally(()=>{
+      if(!cancelled&&active.current)setOrdersRefreshing(false)
+    })
+    return()=>{cancelled=true}
+  },[repository,isActive,initialVehicleId,ordersRetry])
   useEffect(() => {
     if (bundle) rememberQuoteSelection(context.userId, context.workshop.id, bundle.quote.id)
   }, [bundle?.quote.id, context.userId, context.workshop.id])
@@ -179,6 +201,7 @@ export function QuotePanel({
       setDraft(empty)
       setQuotes([])
       setOrders([])
+      setOrderId('')
       setEditing(null)
       setRecovery(null)
     }
@@ -549,8 +572,9 @@ export function QuotePanel({
           ))}
           <label>
             Orden CP04
-            <select disabled={busy} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
+            <select disabled={busy||ordersRefreshing||!!ordersError} aria-busy={ordersRefreshing} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
               <option value="">Selecciona una orden</option>
+              {orderId&&!orders.some(o=>o.order.id===orderId)&&<option value={orderId}>OT seleccionada · {orderId.slice(0,8)} · fuera del listado reciente</option>}
               {orders.map((o) => (
                 <option key={o.order.id} value={o.order.id}>
                   {o.vehicle.plate || 'Sin patente'} · {o.vehicle.make} {o.vehicle.model} ·{' '}
@@ -559,13 +583,15 @@ export function QuotePanel({
               ))}
             </select>
           </label>
+          {ordersRefreshing&&<small role="status">Actualizando órdenes autorizadas…</small>}
+          {ordersError&&<div className="cp05-notice" role="status"><p>{ordersError}</p><button type="button" className="cp04-secondary" onClick={()=>setOrdersRetry(n=>n+1)}>Reintentar órdenes</button></div>}
           <small>
             Selección de las últimas 40 órdenes. Desde CP04 puedes abrir cualquier orden recuperada.
           </small>
           {canWrite && (
             <button
               className="cp04-primary"
-              disabled={busy || !!readPending || !orderId}
+              disabled={busy || ordersRefreshing || !!ordersError || !!readPending || !orderId}
               onClick={() => {
                 if (!dirty || window.confirm('¿Continuar sin guardar los cambios actuales?'))
                   void action('create')
