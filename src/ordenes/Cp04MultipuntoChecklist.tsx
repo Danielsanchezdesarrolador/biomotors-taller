@@ -91,7 +91,7 @@ export function Cp04MultipuntoChecklist({
        onChange={readOnlyOrBusy?undefined:(itemId,state)=>queue.select(itemId,state)}
        renderAfterRow={item=>{
          const entry=entries[item.id]
-         const saved=latestForMultipuntoItem(item,findings)
+         const saved=latestForMultipuntoItem(item,findings,scope)
          const phase=entry?.phase
          const showNote=item.state==='attention'||item.state==='immediate'
          const isResolved=saved?.resolution==='resolved' && !entry
@@ -100,7 +100,7 @@ export function Cp04MultipuntoChecklist({
          const status=entry?phase==='queued'?'Pendiente de enviar'
            :phase==='saving'?'Guardando…'
            :phase==='error'?'Error al guardar':'Guardado'
-           :saved?'Guardado':'Sin revisar'
+           :saved?(item.state==='unreviewed'?'Sin revisar · Guardado':'Guardado'):'Sin revisar'
          return <div className="cp04-inline-control">
            <span className={
              'cp04-inline-status '+(phase==='error'?'is-error':

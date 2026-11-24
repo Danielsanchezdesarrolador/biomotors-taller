@@ -146,3 +146,142 @@ Publicación y despliegue requieren autorización expresa separada y el procedim
 vigente de pausa/verificación de autoDeploy; `[skip render]` es defensa adicional,
 no autorización. Si hay una observación visual, corregir solo el formato y repetir
 las verificaciones afectadas, sin volver a auditar respaldos ni producción.
+
+
+## Adenda CP04 — corrección de diagnóstico vigente y compactación (24/11/2026)
+
+### Alcance y continuidad
+
+Orden del propietario del 24/11: implementación y validación exclusivamente local.
+Base main `169ddddbe8821fda87d49cecb3754b857dce8d56`, obtenida por fast-forward del
+remoto; se conservan CP05, SEC07 y el resto del proyecto. `artifacts/` preexistente
+no se incorpora. No se crean ramas ni checkpoints nuevos. Esta adenda no reabre
+la aprobación A4 ni SEC07: el piloto inicial tiene el cierre declarado por el
+propietario en la documentación más reciente; no revocarlo usando notas antiguas.
+
+### Causas comprobadas
+
+1. `Cp04OrdersView` renderizaba `findings.map()` completo como diagnóstico actual:
+   una atención anterior seguía apareciendo junto a un OK confirmado posterior.
+2. La inserción de autoguardado pasaba `entry.note.trim() || CP04_PROVISIONAL_NOTE`
+   también a `multipuntoFinding(...,'ok',...)`. Se guardaba una nota provisional
+   en un estado que no la requería. No se corrigen registros alojados individuales.
+3. `latestForMultipuntoItem` recorría el array al revés; pendientes elegía fecha/ID
+   y otras rutas solo ordenaban milisegundos. Respuestas desordenadas, empates o
+   microsegundos podían proyectar resultados distintos. Actualizar una nota no
+   debe convertir un diagnóstico viejo en el más nuevo.
+4. `findingsForOrder` tenía límite 100 ascendente, por lo que una corrección después
+   de 100 eventos podía desaparecer tras recargar. Se reutiliza la paginación
+   keyset protegida de pendientes: 200 por página, fecha/ID, error cerrado ante
+   filas de otro alcance, duplicados de paginación o límite de seguridad superado.
+
+### Corrección general y comportamiento
+
+- Comparador único por creación con precisión de microsegundos y desempate UUID;
+  comparación de actualización de nota conserva también esa precisión.
+- Proyección vigente por taller/vehículo/OT/categoría; el selector multipunto
+  requiere una OT inequívoca y rechaza tomar marcas de visitas mezcladas. La cola
+  filtra su alcance autenticado y conserva su concurrencia, reintentos y recuperación.
+- OK nuevo se guarda sin nota provisional; los OK heredados con ese texto se
+  presentan sin él, sin borrarlos o resolverlos en la base. Se mantiene detalle
+  técnico explícito que no sea el marcador provisional.
+- Limpiar X persiste `not_checked`: checklist, resumen y modelo PDF muestran
+  Sin revisar. No certifica reparación. Los pendientes del vehículo ignoran ese
+  estado como prueba de resolución y conservan el último antecedente evaluado,
+  incluidas visitas previas. OK confirmado lo sustituye en la proyección pendiente;
+  el registro anterior conserva `resolution=pending` y `resolved_at=null`.
+- El bloqueo de PDF por nota provisional usa diagnósticos vigentes de la visita;
+  una nota provisional histórica ya sustituida no bloquea el documento actual.
+- Cuatro paneles montados: Resumen / Inspección multipunto / Observaciones
+  pendientes / Historial de diagnósticos. Roles ARIA, navegación por teclado,
+  formularios y cola conservados al navegar; pestaña y posición interna bajo
+  las mismas guardas de usuario/taller/TTL, sin recrear borradores tras logout.
+- Resumen con 34 componentes en cinco grupos e indicadores confirmados; diagnósticos
+  adicionales por categoría se conservan. Historial distingue datos anteriores
+  del diagnóstico vigente. No se altera la numeración ni la vida de las OT.
+- Cabecera y acciones de PDF/estado/cotización en espacio compacto R2, área de
+  trabajo con scroll interno, listado acotado y recepción más densa. Las casillas
+  mantienen altura táctil mínima de 44 px; notas técnicas solo donde corresponden.
+  Todo el espacio se ancla como unidad para evitar que dos elementos sticky
+  independientes se superpongan al final del contenedor.
+- PDF: únicamente se unifica la proyección del modelo. Desde `const W=595.28...`
+  en adelante el renderer oficial, fuentes, logotipos y dimensiones no cambian.
+- CP05/selector, CP06, Auth, RLS, SQL, Edge, Storage, correo, pagos, secretos,
+  respaldos y Render no se modifican. No hay nuevas capacidades para mecánicos:
+  autoridad de inspección y bloqueos de recepción/estado se conservan.
+
+### Validación consolidada
+
+- 53/53 pruebas focalizadas en seis archivos CP04: contratos, multipunto,
+  autoguardado, repositorio, borrador y modelo/PDF A4. Incluye 251 eventos,
+  microsegundos/offset, permutaciones, aislamiento y permisos de mecánico.
+- Compilación pública y privada CP04: PASS, TypeScript, frontera de módulos,
+  exclusión de fixtures y marca/PWA. Solo flags del proceso local, sin .env.
+- Navegador responsive **3/3 PASS (390, 768 y 1366 px)**. En cada ancho:
+  dos vehículos ficticios diferentes, dos OT nuevas por vehículo (primera visita
+  y visita posterior), Atención → OK, Inmediato → OK, OK → Atención,
+  Atención → Sin revisar, seis marcas rápidas independientes y navegación antes
+  del debounce. Recarga conserva las seis X y el historial, sin diagnósticos
+  vigentes duplicados ni escritura al alternar pestañas. Los OK no tienen nota
+  provisional ni se resuelven automáticamente las atenciones históricas.
+  Visita nueva sin X conserva el pendiente anterior; PDF real generado localmente,
+  exactamente una A4, y modelo coherente con cada transición. Sin errores JS,
+  desbordes ni superposición geométrica de acciones/campos.
+- Cierre visual adicional **3/3 PASS**: pestaña y scroll interno restaurados tras
+  recarga; flechas de teclado, texto Sin revisar · Guardado, capturas finales de
+  las cuatro pestañas por ancho. Escritorio organiza categorías en dos columnas,
+  sin reutilizar el span completo de la hoja imprimible. PNG sintéticos en
+  `/workspace/work/cp04-current/final/`; revisión visual de móvil y escritorio
+  realizada. La restricción del portal mecánico sin flags de talleres se mantiene;
+  la inspección autorizada y denegación de creación/cierre se prueban en el port
+  de repositorio, sin habilitar flags para ampliar el acceso.
+- Prueba focalizada `scripts/verify-cp04-current-diagnosis.cjs` reutiliza
+  `tests/harness/cp04BrowserFixture.cjs`; React y SDK reales, HTTP interceptado.
+  No demuestra RLS alojada ni persistencia PostgreSQL real.
+- Los selectores de dos scripts existentes se adaptan al panel ahora visible;
+  no se repiten sus escenarios ajenos. Se comprueba su sintaxis.
+- Incidentes locales: fixture antiguo usaba el mismo ID/fecha para dos registros
+  contradictorios; se corrigió a eventos únicos. La prueba de paginación tenía
+  recursión del mock, corregida conservando su implementación original. La prueba
+  de rol esperaba CP04 sin el flag del portal mecánico; se ajustó a la ruta técnica
+  restringida existente y se probó la autoridad de inspección en el repositorio.
+  La comprobación geométrica detectó solapamiento de sticky hermanos; solución
+  aplicada al contenedor completo, sin quitar la comprobación.
+- Documentación pública Supabase changelog/order: proxy CONNECT 403; no se cambia
+  API ni versión del SDK. Se reutilizan select/order/or existentes y se validan
+  consultas offline. No se consulta el proyecto alojado.
+
+### Reproducción y cierre
+
+`npm test -- src/ordenes/cp04Contracts.test.ts src/ordenes/cp04Multipunto.test.ts
+src/ordenes/cp04Autosave.test.ts src/ordenes/cp04Repository.test.ts
+src/ordenes/cp04Draft.test.ts src/ordenes/cp04InspectionPdf.test.ts`.
+
+Harness loopback puerto 5230 con Auth R1, CP03_PRIVATE y CP04_PRIVATE true:
+`CP04_BASE_URL=http://127.0.0.1:5230 CP04_WIDTHS=390,768,1366
+OUTPUT_DIR=/workspace/work/cp04-current node scripts/verify-cp04-current-diagnosis.cjs`.
+Todos los datos del fixture son ficticios; los vehículos y órdenes nuevos solo
+existen en memoria de la prueba. Capturas y PDF sintéticos fuera del repositorio
+en `/workspace/work/cp04-current/`. No se ejecutan auditorías SEC07 ni respaldos.
+
+Un único commit local de cierre (SHA identificado mediante `git log -1` y entregado al titular):
+`fix(cp04): reconcile current diagnoses and compact order workspace [skip render]`.
+Publicación y despliegue requieren autorización posterior. Pendiente revisión
+visual del titular y dispositivos físicos Safari/iPhone; no declarar QA productiva.
+
+
+### Archivos incluidos en esta adenda
+
+- `src/ordenes/Cp04OrdersView.tsx`, `Cp04MultipuntoChecklist.tsx`, `cp04.css`.
+- `src/ordenes/cp04Contracts.ts`, `cp04Multipunto.ts`, `cp04Autosave.ts`,
+  `cp04Repository.ts`, `cp04Draft.ts`, `cp04InspectionPdf.ts` (solo proyección).
+- Sus seis pruebas: `cp04Contracts.test.ts`, `cp04Multipunto.test.ts`,
+  `cp04Autosave.test.ts`, `cp04Repository.test.ts`, `cp04Draft.test.ts`,
+  `cp04InspectionPdf.test.ts`.
+- `scripts/verify-cp04-current-diagnosis.cjs` (recorrido focalizado nuevo),
+  `scripts/verify-cp04-redesign.cjs`, `scripts/verify-pilot-qa04b.cjs` (solo
+  selectores de pestaña/formulario afectados; no se ejecuta su suite general).
+- `AGENTS.md`, `agent.md`, `roadmap.md` y este checkpoint existente.
+
+No se incluyen capturas antiguas de fallo, logs, dumps ni el directorio preexistente
+`artifacts/` en el commit. Toda evidencia visual entregada es sintética y local.

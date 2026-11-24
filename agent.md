@@ -1,3 +1,22 @@
+## CP04 — diagnóstico vigente y espacio compacto (24/11/2026)
+
+Implementación local sobre main `169ddddbe8821fda87d49cecb3754b857dce8d56`,
+actualizado por avance rápido conservando el trabajo CP05 publicado. Sin push,
+despliegue, migraciones ni operaciones productivas. El selector CP05 se conserva
+para su reparación separada; no modificar sus archivos ni hacer activaciones.
+
+Se corrige la proyección histórica del resumen, la nota provisional insertada
+sobre OK y la selección dependiente del orden del array. Un diagnóstico vigente
+por taller/vehículo/OT/componente; pendientes del vehículo conservan antecedentes
+al limpiar una X, sin declarar reparación. Cuatro pestañas persistentes, estados
+compactos y cinco categorías R2. Formato oficial A4 preservado. Validación local:
+53/53 pruebas, builds público/privado, tres recorridos responsive con dos vehículos
+y nuevas visitas en cada ancho, más cierre visual/posición en los tres anchos PASS.
+
+Continuidad y resultados en el [checkpoint CP04 existente](docs/checkpoints/CHECKPOINT_BT_INS_PDF_02_DISENO_OFICIAL_A4_20261122.md).
+
+---
+
 ## SEC07 cerrado para piloto inicial — PASS_PILOTO_INICIAL
 
 **23/11/2026 (Chile).** A `BLOCK_A_PASS_V04`, B `BLOCK_B_PASS_INFRASTRUCTURE` y C `BLOCK_C_PASS_PILOT_FLOW`. El titular ejecutó el recorrido con datos ficticios: acceso, cliente y vehículo, recepción y orden, cotización normal en borrador y persistencia verificada tras recargar. Ver [checkpoint de cierre C](docs/checkpoints/CHECKPOINT_BT_SEC07_CIERRE_C_PASS_PILOTO.md).

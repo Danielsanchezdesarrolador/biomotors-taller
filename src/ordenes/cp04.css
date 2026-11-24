@@ -448,3 +448,117 @@
   .cp04-private .cp04-pdf-preview {padding:7px}
   .cp04-private .cp04-pdf-preview iframe {min-height:360px;height:62vh}
 }
+
+/* CP04 compact R2 workspace. The official A4 renderer is independent. */
+.cp04-private [hidden] { display:none!important; }
+.cp04-private .cp04-heading { padding:12px 0 4px; margin:0; }
+.cp04-private .cp04-heading h1 { font-size:26px; margin:5px 0; }
+.cp04-private .cp04-heading p { margin:4px 0; font-size:13px; }
+.cp04-private .cp04-autosave-bar { padding:9px 12px; margin:10px 0; font-size:12px; }
+.cp04-private .cp04-metrics { gap:10px; margin:10px 0 4px; }
+.cp04-private .cp04-metric { padding:11px 14px; min-height:66px; }
+.cp04-private .cp04-metric strong { font-size:23px; }
+.cp04-private .cp04-scope { margin:6px 0; font-size:11px; }
+.cp04-private .cp04-quick-actions { margin:10px 0; }
+.cp04-private .cp04-layout { gap:14px; }
+.cp04-private .cp04-panel { padding:16px; }
+.cp04-private .cp04-orders { max-height:330px; overflow:auto; overscroll-behavior:contain; }
+.cp04-private .cp04-order { padding:10px 12px; gap:10px; min-height:88px; }
+.cp04-private .cp04-car-icon { width:40px; height:40px; }
+.cp04-private .cp04-order-meta { font-size:10px; }
+.cp04-private .cp04-complaint { font-size:12px; }
+.cp04-private .cp04-reception .cp04-form { gap:9px; }
+.cp04-private .cp04-reception textarea { min-height:65px; }
+.cp04-private .cp04-detail { --cp04-toolbar-height:280px; padding:0; margin-top:14px; overflow:visible; }
+.cp04-workspace-toolbar { position:sticky; top:0; z-index:15; padding:14px 16px 0; border:1px solid var(--bt-border,#d7e3f7); border-radius:16px; background:#fff; box-shadow:var(--bt-shadow); display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.cp04-private .cp04-detail-head { flex-basis:100%; padding:0; margin:0; border:0; gap:10px; }
+.cp04-private .cp04-detail-head h2 { font-size:19px; margin:4px 0; }
+.cp04-private .cp04-detail-head p { font-size:13px; margin:4px 0; }
+.cp04-private .cp04-detail-head small { font-size:11px; }
+.cp04-private .cp04-workspace-toolbar .cp04-checklist-launch { display:contents; }
+.cp04-private .cp04-checklist-launch small { display:none; }
+.cp04-private .cp04-workspace-toolbar .cp04-pdf-controls { display:contents; }
+.cp04-private .cp04-workspace-toolbar .cp04-pdf-intro { display:none; }
+.cp04-private .cp04-pdf-actions,.cp04-private .cp04-workspace-toolbar .cp04-actions { display:contents; }
+.cp04-private .cp04-workspace-toolbar button { min-height:40px; font-size:12px; padding:8px 11px; }
+.cp04-private .cp04-pdf-hint { flex-basis:100%; margin:0; font-size:11px; }
+.cp04-private .cp04-pdf-preview { flex-basis:100%; max-height:40dvh; overflow:auto; }
+.cp04-inspection-counts { flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px 16px; padding:6px 0; font-size:12px; color:var(--bt-muted,#536e93); }
+.cp04-inspection-counts strong { color:var(--bt-text,#091a3c); }
+.cp04-count-ok { border-left:3px solid #4cab44; padding-left:6px; }
+.cp04-count-attention { border-left:3px solid #edbd22; padding-left:6px; }
+.cp04-count-immediate { border-left:3px solid #e64d4d; padding-left:6px; }
+.cp04-detail-tabs { flex-basis:100%; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-top:1px solid #e4ecf7; padding-top:4px; }
+.cp04-private .cp04-detail-tabs [role=tab] { border:0; border-bottom:3px solid transparent; border-radius:0; background:transparent; color:#536e93; box-shadow:none; font-size:12px; padding:10px 5px; }
+.cp04-private .cp04-detail-tabs [aria-selected=true] { border-bottom-color:var(--bt-blue,#0469f6); background:#f3f8ff; color:#075fe7; }
+.cp04-workspace-content { position:sticky; top:calc(var(--cp04-toolbar-height) + 10px); margin:12px 0; }
+.cp04-tab-content { max-height:64dvh; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable; padding:12px 16px; min-width:0; scroll-margin-block:16px; }
+.cp04-tab-content:focus-visible { outline:2px solid #6ab2ff; outline-offset:2px; }
+.cp04-tab-content h3 { margin:0 0 8px; color:var(--bt-text,#091a3c); font-size:17px; }
+.cp04-current-groups { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.cp04-current-groups > section { border:1px solid #d7e3f7; border-radius:12px; overflow:hidden; align-self:start; background:white; }
+.cp04-current-groups h4 { margin:0; padding:10px 12px; background:#f0f6ff; color:#183c70; font-size:14px; }
+.cp04-current-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 8px; padding:9px 12px; border-top:1px solid #e6edf7; font-size:12px; }
+.cp04-current-row span { font-size:11px; color:#536e93; }
+.cp04-current-row.result-immediate span { color:#a52626; }
+.cp04-current-row.result-attention span { color:#805800; }
+.cp04-current-row.result-ok span { color:#226d4b; }
+.cp04-current-row p { grid-column:1/-1; margin:2px 0; overflow-wrap:anywhere; white-space:pre-wrap; }
+.cp04-additional-finding { margin-top:14px; border:1px solid #d7e3f7; border-radius:10px; padding:12px; }
+.cp04-additional-finding summary { cursor:pointer; font-size:13px; color:#1653a0; font-weight:650; }
+.cp04-private .cp04-checklist-top { margin-bottom:10px; }
+.cp04-private .cp04-checklist-top h2 { font-size:18px; }
+.cp04-private .cp04-checklist-top p,.cp04-private .cp04-private-hint { font-size:11px; }
+.cp04-private .cp04-count { padding:8px 10px; font-size:12px; margin:8px 0; }
+.cp04-private .cp04-checklist-sheet { padding:0!important; border:0; background:transparent; }
+.cp04-private .cp04-checklist-sheet .mp-tables { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.cp04-private .mp-category { grid-column:auto; margin:0; border:1px solid #d7e3f7; border-radius:12px; overflow:hidden; min-width:0; }
+.cp04-private .mp-category h3 { margin:0; padding:10px 12px; font-size:14px; background:#f0f6ff; color:#183c70; }
+.cp04-private .cp04-checklist-sheet .mp-category-rows { display:block; }
+.cp04-private .cp04-checklist-sheet .mp-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:3px 8px; padding:7px 9px; min-height:64px; border-top:1px solid #e6edf7; }
+.cp04-private .cp04-checklist-sheet .mp-status { grid-column:2; grid-row:1; display:flex; gap:2px; width:auto; }
+.cp04-private .cp04-checklist-sheet .mp-cell { width:44px; min-width:44px; flex:0 0 44px; height:44px; min-height:44px; border-radius:5px; }
+.cp04-private .cp04-checklist-sheet .mp-cell input { min-width:0; min-height:0; }
+.cp04-private .cp04-checklist-sheet .mp-clear { width:32px; min-width:32px; flex:0 0 32px; min-height:44px; padding:2px; font-size:18px; }
+.cp04-private .cp04-checklist-sheet .mp-item-name { grid-column:1; grid-row:1; font-size:12px; padding:0; min-width:0; min-height:0; }
+.cp04-private .cp04-checklist-sheet .mp-item-name small { display:none; }
+.cp04-private .cp04-checklist-sheet .mp-row-extra { grid-column:1/-1; padding:0; margin:0; min-width:0; }
+.cp04-private .cp04-inline-control { display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin:0; padding:0; }
+.cp04-private .cp04-inline-status { font-size:10px; padding:0; background:transparent; }
+.cp04-private .cp04-inline-note { flex-basis:100%; margin:4px 0 0; padding:0; gap:4px; font-size:11px; }
+.cp04-private .cp04-inline-note textarea { min-height:58px; padding:8px; font-size:13px; }
+.cp04-private .cp04-provisional-hint { font-size:10px; margin:2px 0; }
+.cp04-private .cp04-finding,.cp04-private .cp04-pending { padding:10px 12px; margin:8px 0; }
+@media(max-width:1050px) { .cp04-private .cp04-checklist-sheet .mp-tables { grid-template-columns:1fr; } }
+@media(max-width:760px) {
+ .cp04-private .cp04-heading h1 { font-size:23px; }
+ .cp04-private .cp04-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .cp04-private .cp04-detail-head h2 { font-size:16px; }
+ .cp04-workspace-toolbar { padding:11px 10px 0; gap:6px; }
+ .cp04-private .cp04-workspace-toolbar > button,.cp04-private .cp04-workspace-toolbar .cp04-actions > button,.cp04-private .cp04-pdf-actions > button { flex:1 1 44%; min-width:0; font-size:11px; padding:7px 5px; }
+ .cp04-private .cp04-detail-tabs [role=tab] { font-size:10px; padding:9px 2px; }
+ .cp04-inspection-counts { font-size:10px; gap:5px 9px; }
+ .cp04-tab-content { max-height:max(160px,calc(100dvh - var(--cp04-toolbar-height) - 105px)); padding:10px; }
+ .cp04-current-groups { grid-template-columns:1fr; }
+ .cp04-private .cp04-checklist-top { display:block; }
+ .cp04-private .cp04-checklist-top > button { font-size:11px; margin:4px 0; }
+ .cp04-private .cp04-checklist-sheet .mp-cell { width:44px; min-width:44px; }
+ .cp04-private .cp04-checklist-sheet .mp-row { gap:3px 6px; padding:6px; }
+ .cp04-private .cp04-checklist-legend { font-size:10px; gap:7px; }
+ .cp04-private .cp04-checklist-legend span { gap:3px; }
+}
+
+/* The active tab already names the inspection; avoid a second mobile header. */
+.cp04-private .cp04-checklist-top { display:none; }
+.cp04-private .cp04-checklist { margin:0; padding:0; border:0; }
+.cp04-private .cp04-checklist-legend { margin:7px 0 10px; }
+.cp04-private .cp04-tab-content .cp04-pending { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+.cp04-private .cp04-tab-content .cp04-pending-content { flex:1 1 200px; min-width:0; }
+.cp04-private .cp04-tab-content .cp04-pending > button { min-height:44px; min-width:140px; width:auto; font-size:12px; padding:8px 12px; }
+/* Anchor the workspace as one unit: independent sticky siblings could overlap
+   at the parent's lower boundary. Only the selected panel scrolls internally. */
+.cp04-private .cp04-detail { position:sticky; top:0; }
+.cp04-workspace-toolbar,.cp04-workspace-content { position:static; }
+@media(max-width:760px) {
+ .cp04-tab-content { max-height:max(160px,calc(100dvh - var(--cp04-toolbar-height) - 145px)); }
+}

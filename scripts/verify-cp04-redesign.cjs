@@ -112,7 +112,7 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
             () => document.querySelector('.cp04-count strong')?.textContent === '34/34'
           )
           assert.equal(state.findings.length, 34)
-          await p.getByRole('button', { name: 'Volver a la orden', exact: true }).click()
+          await p.getByRole('tab', { name: 'Resumen', exact: true }).click()
           await p.locator('.cp04-order').nth(4).click()
           await p.locator('.cp04-detail h2').filter({ hasText: 'QA1238' }).waitFor()
           await p.getByRole('button', { name: 'Abrir inspección multipunto con X' }).click()
@@ -180,13 +180,17 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
             resolution: 'pending', resolved_at: null }
         )
         await p.locator('.cp04-order').first().click()
-        await p.locator('.cp04-finding').first().waitFor()
+        await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
+        await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
+        await p.getByRole('tab',{name:'Observaciones pendientes',exact:true}).click()
         await p.locator('.cp04-pending').first().waitFor()
-        assert.equal(await p.locator('.cp04-finding').count(), 2)
+        assert.equal(await p.locator('[data-detail-tab=history] .cp04-finding').count(), 2)
         assert.equal(await p.locator('.cp04-pending').count(), 1,
           'closed prior visit must remain visible as pending')
-        const size = await p.locator('.cp04-finding').first().boundingBox()
+        await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
+        const size = await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().boundingBox()
         assert.ok(size && size.height < 150, 'oversized inspection row')
+        await p.getByRole('tab',{name:'Observaciones pendientes',exact:true}).click()
         const action = await p.getByRole('button', { name: 'Marcar resuelto' }).boundingBox()
         assert.ok(action && action.width >= 135 && action.height >= 43,
           'resolve button must stay usable')

@@ -210,3 +210,25 @@ describe('CP04 X multipoint autosave queue',()=>{
   })
 
 })
+
+describe('CP04 successive states preserve history without provisional OK notes',()=>{
+ it('persists attention → OK, immediate → OK, OK → attention and clear, including reload',async()=>{
+  vi.useFakeTimers()
+  try{
+   const {engine,rows,port,store}=lab();engine.start();const id=template[0].id
+   for(const state of ['attention','ok','immediate','ok','attention','unreviewed'] as const){
+     engine.select(id,state);await flush()
+     expect(engine.getCurrentItems()[0].state).toBe(state)
+     expect(engine.getOutstandingCount()).toBe(0)
+   }
+   expect(rows.map(r=>r.result)).toEqual(['attention','ok','attention','ok','attention','not_checked'])
+   expect(rows.filter(r=>r.result==='ok').every(r=>r.note===null&&r.resolution==='not_applicable')).toBe(true)
+   expect(rows.filter(r=>r.result==='attention').every(r=>r.resolution==='pending'&&r.resolved_at===null)).toBe(true)
+   expect(hasCurrentProvisionalFindings(rows)).toBe(false)
+   engine.stop()
+   const restored=new Cp04AutosaveQueue({scope,initialFindings:[...rows].reverse(),port,store})
+   restored.start();expect(restored.getCurrentItems()[0].state).toBe('unreviewed');restored.stop()
+   expect(rows).toHaveLength(6)
+  }finally{vi.useRealTimers()}
+ })
+})

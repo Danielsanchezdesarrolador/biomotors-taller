@@ -36,6 +36,36 @@ export type NewFinding=Readonly<{
   order_id:string;vehicle_id:string;category:string;
   result:FindingResult;note:string|null
 }>
+export const CP04_PROVISIONAL_NOTE='Detalle técnico pendiente de completar'
+export type FindingScope=Readonly<{workshopId:string;vehicleId:string;orderId?:string}>
+export function inFindingScope(row:Finding,scope:FindingScope):boolean {
+  return row.workshop_id===scope.workshopId&&row.vehicle_id===scope.vehicleId&&
+    (scope.orderId===undefined||row.order_id===scope.orderId)
+}
+/** PostgreSQL timestamps retain microseconds; array order and note update time
+ * are not diagnostic chronology. UUID is the stable tie breaker. */
+export function compareFindingTimes(a:string,b:string):number {
+  const time=(value:string)=>{
+    const ms=Date.parse(value)
+    const fraction=/\.(\d+)(?:Z|[+-]\d\d:\d\d)$/.exec(value)?.[1]??''
+    return Number.isFinite(ms)?ms*1000+Number(fraction.padEnd(6,'0').slice(3,6)):0
+  }
+  return time(a)-time(b)
+}
+export function compareFindings(a:Finding,b:Finding):number {
+  return compareFindingTimes(a.created_at,b.created_at)||(a.id<b.id?-1:a.id>b.id?1:0)
+}
+/** Current diagnosis per visit/component, including an explicit cleared X. */
+export function currentFindings(rows:readonly Finding[],scope?:FindingScope):Finding[] {
+  const latest=new Map<string,Finding>()
+  for(const row of rows){
+    if(scope&&!inFindingScope(row,scope))continue
+    const key=[row.workshop_id,row.vehicle_id,row.order_id,row.category].join('\u0000')
+    const previous=latest.get(key)
+    if(!previous||compareFindings(row,previous)>0)latest.set(key,row)
+  }
+  return [...latest.values()].sort(compareFindings)
+}
 /** A later confirmed OK supersedes an old multipoint pending in the current
  * vehicle to-do list. Keep historic findings intact: no auto-repair assertion.
  * Generic diagnostic categories may represent different faults, so preserve
@@ -44,12 +74,6 @@ export type NewFinding=Readonly<{
 export function effectivePendingFindings(rows: readonly Finding[]): Finding[] {
   const latest = new Map<string, Finding>()
   const generic: Finding[] = []
-  const newer = (a: Finding, b: Finding): boolean => {
-    const ams = Date.parse(a.created_at), bms = Date.parse(b.created_at)
-    if (Number.isFinite(ams) && Number.isFinite(bms) && ams !== bms) return ams > bms
-    return a.created_at > b.created_at ||
-      (a.created_at === b.created_at && a.id > b.id)
-  }
   for (const row of rows) {
     if (!row.category.startsWith('Multipunto · ')) {
       if (row.result === 'attention' && row.resolution === 'pending') generic.push(row)
@@ -58,11 +82,11 @@ export function effectivePendingFindings(rows: readonly Finding[]): Finding[] {
     if (row.result === 'not_checked') continue
     const key = row.workshop_id + '\u0000' + row.vehicle_id + '\u0000' + row.category
     const prev = latest.get(key)
-    if (!prev || newer(row, prev)) latest.set(key, row)
+    if (!prev || compareFindings(row, prev)>0) latest.set(key, row)
   }
   return [...generic, ...[...latest.values()].filter(
     row => row.result === 'attention' && row.resolution === 'pending'
-  )].sort((a,b)=>newer(a,b)?-1:newer(b,a)?1:0)
+  )].sort((a,b)=>compareFindings(b,a))
 }
 export const recentOrdersLimit = 40
 export const workStatuses:readonly OrderStatus[]=['received','inspecting','in_service','ready','closed']

@@ -104,3 +104,48 @@ describe('CP04 private data repository and lifecycle',()=>{
     expect(reads.inspection_findings.rows).toHaveLength(3)
   })
 })
+
+describe('CP04 complete visit history',()=>{
+ it('paginates beyond 200 diagnoses so a later correction cannot disappear after reload',async()=>{
+   const {client}=fake()
+   const rows:Finding[]=Array.from({length:251},(_,i)=>({
+    workshop_id:b,id:`12345678-1234-4234-8234-${String(i+1).padStart(12,'0')}`,
+    order_id:a,vehicle_id:a,category:'Multipunto · Extintor',result:i===250?'ok':'attention',
+    note:i===250?null:'Antecedente',resolution:i===250?'not_applicable':'pending',resolved_at:null,
+    recorded_by:a,created_at:new Date(1795500000000+i*1000).toISOString(),updated_at:new Date(1795500000000+i*1000).toISOString()
+   }))
+   const original=vi.mocked(client.from).getMockImplementation()!,cursors:string[]=[],filters:string[][]=[]
+   let page=0
+   vi.mocked(client.from).mockImplementation(((table:string)=>{
+     if(table!=='inspection_findings')return original(table)
+     const chain={select:()=>chain,eq:(key:string,value:string)=>{filters.push([key,value]);return chain},order:()=>chain,limit:()=>chain,
+       or:(value:string)=>{cursors.push(value);return chain},
+       then:(fn:(value:unknown)=>unknown)=>Promise.resolve(fn({data:[...rows].reverse().slice(page++*200,(page-1)*200+201),error:null}))}
+     return chain
+   }) as typeof client.from)
+   const history=await cp04Repository(client,ctx).findingsForOrder(a)
+   expect(history).toHaveLength(251)
+   expect(history.at(-1)?.result).toBe('ok')
+   expect(cursors).toHaveLength(1)
+   expect(cursors[0]).toContain('created_at.lt.')
+   expect(filters).toContainEqual(['workshop_id',b]);expect(filters).toContainEqual(['order_id',a])
+ })
+ it('rejects an unrelated order returned by the backend despite the scoped query',async()=>{
+   const {client,reads}=fake()
+   reads.inspection_findings.rows=[{workshop_id:b,id:a,order_id:b,vehicle_id:a}]
+   await expect(cp04Repository(client,ctx).findingsForOrder(a)).rejects.toMatchObject({kind:'unavailable'})
+ })
+})
+
+describe('CP04 mechanic authority remains unchanged',()=>{
+ it('allows a verified mechanic to inspect an open order, never create or change its state',async()=>{
+  const {client,reads}=fake('mechanic'),r=cp04Repository(client,{...ctx,role:'mechanic'})
+  reads.work_orders.rows=[{id:a,workshop_id:b,vehicle_id:a,status:'inspecting'}]
+  reads.inspection_findings.rows=[{id:a,workshop_id:b,order_id:a,vehicle_id:a,result:'ok',note:null}]
+  await expect(r.createFinding({order_id:a,vehicle_id:a,category:'Multipunto · Extintor',result:'ok',note:null})).resolves.toMatchObject({id:a,result:'ok'})
+  await expect(r.createOrder({vehicle_id:a,complaint:'Inspección sintética',intake_odometer:null})).rejects.toMatchObject({kind:'denied'})
+  await expect(r.setStatus(a,'2026-11-24T10:00:00Z','closed')).rejects.toMatchObject({kind:'denied'})
+  reads.work_orders.rows[0].status='closed'
+  await expect(r.createFinding({order_id:a,vehicle_id:a,category:'Multipunto · Extintor',result:'ok',note:null})).rejects.toMatchObject({kind:'invalid'})
+ })
+})

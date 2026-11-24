@@ -4,7 +4,7 @@ import {
   writeCp04Draft,
   clearCp04Draft,
   emptyCp04Draft,
-  rememberCp04Position
+  rememberCp04Position,rememberCp04PanelPosition
 } from './cp04Draft'
 const scope = {
   userId: '11111111-1111-4111-8111-111111111111',
@@ -86,4 +86,17 @@ describe('CP04 same-tab draft lifecycle', () => {
     clearCp04Draft(store)
     expect(readCp04Draft(scope, store, 101)).toBeNull()
   })
+})
+
+describe('CP04 persistent detail tabs',()=>{
+ it('restores tab and internal position without recreating a draft cleared on logout',()=>{
+  const {store}=tab()
+  expect(writeCp04Draft(scope,{...emptyCp04Draft,detailTab:'inspection'},store)).toBe(true)
+  expect(rememberCp04PanelPosition(scope,'inspection',540,store)).toBe(true)
+  expect(readCp04Draft(scope,store)).toMatchObject({detailTab:'inspection',detailScroll:{inspection:540}})
+  expect(rememberCp04PanelPosition(scope,'inspection',-1,store)).toBe(false)
+  clearCp04Draft(store)
+  expect(rememberCp04PanelPosition(scope,'inspection',540,store)).toBe(false)
+  expect(readCp04Draft(scope,store)).toBeNull()
+ })
 })

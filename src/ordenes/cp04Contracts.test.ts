@@ -75,3 +75,14 @@ describe('CP04: typed intake/inspection contracts',()=>{
       .toEqual([first.id,second.id,mp.id].sort())
   })
 })
+
+describe('CP04 pending observations across visits',()=>{
+ it('a new unchecked visit retains previous vehicle problems; only confirmed OK supersedes',()=>{
+  const previous:Finding={id:a,workshop_id:a,vehicle_id:a,order_id:a,category:'Multipunto · Extintor',result:'attention',note:'Extintor vencido',resolution:'pending',resolved_at:null,recorded_by:a,created_at:'2026-11-22T10:00:00Z',updated_at:'2026-11-22T10:00:00Z'}
+  const clear={...previous,id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',order_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',result:'not_checked' as const,note:null,resolution:'not_applicable' as const,created_at:'2026-11-24T10:00:00Z'}
+  const ok={...clear,id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',result:'ok' as const,created_at:'2026-11-24T10:01:00Z'}
+  expect(effectivePendingFindings([clear,previous])).toEqual([previous])
+  expect(effectivePendingFindings([ok,clear,previous])).toEqual([])
+  expect(previous.resolution).toBe('pending');expect(previous.resolved_at).toBeNull()
+ })
+})

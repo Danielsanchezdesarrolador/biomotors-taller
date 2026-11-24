@@ -3,7 +3,7 @@
  * No fixture, demo item, payment, email, or secret key. The repository is
  * injected only after verified Auth R1, and RLS isolates tenant records.
  */
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, useId, type FormEvent } from 'react'
 import {
   ClipboardCheck,
   Search,
@@ -28,6 +28,8 @@ import {
   workMessage,
   inspectionResolutionLabel,
   effectivePendingFindings,
+  currentFindings,
+  compareFindings,
   recentOrdersLimit,
   type Finding,
   type FindingResult,
@@ -35,10 +37,12 @@ import {
   type OrderStatus,
   type VehicleChoice
 } from './cp04Contracts'
-import { readCp04Draft, writeCp04Draft, emptyCp04Draft, rememberCp04Position } from './cp04Draft'
+import { readCp04Draft, writeCp04Draft, emptyCp04Draft, rememberCp04Position, rememberCp04PanelPosition } from './cp04Draft'
 import { Cp04MultipuntoChecklist } from './Cp04MultipuntoChecklist'
 import { Cp04MultipuntoPdfPreview } from './Cp04MultipuntoPdfPreview'
 import { hasCurrentProvisionalFindings } from './cp04Autosave'
+import {multipuntoItemsFromFindings,multipuntoDisplayNote} from './cp04Multipunto'
+import {categories,resultLabels} from '../informes/multipunto/multipuntoTemplate'
 import './cp04.css'
 export type Cp04Port = Pick<
   ReturnType<typeof cp04Repository>,
@@ -109,6 +113,17 @@ export function Cp04OrdersView({
   const [result, setResult] = useState<FindingResult>(initial.result)
   const [note, setNote] = useState(initial.note)
   const [multipuntoOpen, setMultipuntoOpen] = useState(initial.multipunto?.open ?? false)
+  const [detailTab,setDetailTab]=useState<'summary'|'inspection'|'pending'|'history'>(initial.detailTab??(initial.multipunto?.open?'inspection':'summary'))
+  const panelScroll=useRef(initial.detailScroll??{})
+  const tabId=useId()
+  const toolbar=useRef<HTMLDivElement>(null)
+  const detailTabs=[['summary','Resumen'],['inspection','Inspección multipunto'],['pending','Observaciones pendientes'],['history','Historial de diagnósticos']] as const
+  useEffect(()=>{
+    const node=toolbar.current,root=orderDetail.current
+    if(!node||!root)return
+    const observer=new ResizeObserver(()=>root.style.setProperty('--cp04-toolbar-height',node.offsetHeight+'px'))
+    observer.observe(node);return()=>observer.disconnect()
+  },[!!selected])
   const [multipuntoOutstanding, setMultipuntoOutstanding] = useState(0)
   const [multipuntoIncomplete, setMultipuntoIncomplete] = useState(false)
   const multipuntoSection = useRef<HTMLDivElement>(null)
@@ -132,6 +147,7 @@ export function Cp04OrdersView({
   useEffect(() => {
     if (!viewRoot.current?.isConnected) return
     writeCp04Draft(scope, {
+      detailTab,detailScroll:panelScroll.current,
       scrollY: scrollPosition.current,
       selectedOrderId: selected?.order.id ?? confirmedOrderId ?? initial.selectedOrderId,
       plate,
@@ -153,7 +169,7 @@ export function Cp04OrdersView({
     category,
     result,
     note,
-    multipuntoOpen
+    multipuntoOpen,detailTab
   ])
 
   useEffect(() => {
@@ -228,6 +244,20 @@ export function Cp04OrdersView({
     }
   }, [repository])
 
+  useEffect(()=>{
+    if(selected?.order.id!==initial.selectedOrderId)return
+    const frame=requestAnimationFrame(()=>{
+      viewRoot.current?.querySelectorAll<HTMLElement>('[data-detail-tab]').forEach(node=>{
+        node.scrollTop=panelScroll.current[node.dataset.detailTab as keyof typeof panelScroll.current]??0
+      })
+    })
+    return()=>cancelAnimationFrame(frame)
+  },[selected?.order.id])
+  function rememberPanel(tab:NonNullable<typeof initial.detailTab>,node:HTMLElement){
+    if(!active.current||node.closest('[hidden]'))return
+    panelScroll.current={...panelScroll.current,[tab]:node.scrollTop}
+    rememberCp04PanelPosition(scope,tab,node.scrollTop)
+  }
   async function openOrder(id: string, focusDetail = false): Promise<boolean> {
     const request = ++revision.current
     setLoading(true)
@@ -243,6 +273,8 @@ export function Cp04OrdersView({
       if (!active.current || request !== revision.current) return false
       if (selected && selected.order.id !== item.order.id) {
         setMultipuntoOpen(false)
+        setDetailTab('summary')
+        panelScroll.current={}
         setMultipuntoOutstanding(0)
         setMultipuntoIncomplete(false)
       }
@@ -424,14 +456,12 @@ export function Cp04OrdersView({
       return prev.map((x) => (x.id === record.id ? record : x))
     })
     setPending(prev=>effectivePendingFindings([
-      ...prev.filter(x=>x.id!==record.id),record
+      ...prev.filter(x=>x.id!==record.id),...findings.filter(x=>x.id!==record.id),record
     ]))
   }
   function openMultipunto() {
     setMultipuntoOpen(true)
-    window.requestAnimationFrame(() =>
-      multipuntoSection.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    )
+    setDetailTab('inspection')
   }
   async function changeStatus(next: OrderStatus) {
     if (!selected || lock.current || !canCreate) return
@@ -504,6 +534,10 @@ export function Cp04OrdersView({
       if (active.current) setBusy(false)
     }
   }
+  const inspectionItems=multipuntoItemsFromFindings(findings,selected?{
+    workshopId:context.workshop.id,vehicleId:selected.order.vehicle_id,orderId:selected.order.id
+  }:undefined)
+  const inspectionCounts=inspectionItems.reduce((counts,item)=>({...counts,[item.state]:counts[item.state]+1}),{ok:0,attention:0,immediate:0,unreviewed:0})
   const metrics = [
     {
       label: 'Órdenes activas',
@@ -795,6 +829,7 @@ export function Cp04OrdersView({
           aria-busy={loading}
           inert={loading}
         >
+          <div className="cp04-workspace-toolbar" ref={toolbar}>
           <div className="cp04-detail-head">
             <div>
               <span className="official-eyebrow">Orden persistente</span>
@@ -866,8 +901,21 @@ export function Cp04OrdersView({
               ))}
             </div>
           )}
-          {multipuntoOpen && (
-            <div ref={multipuntoSection} className="cp04-multipunto-anchor">
+          <div className="cp04-inspection-counts" aria-label="Estados confirmados de los 34 componentes">
+            {(['ok','attention','immediate','unreviewed'] as const).map(state=><span key={state} className={'cp04-count-'+state}><strong>{inspectionCounts[state]}</strong> {resultLabels[state]}</span>)}
+          </div>
+          <div className="cp04-detail-tabs" role="tablist" aria-label="Secciones de la orden">
+            {detailTabs.map(([key,label],index)=><button type="button" role="tab" key={key}
+              id={tabId+'-tab-'+key} aria-controls={tabId+'-panel-'+key} aria-selected={detailTab===key}
+              tabIndex={detailTab===key?0:-1} onClick={()=>{setDetailTab(key);if(key==='inspection')setMultipuntoOpen(true)}}
+              onKeyDown={event=>{
+                const next=event.key==='ArrowRight'?(index+1)%4:event.key==='ArrowLeft'?(index+3)%4:event.key==='Home'?0:event.key==='End'?3:-1
+                if(next>=0){event.preventDefault();setDetailTab(detailTabs[next][0]);document.getElementById(tabId+'-tab-'+detailTabs[next][0])?.focus({preventScroll:true})}
+              }}>{label}</button>)}
+          </div>
+          </div>
+          <div className="cp04-workspace-content">
+          <div ref={multipuntoSection} role="tabpanel" data-detail-tab="inspection" onScroll={e=>rememberPanel('inspection',e.currentTarget)} id={tabId+'-panel-inspection'} aria-labelledby={tabId+'-tab-inspection'} hidden={detailTab!=='inspection'} tabIndex={0} className="cp04-tab-content cp04-multipunto-anchor">
               <Cp04MultipuntoChecklist
                 key={selected.order.id}
                 repository={repository}
@@ -886,48 +934,25 @@ export function Cp04OrdersView({
                 disabled={busy || loading}
                 readOnly={!canInspect || selected.order.status === 'closed'}
                 plate={selected.vehicle.plate}
-                onBack={() => setMultipuntoOpen(false)}
+                onBack={() => {setMultipuntoOpen(false);setDetailTab('summary')}}
               />
+
+          </div>
+          <div role="tabpanel" data-detail-tab="summary" onScroll={e=>rememberPanel('summary',e.currentTarget)} id={tabId+'-panel-summary'} aria-labelledby={tabId+'-tab-summary'} hidden={detailTab!=='summary'} tabIndex={0} className="cp04-tab-content">
+            <h3>Diagnóstico vigente de esta visita</h3>
+            <p className="cp04-info">Una marca por componente. Cambiar a OK no certifica una reparación; limpiar una X significa Sin revisar. Los registros anteriores se conservan en el historial.</p>
+            <div className="cp04-current-groups">
+              {categories.map(group=><section key={group.id} aria-label={group.name}>
+                <h4>{group.name}</h4>
+                {inspectionItems.filter(item=>item.category===group.id).map(item=><div key={item.id} data-current-item={item.id} className={'cp04-current-row result-'+item.state}>
+                  <strong>{item.name}</strong><span>{resultLabels[item.state]}</span>
+                  {(item.state==='attention'||item.state==='immediate')&&item.note&&<p>{item.note}</p>}
+                </div>)}
+              </section>)}
             </div>
-          )}
-          {!multipuntoOpen && (
-            <div className="cp04-detail-grid">
-              <div>
-                <h3>
-                  <ClipboardCheck size={18} /> Inspección multipunto
-                </h3>
-                {findings.length === 0 && <p>Todavía no se han registrado puntos de inspección.</p>}
-                {findings.map((item) => (
-                  <div key={item.id} className="cp04-finding">
-                    <div className="cp04-finding-heading">
-                      <strong>{item.category}</strong>
-                      <span className={'cp04-finding-diagnosis result-' + item.result}>
-                        Diagnóstico:{' '}
-                        {item.result === 'ok'
-                          ? 'Correcto'
-                          : item.result === 'attention'
-                            ? 'Requiere atención'
-                            : 'No revisado'}
-                      </span>
-                      {item.result === 'attention' && (
-                        <span
-                          className={
-                            'cp04-resolution ' +
-                            (item.resolution === 'resolved' ? 'is-resolved' : 'is-pending')
-                          }
-                        >
-                          {inspectionResolutionLabel(item)}
-                          {item.resolution === 'resolved' && item.resolved_at
-                            ? ' · ' + safeDate(item.resolved_at)
-                            : ''}
-                        </span>
-                      )}
-                    </div>
-                    {item.note && <p className="cp04-finding-note">{item.note}</p>}
-                    <small>Registrado: {safeDate(item.created_at)}</small>
-                  </div>
-                ))}
-                {canInspect && selected.order.status !== 'closed' && (
+            {currentFindings(findings).filter(row=>!row.category.startsWith('Multipunto · ')).map(row=><article key={row.id} className="cp04-finding"><strong>{row.category} · {row.result==='ok'?'OK':row.result==='attention'?'Requiere atención':'Sin revisar'}</strong><p>{row.note}</p><small>{inspectionResolutionLabel(row)}</small></article>)}
+            <details className="cp04-additional-finding"><summary>Registrar diagnóstico adicional por categoría</summary>
+              {canInspect && selected.order.status !== 'closed' && (
                   <form className="cp04-form" onSubmit={saveFinding}>
                     <label>
                       Punto a revisar
@@ -967,8 +992,10 @@ export function Cp04OrdersView({
                     </button>
                   </form>
                 )}
-              </div>
-              <div>
+
+            </details>
+          </div>
+          <div role="tabpanel" data-detail-tab="pending" onScroll={e=>rememberPanel('pending',e.currentTarget)} id={tabId+'-panel-pending'} aria-labelledby={tabId+'-tab-pending'} hidden={detailTab!=='pending'} tabIndex={0} className="cp04-tab-content">
                 <h3>
                   <AlertTriangle size={18} /> Observaciones pendientes del vehículo
                 </h3>
@@ -995,9 +1022,21 @@ export function Cp04OrdersView({
                     )}
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
+
+            <p className="cp04-info">Una X limpiada no acredita reparación ni descarta antecedentes pendientes. Un OK posterior sustituye el diagnóstico vigente, sin cambiar la resolución histórica.</p>
+          </div>
+          <div role="tabpanel" data-detail-tab="history" onScroll={e=>rememberPanel('history',e.currentTarget)} id={tabId+'-panel-history'} aria-labelledby={tabId+'-tab-history'} hidden={detailTab!=='history'} tabIndex={0} className="cp04-tab-content">
+            <h3>Historial de diagnósticos de esta orden</h3>
+            <p className="cp04-info">Registros históricos de esta visita, incluidos cambios de X. No representan todos el diagnóstico actual.</p>
+            {!findings.length&&<p>No hay diagnósticos registrados en esta orden.</p>}
+            {[...findings].sort((a,b)=>compareFindings(b,a)).map(item=><article key={item.id} className="cp04-finding" data-finding-id={item.id}>
+              <div className="cp04-finding-heading"><strong>{item.category}</strong><span>{item.result==='ok'?'OK':item.result==='attention'?'Requiere atención':'Sin revisar'}</span></div>
+              {multipuntoDisplayNote(item)&&<p className="cp04-finding-note">{multipuntoDisplayNote(item)}</p>}
+              <small>{safeDate(item.created_at)} · {inspectionResolutionLabel(item)}</small>
+            </article>)}
+          </div>
+          </div>
+
         </section>
       )}
     </div>

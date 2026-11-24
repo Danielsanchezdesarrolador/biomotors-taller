@@ -99,6 +99,7 @@ async function run(browser, id, width, task) {
       await run(browser, 'F04', width, async ({ p, state, requests }) => {
         await p.locator('.cp04-order').first().click()
         await p.locator('.cp04-detail').waitFor()
+        await p.locator('.cp04-additional-finding summary').click()
         const findingForm = p.locator('.cp04-detail form.cp04-form')
         assert.equal(await findingForm.count(), 1, 'editable finding form must be present')
         await findingForm.locator('select').nth(1).selectOption('attention')
@@ -107,10 +108,11 @@ async function run(browser, id, width, task) {
         await p.getByText(/Inspección guardada en el servidor\. La lista está pendiente/).waitFor()
         assert.equal(state.findings.length, 1)
         assert.equal(writes(requests, 'inspection_findings'), 1)
-        assert.equal(await p.locator('.cp04-finding').count(), 1)
+        assert.equal(await p.locator('[data-detail-tab=history] .cp04-finding').count(), 1)
         state.failFindingReads = false
         await p.locator('.cp04-order').first().click()
-        await p.locator('.cp04-finding').first().waitFor()
+        await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
+        await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
         assert.equal(state.findings.length, 1)
         assert.equal(writes(requests, 'inspection_findings'), 1)
       })
@@ -122,6 +124,7 @@ async function run(browser, id, width, task) {
           created_at: at, updated_at: at
         })
         await p.locator('.cp04-order').first().click()
+        await p.getByRole('tab',{name:'Observaciones pendientes',exact:true}).click()
         await p.locator('.cp04-pending').first().waitFor()
         await p.getByRole('button', { name: 'Marcar resuelto' }).click()
         await p.getByText(/Observación resuelta en el servidor\. La lista está pendiente/).waitFor()
@@ -130,7 +133,8 @@ async function run(browser, id, width, task) {
         assert.equal(writes(requests, 'inspection_findings', 'PATCH'), 1)
         state.failFindingReads = false
         await p.locator('.cp04-order').first().click()
-        await p.locator('.cp04-finding').first().waitFor()
+        await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
+        await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
         assert.equal(await p.locator('.cp04-pending').count(), 0)
         assert.equal(writes(requests, 'inspection_findings', 'PATCH'), 1)
       })

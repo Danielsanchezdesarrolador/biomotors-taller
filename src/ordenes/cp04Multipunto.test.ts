@@ -37,9 +37,33 @@ describe('CP04 live X multipoint checklist',()=>{
  })
  it('restores latest saved X for item, never turns broad legacy Frenos into all OK',()=>{
    const f=[row('Frenos','ok',null),row('Multipunto · Pastillas de freno','ok',null),
-    row('Multipunto · Pastillas de freno','attention','Desgastadas')]
+    {...row('Multipunto · Pastillas de freno','attention','Desgastadas'),id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',created_at:'2026-11-15T10:01:00Z'}]
    const items=multipuntoItemsFromFindings(f)
    expect(items.find(i=>i.name==='Pastillas de freno')?.state).toBe('attention')
    expect(items.find(i=>i.name==='Discos de freno')?.state).toBe('unreviewed')
+ })
+})
+
+describe('CP04 deterministic visit selection',()=>{
+ it('uses timestamp microseconds then ID, never input order or note update time',()=>{
+   const old={...row('Multipunto · Pastillas de freno','attention','Desgastadas'),id:'ffffffff-ffff-4fff-8fff-ffffffffffff',created_at:'2026-11-24T10:00:00.000001Z',updated_at:'2026-11-25T10:00:00Z'}
+   const ok={...old,id:a,result:'ok' as const,note:null,created_at:'2026-11-24T07:00:00.000002-03:00'}
+   for(const history of [[old,ok],[ok,old]])expect(multipuntoItemsFromFindings(history).find(i=>i.name==='Pastillas de freno')?.state).toBe('ok')
+   const tie={...ok,id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',result:'not_checked' as const}
+   expect(multipuntoItemsFromFindings([tie,ok]).find(i=>i.name==='Pastillas de freno')?.state).toBe('unreviewed')
+ })
+ it('requires a visit scope for mixed orders and never borrows another vehicle or workshop X',()=>{
+   const old=row('Multipunto · Pastillas de freno','attention','Observación previa')
+   const other={...old,id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',order_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',result:'ok' as const}
+   const rows=[old,other,{...other,workshop_id:other.order_id},{...other,vehicle_id:other.order_id}]
+   expect(multipuntoItemsFromFindings(rows).find(i=>i.name==='Pastillas de freno')?.state).toBe('unreviewed')
+   expect(multipuntoItemsFromFindings(rows,{workshopId:a,vehicleId:a,orderId:a}).find(i=>i.name==='Pastillas de freno')?.state).toBe('attention')
+ })
+ it('hides and never re-saves a legacy provisional technical note on OK',()=>{
+   const provisional='Detalle técnico pendiente de completar'
+   const old=row('Multipunto · Pastillas de freno','ok',provisional)
+   expect(multipuntoItemsFromFindings([old]).find(i=>i.name==='Pastillas de freno')?.note).toBe('')
+   const item=multipuntoTemplateItems().find(i=>i.name==='Pastillas de freno')!
+   expect(multipuntoFinding(item.id,'ok',provisional,a,a).note).toBeNull()
  })
 })

@@ -102,3 +102,15 @@ describe('CP04 multipoint local PDF model',()=>{
    }
  })
 })
+
+describe('CP04 current-state PDF projection regression',()=>{
+ it('matches the current X after historical warning, OK and clear without changing A4 layout',()=>{
+  const old=finding('Multipunto · Extintor','attention','PRIORIDAD INMEDIATA: Extintor vencido')
+  const ok={...old,id:a,result:'ok' as const,note:'Detalle técnico pendiente de completar',resolution:'not_applicable' as const,created_at:'2026-11-24T10:00:00Z'}
+  const cleared={...ok,id:b,result:'not_checked' as const,note:null,created_at:'2026-11-24T10:01:00Z'}
+  const input={workshopName:'Taller ficticio',order,findings:[ok,old]}
+  expect(multipuntoPdfModel(input).rows.find(r=>r.label==='Extintor')).toMatchObject({state:'ok',note:'',provisional:false})
+  expect(multipuntoPdfModel({...input,findings:[cleared,old,ok]}).rows.find(r=>r.label==='Extintor')).toMatchObject({state:'unreviewed',note:'',provisional:false})
+  expect(old.resolution).toBe('pending')
+ })
+})

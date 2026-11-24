@@ -8,13 +8,13 @@
  *
  * Existing R1 Supabase repository / RLS remains the only write authority.
  */
-import {effectivePendingFindings,type Finding,type NewFinding} from './cp04Contracts'
+import {currentFindings,inFindingScope,compareFindings,compareFindingTimes,CP04_PROVISIONAL_NOTE,type Finding,type NewFinding} from './cp04Contracts'
 import type {Result} from '../informes/multipunto/multipuntoTemplate'
 import {
   multipuntoFinding,multipuntoSavedState,latestForMultipuntoItem,
-  multipuntoTemplateItems,CP04_IMMEDIATE_PREFIX
+  multipuntoTemplateItems,CP04_IMMEDIATE_PREFIX,multipuntoDisplayNote
 } from './cp04Multipunto'
-export const CP04_PROVISIONAL_NOTE='Detalle técnico pendiente de completar'
+export {CP04_PROVISIONAL_NOTE} from './cp04Contracts'
 const KEY='bt:cp04:multipunto-autosave:v1:'
 const TTL=8*60*60*1000
 export type AutosaveScope=Readonly<{
@@ -90,7 +90,7 @@ function trimNote(note:string){return note.startsWith(CP04_IMMEDIATE_PREFIX)
    ?note.slice(CP04_IMMEDIATE_PREFIX.length):note}
 function encodedNote(state:Result,note:string):string|null{
  if(state==='unreviewed')return null
- if(state==='ok')return note.trim()||null
+ if(state==='ok')return note.trim()===CP04_PROVISIONAL_NOTE?null:note.trim()||null
  const text=note.trim()||CP04_PROVISIONAL_NOTE
  return state==='immediate'?CP04_IMMEDIATE_PREFIX+text:text
 }
@@ -103,7 +103,7 @@ export function provisionalFinding(f:Finding):boolean {
 /** Only currently outstanding provisional multipoint diagnoses block the PDF.
  * An older provisional note superseded by a confirmed OK stays in history. */
 export function hasCurrentProvisionalFindings(rows: readonly Finding[]): boolean {
-  return effectivePendingFindings(rows).some(provisionalFinding)
+  return currentFindings(rows).some(provisionalFinding)
 }
 export class Cp04AutosaveQueue {
  private readonly config:QueueConfig
@@ -126,7 +126,7 @@ export class Cp04AutosaveQueue {
   this.config=config
   this.store=config.store===undefined?storage():config.store
   this.backupAvailable=this.store!==null
-  this.finds=[...config.initialFindings]
+  this.finds=config.initialFindings.filter(row=>inFindingScope(row,config.scope))
   this.entries={...read(config.scope,this.store)}
   for(const id of Object.keys(this.entries))this.uncertain.add(id)
   this.current={...this.entries}
@@ -144,13 +144,13 @@ export class Cp04AutosaveQueue {
  getSavedCount=()=>template.filter(item=>{
    const entry=this.entries[item.id]
    return entry?.phase==='saved'||(!entry&&multipuntoSavedState(
-     latestForMultipuntoItem(item,this.finds))!=='unreviewed')
+     latestForMultipuntoItem(item,this.finds,this.config.scope))!=='unreviewed')
  }).length
  getCurrentItems=()=>template.map(item=>{
-   const row=latestForMultipuntoItem(item,this.finds)
+   const row=latestForMultipuntoItem(item,this.finds,this.config.scope)
    const entry=this.entries[item.id]
    return {...item,state:entry?.state??multipuntoSavedState(row),
-     note:entry?.note??(row?.note ? trimNote(row.note):'')}
+     note:entry?.note??multipuntoDisplayNote(row)}
  })
  start(){
    if(this.active)return
@@ -176,15 +176,13 @@ export class Cp04AutosaveQueue {
  setFindings(rows:readonly Finding[]){
    // Do not discard a newer result returned by an in-flight mutation.
    const all=new Map(this.finds.map(x=>[x.id,x]))
-   for(const row of rows)if(!all.has(row.id)||new Date(row.updated_at).getTime()>=
-     new Date(all.get(row.id)!.updated_at).getTime())all.set(row.id,row)
-   this.finds=[...all.values()].sort((a,b)=>
-     new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+   for(const row of rows)if(inFindingScope(row,this.config.scope)&&(!all.has(row.id)||compareFindingTimes(row.updated_at,all.get(row.id)!.updated_at)>=0))all.set(row.id,row)
+   this.finds=[...all.values()].sort(compareFindings)
    for(const [id,entry] of Object.entries(this.entries)){
       if(entry.phase==='saving')continue
       const item=template.find(x=>x.id===id)
       if(!item)continue
-      const row=latestForMultipuntoItem(item,this.finds)
+      const row=latestForMultipuntoItem(item,this.finds,this.config.scope)
       if(multipuntoSavedState(row)===entry.state&&
          (row?.note??null)===encodedNote(entry.state,entry.note)){
         delete this.entries[id]
@@ -218,7 +216,7 @@ export class Cp04AutosaveQueue {
    if(!this.active||!itemSet.has(id))return
    const existing=this.entries[id]
    const item=template.find(x=>x.id===id)!
-   const row=latestForMultipuntoItem(item,this.finds)
+   const row=latestForMultipuntoItem(item,this.finds,this.config.scope)
    const oldState=existing?.state??multipuntoSavedState(row)
    if(state===oldState&&existing?.phase!=='error')return
    const note=state==='ok'||state==='unreviewed'?'':(
@@ -231,7 +229,7 @@ export class Cp04AutosaveQueue {
  note(id:string,note:string){
    if(!this.active||!itemSet.has(id)||note.length>1900)return
    const item=template.find(x=>x.id===id)!
-   const row=latestForMultipuntoItem(item,this.finds)
+   const row=latestForMultipuntoItem(item,this.finds,this.config.scope)
    const existing=this.entries[id]
    const state=existing?.state??multipuntoSavedState(row)
    if(state==='unreviewed')return
@@ -293,14 +291,14 @@ export class Cp04AutosaveQueue {
          if(index>=0)this.finds[index]=record
          else this.finds.push(record)
        }
-       this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+       this.finds.sort(compareFindings)
        this.uncertain.delete(id)
      }
      // Auth teardown may occur while reconciliation is waiting: no new mutation.
      if(!this.active||generation!==this.generation)return
      // Reconcile server first when draft was restored after an interrupted
      // request; the original INSERT might already have reached PostgreSQL.
-     let row=latestForMultipuntoItem(item,this.finds)
+     let row=latestForMultipuntoItem(item,this.finds,this.config.scope)
      const desired=encodedNote(entry.state,entry.note)
      if(row&&multipuntoSavedState(row)===entry.state&&row.note===desired){
         // Already committed (possibly during Auth focus revalidation).
@@ -311,7 +309,7 @@ export class Cp04AutosaveQueue {
        const input=entry.state==='unreviewed'
          ?{order_id:this.config.scope.orderId,vehicle_id:this.config.scope.vehicleId,
            category:'Multipunto · '+item.name,result:'not_checked' as const,note:null}
-         :multipuntoFinding(id,entry.state,entry.note.trim()||CP04_PROVISIONAL_NOTE,
+         :multipuntoFinding(id,entry.state,entry.state==='ok'?entry.note:(entry.note.trim()||CP04_PROVISIONAL_NOTE),
            this.config.scope.orderId,this.config.scope.vehicleId)
        row=await this.config.port.createFinding(input)
      }
@@ -325,7 +323,7 @@ export class Cp04AutosaveQueue {
      const index=this.finds.findIndex(x=>x.id===row.id)
      if(index>=0)this.finds[index]=row
      else this.finds.push(row)
-     this.finds.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+     this.finds.sort(compareFindings)
      this.onSaved?.(row)
      const current=this.entries[id]
      if(current&&current.revision===entry.revision){

@@ -6,7 +6,7 @@
  * represented as attention plus an explicit priority prefix in the note.
  */
 import {categories,type Result,type InspectionItem} from '../informes/multipunto/multipuntoTemplate'
-import type {Finding,NewFinding} from './cp04Contracts'
+import {currentFindings,CP04_PROVISIONAL_NOTE,type Finding,type NewFinding,type FindingScope} from './cp04Contracts'
 export const CP04_IMMEDIATE_PREFIX='PRIORIDAD INMEDIATA: '
 export const multipuntoItemName=(name:string)=>'Multipunto · '+name
 const template:InspectionItem[]=categories.flatMap(group=>
@@ -18,10 +18,15 @@ const template:InspectionItem[]=categories.flatMap(group=>
 export function multipuntoTemplateItems():InspectionItem[]{
  return template.map(x=>({...x}))
 }
-export function latestForMultipuntoItem(item:InspectionItem,findings:readonly Finding[]):Finding|null{
+export function latestForMultipuntoItem(item:InspectionItem,findings:readonly Finding[],scope?:FindingScope):Finding|null{
   const category=multipuntoItemName(item.name)
-  for(let i=findings.length-1;i>=0;i--)if(findings[i].category===category)return findings[i]
-  return null
+  const rows=currentFindings(findings,scope).filter(row=>row.category===category)
+  // A caller with mixed visits must select a visit explicitly, never borrow its X.
+  return rows.length===1?rows[0]:null
+}
+export function multipuntoDisplayNote(row:Finding|null):string {
+  const text=(row?.note??'').replace(/^PRIORIDAD INMEDIATA: /,'').trim()
+  return row?.result==='ok'&&text===CP04_PROVISIONAL_NOTE?'':text
 }
 export function multipuntoSavedState(row:Finding|null):Result{
   if(!row)return 'unreviewed'
@@ -30,10 +35,10 @@ export function multipuntoSavedState(row:Finding|null):Result{
     return row.note?.startsWith(CP04_IMMEDIATE_PREFIX)?'immediate':'attention'
   return 'unreviewed'
 }
-export function multipuntoItemsFromFindings(findings:readonly Finding[]):InspectionItem[]{
+export function multipuntoItemsFromFindings(findings:readonly Finding[],scope?:FindingScope):InspectionItem[]{
   return template.map(item=>{
-    const row=latestForMultipuntoItem(item,findings)
-    return {...item,state:multipuntoSavedState(row),note:row?.note??''}
+    const row=latestForMultipuntoItem(item,findings,scope)
+    return {...item,state:multipuntoSavedState(row),note:multipuntoDisplayNote(row)}
   })
 }
 export function multipuntoFinding(
@@ -41,7 +46,7 @@ export function multipuntoFinding(
 ):NewFinding {
   const item=template.find(i=>i.id===itemId)
   if(!item||state==='unreviewed')throw Error('Selecciona primero una casilla con X.')
-  const text=note.trim()
+  const text=state==='ok'&&note.trim()===CP04_PROVISIONAL_NOTE?'':note.trim()
   if((state==='attention'||state==='immediate')&&text.length<3)
     throw Error('Agrega una observación técnica para este problema.')
   const saved=state==='immediate'?CP04_IMMEDIATE_PREFIX+text:text

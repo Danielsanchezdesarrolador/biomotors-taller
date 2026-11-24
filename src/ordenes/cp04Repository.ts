@@ -9,7 +9,7 @@ import type { Context,Role } from '../auth/controller'
 import { UUID } from '../clientes/cp03PilotContracts'
 import {
   WorkOrderFailure, workFailure, validId, validPlateSearch, orderInput,
-  effectivePendingFindings,
+  effectivePendingFindings,compareFindings,
   findingInput, workStatuses, recentOrdersLimit, type WorkOrder, type Finding, type NewOrder,
   type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle, type InspectionPdfIdentity
 } from './cp04Contracts'
@@ -139,16 +139,15 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       ownerName:customer?.full_name??null,modelYear:details.model_year??null}
   }
   async function findingsForOrder(orderId:string):Promise<Finding[]>{
-    const id=validId(orderId),version=await guard()
-    const result=await client.from('inspection_findings').select(findingCols)
-      .eq('workshop_id',tenant).eq('order_id',id)
-      .order('created_at',{ascending:true}).limit(100)
-    if(result.error)workFailure(result.error)
-    valid(version)
-    return many<Finding>(result.data,tenant)
+    return findingHistory('order_id',validId(orderId))
   }
   async function pendingForVehicle(vehicleId:string):Promise<Finding[]>{
-    const id=validId(vehicleId),version=await guard()
+    return effectivePendingFindings(await findingHistory('vehicle_id',validId(vehicleId)))
+  }
+  /** Complete history: never let the former 100-row visit limit revive an old X.
+   * Reuse the existing read-only deterministic vehicle keyset pagination. */
+  async function findingHistory(field:'order_id'|'vehicle_id',id:string):Promise<Finding[]>{
+    const version=await guard()
     const all:Finding[]=[]
     let last:Finding|null=null
     const seen=new Set<string>()
@@ -156,7 +155,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     // Read confirmed vehicle history in deterministic keyset pages, read only.
     for(let page=0;page<100;page++){
       let query=client.from('inspection_findings').select(findingCols)
-        .eq('workshop_id',tenant).eq('vehicle_id',id)
+        .eq('workshop_id',tenant).eq(field,id)
         .order('created_at',{ascending:false})
         .order('id',{ascending:false}).limit(201)
       if(last){
@@ -169,12 +168,12 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       if(response.error)workFailure(response.error)
       valid(version)
       const rows=many<Finding>(response.data,tenant)
-      if(rows.some(row=>row.vehicle_id!==id||seen.has(row.id)))
+      if(rows.some(row=>row[field]!==id||seen.has(row.id)))
         throw new WorkOrderFailure('unavailable')
       const batch=rows.slice(0,200)
       batch.forEach(row=>seen.add(row.id))
       all.push(...batch)
-      if(rows.length<=200)return effectivePendingFindings(all)
+      if(rows.length<=200)return all.sort(compareFindings)
       last=batch[batch.length-1]
     }
     throw new WorkOrderFailure('unavailable')

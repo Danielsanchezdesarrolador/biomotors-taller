@@ -6,6 +6,8 @@
  */
 import { UUID } from '../clientes/cp03PilotContracts'
 export type Cp04Draft = Readonly<{
+  detailTab?: 'summary'|'inspection'|'pending'|'history'
+  detailScroll?: Partial<Record<'summary'|'inspection'|'pending'|'history',number>>
   scrollY?: number
   selectedOrderId: string | null
   plate: string
@@ -48,6 +50,8 @@ function valid(input: unknown): input is Cp04Draft {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return false
   const v = input as Record<string, unknown>
   return (
+    (v.detailScroll===undefined||(v.detailScroll!==null&&typeof v.detailScroll==='object'&&Object.entries(v.detailScroll).every(([k,n])=>['summary','inspection','pending','history'].includes(k)&&typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=10000000))) &&
+    (v.detailTab===undefined||['summary','inspection','pending','history'].includes(String(v.detailTab))) &&
     (v.scrollY === undefined ||
       (typeof v.scrollY === 'number' &&
         Number.isFinite(v.scrollY) &&
@@ -153,4 +157,10 @@ export function rememberCp04Position(
   if (!Number.isFinite(scrollY) || scrollY < 0 || scrollY > 10000000) return false
   const draft = readCp04Draft(scope, store, now)
   return draft ? writeCp04Draft(scope, { ...draft, scrollY }, store, now) : false
+}
+
+/** Same scope/TTL and no resurrection after logout. UI position is not authority. */
+export function rememberCp04PanelPosition(scope:Scope,tab:NonNullable<Cp04Draft['detailTab']>,scrollTop:number,store:StoragePort|null=storage()){
+ const draft=readCp04Draft(scope,store)
+ return draft?writeCp04Draft(scope,{...draft,detailScroll:{...draft.detailScroll,[tab]:scrollTop}},store):false
 }

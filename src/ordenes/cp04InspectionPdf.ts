@@ -3,7 +3,7 @@ import {PDFDocument,rgb,pushGraphicsState,popGraphicsState,setTextRenderingMode,
 import lightLogoUrl from '../../apps/android/assets/brand/logo-horizontal.png?url'
 import darkLogoUrl from '../../apps/android/assets/brand/logo-horizontal-dark.png?url'
 import fontkit from '@pdf-lib/fontkit'
-import {multipuntoTemplateItems,latestForMultipuntoItem,CP04_IMMEDIATE_PREFIX} from './cp04Multipunto'
+import {multipuntoTemplateItems,latestForMultipuntoItem,multipuntoSavedState,multipuntoDisplayNote} from './cp04Multipunto'
 import {provisionalFinding,CP04_PROVISIONAL_NOTE} from './cp04Autosave'
 import type {Finding,OrderWithVehicle,InspectionPdfIdentity} from './cp04Contracts'
 
@@ -23,11 +23,9 @@ export function multipuntoPdfModel(source:MultipuntoPdfInput){
    f.order_id===order.order.id&&f.vehicle_id===order.vehicle.id)
  const rows:MultipuntoPdfRow[]=multipuntoTemplateItems().map(item=>{
    const found=latestForMultipuntoItem(item,allowed)
-   const immediate=found?.result==='attention'&&found.note?.startsWith(CP04_IMMEDIATE_PREFIX)
-   const state=found?.result==='ok'?'ok':found?.result==='attention'
-     ?(immediate?'immediate':'attention'):'unreviewed'
+   const state=multipuntoSavedState(found)
    const provisional=!!found&&provisionalFinding(found)
-   const text=(found?.note||'').replace(/^PRIORIDAD INMEDIATA: /,'').trim()
+   const text=multipuntoDisplayNote(found)
    return {id:item.id,group:item.category,label:item.name,state,
      note:provisional?CP04_PROVISIONAL_NOTE:text,
      resolution:found?.resolution??null,provisional}
