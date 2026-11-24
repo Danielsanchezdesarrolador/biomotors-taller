@@ -85,9 +85,9 @@ const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
    const count=requests.length
    await tab('Condiciones').click();await tab('Historial').click()
    assert.equal(requests.length,count,'Selecting frozen history is local presentation')
-   assert.equal(await history.getByRole('button',{name:'Enviar correo · desactivado'}).isVisible(),false)
+   assert.equal(await history.getByRole('button',{name:'Enviar cotización · desactivado'}).isVisible(),false)
    await history.locator('.cp05-email-controls summary').click()
-   assert.equal(await history.getByRole('button',{name:'Enviar correo · desactivado'}).isDisabled(),true)
+   assert.equal(await history.getByRole('button',{name:'Enviar cotización · desactivado'}).isDisabled(),true)
    // Internal scroll leaves the essential toolbar in place, without a floating pill.
    const before=await dock.boundingBox()
    await history.evaluate(el=>{el.scrollTop=el.scrollHeight})
