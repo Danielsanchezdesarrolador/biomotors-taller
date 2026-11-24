@@ -1,3 +1,17 @@
+## BT-REG-01 — SQL alojado instalado, rollout OFF (24/11/2026)
+
+El propietario autorizó expresamente instalar BT-REG-01 después del cierre del respaldo S5B+Storage en su alcance acordado y la instalación de LIVE-02 OFF. Migración registrada en Supabase: `20261124213211_bt_records_administration_off`. Fuente [SQL candidato](https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/1095837604492add167f6fe9f2519049d55f69ea/docs/sql/BT_RECORDS_ADMINISTRATION_CANDIDATE.sql), blob `666bc88eb589ebcb68fcecd38517541725d7a094`, idéntico al blob de `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`. Aplicada una vez con transacción y límites locales lock_timeout 5s y statement_timeout 60s; sin cambios en el candidato funcional.
+
+Preflight de catálogo: ausencia de instalación parcial, columnas y funciones requeridas presentes, guarda CP04 BEFORE UPDATE existente, tres tablas LIVE-02 presentes y rollout vacío. Se inspeccionó el repositorio/contratos CP03 del SHA actualmente LIVE `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`: formularios ordinarios no envían archived_at en UPDATE; no se encontraron escritores SQL directos de ese campo mediante la búsqueda acotada de funciones. No constituye inventario universal de consumidores externos. Se informó antes de aplicar que la revocación de UPDATE(archived_at), reemplazo de guarda CP04 y registro de futuras actividades se instalan incluso con rollout OFF.
+
+Postflight: tablas privadas events y rollout con RLS+FORCE y sin acceso directo de roles API; ambas vacías al verificar. Guarda de inmutabilidad del ledger activa, 7/7 guardas de fuentes instaladas (incluidas las 3 LIVE-02), 2/2 triggers de actividad, constraint de cancelación validada, columnas nuevas sin UPDATE autenticado, revocación directa de archivo CP03 comprobada. Cuatro RPC invoker, EXECUTE authenticated y no anon/service_role. Conteos antes/después idénticos: clientes 3, vehículos 3, OT 3, cotizaciones 3, revisiones 1; 0 OT canceladas. No prueba identidad de cada fila mediante conteo ni auditoría integral.
+
+Prueba acotada de gate OFF: transacción READ ONLY con rollback, contexto SQL simulado de owner elegible, rol authenticated, IDs ficticios; 4/4 RPC list/inspect/execute/audit denegadas con SQLSTATE 55000 y RECORDS_OPERATION_FAILED. Marcador RECORDS_OFF_OWNER_SQL_CONTEXT_4_OF_4_DENIED. No JWT real ni pruebas de mutaciones ON. No se habilitó ningún taller, no se ejecutó operación de negocio, no se modificó Render, Edge, Storage, correo ni flags. Sin Codex.
+
+**Estado:** BT-REG-01 y LIVE-02 instalados OFF. Próximo paso: revisar dependencias/SQL de COM-01C y solicitar autorización específica; luego BT-EXP-01. No volver a aplicar migraciones instaladas. Mantener pauta SEC07, comprobar vigencia del respaldo si cambian datos; no certificar S4 integral, segunda copia independiente ni paridad total de permisos. Conservar guardas/ledger al contener el módulo después de habilitarlo según guía productiva. Mantener rama main, Auto-Deploy OFF, correo OFF y QA ficticia antes de uso real.
+
+---
+
 # BT-REG-01 — administración segura de registros
 
 ## Nota posterior de gobernanza — economía de cuota (24/11/2026)

@@ -1,3 +1,9 @@
+## BT-REG-01 — SQL instalado, rollout OFF (24/11/2026)
+
+Autorización específica ejecutada: migración `20261124213211_bt_records_administration_off`. Postflight: 2 tablas privadas RLS+FORCE, 7 guardas de fuentes incluidas 3 LIVE-02, 2 triggers de actividad, 4/4 RPC denegadas con rollout OFF en contexto SQL simulado de owner; conteos existentes conservados. La instalación revoca archivo directo CP03 y registra actividad futura aun OFF. Rollouts REG y FLOW vacíos. Sin despliegue, Edge, Storage, flags, correo ni operaciones de negocio. **Siguiente: revisar COM-01C y solicitar autorización específica de SQL; después BT-EXP-01.** No repetir respaldo/pruebas aprobadas por rutina ni reinstalar migraciones. QA con JWT real y recuperación integral pendientes. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md).
+
+---
+
 ## BT-FLOW-LIVE-02 — migración instalada, OFF (24/11/2026)
 
 Autorización específica del propietario ejecutada: `20261124213015_bt_flow_live_02_operator_attestations_off` registrada. Postflight 3/3 historiales RLS+FORCE e inmutables, sin DML directo; rollout vacío y 3/3 RPC denegadas 42501 en contexto SQL simulado de owner, no prueba JWT real. Sin despliegue, Edge, flags, correo ni escrituras de negocio. Respaldo previo S5B+Storage aprobado en alcance acordado, no S4 integral ni paridad completa. **Siguiente: revisar y solicitar autorización SQL BT-REG-01; LIVE-02 ya existe para sus guardas opcionales.** No reinstalar CP05/LIVE-02 ni repetir pruebas; COM-01C/BT-EXP-01 pendientes. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_FLOW_LIVE_02_PERSISTENCIA_ENTREGA_20261118.md).
