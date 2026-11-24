@@ -37,6 +37,9 @@ if (plan04PrivateEnabled) {
 }
 assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/planStatus\.ts$/.test(id)),
   'Only the pure plan status formatter may enter the public app')
+const finalArchiveEnabled=process.env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true'
+if(finalArchiveEnabled){for(const flag of ['VITE_BT_CP03_PRIVATE_ENABLED','VITE_BT_CP05_PRIVATE_ENABLED','VITE_BT_CP06_PRIVATE_ENABLED'])assert.equal(process.env[flag],'true','Final archive requires private history')}
+else assert.ok(modules.every(id=>!id.includes('src/expedientes/')),'Final archive must stay excluded while OFF')
 const recordsEnabled = process.env.VITE_BT_RECORDS_PRIVATE_ENABLED === 'true'
 if(recordsEnabled) assert.equal(process.env.VITE_BT_CP03_PRIVATE_ENABLED,'true','Record management requires private directory')
 else assert.ok(modules.every(id=>!id.includes('src/records/')),'Record management must stay excluded until approved rollout')
@@ -114,6 +117,7 @@ assert.ok(
       id.endsWith('.css') ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
+      (finalArchiveEnabled && /src\/expedientes\//.test(id)) ||
       (recordsEnabled && /src\/records\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||
       (cp05PrivateEnabled &&

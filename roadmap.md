@@ -1,3 +1,19 @@
+## BT-EXP-01 — archivo privado del expediente final, implementación local (24/11/2026)
+
+El propietario aprueba implementar/validar esta entrega. Se reutilizan CP05, CP06
+y BT-COM; consulta de originales y revisiones, archivo backend, SHA-256, manifest
+inmutable y recuperación de Storage además de PostgreSQL. Toolkit privado consultado
+solo en lectura. Detalle y evidencia en el [checkpoint BT-EXP-01](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+**SOLO LOCAL: NO PUSH funcional, NO deploy, NO SQL/buckets/flags/secrets alojados,
+NO correo ni backups reales.** Nuevos gates de lectura/creación apagados por defecto.
+BT-REG-01 permanece candidato verificado pendiente; SEC07 y CP04 cerrados y selector
+CP05 aceptado. Mantener main único, Auto-Deploy OFF y repo público temporal autorizado.
+La autorización presente sustituye únicamente el pendiente de aprobación de la propuesta
+inferior; no habilita publicación ni infraestructura. Validación consolidada solo nueva.
+
+---
+
 ## BT-REG-01 — publicación cerrada; activación aplazada (24/11/2026)
 
 Candidato `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: CI general `45416339689`,
@@ -20,9 +36,9 @@ Propuesta local siguiente en roadmap: archivo recuperable del expediente final.
 
 ---
 
-## Siguiente entrega propuesta — archivo recuperable del expediente final
+## BT-EXP-01 — archivo recuperable del expediente final, candidato local
 
-**Solo propuesta; sin implementación nueva ni activación autorizadas.** Resultado
+**Implementación y validación locales autorizadas y completadas; sin push/activación.** Resultado
 para Ignacio: desde el historial de la visita, recuperar el PDF original emitido
 de la cotización y las copias archivadas del informe de trabajos y constancia de
 entrega, individualmente o como paquete; conservar revisión, vínculos e integridad
@@ -60,7 +76,9 @@ No incluye envío real, pagos, respaldos, credenciales, cambios productivos ni
 activar LIVE-02/CP06. Su infraestructura y aceptación requerirían autorizaciones
 posteriores. Emisión/descarga/ejecución que ya existen se reutilizan como dependencias;
 no se anuncian como nuevas implementaciones ni como activadas en producción.
-El propietario debe aprobar esta propuesta antes de escribir código de la entrega.
+La aprobación posterior del propietario autoriza esta implementación local.
+Quedan pendientes revisión/aceptación de la entrega, push/CI, respaldo actualizado,
+SQL/buckets/Edge y activación bajo permisos específicos; no se presume producción.
 
 ---
 

@@ -1,3 +1,19 @@
+## BT-EXP-01 — archivo privado del expediente final, implementación local (24/11/2026)
+
+El propietario aprueba implementar/validar esta entrega. Se reutilizan CP05, CP06
+y BT-COM; consulta de originales y revisiones, archivo backend, SHA-256, manifest
+inmutable y recuperación de Storage además de PostgreSQL. Toolkit privado consultado
+solo en lectura. Detalle y evidencia en el [checkpoint BT-EXP-01](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+**SOLO LOCAL: NO PUSH funcional, NO deploy, NO SQL/buckets/flags/secrets alojados,
+NO correo ni backups reales.** Nuevos gates de lectura/creación apagados por defecto.
+BT-REG-01 permanece candidato verificado pendiente; SEC07 y CP04 cerrados y selector
+CP05 aceptado. Mantener main único, Auto-Deploy OFF y repo público temporal autorizado.
+La autorización presente sustituye únicamente el pendiente de aprobación de la propuesta
+inferior; no habilita publicación ni infraestructura. Validación consolidada solo nueva.
+
+---
+
 ## BT-REG-01 — publicación cerrada; activación aplazada (24/11/2026)
 
 Candidato `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: CI general `45416339689`,

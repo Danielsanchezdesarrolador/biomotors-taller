@@ -212,7 +212,10 @@ export async function archiveClosingCandidate(
   }
   const stored = await ports.commit(request.requestId, manifest)
   // Fail closed if a racing different payload is returned for this revision.
-  if (JSON.stringify(stored) !== JSON.stringify(manifest))
+  // JSONB orders object keys differently; compare structure without weakening any field.
+  const canonical=(value:unknown)=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)
+    ?Object.fromEntries(Object.entries(item).sort(([a],[b])=>a.localeCompare(b))):item)
+  if (canonical(stored) !== canonical(manifest))
     deny('CLOSING_ARCHIVE_COMMIT_MISMATCH')
   return stored
 }

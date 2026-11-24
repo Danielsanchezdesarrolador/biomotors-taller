@@ -65,3 +65,29 @@ BT_SEC07_S4B_R8_RESULT: RESTORE_PASS
 ## Anexo: S4C-R9 posterior a R8 — resultado limitado (23/11/2026)
 
 El propietario ejecutó S4C-R9 con el mismo v04 en un laboratorio nuevo y obtuvo `LAB READY`, `RESTORE_EXIT 0`, `GPG PASS`, `STRUCTURE PASS`, `RLS WORKSHOPS_AB_PASS_LAB_GRANT`, `ACL NOT_CERTIFIED_NO_ACL_RESTORE`, `RESULT CHECK_PASS_LIMITED`. No hubo conexión ni cambios a producción. La prueba confirmó presencia de 12 tablas, banderas RLS, mínimas relaciones y lectura A permitida/B denegada en `public.workshops` con grants *temporales* introducidos en laboratorio. No extrapolar a las ACL reales ni otras tablas/operaciones. Por ser `--rm`, el lab fue destruido. **No repetir S4C-R9 como rutina.** La recuperación integral S4 y coberturas S3 continúan abiertas. [Checkpoint S4C](../checkpoints/CHECKPOINT_BT_SEC07_S4C_R9_VALIDACION_LIMITADA_PASS_20261123.md).
+
+
+## Anexo documental BT-EXP-01 — originales PDF en Storage (24/11/2026)
+
+La nueva entrega candidata de archivo documental incorpora un sidecar de objetos,
+sin modificar el código ni los resultados aprobados de SEC07 y sin repetir R8,
+S4C o sus auditorías. **Un dump PostgreSQL no contiene los bytes de Storage**;
+metadatos/rutas restaurados no prueban apertura de los documentos.
+
+Antes de activar el archivo final, el procedimiento de custodia debe asociar el
+respaldo DB elegido con su inventario de referencias y un sidecar cifrado de los
+PDF CP05/COM. Ver [procedimiento BT-EXP-01](../checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md#respaldo-y-recuperación-bytes-además-de-postgresql),
+`final_archive_inventory.sql` y `final_archive_storage.py` en `scripts/backup/`.
+La selección se deriva del mismo conjunto de DB, no de un snapshot vivo distinto;
+comparar inventario completo, hashes, tamaño, apertura y lectura tras recuperación
+antes de declarar recuperado el expediente. Rechazar faltantes/corrupción sin regenerar.
+
+El exportador conserva solo la pública GPG; descifrado y verificación pertenecen
+al PC/custodia del propietario. El modo `verify --encrypted-file` transporta bytes
+internamente y comprueba la salida GPG, evitando conversiones de PowerShell 5.1.
+No ejecutar desde esta preparación con datos reales, no configurar secretos ni
+cambiar el workflow de backup. El workflow vigente aún no captura esos objetos.
+Solo se han validado documentos/keys ficticios y restauración aislada local;
+la incorporación operativa y restauración a Storage alojado requieren permisos y
+QA específicos. El cierre del piloto SEC07 no se convierte por este anexo en DR
+integral de Storage, Auth, Edge o de todo el proyecto. Se conserva la evidencia histórica.

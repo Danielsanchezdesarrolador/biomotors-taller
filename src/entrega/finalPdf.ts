@@ -48,6 +48,7 @@ export async function closingDocumentPdf(
   doc.setCreator('ByteTorque')
   doc.setProducer('ByteTorque BT-COM-01 - copia generada localmente')
   doc.setCreationDate(new Date(sourceDate))
+  doc.setModificationDate(new Date(sourceDate)) // Stable first archive and content-addressed concurrent retries.
   let page: PDFPage
   let y=0
   function header() {

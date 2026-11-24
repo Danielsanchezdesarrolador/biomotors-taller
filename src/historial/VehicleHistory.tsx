@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
 import { workStatusLabel, type Finding } from '../ordenes/cp04Contracts'
@@ -624,6 +624,7 @@ export function HistoryView({
     </section>
   )
 }
+const FinalArchiveLoader = import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED === 'true' ? lazy(() => import('../expedientes/FinalArchiveLoader')) : null
 export function VehicleHistory({
   client,
   context,
@@ -637,6 +638,7 @@ export function VehicleHistory({
   onAccessLost?: () => void
   onBack: () => void
 }) {
+  const [archiveOpen,setArchiveOpen]=useState(false)
   const [repository, setRepository] = useState<HistoryPort | null>(null),
     [document, setDocument] = useState<{ kind: 'order' | 'quote'; id: string } | null>(null),
     [archive, setArchive] = useState<{
@@ -704,7 +706,9 @@ export function VehicleHistory({
     <>
       {/* Keep the verified history mounted while opening an OT or quotation:
           returning to the vehicle must not lose loaded pages or scroll context. */}
-      <div hidden={document !== null}>
+      {FinalArchiveLoader&&['owner','admin'].includes(context.role)&&!archiveOpen&&<button className="cp03-secondary" onClick={()=>setArchiveOpen(true)}>Consultar documentos originales</button>}
+      {FinalArchiveLoader&&archiveOpen&&['owner','admin'].includes(context.role)&&<Suspense fallback={<p>Abriendo originales…</p>}><FinalArchiveLoader client={client} context={context} vehicleId={vehicleId} onBack={()=>setArchiveOpen(false)}/></Suspense>}
+      <div hidden={document !== null||archiveOpen} inert={document !== null||archiveOpen}>
         {repository ? (
           <HistoryView
             onAccessLost={onAccessLost}
@@ -723,6 +727,7 @@ export function VehicleHistory({
             } : undefined}
             onBack={onBack}
             onFinalDownload={
+              import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED !== 'true' &&
               import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
               import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true'
                 ? async (quote, revision, evidence, kind) => {
@@ -739,6 +744,7 @@ export function VehicleHistory({
                 : undefined
             }
             onPackageDownload={
+              import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED !== 'true' &&
               import.meta.env.VITE_BT_COM_01D_PREVIEW_ENABLED === 'true' &&
               import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
               import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&

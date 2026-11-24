@@ -1,3 +1,5 @@
+import {isArchivedPdf} from '../../src/cp05/pdfEnvelope'
+export {isArchivedPdf} from '../../src/cp05/pdfEnvelope'
 /** Private and append-only CP05 archive: candidate only; never browser-accessible.
  * Requires an approved private bucket with backend-only Storage policies.
  */
@@ -14,14 +16,6 @@ const hash = async (bytes: Uint8Array) =>
   [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes.slice().buffer))]
     .map(x => x.toString(16).padStart(2, '0')).join('')
 
-/** Minimal generated PDF envelope; never trusts MIME supplied by a caller. */
-export function isArchivedPdf(bytes: Uint8Array): boolean {
-  if (!(bytes instanceof Uint8Array) || bytes.byteLength < 12 ||
-      bytes.byteLength > CP05_MAX_PDF_BYTES) return false
-  const head = new TextDecoder('ascii').decode(bytes.subarray(0, 8))
-  const tail = new TextDecoder('ascii').decode(bytes.subarray(Math.max(0, bytes.length - 2048)))
-  return /^%PDF-[1-2]\.[0-9]/.test(head) && tail.includes('%%EOF')
-}
 export function isArchivePath(path: string): boolean {
   return typeof path === 'string' && pathPattern.test(path)
 }

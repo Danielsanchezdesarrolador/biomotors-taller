@@ -14,20 +14,27 @@ import { Cp03PilotDirectoryView } from './cp03PilotDirectoryView'
 
 const RecordsLoader = import.meta.env.VITE_BT_RECORDS_PRIVATE_ENABLED === 'true' ? lazy(() => import('../records/RecordsLoader')) : null
 
+const FinalArchiveLoader = import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED === 'true' ? lazy(() => import('../expedientes/FinalArchiveLoader')) : null
+
 type Binding = ReturnType<typeof cp03PilotAccessBinding>
 
 function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { binding: Binding; client:SupabaseClient; onAccessLost:()=>void; onVehicleQuotes?: (id:string)=>void }) {
   const [administration, setAdministration] = useState(false)
+  const [archiveOpen,setArchiveOpen]=useState(false)
   const [directoryRevision, setDirectoryRevision] = useState(0)
   const access = useSyncExternalStore(binding.subscribe,binding.getSnapshot,() => null)
   if (!access) return <p role="status">Verificando el acceso al directorio privado…</p>
   const { context, repository } = access
   const canManage = RecordsLoader && ['owner','admin'].includes(context.role)
+  const canReadArchive=FinalArchiveLoader&&['owner','admin'].includes(context.role)
+  const showArchive=!!canReadArchive&&archiveOpen
   const showAdministration = !!canManage && administration
   return <div className="cp03-private-panel">
-    {canManage && !administration && <button className="cp03-secondary" onClick={()=>setAdministration(true)}>Administrar registros</button>}
+    {canReadArchive&&!administration&&!archiveOpen&&<button className="cp03-secondary" onClick={()=>setArchiveOpen(true)}>Expedientes anteriores · documentos originales</button>}
+    {showArchive&&FinalArchiveLoader&&<Suspense fallback={<p>Abriendo archivo privado…</p>}><FinalArchiveLoader client={client} context={context} onBack={()=>setArchiveOpen(false)}/></Suspense>}
+    {canManage && !administration && !archiveOpen && <button className="cp03-secondary" onClick={()=>setAdministration(true)}>Administrar registros</button>}
     {administration && canManage && <Suspense fallback={<p role="status">Preparando administración…</p>}><RecordsLoader client={client} context={context} onBack={()=>{setAdministration(false); setDirectoryRevision(n=>n+1)}}/></Suspense>}
-    <div hidden={showAdministration} inert={showAdministration}>
+    <div hidden={showAdministration||showArchive} inert={showAdministration||showArchive}>
     <Cp03PilotDirectoryView refreshRevision={directoryRevision} key={context.userId+'-'+context.workshop.id+'-'+context.role}
     renderHistory={import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'?(vehicle,onBack)=><Cp06HistoryLoader key={vehicle.id} client={client} context={context} vehicleId={vehicle.id} onBack={onBack} onAccessLost={onAccessLost}/>:undefined}
     onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
