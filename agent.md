@@ -1,3 +1,13 @@
+## SEC07 — cierre acotado al piloto: dictamen Astra adoptado (23/11/2026)
+
+El propietario aportó el dictamen Astra posterior a S3-R4 y solicitó continuar hacia el cierre de seguridad. **S3-R5 de roles representativos DESCARTADO, NO EJECUTAR.** R4 falló MISSING_ROLE sin identidad del rol: no se conoce si corresponde a un objeto administrado o propio. Conservar S0/S1 local/S2-R11/R8/R9/S3-R1/R2/R3 en sus alcances acreditados. No repetirlos ni reexportar la base por ese fallo.
+
+**Tres entregas de cierre, sin requisitos nuevos innecesarios:** A) contrato real de owners/ACL/default ACL, roles y dependencias propios de la aplicación extraído de v04, revisión por objeto/firma (incluidas personalizaciones activas auth/storage y defaults globales relevantes), aplicación en lab con roles reales sin grants de conveniencia y comprobación sintética de operaciones permitidas/denegadas por taller, admin/mecánico y RPC sensibles/MFA; B) ficha privada de recuperación de Auth/Render, accesos, secretos por reposición y dependencias Edge/Storage que se usen efectivamente; C) recorrido funcional autorizado del piloto y registro del respaldo periódico manual cada dos días y antes de cambios de datos. No exigir paridad total de roles reservados, prueba de pérdida total del proveedor, USB/Drive/automatización o cambio TLS enforcement como condición adicional de este cierre. Riesgo PC-only aceptado y explícito. No desplegar ni modificar producción por este dictamen.
+
+**Próxima acción concreta:** extraer en el recinto Docker aislado el SQL de esquema del mismo v04 y metadatos por entrada TOC para revisar el contrato. No certificar por conteos, no seleccionar automáticamente mediante heurísticas SQL, no aplicar aún ni cargar filas. Selección definitiva y pruebas deberán utilizar el contenido archivado y dependencias revisadas. [Dictamen y criterios](docs/recovery/BT_SEC07_CIERRE_PILOTO_DICTAMEN_ASTRA_20261123.md). SEC07 **PENDIENTE DE APROBACIÓN PARA PILOTO**; no confundir con DR integral.
+
+---
+
 ## SEC07-S3-R4 — RESTORE_EXIT 1 / MISSING_ROLE; reconciliación de roles globales (23/11/2026, Chile)
 
 **Evidencia real del propietario (PowerShell 5.1):**
