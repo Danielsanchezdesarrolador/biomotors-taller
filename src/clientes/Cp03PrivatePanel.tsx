@@ -24,7 +24,7 @@ function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { bi
   const { context, repository } = access
   const canManage = RecordsLoader && ['owner','admin'].includes(context.role)
   const showAdministration = !!canManage && administration
-  return <div className="cp03-pilot">
+  return <div className="cp03-private-panel">
     {canManage && !administration && <button className="cp03-secondary" onClick={()=>setAdministration(true)}>Administrar registros</button>}
     {administration && canManage && <Suspense fallback={<p role="status">Preparando administración…</p>}><RecordsLoader client={client} context={context} onBack={()=>{setAdministration(false); setDirectoryRevision(n=>n+1)}}/></Suspense>}
     <div hidden={showAdministration} inert={showAdministration}>

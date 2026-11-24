@@ -1,5 +1,14 @@
 # BT-REG-01 — administración segura de registros
 
+## Corrección puntual tras CI de publicación
+
+El workflow oficial detectó una raíz `.cp03-pilot` duplicada en el contenedor de
+administración. Se renombra solo el wrapper y se conserva el estilo con dos
+selectores CSS; no cambia lógica, SQL, permisos, flags ni datos. Apertura/raíz única
+verificadas con HTTP ficticio a 390/1366. Se añade a los archivos de preparación
+`src/clientes/cp03PilotDirectory.css`; el código original permanece en su commit.
+Resultados y runs por SHA en la guía productiva y el informe de publicación.
+
 ## Aprobación local y autorización de publicación — 24/11/2026
 
 El propietario aprueba la implementación y las validaciones, autoriza publicación

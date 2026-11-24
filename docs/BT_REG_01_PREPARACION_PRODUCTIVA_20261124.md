@@ -206,3 +206,21 @@ su resultado aprobado es local. No se altera CI para ampliar este alcance.
 Render consultado en lectura antes de publicar: `autoDeploy=no`,
 `autoDeployTrigger=off`. El resultado de CI debe comunicarse por SHA publicado,
 distinguiendo en curso, éxito y fallo; esta guía no presume éxito futuro.
+
+### Incidente CI de publicación y corrección mínima
+
+Publicación inicial `18730572a1cc58d27cf3dd34ad8d1599577cb320`: CI general,
+BT-COT-01, BT-FLOW-01 y BT-REG-02 SUCCESS. BT-OFICIAL-01A falló en el paso
+BT-PILOT-QA-04B: `.cp03-pilot` coincidía con el contenedor nuevo y con el directorio.
+No fue un fallo SQL ni una prueba contra Supabase alojado.
+
+Corrección limitada a renombrar el contenedor externo a `cp03-private-panel` y
+extender dos selectores CSS para conservar el estilo de la entrada de administración.
+Se mantiene el selector existente de la prueba, sin ocultar su fallo. SQL, permisos,
+flujos, flags y datos quedan íntegros. Build privado de Vite y comprobación local
+puntual de una única raíz y apertura de directorio en 390/1366 PASS, usando el
+fixture HTTP existente; no se repiten F01–F06 ni auditorías locales completas.
+
+El push de corrección vuelve a disparar CI general, BT-OFICIAL-01A, BT-FLOW-01 y
+BT-REG-02. BT-COT-01 no coincide con las rutas de esta corrección; su éxito anterior
+se informa por el SHA inicial, sin inventar una ejecución en el SHA nuevo.

@@ -16,13 +16,13 @@
 .cp03-pilot input:focus-visible,.cp03-pilot textarea:focus-visible,.cp03-pilot button:focus-visible {
   outline:3px solid #76adff; outline-offset:2px;
 }
-.cp03-pilot .cp03-primary,.cp03-pilot .cp03-secondary {
+.cp03-pilot .cp03-primary,.cp03-pilot .cp03-secondary,.cp03-private-panel > .cp03-secondary {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   padding:11px 16px; min-height:46px; border-radius:10px; font:inherit;
   font-size:14px; font-weight:650; cursor:pointer;
 }
 .cp03-pilot .cp03-primary { border:1px solid #0469f6; background:#0469f6; color:#fff; }
-.cp03-pilot .cp03-secondary { border:1px solid #c8dbf1; background:#f3f8ff; color:#194d91; }
+.cp03-pilot .cp03-secondary,.cp03-private-panel > .cp03-secondary { border:1px solid #c8dbf1; background:#f3f8ff; color:#194d91; }
 .cp03-pilot button:disabled { cursor:not-allowed; opacity:.62; }
 .cp03-pilot .cp03-result {
   border:1px solid transparent; border-bottom:1px solid #e0eaf6;
