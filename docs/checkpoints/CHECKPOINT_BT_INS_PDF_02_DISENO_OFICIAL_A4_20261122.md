@@ -305,3 +305,86 @@ no disparar respaldos ni workflows manuales de infraestructura.
 **Render: NO desplegar ni cambiar Auto-Deploy.** ChatGPT gestionará el despliegue
 separadamente tras confirmar CI. Sin cambios en Supabase, Edge, secretos, datos,
 SQL, Storage ni el selector CP05. No se crean nuevos checkpoints.
+
+
+## Cierre del incidente CI y despliegue manual CP04 — 24/11/2026
+
+Esta sección actualiza el estado de autorización y despliegue de las adendas
+anteriores: el propietario autorizó expresamente el deploy manual después de
+ambas CI verdes. La aprobación visual CP04 ya estaba otorgada y se conserva.
+
+### Incidente, causa y solución comprobados
+
+- Publicación previa `999da304c5a64eee68931e4defb8c65223aca361`: CI general
+  SUCCESS; oficial 45394197290 FAILURE en `scripts/verify-cp05-browser.cjs:90`.
+  Timeout buscando el nombre accesible antiguo «Enviar correo · desactivado».
+  Los pasos CP04 y F01–F06 pasaron. Esto identificaba un selector de prueba
+  desactualizado, no demostraba una nueva regresión funcional de correo.
+- El propietario publicó `bf2d0efc5ff16531db81f017fc4a7ad540bc7c8e`:
+  exactamente dos referencias cambiadas a «Enviar cotización · desactivado».
+  Se incorporó localmente mediante fast-forward desde `999da30`; no rebase,
+  reconstrucción de módulos ni correcciones adicionales de aplicación.
+- Las nuevas CI finalizaron SUCCESS:
+  - Verificación ByteTorque: run 45395781431, jobs Web / iOS PWA y Android.
+  - BT-OFICIAL-01A: run 45395781565, job 138451048260, incluidas CP04,
+    recuperación F01–F06, CP05 móvil, UX persistente y WebKit Linux.
+  - Enlaces: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45395781431
+    y https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45395781565.
+- No se repitieron pruebas locales, auditorías SEC07 ni operaciones productivas
+  de datos. Se observó la CI existente; no se ejecutaron workflows de respaldo.
+
+### Deploy y verificación
+
+Workspace confirmado anteriormente por el titular: My Workspace,
+`tea-daum20gjo6nc73dndfqg`. Servicio existente `biomotors-taller-demo`, static site
+`srv-dbqe4quc6qcc73f275jg`, repositorio correcto, rama `main`.
+
+Antes de disparar se comprobaron ambas CI, el HEAD remoto exacto `bf2d0ef...`,
+Auto-Deploy `no` y `autoDeployTrigger=off`, y el deploy anterior LIVE
+`dep-dc288ot6e07s73b23qo0` en `871b4835c94b1cb738046d96f45b28db753d70cf`.
+
+Único trigger manual por conector Render, sin limpiar caché ni cambiar opciones:
+
+- ID: **dep-dc2ofvui0phs73beuu80**.
+- SHA: **bf2d0efc5ff16531db81f017fc4a7ad540bc7c8e**.
+- `trigger=api`; inicio 2026-11-24T12:50:07.339609Z.
+- Estado final **live**, fin 2026-11-24T12:50:39.764934Z (09:50:39 Chile).
+- Auto-Deploy confirmado nuevamente **OFF** tras LIVE.
+- https://biomotors-taller-demo.onrender.com: **HTTP 200**, HTML y bundle CP04
+  `/assets/Cp04PrivatePanel-IJ0NFS_1.js` obtenidos en lectura. Marcadores confirmados:
+  «Diagnóstico vigente de esta visita», «Historial de diagnósticos»,
+  `cp04-detail-tabs` y «Sin revisar · Guardado».
+- No se inició sesión ni se escribieron datos de clientes para esta verificación.
+  Esto acredita respuesta y entrega del bundle, no una nueva QA autenticada ni
+  prueba física Safari/iPhone.
+- https://bytetorque.cl: CONNECT 403 del proxy; no se atribuye a la aplicación.
+  Documentación actual Render (Markdown y HTML de deploys/health-checks) también
+  bloqueada por proxy. Se emplearon capacidades actuales del conector, identidad
+  de servicio y estado de despliegue devueltos por Render; no se inventaron umbrales.
+
+### Restricciones conservadas y pendiente de privacidad
+
+Supabase, RLS, Edge, Storage, migraciones, variables, datos y respaldos intactos.
+SEC07 permanece cerrado. No se inicia trabajo del selector CP05 ni nuevas etapas.
+El permiso de despliegue de esta orden queda consumado para esta versión; no es
+una autorización abierta para desplegar cambios futuros.
+
+GitHub devuelve `visibility=public` antes y después del deploy. Existe autorización
+histórica de público temporal, pero la petición actual exige privado: **no se
+considera cumplida la privacidad**. Se intentó `gh repo edit --visibility private`;
+la API devolvió Forbidden del proxy. El conector no expone edición de ajustes del
+repositorio y el navegador devuelve Settings 404 con enlaces Sign in, sin sesión
+autenticada. No se solicitaron ni extrajeron credenciales. Se requiere un acceso
+administrativo capaz de cambiar la visibilidad, o intervención del propietario.
+
+Esta documentación queda en un commit **local** de cuatro archivos para no
+publicar material nuevo en un repositorio que sigue público contra el requisito
+actual. No se crean ramas ni un nuevo checkpoint. El SHA desplegado/remoto sigue
+`bf2d0ef...`; el commit local documental no cambia el código servido.
+
+Commit documental de cierre:
+`docs(cp04): close CI incident and record verified live deploy [skip render]`.
+Pendientes reales: hacer privado el repositorio y publicar esta documentación
+cuando esa condición esté confirmada; verificación directa del dominio canónico
+sigue bloqueada en este entorno. No se pide una nueva autorización para el deploy
+que ya se completó.

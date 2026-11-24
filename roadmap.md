@@ -1,3 +1,35 @@
+## CP04 cerrado y desplegado LIVE — 24/11/2026
+
+Aprobación visual del propietario conservada. `main` actualizado por fast-forward
+al fix de test `bf2d0efc5ff16531db81f017fc4a7ad540bc7c8e`. Las CI general y oficial
+terminaron SUCCESS antes del despliegue manual autorizado.
+
+Render `biomotors-taller-demo` (`srv-dbqe4quc6qcc73f275jg`): deploy
+`dep-dc2ofvui0phs73beuu80` **LIVE** a las 09:50:39 Chile (12:50:39 UTC),
+SHA **bf2d0efc5ff16531db81f017fc4a7ad540bc7c8e**. Auto-Deploy **OFF**
+antes y después. HTTPS onrender HTTP 200 y bundle CP04 vigente confirmado,
+sin autenticación ni cambios de registros. `bytetorque.cl` bloqueado por proxy
+CONNECT 403 en este entorno: no implica error HTTP de la aplicación.
+
+Incidente CI anterior: `verify-cp05-browser.cjs` buscaba «Enviar correo ·
+desactivado», mientras el control vigente dice «Enviar cotización · desactivado».
+El propietario corrigió dos referencias en `bf2d0ef`; no se modificó lógica CP05.
+CI: general [45395781431](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45395781431)
+y oficial [45395781565](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45395781565) SUCCESS.
+
+**Privacidad pendiente:** GitHub sigue devolviendo `visibility=public`, pese al
+requisito actual de privado. Intento autorizado de cambiarla con CLI bloqueado
+por API/proxy 403; navegador sin sesión GitHub. No afirmar que sea privado ni
+publicar esta adenda mientras siga ese bloqueo. Documentación de cierre local;
+no se cambia visibilidad por mecanismos alternativos ni se solicitan secretos.
+
+SEC07 sigue cerrado para el piloto en su alcance aprobado. No se tocaron Supabase,
+RLS, Edge, SQL, variables, datos ni respaldos. No comenzar CP05/selector todavía.
+El presente permiso de deploy ya se ejecutó; no autoriza futuros despliegues.
+Detalle en el [checkpoint CP04 existente](docs/checkpoints/CHECKPOINT_BT_INS_PDF_02_DISENO_OFICIAL_A4_20261122.md).
+
+---
+
 ## CP04 — aprobación visual y publicación autorizadas (24/11/2026)
 
 El propietario aprueba visualmente la corrección general y compactación CP04
