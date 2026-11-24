@@ -1,3 +1,9 @@
+## SEC07 S3-R1 — inventario de permisos preparado, NO ejecutado (23/11/2026)
+
+Avance desde S4C-R9 `CHECK_PASS_LIMITED`: se consolidó matriz de cobertura **S3** de permisos/owners/roles, Auth, Storage, Edge y Render, usando evidencias históricas CP50/51 y reglas actuales Supabase. Se preparó una sola consulta `BEGIN TRANSACTION READ ONLY` **solo catálogo agregado** para ejecución voluntaria del propietario en SQL Editor: [`docs/sql/BT_SEC07_S3_R1_INVENTARIO_CATALOGO_READONLY.sql`](docs/sql/BT_SEC07_S3_R1_INVENTARIO_CATALOGO_READONLY.sql). Matriz y alcance: [`docs/BT_SEC07_S3_MATRIZ_COBERTURA_20261123.md`](docs/BT_SEC07_S3_MATRIZ_COBERTURA_20261123.md). **No consultado remoto, sin resultados ni PASS S3 aún.** No reejecutar R8/R9 ni exponer secretos o clientes. GitHub `main` docs-only `[skip render]`.
+
+---
+
 ## SEC07-S4C-R9 — comprobación complementaria PASS limitada (23/11/2026)
 
 **Evidencia Windows PowerShell 5.1 aportada por el propietario, posterior al R8:**
