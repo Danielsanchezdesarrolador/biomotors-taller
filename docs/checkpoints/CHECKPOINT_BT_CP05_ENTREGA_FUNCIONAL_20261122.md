@@ -433,3 +433,68 @@ Pendiente aprobación para publicar la corrección funcional y, separadamente,
 para desplegarla. No hay CI nueva de la corrección porque no fue publicada.
 La publicación de documentación CP04 es anterior y no contiene este código.
 CP04/SEC07 siguen cerrados, Auto-Deploy OFF; no ampliar el alcance por inferencia.
+
+
+## Aprobación y despliegue del selector CP05 — 24/11/2026
+
+El propietario aprobó expresamente `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`,
+autorizó su push en main, CI existentes y deploy manual tras resultados
+satisfactorios. Esta aprobación sustituye exclusivamente el pendiente de publicación
+y despliegue de la adenda del selector. No declara aceptación productiva de nuevas
+capacidades de negocio ni autoriza comenzar la próxima funcionalidad.
+
+### Publicación y CI
+
+- Base remota verificada `3f5d962086a678cf7b7a1495f76fea64512e7bdf`.
+- Se verificaron main, SHA exacto, su padre y los ocho archivos aprobados; ningún
+  cambio adicional de código o archivo de `artifacts/`. Único push normal del SHA
+  funcional, sin force, ramas, rebase, nuevos entornos ni nuevas pruebas locales.
+- Se ejecutaron los workflows existentes por sus filtros de push. Todos SUCCESS:
+  - Verificación ByteTorque: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45403074603
+    (Web / iOS PWA y Android React Native / Expo).
+  - BT-OFICIAL-01A: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45403074446
+    (interfaz, CP04, F01–F06, CP05 móvil, UX persistente, WebKit Linux y R1).
+  - BT-COT-01: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45403074653.
+  - BT-FLOW-01: https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45403074490.
+- No hubo fallos en estas CI ni correcciones adicionales. No se repitieron
+  auditorías manuales CP04/SEC07: solo se observó la CI existente autorizada.
+
+### Despliegue manual verificado
+
+Servicio existente `srv-dbqe4quc6qcc73f275jg` (`biomotors-taller-demo`, static site),
+workspace My Workspace `tea-daum20gjo6nc73dndfqg`, repositorio correcto, rama main.
+Se comprobaron las cuatro CI, HEAD remoto exacto y Auto-Deploy OFF antes del trigger.
+
+- Deploy **dep-dc2p4f3m8hqs7386htgg**, `trigger=api`, sin limpiar caché.
+- SHA **a92e5c87bf351eeb55ea4754187cf4452cfe0ba8**.
+- Inicio 2026-11-24T13:33:48.312037Z.
+- Estado final **live**, fin 2026-11-24T13:34:11.467183Z (10:34:11 Chile).
+- Auto-Deploy `no`, `autoDeployTrigger=off` nuevamente confirmados tras LIVE.
+- https://biomotors-taller-demo.onrender.com responde **HTTP 200**. HTML y bundle
+  `/assets/Cp05PrivatePanel-psaNYtf6.js` obtenidos en lectura. Marcadores confirmados:
+  «Actualizando órdenes autorizadas», «Reintentar órdenes», «fuera del listado
+  reciente» y `isActive`. Esto comprueba entrega de la versión, no una nueva
+  sesión de uso autenticado ni escrituras alojadas con datos reales.
+- No se vuelve a probar el dominio canónico bloqueado por proxy en el cierre
+  anterior; no se atribuye aquel CONNECT 403 a un fallo de ByteTorque.
+
+### Documentación y siguiente entrega
+
+Se actualizan únicamente AGENTS.md, agent.md, roadmap.md y este checkpoint
+existente tras LIVE. Commit documental separado con `[skip render]`, sin otro
+deploy: el SHA productivo funcional permanece a92e5c8. Las referencias inferiores
+de permiso pendiente/local son históricas y se sustituyen por este cierre.
+
+El roadmap incorpora como **próxima entrega planificada y NO implementada** la
+eliminación controlada, archivo y recuperación de clientes, vehículos, órdenes y
+borradores de cotizaciones. Antes de implementar deberá definirse el impacto y
+las dependencias, distinguir archivo reversible de eliminación definitiva, impedir
+huérfanos/cascadas destructivas y preservar historiales y revisiones emitidas.
+No se escriben tablas, migraciones ni código de esa entrega por esta autorización.
+
+GitHub vuelve a confirmar `visibility=public`, autorizado temporalmente por el
+propietario hasta renovar minutos GitHub Actions. No se cambia la visibilidad.
+CP04 y SEC07 permanecen cerrados; no se modificaron Supabase, RLS, Edge, variables,
+datos, respaldos, correos, pagos ni infraestructura adicional. Auto-Deploy OFF.
+La aprobación de esta implementación y su despliegue queda cumplida; próximas
+funciones y deploys necesitan su propia autorización.

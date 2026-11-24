@@ -1,3 +1,55 @@
+## Selector CP05 aprobado, publicado y LIVE — 24/11/2026
+
+El propietario aprobó la implementación y autorizó publicación, CI existentes y
+deploy manual. Commit funcional **a92e5c87bf351eeb55ea4754187cf4452cfe0ba8**
+publicado mediante fast-forward. Las cuatro CI disparadas terminaron **SUCCESS**:
+general 45403074603, oficial 45403074446, cotizaciones 45403074653 y flujo 45403074490.
+No fueron necesarias correcciones adicionales ni nuevas pruebas locales.
+
+Render `biomotors-taller-demo`: deploy `dep-dc2p4f3m8hqs7386htgg`, **LIVE** desde
+2026-11-24T13:34:11.467183Z (10:34:11 Chile), SHA **a92e5c87bf351eeb55ea4754187cf4452cfe0ba8**.
+Auto-Deploy **OFF** confirmado antes y después. HTTPS onrender HTTP 200 y bundle
+CP05 vigente comprobado en lectura; no se afirma una nueva QA autenticada con
+registros productivos. El commit documental posterior no cambia el código LIVE.
+
+Repositorio público temporal por autorización expresa del propietario; no cambiar
+su visibilidad. CP04 y SEC07 siguen cerrados. No se modificaron Supabase, RLS,
+Edge, variables, migraciones, datos, respaldos ni nuevas funciones de negocio.
+
+Próxima entrega registrada en roadmap: eliminación controlada, archivo y recuperación
+de clientes, vehículos, OT y borradores de cotizaciones, preservando dependencias
+e historiales. **Solo planificada: NO implementar ni activar todavía.**
+Esta orden de deploy queda ejecutada para esta versión y no autoriza otros deploys.
+Detalle en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+Las notas inferiores de «solo local» corresponden a la preparación ya superada.
+
+---
+
+## Próxima entrega funcional — eliminación controlada, archivo y recuperación
+
+**Planificada por el propietario el 24/11/2026. NO implementada ni activada.**
+Al cerrar la publicación/despliegue del selector CP05, la próxima entrega tratará
+clientes, vehículos, órdenes y borradores de cotizaciones.
+
+Criterios de la próxima especificación:
+
+- Mostrar las dependencias y el impacto antes de confirmar cada acción.
+- Diferenciar archivo reversible, recuperación y eliminación controlada; definir
+  la política de eliminación definitiva antes de implementarla, sin borrado automático.
+- Preservar vínculos cliente → vehículo → OT → cotización y sus identificadores;
+  impedir registros huérfanos o cascadas que destruyan historiales.
+- Conservar diagnósticos, revisiones emitidas y documentos históricos; distinguir
+  un borrador eliminable de una revisión inmutable o un documento ya archivado.
+- Recuperar registros y relaciones de forma consistente en los selectores y vistas,
+  manteniendo aislamiento por taller y permisos de los roles autorizados.
+- Validar las acciones y su recuperación con datos ficticios antes de cualquier
+  activación productiva. No ejecutar cambios de datos, SQL o migraciones por este registro.
+
+Esta planificación no autoriza empezar la funcionalidad. CP04 y SEC07 continúan
+cerrados; Auto-Deploy OFF y repositorio público temporal según decisión del titular.
+
+---
+
 ## CP05 — selector de órdenes actualizado al regresar, solo local (24/11/2026)
 
 CP04 aceptado funcional y visualmente en producción por el propietario; CP04 y

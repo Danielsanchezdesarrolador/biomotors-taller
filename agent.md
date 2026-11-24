@@ -1,3 +1,30 @@
+## Selector CP05 aprobado, publicado y LIVE — 24/11/2026
+
+El propietario aprobó la implementación y autorizó publicación, CI existentes y
+deploy manual. Commit funcional **a92e5c87bf351eeb55ea4754187cf4452cfe0ba8**
+publicado mediante fast-forward. Las cuatro CI disparadas terminaron **SUCCESS**:
+general 45403074603, oficial 45403074446, cotizaciones 45403074653 y flujo 45403074490.
+No fueron necesarias correcciones adicionales ni nuevas pruebas locales.
+
+Render `biomotors-taller-demo`: deploy `dep-dc2p4f3m8hqs7386htgg`, **LIVE** desde
+2026-11-24T13:34:11.467183Z (10:34:11 Chile), SHA **a92e5c87bf351eeb55ea4754187cf4452cfe0ba8**.
+Auto-Deploy **OFF** confirmado antes y después. HTTPS onrender HTTP 200 y bundle
+CP05 vigente comprobado en lectura; no se afirma una nueva QA autenticada con
+registros productivos. El commit documental posterior no cambia el código LIVE.
+
+Repositorio público temporal por autorización expresa del propietario; no cambiar
+su visibilidad. CP04 y SEC07 siguen cerrados. No se modificaron Supabase, RLS,
+Edge, variables, migraciones, datos, respaldos ni nuevas funciones de negocio.
+
+Próxima entrega registrada en roadmap: eliminación controlada, archivo y recuperación
+de clientes, vehículos, OT y borradores de cotizaciones, preservando dependencias
+e historiales. **Solo planificada: NO implementar ni activar todavía.**
+Esta orden de deploy queda ejecutada para esta versión y no autoriza otros deploys.
+Detalle en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
+Las notas inferiores de «solo local» corresponden a la preparación ya superada.
+
+---
+
 ## CP05 — selector de órdenes actualizado al regresar, solo local (24/11/2026)
 
 CP04 aceptado funcional y visualmente en producción por el propietario; CP04 y
