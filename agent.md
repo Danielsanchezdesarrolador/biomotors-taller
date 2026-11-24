@@ -1,3 +1,22 @@
+## BT-REG-01 — preparación productiva y publicación autorizada (24/11/2026)
+
+El propietario aprueba la entrega local `bf0bf781b219505daec60c5cc288fc23c87a1896`
+y sus validaciones. Autoriza publicar candidato/documentación en `main` y ejecutar
+las CI existentes, con funcionalidad desactivada. Esta orden levanta únicamente
+el NO PUSH de la entrega inferior; **NO SQL, NO DEPLOY, NO activación**.
+Auto-Deploy OFF y repositorio público temporal. Sin ramas nuevas ni auditorías repetidas.
+
+Antes de autorizar/aplicar SQL, el propietario realizará un respaldo actualizado
+por SEC07 aprobado. No asumirlo realizado ni sustituir las condiciones de recuperación
+vigentes por esta aprobación del código. No ejecutar backup, migraciones ni secretos.
+
+[Guía de migración, compatibilidad, secuencia y reversión](docs/BT_REG_01_PREPARACION_PRODUCTIVA_20261124.md).
+El SQL candidato permanece íntegro y sin aplicar. Su instalación sí revoca archivo
+directo y registra actividad aun con rollout OFF; tras activación, la contención
+conserva guardas y ledger, según la guía. La CI se confirma por el SHA publicado.
+
+---
+
 ## BT-REG-01 — administración de registros, entrega local (24/11/2026)
 
 El propietario confirma la **aceptación funcional del selector CP05 en producción**

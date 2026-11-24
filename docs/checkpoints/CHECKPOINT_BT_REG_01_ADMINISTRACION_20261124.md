@@ -1,5 +1,17 @@
 # BT-REG-01 — administración segura de registros
 
+## Aprobación local y autorización de publicación — 24/11/2026
+
+El propietario aprueba la implementación y las validaciones, autoriza publicación
+solo del candidato y documentación en `main` y CI existentes. Sin SQL alojado,
+despliegue ni activación. La mención «sin push» inferior describe la entrega local
+original, preservada en `bf0bf781b219505daec60c5cc288fc23c87a1896`.
+El propietario realizará el respaldo SEC07 actualizado antes de autorizar SQL.
+Guía productiva: [migración, permisos, compatibilidad y reversión](../BT_REG_01_PREPARACION_PRODUCTIVA_20261124.md).
+La lista de 34 archivos inferior corresponde al commit funcional original; esta
+preparación solo añade la guía y actualiza AGENTS.md, agent.md, roadmap.md y este checkpoint.
+
+
 24/11/2026, Chile. **Entrega local en `main`. Sin push, deploy ni cambios alojados.**
 Base: `9e374991d371c9f7e5fc57a21dcb373471172ab0`. El commit local de entrega
 contiene este checkpoint; consultar `git log -1 --format=%H -- <este archivo>`.
