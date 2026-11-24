@@ -1,3 +1,9 @@
+## BT-EXP-01 — Edge alojada v1 ACTIVE, gates OFF (24/11/2026)
+
+[Workflow manual 45494935988](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45494935988) y [CI general 45494618400](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45494618400) SUCCESS en `c3accc6810624373edb397bd7914f0453f4aa66d`, comprobados directamente. Log confirma paquete verificado, solicitud de gates READ/WRITE false exitosa antes de deploy y solo bt-final-archive desplegada. Supabase confirma v1 ACTIVE, verify_jwt=true; SQL read-only confirma 0 rollouts FLOW/REG/COM, 0 manifiestos/objetos nuevos y correo OFF. Render verificado LIVE `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`, Auto-Deploy OFF. **Siguiente: autorización específica para deploy manual frontend con módulos nuevos OFF, preservando CP05 y correo OFF; luego QA por taller autorizado.** Sin Codex ni reinstalaciones. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+---
+
 ## BT-EXP-01 — despliegue Edge manual autorizado, pendiente de ejecución (24/11/2026)
 
 El propietario autorizó publicar y desplegar únicamente bt-final-archive con JWT y READ/WRITE OFF. Se prepara [workflow manual](.github/workflows/bt-exp01-edge-manual.yml) sobre el empaquetador original, con Docker y CLI v2, verificación de manifest, hashes, recursos y configuración. Sin ejecución automática, sin Codex, sin modificación de CP05, SQL, Render, correo ni datos. El conector GitHub no permite iniciar workflow_dispatch; el titular debe ejecutarlo desde main con `DESPLEGAR_EXP01_APAGADO`. No declarar despliegue ni gates Edge configurados hasta verificar resultado alojado. SQL/bucket EXP-01 ya instalados OFF; no reinstalar. Después verificar versión/JWT y solicitar autorización independiente para deploy frontend OFF.
