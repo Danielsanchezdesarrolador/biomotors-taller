@@ -1,0 +1,124 @@
+name: ByteTorque EXP-01 - QA lectura (escritura OFF)
+
+# Solo manual. SQL QA autorizado debe estar habilitado previamente; escritura y correo OFF.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe ACTIVAR_EXP01_LECTURA_QA'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bytetorque-final-archive-edge-deploy
+  cancel-in-progress: false
+
+jobs:
+  desplegar-exp01:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmacion == 'ACTIVAR_EXP01_LECTURA_QA' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_REF: suxcqqnmcjoezfxltoms
+      BUNDLE_PATH: /tmp/bytetorque-final-archive-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Obtener exactamente el commit autorizado de main
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Comprobar rama, empaquetador original y Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main ]]
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          [[ "$(git hash-object scripts/package-final-archive.mjs)" == a5ee9a671782755859d7ca287789fec52e8453df ]]
+          [[ "$(git hash-object server/com/finalArchiveEntry.ts)" == 33c7f7f782f0b389110fac722a9d32091cc0d636 ]]
+          docker info >/dev/null 2>&1
+          echo "BT_EXP01_PREFLIGHT: PASS"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependencias y construir paquete original (sin token)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          node scripts/package-final-archive.mjs "$BUNDLE_PATH"
+
+      - name: Verificar bundle, manifest, recursos binarios y JWT
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createHash } from 'node:crypto'
+          import { readFile } from 'node:fs/promises'
+          import { join } from 'node:path'
+          const root = process.env.BUNDLE_PATH
+          const fn = join(root, 'supabase/functions/bt-final-archive')
+          const sha = b => createHash('sha256').update(b).digest('hex')
+          const manifest = JSON.parse(await readFile(join(root, 'offline-package-manifest.json'), 'utf8'))
+          assert.equal(manifest.scope, 'CANDIDATE_ONLY_NOT_DEPLOYED')
+          assert.equal(manifest.production_contacted, false)
+          assert.equal(manifest.entrypoint, 'supabase/functions/bt-final-archive/index.js')
+          const bundle = await readFile(join(fn, 'index.js'))
+          assert.ok(bundle.length > 1000)
+          assert.equal(sha(bundle), manifest.entrypoint_sha256)
+          assert.equal(sha(bundle), '2814d39bce8d66b30817c3b20a293e30eddcd7930c8db9553b210b71031f4bd2', 'Approved deployed JS bundle changed; stop before any secret update')
+          const assets = [
+            ['public/cp05/DejaVuSans.ttf','DejaVuSans.ttf','57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e'],
+            ['assets/brand/generated/icon-192.png','icon-192.png','1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67'],
+            ['public/cp05/FONT-LICENSE.txt','FONT-LICENSE.txt',null]
+          ]
+          for (const [source,name,expected] of assets) {
+            const bytes = await readFile(join(fn,'assets',name))
+            assert.ok(bytes.length > 100)
+            const hash = sha(bytes)
+            assert.equal(hash, sha(await readFile(source)))
+            assert.equal(hash, manifest.source_asset_sha256[source])
+            if (expected) assert.equal(hash, expected)
+          }
+          const config = await readFile(join(root,'supabase/config.toml'),'utf8')
+          assert.equal(config.split('\n').filter(line => line.trim() && !line.startsWith('#')).join('\n'),
+            '[functions.bt-final-archive]\nverify_jwt = true\nentrypoint = "./functions/bt-final-archive/index.js"\nstatic_files = ["./functions/bt-final-archive/assets/*"]')
+          const source = bundle.toString('utf8')
+          for (const marker of ['BT_FINAL_ARCHIVE_READ_ENABLED','BT_FINAL_ARCHIVE_WRITE_ENABLED','bt_final_archive_commit','bt_final_archive_document','bt-closing-documents','npm:@supabase/supabase-js@2.119.0','npm:pdf-lib@1.17.1','npm:@pdf-lib/fontkit@1.1.1']) assert.ok(source.includes(marker), marker)
+          console.log('BT_EXP01_PACKAGE: VERIFIED')
+          console.log('BT_EXP01_BUNDLE_SHA256: ' + manifest.entrypoint_sha256)
+          JS
+
+      - name: Instalar Supabase CLI v2 (recursos estaticos via Docker)
+        uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+
+      - name: Configurar READ ON / WRITE OFF y desplegar SOLO bt-final-archive
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]] || { echo "::error::Falta token de despliegue existente"; exit 1; }
+          supabase --version
+          supabase functions deploy --help >/dev/null
+          supabase secrets set \
+            BT_FINAL_ARCHIVE_READ_ENABLED=true \
+            BT_FINAL_ARCHIVE_WRITE_ENABLED=false \
+            --project-ref "$PROJECT_REF"
+          echo "BT_EXP01_FLAGS: READ_TRUE_WRITE_FALSE_SET_REQUEST_SUCCEEDED"
+          cd "$BUNDLE_PATH"
+          supabase functions deploy bt-final-archive --project-ref "$PROJECT_REF"
+          echo "BT_EXP01_EDGE: DEPLOY_COMMAND_SUCCEEDED"
+          supabase functions list --project-ref "$PROJECT_REF"
+          echo "BT_EXP01_NEXT: VERIFY_READ_HOSTED_BEFORE_FRONTEND_AND_WRITE"
+
