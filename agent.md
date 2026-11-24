@@ -1,3 +1,27 @@
+## SEC07-S4C-R9 — comprobación complementaria PASS limitada (23/11/2026)
+
+**Evidencia Windows PowerShell 5.1 aportada por el propietario, posterior al R8:**
+```text
+BT_SEC07_S4C_R9: START
+BT_SEC07_S4C_R9_LAB: READY
+BT_SEC07_S4C_R9_RESTORE_EXIT: 0
+BT_SEC07_S4C_R9_GPG: PASS
+BT_SEC07_S4C_R9_STRUCTURE: PASS
+BT_SEC07_S4C_R9_RLS: WORKSHOPS_AB_PASS_LAB_GRANT
+BT_SEC07_S4C_R9_ACL: NOT_CERTIFIED_NO_ACL_RESTORE
+BT_SEC07_S4C_R9_RESULT: CHECK_PASS_LIMITED
+```
+
+**Resultado:** segunda ejecución real del v04 cifrado en laboratorio local Supabase PostgreSQL 17 aislado, reutilizando la arquitectura R8 ya validada; descifrado GPG y `pg_restore` código 0. El script S4C-R9 de esta conversación ejecutó **dentro del mismo laboratorio restaurado, antes de destruir el contenedor**: existencia de 12 tablas de aplicación definidas en `public`, RLS habilitada para cada una, existencia de `auth.users`, al menos dos talleres en `public.workshops` y una membresía, presencia **global** de al menos una FK y un índice en `public`, y ausencia de relaciones huérfanas detectadas para vehicles→customers, work_orders→vehicles, inspection_findings→work_orders y memberships→auth.users/workshops. `STRUCTURE:PASS` **NO** certifica todas las FK/índices por tabla ni un cotejo de conteos/filas contra producción.
+
+**Alcance exacto del PASS RLS:** en el laboratorio se otorgó explícitamente y solo para la prueba `GRANT USAGE ON SCHEMA public` y `GRANT SELECT` a `authenticated` sobre workshops y memberships, porque el restore se hizo con `--no-acl`. Se seleccionó una membresía activa de un usuario Auth con correo confirmado en taller A activo y otro taller B activo sin membresía activa para ese usuario. Con `SET LOCAL ROLE authenticated` y `request.jwt.claim.sub` temporal se verificó que la policy de `public.workshops` **permitió ver A e impidió ver B**. **No** certifica todas las tablas, operaciones de escritura, revocación, roles admin/mecánico, owners/ACL originales ni seguridad RLS funcional global. El laboratorio no requiere acceso a producción para esta comprobación.
+
+**Estado actualizado:** S2-R11 estructural PASS; S4B-R8 restauración técnica PASS; S4C-R9 estructura y RLS lectura workshops A/B **CHECK_PASS_LIMITED**. **S4 integral permanece ABIERTA**: falta comparación de datos/filas esperados, controles completos de permisos, grants/owner, RLS de tablas restantes, matrices A/B en operaciones relevantes y cobertura S3 (Auth operativo, Storage binario, Edge, Render, secretos). No convertir `NOT_CERTIFIED_NO_ACL_RESTORE` en error de backup ni declararlo PASS. El laboratorio R9 fue efímero `--rm` y no persiste. Ningún cambio a Supabase/Render/producción. No reejecutar R8 ni R9 como verificación rutinaria; el siguiente trabajo debe concentrarse en la **brecha verificable** y consolidar lo faltante, sin añadir una sucesión de reintentos.
+
+**Referencia:** [checkpoint S4C-R9](docs/checkpoints/CHECKPOINT_BT_SEC07_S4C_R9_VALIDACION_LIMITADA_PASS_20261123.md), [runbook R8](docs/recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md). Documentación sanitizada, solo rama `main`, `[skip render]`.
+
+---
+
 ## SEC07 — Runbook permanente tras S4B-R8 PASS (23/11/2026)
 
 **Solución y prevención documentadas:** [`docs/recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md`](docs/recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md). Describe toda la secuencia real desde claves/GPG y R2-R7, causa demostrada vs hipótesis, corrección operativa R8, guardas para PostgreSQL/Supabase/Docker/PowerShell y estado posterior. **R8 RESTORE_PASS**, no significa **S4 global PASS**; S4C con controles de datos y A/B pendiente. **No repetir R8 rutinariamente ni reexportar S2-R11.**
