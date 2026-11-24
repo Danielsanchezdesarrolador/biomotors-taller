@@ -1,3 +1,69 @@
+## BT-REG-01 — publicación cerrada; activación aplazada (24/11/2026)
+
+Candidato `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: CI general `45416339689`,
+oficial `45416339355`, flujo `45416339541` y registro `45416339491` **SUCCESS**.
+No se relanzaron. BT-COT-01 no se activó para ese SHA; SUCCESS en `1873057`,
+run `45415057212`. Raíz `.cp03-pilot` duplicada corregida; SQL íntegro y sin aplicar.
+
+Propietario sin acceso a su PC personal de respaldos: **NO SQL, NO deploy,
+NO flags ni cambios de datos/permisos/variables productivas; NO nuevos respaldos**.
+Tras respaldo SEC07 actualizado/verificado desde su PC, solicitar autorizaciones
+específicas de SQL, deploy OFF y activación, QA ficticia y aceptación. Mantener
+las guardas de reversión. SEC07/piloto y CP04 siguen cerrados; selector CP05 aceptado.
+LIVE previo `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`, Auto-Deploy OFF y repo público temporal.
+
+Solo cierre documental; no nueva versión funcional ni CI por filtros Markdown.
+Propuesta local siguiente en roadmap: archivo recuperable del expediente final.
+**No iniciar nueva implementación hasta presentar la propuesta y recibir aprobación.**
+[Checkpoint y CI](docs/checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md)
+· [Guía productiva](docs/BT_REG_01_PREPARACION_PRODUCTIVA_20261124.md).
+
+---
+
+## Siguiente entrega propuesta — archivo recuperable del expediente final
+
+**Solo propuesta; sin implementación nueva ni activación autorizadas.** Resultado
+para Ignacio: desde el historial de la visita, recuperar el PDF original emitido
+de la cotización y las copias archivadas del informe de trabajos y constancia de
+entrega, individualmente o como paquete; conservar revisión, vínculos e integridad
+tras cambiar de sección o abrir una sesión nueva. No presentar una regeneración
+actual como si fuera el documento originalmente archivado.
+
+Situación comprobada por lectura focalizada del código y checkpoints, sin auditoría
+ni acceso productivo:
+
+| Prioridad del propietario | Base existente reutilizable | Pendiente real |
+| --- | --- | --- |
+| Emisión de cotizaciones | CP05, `documentClient`, motor/paquete Edge y revisión inmutable; QA histórica aprobada | Autorización/QA de alcance alojado; no reconstruir emisión |
+| Descarga de PDF | `src/historial/archiveDownload.ts`, documentos CP05 y validación de integridad | Confirmar recuperación con la infraestructura autorizada; no afirmar uso productivo nuevo |
+| Archivo y recuperación documental | `server/com/closingArchiveCandidate.ts` y contratos `ClosingArchivePorts` | Falta adaptador concreto de persistencia; los usos actuales del motor son contratos/tests |
+| Ejecución de trabajos | `FlowLive02Panel`, cliente RPC y SQL LIVE-02 candidatos | Activación de infraestructura separada; no rehacer formularios/importes |
+| Historial cliente/vehículo | CP06: `repository.ts`, `VehicleHistory.tsx`, evidencia por visita | Integrar lectura del archivo final en ese historial existente |
+| Informe/entrega final | `executionPdf`, `finalPdf`, `ClosingReviewPanel` y ZIP local de tres PDF | Archivo duradero y recuperación de esos bytes, no solo descarga/generación local |
+| Envío autorizado | Revisión de correo CP05 y candidatos COM de revisión/estado | Proveedor, permisos y autorización independientes; mantener envío externo OFF |
+
+Entrega local propuesta, coherente y completa:
+
+1. Conectar el motor de cierre existente con un adaptador backend candidato que
+   derive taller, revisión, ejecución y entrega desde persistencia autorizada,
+   sin aceptar rutas/importes del navegador. Reutilizar motor y esquemas candidatos;
+   preparar únicamente lo que falte, sin aplicar SQL/Storage/Edge alojados.
+2. Archivar/recuperar originales de los tres documentos con manifiesto inmutable,
+   SHA-256, lectura de comprobación, idempotencia y protección de dependencias.
+3. Integrar el expediente recuperable en el historial CP06/R2 existente, con errores
+   y reintentos claros, sin regenerar un PDF histórico para sustituir su original.
+4. Validación consolidada local con datos ficticios: otra sesión, revisión anterior,
+   permiso revocado, aislamiento por taller, interrupción/reintento y archivo incompleto.
+   Sin repetir SEC07, CP04, selector CP05 ni reconstruir módulos ya aprobados.
+
+No incluye envío real, pagos, respaldos, credenciales, cambios productivos ni
+activar LIVE-02/CP06. Su infraestructura y aceptación requerirían autorizaciones
+posteriores. Emisión/descarga/ejecución que ya existen se reutilizan como dependencias;
+no se anuncian como nuevas implementaciones ni como activadas en producción.
+El propietario debe aprobar esta propuesta antes de escribir código de la entrega.
+
+---
+
 ## BT-REG-01 — preparación productiva y publicación autorizada (24/11/2026)
 
 El propietario aprueba la entrega local `bf0bf781b219505daec60c5cc288fc23c87a1896`
@@ -73,7 +139,7 @@ Las notas inferiores de «solo local» corresponden a la preparación ya superad
 
 ## Administración de registros — implementación local BT-REG-01
 
-**Implementada como candidata local por autorización posterior del propietario. NO publicada ni activada.**
+**Candidata publicada y corregida en `9484ed79`, CI correspondiente SUCCESS. NO activada en producción.**
 Al cerrar la publicación/despliegue del selector CP05, la próxima entrega tratará
 clientes, vehículos, órdenes y borradores de cotizaciones.
 
@@ -92,8 +158,9 @@ Criterios de la próxima especificación:
   activación productiva. No ejecutar cambios de datos, SQL o migraciones por este registro.
 
 La orden BT-REG-01 autoriza la implementación local descrita en el checkpoint.
-Quedan pendientes aprobación visual/funcional del propietario, publicación, SQL
-alojado y activación controlada. CP04 y SEC07 continúan cerrados; Auto-Deploy OFF
+Implementación y validaciones locales aprobadas; publicación y CI cerradas.
+Quedan pendientes respaldo actualizado/verificado desde el PC personal, permiso
+de SQL alojado, deploy OFF, activación y QA/aceptación productivas. CP04 y SEC07 continúan cerrados; Auto-Deploy OFF
 y repositorio público temporal según decisión del titular.
 
 ---

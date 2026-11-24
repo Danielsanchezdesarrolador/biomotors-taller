@@ -11,6 +11,20 @@ Base remota comprobada antes de preparar la publicación:
 La publicación incorpora ese commit intacto más esta documentación; no modifica
 el código funcional aprobado ni crea ramas. La preparación no repite auditorías.
 
+## Cierre de publicación confirmado — 24/11/2026
+
+Candidato corregido `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: sus cuatro
+CI correspondientes terminaron SUCCESS, sin repetir ejecuciones. BT-COT-01 tuvo
+SUCCESS solo en `1873057`, no se activó para el SHA corregido. Los runs exactos y
+la resolución del incidente están en el [checkpoint existente](checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md).
+SQL candidato conserva el hash siguiente, sin aplicar. Auto-Deploy sigue OFF.
+
+El propietario está sin acceso a su PC personal de respaldos. Se aplazan SQL,
+deploy y activación; no se hacen nuevos backups ni cambios productivos. Cuando
+esté disponible, el propietario generará/verificará el respaldo SEC07 antes de
+solicitar los permisos específicos descritos en la secuencia. Este cierre no
+modifica el código candidato ni autoriza otra implementación o infraestructura.
+
 ## Migración candidata
 
 Archivo único: [`sql/BT_RECORDS_ADMINISTRATION_CANDIDATE.sql`](sql/BT_RECORDS_ADMINISTRATION_CANDIDATE.sql).

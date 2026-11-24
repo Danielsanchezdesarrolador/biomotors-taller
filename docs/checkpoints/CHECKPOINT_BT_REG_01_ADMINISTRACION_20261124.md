@@ -1,5 +1,46 @@
 # BT-REG-01 — administración segura de registros
 
+## Cierre de publicación confirmado — 24/11/2026
+
+Orden de continuidad recibida tras el límite de uso de Codex. `main` remoto y
+local comprobados en `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`; no se repite
+la implementación ni ninguna suite ya aprobada.
+
+| Workflow correspondiente al SHA corregido | Run | Resultado |
+| --- | --- | --- |
+| Verificación ByteTorque | [45416339689](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45416339689) | SUCCESS |
+| BT-OFICIAL-01A | [45416339355](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45416339355) | SUCCESS |
+| BT-FLOW-01 | [45416339541](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45416339541) | SUCCESS |
+| BT-REG-02 | [45416339491](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45416339491) | SUCCESS |
+
+**BT-COT-01 no tuvo una ejecución en `9484ed79`**, por sus filtros. Su ejecución
+[45415057212](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45415057212)
+fue SUCCESS en `18730572a1cc58d27cf3dd34ad8d1599577cb320`. No se relanza ni
+se atribuye a otro SHA. El fallo oficial de ese SHA anterior se conserva como
+incidente histórico: raíz `.cp03-pilot` duplicada, corregida en wrapper/estilos,
+sin relajar la prueba. El workflow oficial del SHA corregido ya terminó SUCCESS.
+
+SQL candidato conserva SHA-256
+`f956656767d22a6e50ce2c9141e0f37b0912c9dd625090b22b489ec10ab407df`.
+No se ha aplicado. No se ejecutan backups, deploys, flags, cambios de permisos,
+variables ni datos alojados. Render consultado en lectura: Auto-Deploy OFF,
+`updatedAt=2026-11-24T13:34:11.471317Z`, sin cambios desde el deploy conocido.
+El SHA LIVE previamente confirmado sigue siendo `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`;
+no se confunde un commit publicado en GitHub con uno desplegado.
+
+**Candidato preparado; activación aplazada** hasta que el propietario disponga
+de su PC personal y genere/verifique el respaldo SEC07 aprobado. Luego se requiere
+permiso específico de SQL, deploy inicialmente OFF, activación controlada, QA ficticia
+y aceptación. No se reabre SEC07 ni se desactivan guardas como rollback improvisado.
+
+Se actualizan AGENTS.md, agent.md, roadmap y este checkpoint; la guía recibe este
+resultado. Un commit únicamente documental no modifica el candidato funcional
+ni activa workflows cuyos filtros excluyen Markdown. No se inventa CI para ese commit.
+La propuesta siguiente —archivo recuperable del expediente final— queda en roadmap,
+sin implementación. Se reutilizarán los módulos ya existentes solo si el propietario
+la aprueba. No se crea otro checkpoint ni etapa de desarrollo.
+
+
 ## Corrección puntual tras CI de publicación
 
 El workflow oficial detectó una raíz `.cp03-pilot` duplicada en el contenedor de

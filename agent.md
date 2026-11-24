@@ -1,3 +1,25 @@
+## BT-REG-01 — publicación cerrada; activación aplazada (24/11/2026)
+
+Candidato `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: CI general `45416339689`,
+oficial `45416339355`, flujo `45416339541` y registro `45416339491` **SUCCESS**.
+No se relanzaron. BT-COT-01 no se activó para ese SHA; SUCCESS en `1873057`,
+run `45415057212`. Raíz `.cp03-pilot` duplicada corregida; SQL íntegro y sin aplicar.
+
+Propietario sin acceso a su PC personal de respaldos: **NO SQL, NO deploy,
+NO flags ni cambios de datos/permisos/variables productivas; NO nuevos respaldos**.
+Tras respaldo SEC07 actualizado/verificado desde su PC, solicitar autorizaciones
+específicas de SQL, deploy OFF y activación, QA ficticia y aceptación. Mantener
+las guardas de reversión. SEC07/piloto y CP04 siguen cerrados; selector CP05 aceptado.
+LIVE previo `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`, Auto-Deploy OFF y repo público temporal.
+
+Solo cierre documental; no nueva versión funcional ni CI por filtros Markdown.
+Propuesta local siguiente en roadmap: archivo recuperable del expediente final.
+**No iniciar nueva implementación hasta presentar la propuesta y recibir aprobación.**
+[Checkpoint y CI](docs/checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md)
+· [Guía productiva](docs/BT_REG_01_PREPARACION_PRODUCTIVA_20261124.md).
+
+---
+
 ## BT-REG-01 — preparación productiva y publicación autorizada (24/11/2026)
 
 El propietario aprueba la entrega local `bf0bf781b219505daec60c5cc288fc23c87a1896`
