@@ -1,3 +1,21 @@
+## CP04 aceptado en producción; repositorio público temporal autorizado — 24/11/2026
+
+El propietario confirma la aprobación **funcional y visual de CP04 en producción**.
+CP04 y SEC07 quedan cerrados en su alcance aprobado. Se autoriza publicar la
+documentación pendiente del cierre LIVE; no se repiten pruebas ni auditorías.
+
+El repositorio puede permanecer **público temporalmente hasta la renovación de
+los minutos de GitHub Actions**, por decisión expresa del propietario. Esta orden
+sustituye la restricción anterior de privado y levanta el bloqueo documental;
+no intentar cambiar su visibilidad ni afirmar que sea privado.
+
+Auto-Deploy **OFF**. Inicio del selector CP05 autorizado solo para implementación
+y validación local; su código no se publica ni se despliega sin aprobación posterior.
+Las adendas inferiores de privacidad pendiente y «No comenzar CP05» son históricas
+y quedan sustituidas únicamente por esta autorización expresa.
+
+---
+
 ## CP04 cerrado y desplegado LIVE — 24/11/2026
 
 Aprobación visual del propietario conservada. `main` actualizado por fast-forward

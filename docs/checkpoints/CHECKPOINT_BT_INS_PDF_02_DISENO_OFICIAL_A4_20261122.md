@@ -388,3 +388,21 @@ Pendientes reales: hacer privado el repositorio y publicar esta documentación
 cuando esa condición esté confirmada; verificación directa del dominio canónico
 sigue bloqueada en este entorno. No se pide una nueva autorización para el deploy
 que ya se completó.
+
+
+### Aceptación productiva del propietario y publicación documental — 24/11/2026
+
+El propietario confirma aprobación funcional y visual **en producción** de CP04.
+Se registra su aceptación, no una nueva prueba alojada ejecutada por el agente.
+CP04 y SEC07 permanecen cerrados; no repetir sus auditorías.
+
+Autoriza expresamente que el repositorio continúe público temporalmente hasta
+la renovación de los minutos GitHub Actions. Esta decisión sustituye la exigencia
+anterior de privado: el bloqueo de publicación documental por privacidad queda
+levantado por decisión del titular, sin cambiar la visibilidad.
+
+Publicación autorizada exclusivamente de la documentación pendiente en
+`f2b528ecb1f5a922004bea9aef8f934e7ca5835c` y este registro de aceptación.
+El permiso de implementación del selector CP05 es **local** y se separa de esta
+publicación documental. No incluye código CP05 ni autoriza deploy. Auto-Deploy OFF.
+Render continúa con el SHA LIVE `bf2d0efc5ff16531db81f017fc4a7ad540bc7c8e`.
