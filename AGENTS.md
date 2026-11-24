@@ -1,3 +1,11 @@
+## Respaldo previo a integración — PASS de alcance acordado (24/11/2026)
+
+El propietario confirmó «PDF correcto» tras abrir localmente el original recuperado del sidecar cifrado. Con los resultados previos S5B (integridad, contenido restaurado, fuente intacta, limpieza) y Storage (inventario del mismo dump, único PDF CP05, bytes/hash y recibo verificados), se cierra el requisito de respaldo previo para el alcance documentado, sin declarar paridad completa de seguridad ni DR integral. No repetir el respaldo ni sus verificaciones por rutina; si cambian los datos antes de la migración, evaluar vigencia del conjunto. Custodia privada; no publicar datos, rutas ni secretos.
+
+Próximo paso: inventario puntual de prerrequisitos alojados en solo lectura y propuesta exacta de migraciones/Edge/flags. Solicitar autorización específica antes de cada cambio productivo; no habilitar correo ni tocar datos reales. SEC07 conserva su cierre inicial; BT-REG-01 y BT-EXP-01 siguen candidatos pendientes de activación. Auto-Deploy OFF, main único. [Evidencia consolidada](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+---
+
 ## BT-EXP-01 — cierre de publicación y CI informada por el propietario (24/11/2026)
 
 **Candidato publicado, validado localmente y CI SUCCESS según confirmación del propietario; NO operativo en producción.** Aprobación visual otorgada para `d8101c90b408815629c1e78030d540f01f9741f6`; integración funcional `7ebcdf4ddefe509da7c4143a101c03cfe644769f`; publicación documental previa `9b34c4d6357d2dce385be6c7e87b8d34268f8c02`. Captura de Actions del propietario mostró las cinco ejecuciones de ese SHA: Verificación ByteTorque #642 y BT-REG-02 #43 SUCCESS; BT-COT-01 #39, BT-FLOW-01 #62 y BT-OFICIAL-01A #362 en curso. El propietario confirmó posteriormente «TODO VERDE». Se registra la confirmación sin atribuir una consulta independiente de los resultados finales: el conector no enumera las ejecuciones push y no se dispone de sus IDs. No relanzar suites aprobadas por esta confirmación ni declarar CI específica del archivo que no figure en evidencia.
