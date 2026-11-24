@@ -1,3 +1,13 @@
+## BT-EXP-01 — despliegue Edge manual autorizado, pendiente de ejecución (24/11/2026)
+
+El propietario autorizó publicar y desplegar únicamente bt-final-archive con JWT y READ/WRITE OFF. Se prepara [workflow manual](../../.github/workflows/bt-exp01-edge-manual.yml) sobre el empaquetador original, con Docker y CLI v2, verificación de manifest, hashes, recursos y configuración. Sin ejecución automática, sin Codex, sin modificación de CP05, SQL, Render, correo ni datos. El conector GitHub no permite iniciar workflow_dispatch; el titular debe ejecutarlo desde main con `DESPLEGAR_EXP01_APAGADO`. No declarar despliegue ni gates Edge configurados hasta verificar resultado alojado. SQL/bucket EXP-01 ya instalados OFF; no reinstalar. Después verificar versión/JWT y solicitar autorización independiente para deploy frontend OFF.
+
+---
+
+El nuevo workflow reutiliza el patrón de CP05 manual; limita el token existente al paso de despliegue, no imprime secretos ni cambia bindings CP05. El empaquetador y entrypoint conservan sus blobs aprobados. Se valida el paquete en runner antes de cualquier cambio alojado; la revisión estática no demuestra build o deploy. CI general sigue su filtro habitual para workflows nuevos. No repetir manualmente suites históricas.
+
+---
+
 ## BT-EXP-01 — instalación SQL alojada y Storage, OFF (24/11/2026)
 
 Autorización del propietario: «AUTORIZO BT-EXP-01 SQL, BUCKET Y POLÍTICA CON GATES OFF». Migración registrada: `20261124213926_bt_final_archive_private_off`. Fuente [SQL original](https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/8381fcf32a5ae816d28dfc542bda21ced1fd4ee4/docs/sql/BT_FINAL_ARCHIVE_CANDIDATE.sql), blob `3af03a87e413b2337920e5d0f183f36cd5f38315`. Aplicada una vez mediante migración transaccional con SET LOCAL lock_timeout 5s y statement_timeout 60s añadidos; sin alterar DDL ni contratos. Preflight confirmó HEAD y blob, tres migraciones prerrequisito, columnas necesarias, ausencia de instalación parcial y rollouts vacíos. Se mantuvo el respaldo S5B+Storage aprobado; no se repitió.
