@@ -1,3 +1,13 @@
+## BT-COM-01C — SQL alojado instalado, archivo y correo OFF (24/11/2026)
+
+Autorización específica del titular ejecutada. Migración Supabase `20261124213414_bt_com_01c_private_review_ledger_off`, fuente `docs/sql/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.sql`, blob `173a6437c2bc495987705dd8291e19919b07ef5c`, idéntico al de la CI histórica `177e32af`. Aplicación transaccional una sola vez, únicamente con SET LOCAL lock_timeout 5s y statement_timeout 60s añadidos. Preflight confirmó esquema ausente, claves y columnas CP05/LIVE-02, roles, tres guardas REG sobre LIVE-02 y ambos rollouts vacíos.
+
+Postflight en solo lectura: cuatro tablas privadas vacías con RLS+FORCE y ningún acceso directo anon/authenticated/service_role; tres triggers de inmutabilidad activos; delivery_enabled obligado a FALSE por CHECK. Solo record_review ejecutable por service_role, sin función de cola/envío. Prueba SQL READ ONLY/ROLLBACK con SET LOCAL ROLE service_role e IDs y correo ficticios: rechazo 42501 BT_COM_REVIEW_DISABLED, marcador COM_REVIEW_OFF_SERVICE_ROLE_DENIED. No prueba Edge/JWT real ni recepción de correo. FLOW y REG continúan OFF. Bucket CP05 único y privado, sin nuevo bucket, sin correo, cambios de datos, flags, Edge ni Render. No Codex.
+
+Siguiente: revisar `docs/sql/BT_FINAL_ARCHIVE_CANDIDATE.sql` y solicitar autorización específica para SQL/bucket/política de BT-EXP-01, con lectura/escritura OFF. Después Edge bt-final-archive con JWT y gates OFF, deploy manual OFF y activación separada en taller QA. Confirmar versión y gates CP05 existentes sin reaplicar migraciones. Respaldo S5B+Storage previo aprobado en alcance acordado; no equivale a S4 integral, paridad de seguridad o segunda copia independiente. Evaluar vigencia si cambian datos; no repetir recuperación aprobada por rutina. Mantener main, Auto-Deploy OFF, correo OFF y autorización separada para cada cambio.
+
+---
+
 # ByteTorque — BT-COM-01C · Registro transaccional y estados de correo (candidato OFF)
 
 **Fecha:** 18/11/2026 · **Rama:** `main` · **Alcance:** diseño SQL privado y verificación local; **NO migración alojada, NO correo, NO Render**.

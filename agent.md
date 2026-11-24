@@ -1,3 +1,9 @@
+## BT-COM-01C — SQL instalado, OFF; continuidad EXP-01 (24/11/2026)
+
+Migración `20261124213414_bt_com_01c_private_review_ledger_off` aplicada por autorización específica. 4 tablas privadas vacías RLS+FORCE, 3 triggers inmutables, servicio review denegado con gate OFF, CHECK impide correo ON; FLOW y REG OFF. Sin nuevo bucket, Edge, flags, datos de negocio ni deploy. **Próximo: revisar BT-EXP-01 SQL/bucket/política y pedir autorización específica.** Respaldo S5B+Storage recuperado y PDF abierto, no repetir; no equivale a S4 integral. Reutilizar ejecutores locales correctos y consultar registro de incidentes, no improvisar. [COM-01C](docs/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.md) · [Continuidad y errores de sesión](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+---
+
 ## BT-REG-01 — SQL instalado, rollout OFF (24/11/2026)
 
 Autorización específica ejecutada: migración `20261124213211_bt_records_administration_off`. Postflight: 2 tablas privadas RLS+FORCE, 7 guardas de fuentes incluidas 3 LIVE-02, 2 triggers de actividad, 4/4 RPC denegadas con rollout OFF en contexto SQL simulado de owner; conteos existentes conservados. La instalación revoca archivo directo CP03 y registra actividad futura aun OFF. Rollouts REG y FLOW vacíos. Sin despliegue, Edge, Storage, flags, correo ni operaciones de negocio. **Siguiente: revisar COM-01C y solicitar autorización específica de SQL; después BT-EXP-01.** No repetir respaldo/pruebas aprobadas por rutina ni reinstalar migraciones. QA con JWT real y recuperación integral pendientes. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md).
