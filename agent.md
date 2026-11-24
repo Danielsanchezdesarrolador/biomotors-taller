@@ -1,3 +1,13 @@
+## SEC07 cerrado para piloto inicial — PASS_PILOTO_INICIAL
+
+**23/11/2026 (Chile).** A `BLOCK_A_PASS_V04`, B `BLOCK_B_PASS_INFRASTRUCTURE` y C `BLOCK_C_PASS_PILOT_FLOW`. El titular ejecutó el recorrido con datos ficticios: acceso, cliente y vehículo, recepción y orden, cotización normal en borrador y persistencia verificada tras recargar. Ver [checkpoint de cierre C](docs/checkpoints/CHECKPOINT_BT_SEC07_CIERRE_C_PASS_PILOTO.md).
+
+**Hallazgo funcional:** el selector general de Cotizaciones no mostró la orden recién creada. Abrirla desde **Órdenes de trabajo → Preparar / consultar cotización** permitió completar el recorrido. La actualización del selector queda pendiente como mejora del producto.
+
+El piloto inicial usa cuentas gestionadas y excluye onboarding público, emisión, archivo PDF privado y correo externo. Mantener respaldos cifrados manuales cada dos días y antes de cambios de datos. No repetir A ni B. Retomar el desarrollo funcional con este alcance.
+
+---
+
 ## SEC07 cierre B — BLOCK_B_PASS_INFRASTRUCTURE
 
 **Estado al 23/11/2026 (Chile): A y B aprobados en su alcance. C en curso.** El titular confirmó acceso administrativo a las cinco plataformas, ajustes de Auth registrados, 12 variables de Render inventariadas (nueve flags confirmados en `true`), ausencia de reglas personalizadas Redirects/Rewrites y custodia privada de la ficha de recuperación. El detalle privado y los valores de configuración quedan fuera del repositorio. La documentación refleja la evidencia del titular. No se cambió la configuración alojada.
