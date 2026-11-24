@@ -1,5 +1,9 @@
 # BT-REG-01 — administración segura de registros
 
+## Nota posterior de gobernanza — economía de cuota (24/11/2026)
+
+El propietario informó un consumo aproximado de 60 % de cuota en el encargo siguiente (archivo privado/recuperación del expediente final). Se aprueba la nueva regla permanente de [AGENTS.md](../../AGENTS.md): ChatGPT dirige e investiga, Codex implementa y valida de forma focalizada; consultas selectivas, reutilización, una validación consolidada pertinente, escalamiento de bloqueos y documentación breve. No se reduce seguridad ni se amplían autorizaciones. Esta anotación no modifica el PASS histórico de BT-REG-01, su SQL candidato, su guía de activación ni el estado productivo. La entrega documental siguiente tiene autorización local, sin resultados afirmados aquí.
+
 ## Cierre de publicación confirmado — 24/11/2026
 
 Orden de continuidad recibida tras el límite de uso de Codex. `main` remoto y

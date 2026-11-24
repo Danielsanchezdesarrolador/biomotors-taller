@@ -1,3 +1,9 @@
+## Metodología vigente — optimización de cuota (24/11/2026)
+
+El propietario aprueba el reparto ChatGPT director / Codex ejecutor y la consulta focalizada de documentación y Development Toolkit. Regla canónica al inicio de [AGENTS.md](AGENTS.md). Aproximadamente 60 % de cuota consumida en la entrega de expediente final, según el propietario; causa por operación no medida. No repetir investigación o pruebas aprobadas, escalar bloqueos tras un intento focalizado, consolidar entregas y mantener íntegros los controles de seguridad. La aprobación del expediente final es local; no constituye publicación, activación ni prueba completada. BT-REG-01 sigue candidato sin activación. Consultar primero estado actual y archivos pertinentes, no el historial completo por defecto.
+
+---
+
 ## BT-REG-01 — publicación cerrada; activación aplazada (24/11/2026)
 
 Candidato `9484ed797fb7d6d95d54ff7c288e70bfdc8252a7`: CI general `45416339689`,
