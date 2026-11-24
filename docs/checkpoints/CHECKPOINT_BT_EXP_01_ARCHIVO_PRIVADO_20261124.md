@@ -255,3 +255,21 @@ contenido privado del toolkit al bundle, ni se modifica su repositorio.
 - `tests/harness/FinalArchiveFixture.tsx`
 - `tests/harness/main.tsx`
 - `vite.config.ts`
+
+## Publicación autorizada y aprobación visual — 24/11/2026
+
+El propietario aprueba visualmente `d8101c90b408815629c1e78030d540f01f9741f6`
+y autoriza publicación/CI exclusivamente. Publicado en main mediante integración
+`7ebcdf4ddefe509da7c4143a101c03cfe644769f`, conservando íntegro el commit
+`4bfd8246b74ac07bacf396980d3feb43d038b3f5` y sus reglas de cuota.
+Se conciliaron únicamente inserciones documentales concurrentes en AGENTS.md,
+agent.md y roadmap.md; ningún cambio funcional adicional ni prueba local repetida.
+
+CI: consultas al conector GitHub para ese SHA devuelven `workflow_runs: []`
+y `statuses: []`. **Sin ejecución registrada observable; no equivale a éxito.**
+No se relanzó ninguna CI. El CLI local informa autenticación inválida y el
+acceso HTTP directo a la API devuelve 403; no se cambian credenciales.
+Pendiente confirmar aparición/ejecución de las CI correspondientes en GitHub.
+
+Todos los nuevos interruptores permanecen OFF. BT-REG-01 y BT-EXP-01 pendientes
+de activación productiva. Sin SQL, Storage, Edge, respaldos, correo ni Render.
