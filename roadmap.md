@@ -1,3 +1,38 @@
+## SEC07 S3-R1 — inventario REAL de permisos SQL solo lectura (23/11/2026, Chile)
+
+**Evidencia entregada por el propietario desde SQL Editor Supabase del proyecto `biomotors-taller`, entorno `main` (PRODUCTION):**
+```json
+{
+  "marker": "BT_SEC07_S3_R1_INVENTORY",
+  "result": "CATALOG_METADATA_ONLY_NO_CHANGES",
+  "tables_found": 12,
+  "tables_expected": 12,
+  "tables_rls_forced": 9,
+  "anon_select_tables": 0,
+  "tables_rls_enabled": 12,
+  "default_acl_entries": 6,
+  "tables_explicit_acl": 12,
+  "distinct_table_owners": 1,
+  "standard_roles_present": 3,
+  "public_roles_privileged": 0,
+  "security_definer_functions": 18,
+  "authenticated_delete_tables": 0,
+  "authenticated_select_tables": 12,
+  "security_definer_public_anon_executable": 0,
+  "security_definer_public_authenticated_executable": 6
+}
+```
+
+**Interpretación técnica y límites:** el script `docs/sql/BT_SEC07_S3_R1_INVENTARIO_CATALOGO_READONLY.sql` se diseñó con `BEGIN TRANSACTION READ ONLY`; el propietario comunicó un resultado de catálogo con `CATALOG_METADATA_ONLY_NO_CHANGES` (etiqueta generada, no auditoría independiente de SQL de la plataforma). Están presentes las 12 tablas objetivo; RLS habilitada 12/12 y FORCE 9/12 (no exigir FORCE a las otras 3 sin estudiar sus reglas); 0/12 con SELECT efectivo para `anon`; `authenticated` tiene SELECT en 12/12 y DELETE en 0/12; `anon/authenticated` sin SUPERUSER/BYPASSRLS, existen los tres roles estándar. Doce objetos tienen ACL explícitas, seis entradas de privilegios predeterminados y un único owner de las 12 tablas. **La existencia de 18 funciones SECURITY DEFINER (según alcance público + bt_ del SQL) y 6 funciones SECURITY DEFINER de `public` con `EXECUTE` efectivo para `authenticated`, 0 para `anon`, exige revisión dirigida pero NO demuestra vulnerabilidad.** La consulta solo cuenta funciones; NO proporciona identidades, cuerpos ni efectividad de controles internos. El conteo de 18 NO equivale a 18 funciones expuestas públicamente.
+
+**Estado de etapa:** S3-R1 inventario agregado **PASS (evidencia reportada), sin cambios intencionales**; S3 global todavía **NO CERRADA**. Inventario NO constituye archivo recuperable de roles, GRANT/REVOKE/default privileges, owners ni prueba de RLS por todas las tablas/roles. S4C-R9 continúa CHECK_PASS_LIMITED. No alterar permisos ni revocar funciones sobre la sola base del conteo; impedir impactos a la app piloto.
+
+**Siguiente paso de valor, una sola lectura dirigida:** obtener únicamente las identidades de esas seis funciones `SECURITY DEFINER` de `public` ejecutables por `authenticated`, más si el EXECUTE proviene de ACL explícita o valores predeterminados, sin bodies/secrets/data; comparar con las definiciones reales de `main` y evaluar existencia de `auth.uid()`, validación de membresía y taller, `search_path` seguro y privilegios mínimos. Script preparado para el chat: SQL metadata-only `BEGIN TRANSACTION READ ONLY`, no `GRANT/REVOKE/ALTER`. Identificar luego si hay brechas reales y avanzar respaldo de roles/ACL sin repetir restauración R8/R9.
+
+**Registro histórico:** resultado no equivale a certificado RLS de lectura/grants restaurados; no cambiar producción o Render. Mantener `main` y commits documentales `[skip render]`; sin secretos, RUT, nombres de clientes o dumps en GitHub.
+
+---
+
 ## SEC07 S3-R1 — inventario de permisos preparado, NO ejecutado (23/11/2026)
 
 Avance desde S4C-R9 `CHECK_PASS_LIMITED`: se consolidó matriz de cobertura **S3** de permisos/owners/roles, Auth, Storage, Edge y Render, usando evidencias históricas CP50/51 y reglas actuales Supabase. Se preparó una sola consulta `BEGIN TRANSACTION READ ONLY` **solo catálogo agregado** para ejecución voluntaria del propietario en SQL Editor: [`docs/sql/BT_SEC07_S3_R1_INVENTARIO_CATALOGO_READONLY.sql`](docs/sql/BT_SEC07_S3_R1_INVENTARIO_CATALOGO_READONLY.sql). Matriz y alcance: [`docs/BT_SEC07_S3_MATRIZ_COBERTURA_20261123.md`](docs/BT_SEC07_S3_MATRIZ_COBERTURA_20261123.md). **No consultado remoto, sin resultados ni PASS S3 aún.** No reejecutar R8/R9 ni exponer secretos o clientes. GitHub `main` docs-only `[skip render]`.
