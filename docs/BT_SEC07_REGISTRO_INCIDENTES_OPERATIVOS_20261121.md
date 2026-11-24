@@ -1,3 +1,9 @@
+## SEC07 — Runbook permanente tras S4B-R8 PASS (23/11/2026)
+
+**Solución y prevención documentadas:** [`docs/recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md`](docs/recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md). Describe toda la secuencia real desde claves/GPG y R2-R7, causa demostrada vs hipótesis, corrección operativa R8, guardas para PostgreSQL/Supabase/Docker/PowerShell y estado posterior. **R8 RESTORE_PASS**, no significa **S4 global PASS**; S4C con controles de datos y A/B pendiente. **No repetir R8 rutinariamente ni reexportar S2-R11.**
+
+---
+
 ## SEC07-S4B-R8 — RESTORE_PASS real en laboratorio aislado (23/11/2026)
 
 **Evidencia recibida del propietario desde Windows PowerShell 5.1:**

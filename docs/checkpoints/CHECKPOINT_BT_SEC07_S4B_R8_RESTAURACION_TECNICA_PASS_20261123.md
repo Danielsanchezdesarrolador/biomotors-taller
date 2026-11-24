@@ -33,3 +33,9 @@ BT_SEC07_S4B_R8_RESULT: RESTORE_PASS
 ## Continuidad
 
 Conservar v04, GPG y sus manifiestos intactos. No repetir S2-R11, R5, R6, R7 ni R8 como auditoría rutinaria. Preparar una sola verificación consolidada de estructura/datos y aislamiento A/B con criterios PASS/STOP y resultados sanitizados, sin exponer datos de clientes ni credenciales. Ninguna acción alojada ni despliegue autorizados por este checkpoint. Documentar siguientes hechos en `AGENTS.md`, `agent.md`, `roadmap.md` y el registro de incidentes; mantener `main` y `[skip render]` para cambios documentales.
+
+## Anexo posterior — Prevención de recurrencia y trazabilidad
+
+Se consolidaron las fallas y las correcciones probadas/documentadas de GPG y R2–R8 en el [runbook permanente](../recovery/BT_SEC07_S4B_R8_SOLUCION_Y_PREVENCION_20261123.md). Es la referencia operativa para futuros agentes. Distingue el fallo real R7 de su causa probable (no demostrada sin stderr), y el remedio que sí pasó en R8. No altera el resultado original ni convierte controles faltantes de S4 en PASS.
+
+Para avanzar a S4C, por ser laboratorio `--rm`, se necesita una **única** restauración posterior que integre validaciones antes de salir, no otra ejecución idéntica de R8. Estado S4C: PENDIENTE, sin datos/roles/RLS A/B certificados.
