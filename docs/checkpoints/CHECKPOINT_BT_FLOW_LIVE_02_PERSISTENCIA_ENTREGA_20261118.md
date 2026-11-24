@@ -1,3 +1,15 @@
+## BT-FLOW-LIVE-02 — SQL alojado instalado, rollout OFF (24/11/2026)
+
+El propietario autorizó expresamente esta instalación SQL después de conocer el cierre del respaldo S5B + PDF de Storage en su alcance acordado. No equivale a autorización de activación ni a certificación S4 integral, segunda copia independiente, paridad completa de permisos o DR de todos los servicios. Conservar los requisitos de seguridad y recuperación pendientes para uso real; no presentar el plan histórico integral como cumplido.
+
+Migración registrada en Supabase: `20261124213015_bt_flow_live_02_operator_attestations_off`. Fuente: [SQL candidato](https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/cb77f4b30a6d793e902863994334196d81a52455/docs/sql/BT_FLOW_LIVE_02_CANDIDATE.sql), blob `6464dc3d10117f304f35d86e1bd18e4661b6c001`. Aplicación exitosa una sola vez, en transacción; solo se agregaron límites locales de sesión lock_timeout 5s y statement_timeout 60s, sin alterar el DDL ni los contratos. Preflight de catálogo confirmó ausencia de instalación parcial, CP03/04/05, claves compuestas, columnas, roles y lector CP05 requeridos, así como migraciones CP05 de archivo privado y recuperación ya registradas. No reaplicarlas.
+
+Postflight read-only: tres historiales nuevos vacíos, RLS y FORCE 3/3, trigger inmutable y política de lectura 3/3, SELECT autenticado y sin DML directo, anon sin acceso; wrappers invoker con EXECUTE autenticado y sin EXECUTE anon/service_role. Rollout privado vacío, 0 talleres habilitados, RLS+FORCE, sin acceso API directo. Prueba SQL en transacción READ ONLY y rollback, contexto de claims simulado de owner elegible y rol authenticated, IDs de recursos ficticios: las 3 RPC denegaron 42501 BT_FLOW_ACCESS_DENIED; marcador FLOW_OFF_OWNER_SQL_CONTEXT_3_OF_3_DENIED. Esto no certifica JWT real, recorrido alojado ON ni QA física. No se registraron filas reales o de prueba.
+
+**Estado vigente:** LIVE-02 instalado pero NO activo. Sin cambios Render/Edge/Storage/flags/correo, sin deploy; mantener main y Auto-Deploy OFF. BT-REG-01 sigue pendiente; sus guardas opcionales pueden ahora instalarse sobre las tres tablas LIVE-02, previa revisión y autorización específica. Después COM-01C y BT-EXP-01, respetando dependencias y rollout OFF. No ejecutar otro respaldo ni pruebas aprobadas por rutina; evaluar vigencia si hay cambios de datos y mantener la pauta SEC07. No habilitar talleres ni enviar correos sin nueva autorización y QA controlada.
+
+---
+
 ## Adenda de código y continuidad — 23/11/2026
 
 Rediseño CP05 **aprobado visualmente por propietario**, emisión QA previa aprobada.

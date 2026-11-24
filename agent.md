@@ -1,3 +1,9 @@
+## BT-FLOW-LIVE-02 — migración instalada, OFF (24/11/2026)
+
+Autorización específica del propietario ejecutada: `20261124213015_bt_flow_live_02_operator_attestations_off` registrada. Postflight 3/3 historiales RLS+FORCE e inmutables, sin DML directo; rollout vacío y 3/3 RPC denegadas 42501 en contexto SQL simulado de owner, no prueba JWT real. Sin despliegue, Edge, flags, correo ni escrituras de negocio. Respaldo previo S5B+Storage aprobado en alcance acordado, no S4 integral ni paridad completa. **Siguiente: revisar y solicitar autorización SQL BT-REG-01; LIVE-02 ya existe para sus guardas opcionales.** No reinstalar CP05/LIVE-02 ni repetir pruebas; COM-01C/BT-EXP-01 pendientes. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_FLOW_LIVE_02_PERSISTENCIA_ENTREGA_20261118.md).
+
+---
+
 ## Respaldo previo a integración — PASS de alcance acordado (24/11/2026)
 
 El propietario confirmó «PDF correcto» tras abrir localmente el original recuperado del sidecar cifrado. Con los resultados previos S5B (integridad, contenido restaurado, fuente intacta, limpieza) y Storage (inventario del mismo dump, único PDF CP05, bytes/hash y recibo verificados), se cierra el requisito de respaldo previo para el alcance documentado, sin declarar paridad completa de seguridad ni DR integral. No repetir el respaldo ni sus verificaciones por rutina; si cambian los datos antes de la migración, evaluar vigencia del conjunto. Custodia privada; no publicar datos, rutas ni secretos.
