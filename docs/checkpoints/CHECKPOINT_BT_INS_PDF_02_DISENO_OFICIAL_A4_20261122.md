@@ -285,3 +285,23 @@ visual del titular y dispositivos físicos Safari/iPhone; no declarar QA product
 
 No se incluyen capturas antiguas de fallo, logs, dumps ni el directorio preexistente
 `artifacts/` en el commit. Toda evidencia visual entregada es sintética y local.
+
+
+### Aprobación visual y autorización de publicación — 24/11/2026
+
+El titular aprueba visualmente la corrección y compactación entregadas en
+`c1020011b4b98859f6aea067f07d9787ba267713`, autoriza publicarlas en `main` y
+que se ejecute la CI existente. Fuente: autorización expresa en esta conversación;
+no es una prueba adicional efectuada por el agente. Queda satisfecho el pendiente
+de aprobación visual mencionado arriba. Safari/iPhone físicos y disponibilidad
+productiva de esta versión no se declaran verificados.
+
+Se registra la aprobación en un commit exclusivamente documental, conservando
+el commit funcional íntegro. Base remota comprobada antes de publicar:
+`169ddddbe8821fda87d49cecb3754b857dce8d56`. Push normal, sin ramas adicionales
+ni pruebas locales repetidas. Los workflows existentes se disparan por el push;
+no disparar respaldos ni workflows manuales de infraestructura.
+
+**Render: NO desplegar ni cambiar Auto-Deploy.** ChatGPT gestionará el despliegue
+separadamente tras confirmar CI. Sin cambios en Supabase, Edge, secretos, datos,
+SQL, Storage ni el selector CP05. No se crean nuevos checkpoints.

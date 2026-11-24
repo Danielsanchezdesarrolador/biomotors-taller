@@ -1,3 +1,15 @@
+## CP04 — aprobación visual y publicación autorizadas (24/11/2026)
+
+El propietario aprueba visualmente la corrección general y compactación CP04
+implementadas en `c1020011b4b98859f6aea067f07d9787ba267713`, y autoriza publicar
+en `main` y ejecutar la CI existente. Evidencia: autorización expresa en el chat.
+No sustituye pruebas en Safari/iPhone físicos ni una nueva QA productiva.
+**NO desplegar Render** ni cambiar Auto-Deploy, Supabase, Edge, secretos o datos.
+El despliegue será gestionado separadamente por ChatGPT tras revisar la CI.
+Esta aprobación actualiza el pendiente visual de la adenda CP04 inferior.
+
+---
+
 ## CP04 — diagnóstico vigente y espacio compacto (24/11/2026)
 
 Implementación local sobre main `169ddddbe8821fda87d49cecb3754b857dce8d56`,
