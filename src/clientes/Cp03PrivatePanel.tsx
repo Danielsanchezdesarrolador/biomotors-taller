@@ -5,23 +5,34 @@
  * No separate SDK, fake data, service keys or browser storage.
  * This module is only imported after an explicitly enabled private R1 route.
  */
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AuthController } from '../auth/controller'
 import { cp03PilotAccessBinding } from './cp03PilotAccessBinding'
 import { Cp06HistoryLoader } from './Cp06HistoryLoader'
 import { Cp03PilotDirectoryView } from './cp03PilotDirectoryView'
 
+const RecordsLoader = import.meta.env.VITE_BT_RECORDS_PRIVATE_ENABLED === 'true' ? lazy(() => import('../records/RecordsLoader')) : null
+
 type Binding = ReturnType<typeof cp03PilotAccessBinding>
 
 function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { binding: Binding; client:SupabaseClient; onAccessLost:()=>void; onVehicleQuotes?: (id:string)=>void }) {
+  const [administration, setAdministration] = useState(false)
+  const [directoryRevision, setDirectoryRevision] = useState(0)
   const access = useSyncExternalStore(binding.subscribe,binding.getSnapshot,() => null)
   if (!access) return <p role="status">Verificando el acceso al directorio privado…</p>
   const { context, repository } = access
-  return <Cp03PilotDirectoryView key={context.userId+'-'+context.workshop.id+'-'+context.role}
+  const canManage = RecordsLoader && ['owner','admin'].includes(context.role)
+  const showAdministration = !!canManage && administration
+  return <div className="cp03-pilot">
+    {canManage && !administration && <button className="cp03-secondary" onClick={()=>setAdministration(true)}>Administrar registros</button>}
+    {administration && canManage && <Suspense fallback={<p role="status">Preparando administración…</p>}><RecordsLoader client={client} context={context} onBack={()=>{setAdministration(false); setDirectoryRevision(n=>n+1)}}/></Suspense>}
+    <div hidden={showAdministration} inert={showAdministration}>
+    <Cp03PilotDirectoryView refreshRevision={directoryRevision} key={context.userId+'-'+context.workshop.id+'-'+context.role}
     renderHistory={import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'?(vehicle,onBack)=><Cp06HistoryLoader key={vehicle.id} client={client} context={context} vehicleId={vehicle.id} onBack={onBack} onAccessLost={onAccessLost}/>:undefined}
     onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
     draftScope={{userId:context.userId,workshopId:context.workshop.id}}/>
+    </div></div>
 }
 function AuthClientDirectory({ controller, client, onVehicleQuotes }: {
   controller: AuthController; client: SupabaseClient; onVehicleQuotes?: (id:string)=>void

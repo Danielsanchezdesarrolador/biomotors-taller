@@ -112,9 +112,9 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
     const plateKey = normalizedPlate(value)
     let vehicles: VehicleRecord[] = []
     if (/^[A-Z0-9]{5,8}$/.test(plateKey)) {
-      const result = await client.from('vehicles').select(vehicleColumns)
+      const result = await client.from('vehicles').select(vehicleColumns+',customers!inner(archived_at)')
         .eq('workshop_id', tenant).eq('plate_key', plateKey)
-        .is('archived_at', null).limit(25)
+        .is('archived_at', null).is('customers.archived_at', null).limit(25)
       if (result.error) failure(result.error)
       vehicles = checkMany<VehicleRecord>(result.data, tenant)
     }
@@ -134,9 +134,9 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
   async function getVehicle(id: string): Promise<VehicleRecord | null> {
     if (!UUID.test(id)) throw new DirectoryFailure('invalid')
     const version = await guard(false)
-    const result = await client.from('vehicles').select(vehicleColumns)
+    const result = await client.from('vehicles').select(vehicleColumns+',customers!inner(archived_at)')
       .eq('workshop_id', tenant).eq('id', id.toLowerCase())
-      .is('archived_at', null).maybeSingle()
+      .is('archived_at', null).is('customers.archived_at', null).maybeSingle()
     if (result.error) failure(result.error)
     stillValid(version)
     return result.data ? checkRow<VehicleRecord>(result.data, tenant) : null
@@ -144,9 +144,9 @@ export function cp03PilotRepository(client: SupabaseClient, context: Context) {
   async function vehiclesForCustomer(customerId: string): Promise<VehicleRecord[]> {
     if (!UUID.test(customerId)) throw new DirectoryFailure('invalid')
     const version = await guard(false)
-    const result = await client.from('vehicles').select(vehicleColumns)
+    const result = await client.from('vehicles').select(vehicleColumns+',customers!inner(archived_at)')
       .eq('workshop_id', tenant).eq('customer_id', customerId.toLowerCase())
-      .is('archived_at', null).order('created_at', { ascending: false }).limit(50)
+      .is('archived_at', null).is('customers.archived_at', null).order('created_at', { ascending: false }).limit(50)
     if (result.error) failure(result.error)
     stillValid(version)
     return checkMany<VehicleRecord>(result.data, tenant)

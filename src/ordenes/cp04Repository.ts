@@ -14,7 +14,8 @@ import {
   type NewFinding, type OrderStatus, type VehicleChoice, type OrderWithVehicle, type InspectionPdfIdentity
 } from './cp04Contracts'
 
-const orderCols='workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'
+const recordsEnabled=import.meta.env.VITE_BT_RECORDS_PRIVATE_ENABLED==='true'
+const orderCols='workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'+(recordsEnabled?',cancelled_at':'')
 const findingCols='workshop_id,id,order_id,vehicle_id,category,result,note,resolution,resolved_at,recorded_by,created_at,updated_at'
 const vehicleCols='workshop_id,id,customer_id,plate,plate_key,make,model,odometer_km'
 const staff:readonly Role[]=['owner','admin','reception']
@@ -69,8 +70,8 @@ export function cp04Repository(client:SupabaseClient,context:Context){
   }
   async function findVehicleByPlate(plate:string):Promise<VehicleChoice|null>{
     const key=validPlateSearch(plate),version=await guard()
-    const result=await client.from('vehicles').select(vehicleCols)
-      .eq('workshop_id',tenant).eq('plate_key',key)
+    const result=await client.from('vehicles').select(vehicleCols+',customers!inner(archived_at)')
+      .is('customers.archived_at',null).eq('workshop_id',tenant).eq('plate_key',key)
       .is('archived_at',null).maybeSingle()
     if(result.error)workFailure(result.error)
     valid(version)
@@ -84,10 +85,13 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     valid(version)
     return result.data?check<VehicleChoice>(result.data,tenant):null
   }
-  async function recentOrders():Promise<OrderWithVehicle[]>{
+  async function recentOrders(operational=false):Promise<OrderWithVehicle[]>{
     const version=await guard()
-    const orders=await client.from('work_orders').select(orderCols)
-      .eq('workshop_id',tenant).order('opened_at',{ascending:false}).limit(recentOrdersLimit)
+    let query=client.from('work_orders').select(orderCols+(operational?',vehicles!inner(archived_at,customers!inner(archived_at))':''))
+      .eq('workshop_id',tenant)
+    if(operational)query=query.is('vehicles.archived_at',null).is('vehicles.customers.archived_at',null)
+    if(operational&&recordsEnabled)query=query.is('cancelled_at',null)
+    const orders=await query.order('opened_at',{ascending:false}).limit(recentOrdersLimit)
     if(orders.error)workFailure(orders.error)
     const list=many<WorkOrder>(orders.data,tenant)
     if(!list.length)return []

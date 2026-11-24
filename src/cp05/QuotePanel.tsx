@@ -11,6 +11,7 @@ import {
   ChevronDown,
   History
 } from 'lucide-react'
+import { onRecordChange } from '../official/recordChanges'
 import type { Context } from '../auth/controller'
 import { WorkOrderFailure, type OrderWithVehicle } from '../ordenes/cp04Contracts'
 import { WorkItemsTable, WorkItemForm } from '../informes/trabajos/WorkItemsEditor'
@@ -72,6 +73,8 @@ export function QuotePanel({
   const [ordersRefreshing,setOrdersRefreshing]=useState(true)
   const [ordersError,setOrdersError]=useState('')
   const [ordersRetry,setOrdersRetry]=useState(0)
+  const recordsListRevision=useRef(0),recordsVehicleScope=useRef(initialVehicleId)
+  recordsVehicleScope.current=initialVehicleId
   const [tab,setTab]=useState<'trabajos'|'condiciones'|'historial'>('trabajos')
   const [browseOpen,setBrowseOpen]=useState(false),[revisionOpen,setRevisionOpen]=useState(false)
   const workspaceId=useId(),toolbar=useRef<HTMLDivElement>(null),workspace=useRef<HTMLElement>(null)
@@ -151,7 +154,9 @@ export function QuotePanel({
     setOrdersError('')
     void repository.orders().then(source=>{
       if(cancelled||!active.current)return
-      setOrders(initialVehicleId?source.filter(o=>o.vehicle.id===initialVehicleId):source)
+      const eligible=initialVehicleId?source.filter(o=>o.vehicle.id===initialVehicleId):source
+      setOrders(eligible)
+      setOrderId(current=>eligible.some(o=>o.order.id===current)?current:'')
     }).catch(e=>{
       if(cancelled||!active.current)return
       if((e instanceof QuoteFailure||e instanceof WorkOrderFailure)&&e.kind==='denied'){
@@ -165,6 +170,21 @@ export function QuotePanel({
     })
     return()=>{cancelled=true}
   },[repository,isActive,initialVehicleId,ordersRetry])
+  useEffect(() => onRecordChange(change => {
+    if (change.workshopId !== context.workshop.id) return
+    setOrdersRetry(n=>n+1)
+    const listRevision=++recordsListRevision.current,vehicleScope=initialVehicleId
+    const current=()=>active.current&&listRevision===recordsListRevision.current&&vehicleScope===recordsVehicleScope.current
+    void repository.list(initialVehicleId).then(list=>{if(current())setQuotes(list)}).catch(e=>{if(current())failure(e)})
+    if(change.resource==='quotes' && change.id===bundle?.quote.id) {
+      if(change.action==='delete') {
+        sequence.current++; setBundle(null); setDraft(empty); setRecovery(null); setEditing(null); setReadPending(null); setOrderId('')
+        if(localDraft(context.userId,context.workshop.id)?.quoteId===change.id)clearLocalDraft()
+        operation.current={fingerprint:'',id:crypto.randomUUID()}
+        setMessage('Borrador eliminado desde Administración de registros.')
+      } else if(change.action==='void' && !dirty && !busy)void open(change.id)
+    }
+  }),[repository,context.workshop.id,context.userId,initialVehicleId,bundle?.quote.id,dirty,busy])
   useEffect(() => {
     if (bundle) rememberQuoteSelection(context.userId, context.workshop.id, bundle.quote.id)
   }, [bundle?.quote.id, context.userId, context.workshop.id])

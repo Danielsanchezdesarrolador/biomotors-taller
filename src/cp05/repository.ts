@@ -243,7 +243,7 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
     list,
     forOrder,
     load,
-    orders: () => orders.recentOrders(),
+    orders: () => orders.recentOrders(true),
     open: (orderId: string, requestId: string) =>
       command('bt_cp05_open_quote', { p_order_id: quoteId(orderId) }, requestId),
     save: (quote: Quote, draft: Draft, requestId: string) =>

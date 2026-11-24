@@ -47,8 +47,9 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName, draftScope, onVehicleQuotes, renderHistory
+  repository, role, workshopName, draftScope, onVehicleQuotes, renderHistory, refreshRevision = 0
 }: {
+  refreshRevision?: number
   repository: PilotDirectoryPort
   role: Role
   workshopName: string
@@ -132,6 +133,32 @@ export function Cp03PilotDirectoryView({
       // scoped draft remains, never results or customer objects.
     }
   }, [repository])
+
+  // Returning from management refreshes persisted availability without remounting
+  // the directory or replacing an unrelated in-progress form.
+  useEffect(() => {
+    if (!refreshRevision) return
+    let cancelled = false
+    const index = ++requestId.current
+    setLoading(true)
+    void (async () => {
+      const recent = await repository.recentCustomers()
+      const owner = customer ? await repository.getCustomer(customer.id) : null
+      const selectedVehicle = vehicle ? await repository.getVehicle(vehicle.id) : null
+      if (cancelled || !active.current || index !== requestId.current) return
+      setRecent(recent); setMatches(null)
+      if (customer && !owner) {setCustomer(null); setVehicle(null); setVehicles([]); setEditor(null); setHistoryVehicle(null)}
+      else if (owner) {
+        setCustomer(owner)
+        const list = await repository.vehiclesForCustomer(owner.id)
+        if (cancelled || !active.current || index !== requestId.current) return
+        setVehicles(list)
+        if (vehicle && !selectedVehicle) {setVehicle(null); if(editor==='edit-vehicle')setEditor(null)}
+      }
+    })().catch(e=>{if(!cancelled&&active.current&&index===requestId.current)setMessage(cp03Message(e))})
+      .finally(()=>{if(!cancelled&&active.current&&index===requestId.current)setLoading(false)})
+    return () => {cancelled = true}
+  }, [repository, refreshRevision])
 
   useEffect(() => {
     if (draftRestored && editor) editorRef.current?.scrollIntoView({block:'nearest'})

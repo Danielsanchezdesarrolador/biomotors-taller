@@ -1,5 +1,22 @@
 # CP05 — entrega funcional coherente de cotizaciones (22/11/2026)
 
+## Aceptación funcional del selector en producción — 24/11/2026
+
+El propietario confirma expresamente la aprobación funcional del selector de
+órdenes CP05 en producción. Se cierra ese pendiente para la versión funcional
+`a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`, desplegada previamente LIVE.
+Esta aceptación procede del propietario; no representa otra prueba productiva
+realizada por Codex ni una autorización de nuevos despliegues.
+
+La administración de registros se desarrolla por una orden posterior independiente,
+solo local: [BT-REG-01](CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md).
+Se conserva la actualización del selector al regresar al módulo, los borradores,
+partidas, numeración, revisión inmutable y documentos oficiales. Sus nuevos filtros
+solo excluyen fuentes archivadas/canceladas de la selección operativa; las lecturas
+históricas permanecen disponibles. No se reabren las pruebas aprobadas de CP05,
+CP04 ni SEC07. Correos y activaciones de infraestructura conservan sus controles.
+
+
 ## Adenda de correo CP05 / BT-COM-01 · 23/11/2026
 
 Propietario aprobó visualmente BT-COM-01 y autorizó su **despliegue manual de código en Render** junto con publicación de CP05 correo en `main` y la CI existente. Se agrega revisión humana para el correo de una revisión emitida con revalidación backend de contacto CP03, en vez de envío directo. No se habilitan Resend, SMTP, flags reales, SQL, Storage, Edge ni otros talleres. S4 integral y prueba de recepción real con email propio del propietario permanecen pendientes. La versión de producción debe confirmarse tras deploy real; no deducirla de este texto.

@@ -1,6 +1,7 @@
 import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './WorkflowApp'
+const RecordsFixture = lazy(() => import('./RecordsFixture'))
 const RealAuthQaHarness = lazy(() =>
   import('./RealAuthQaHarness').then((module) => ({ default: module.RealAuthQaHarness }))
 )
@@ -14,7 +15,7 @@ import '../../src/premium.css'
 const path = publicAccessPath(window.location)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {path === '/com01d-review-qa' ? (
+    {path === '/records-qa' ? (<Suspense fallback={<p>Preparando registros sintéticos…</p>}><RecordsFixture/></Suspense>) : path === '/com01d-review-qa' ? (
       <Suspense fallback={<p>Preparando revisión documental aislada…</p>}>
         <ClosingReviewFixture />
       </Suspense>

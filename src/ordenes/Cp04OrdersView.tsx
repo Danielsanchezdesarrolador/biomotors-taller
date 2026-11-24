@@ -20,6 +20,7 @@ import {
   Info
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
+import { onRecordChange } from '../official/recordChanges'
 import { commitAndRefresh } from '../official/confirmedWrite'
 import { cp04Repository } from './cp04Repository'
 import {
@@ -258,6 +259,14 @@ export function Cp04OrdersView({
     panelScroll.current={...panelScroll.current,[tab]:node.scrollTop}
     rememberCp04PanelPosition(scope,tab,node.scrollTop)
   }
+  useEffect(() => onRecordChange(change => {
+    if(change.workshopId!==context.workshop.id)return
+    void reload()
+    if(change.resource==='work_orders' && selected?.order.id===change.id) {
+      if(change.action==='delete') {revision.current++; setSelected(null); setFindings([]); setPending([])}
+      else if(change.action==='cancel')void openOrder(change.id)
+    }
+  }),[repository,context.workshop.id,selected?.order.id])
   async function openOrder(id: string, focusDetail = false): Promise<boolean> {
     const request = ++revision.current
     setLoading(true)
@@ -716,7 +725,7 @@ export function Cp04OrdersView({
                     <span className="cp04-order-heading">
                       <strong className="cp04-plate">{item.vehicle.plate ?? 'Sin patente'}</strong>
                       <span className={'cp04-status cp04-status-' + item.order.status}>
-                        {workStatusLabel[item.order.status]}
+                        {item.order.cancelled_at?'Cancelada':workStatusLabel[item.order.status]}
                       </span>
                     </span>
                     <strong className="cp04-vehicle-name">
@@ -846,7 +855,7 @@ export function Cp04OrdersView({
               </small>
             </div>
             <span className={'cp04-status cp04-status-' + selected.order.status}>
-              {workStatusLabel[selected.order.status]}
+              {selected.order.cancelled_at?'Cancelada':workStatusLabel[selected.order.status]}
             </span>
           </div>
           {onQuote && (

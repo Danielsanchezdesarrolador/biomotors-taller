@@ -1,3 +1,30 @@
+## BT-REG-01 — administración de registros, entrega local (24/11/2026)
+
+El propietario confirma la **aceptación funcional del selector CP05 en producción**
+(SHA funcional `a92e5c87bf351eeb55ea4754187cf4452cfe0ba8`). No se repite su QA.
+CP04 y SEC07 siguen cerrados en su alcance aprobado.
+
+La nueva orden sustituye la planificación inferior de «no implementar todavía»:
+se implementa administración de clientes, vehículos, OT y cotizaciones únicamente
+en `main`, con validación local sintética. Reutiliza archivo CP03 y anulación CP05;
+RPC transaccionales validan propietario/admin, taller, versión y dependencias,
+con auditoría inmutable. El SQL permanece **candidato, NO aplicado**; interruptor
+privado por taller y `VITE_BT_RECORDS_PRIVATE_ENABLED` apagados por defecto.
+
+**NO PUSH, NO DEPLOY, NO SQL/Storage/Edge ni datos productivos.** No cambiar
+Auto-Deploy OFF ni visibilidad pública temporal autorizada. No activar correos,
+pagos, respaldos ni otras funcionalidades. Esta orden no autoriza una activación
+alojada. Antes de activarla se requieren las autorizaciones y condiciones de
+seguridad vigentes, incluida la recuperación integral S4 pendiente; no se reabre SEC07.
+
+Validación: 22 pruebas focalizadas, 43 comprobaciones PostgreSQL, concurrencia,
+navegador 1366/768/390 y builds público/privado PASS. Solo datos ficticios locales.
+
+Entrega y evidencia: [checkpoint BT-REG-01](docs/checkpoints/CHECKPOINT_BT_REG_01_ADMINISTRACION_20261124.md).
+Aceptación CP05 registrada también en su checkpoint existente.
+
+---
+
 ## Selector CP05 aprobado, publicado y LIVE — 24/11/2026
 
 El propietario aprobó la implementación y autorizó publicación, CI existentes y
@@ -16,18 +43,18 @@ Repositorio público temporal por autorización expresa del propietario; no camb
 su visibilidad. CP04 y SEC07 siguen cerrados. No se modificaron Supabase, RLS,
 Edge, variables, migraciones, datos, respaldos ni nuevas funciones de negocio.
 
-Próxima entrega registrada en roadmap: eliminación controlada, archivo y recuperación
-de clientes, vehículos, OT y borradores de cotizaciones, preservando dependencias
-e historiales. **Solo planificada: NO implementar ni activar todavía.**
+La administración de registros inicialmente planificada fue autorizada después
+para implementación y validación local por la orden BT-REG-01 que encabeza este
+documento. Continúa prohibida su publicación o activación sin aprobación específica.
 Esta orden de deploy queda ejecutada para esta versión y no autoriza otros deploys.
 Detalle en el [checkpoint CP05 existente](docs/checkpoints/CHECKPOINT_BT_CP05_ENTREGA_FUNCIONAL_20261122.md).
 Las notas inferiores de «solo local» corresponden a la preparación ya superada.
 
 ---
 
-## Próxima entrega funcional — eliminación controlada, archivo y recuperación
+## Administración de registros — implementación local BT-REG-01
 
-**Planificada por el propietario el 24/11/2026. NO implementada ni activada.**
+**Implementada como candidata local por autorización posterior del propietario. NO publicada ni activada.**
 Al cerrar la publicación/despliegue del selector CP05, la próxima entrega tratará
 clientes, vehículos, órdenes y borradores de cotizaciones.
 
@@ -45,8 +72,10 @@ Criterios de la próxima especificación:
 - Validar las acciones y su recuperación con datos ficticios antes de cualquier
   activación productiva. No ejecutar cambios de datos, SQL o migraciones por este registro.
 
-Esta planificación no autoriza empezar la funcionalidad. CP04 y SEC07 continúan
-cerrados; Auto-Deploy OFF y repositorio público temporal según decisión del titular.
+La orden BT-REG-01 autoriza la implementación local descrita en el checkpoint.
+Quedan pendientes aprobación visual/funcional del propietario, publicación, SQL
+alojado y activación controlada. CP04 y SEC07 continúan cerrados; Auto-Deploy OFF
+y repositorio público temporal según decisión del titular.
 
 ---
 
