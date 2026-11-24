@@ -1,3 +1,26 @@
+## SEC07-S4B-R8 — RESTORE_PASS real en laboratorio aislado (23/11/2026)
+
+**Evidencia recibida del propietario desde Windows PowerShell 5.1:**
+```text
+BT_SEC07_S4B_R8: START
+BT_SEC07_S4B_R8_LAB: READY
+BT_SEC07_S4B_R8_RESTORE_EXIT: 0
+BT_SEC07_S4B_R8_GPG: PASS
+BT_SEC07_S4B_R8_CATALOG: CHECK_PASS
+BT_SEC07_S4B_R8_RESTORE: PASS
+BT_SEC07_S4B_R8_RESULT: RESTORE_PASS
+```
+
+**Resultado verificado por el procedimiento y reportado por el propietario:** se ejecutó en su PC el R8 de PowerShell 5.1, usando el archivo cifrado existente S2-R11 v04 (`*_nobom_v04.dump.gpg`), `GNUPGHOME` seleccionado, GnuPG y Docker local con imagen fijada `supabase/postgres:17.6.1.136`. El entrypoint/migraciones oficiales completaron el bootstrap y la comprobación de roles estándar antes de emitir `LAB:READY`. Se creó `bt_s4` desde `template0` y `pg_restore` terminó con exit code 0, con `--exit-on-error --single-transaction --no-owner --no-acl`. GPG terminó con exit code 0 y estado `DECRYPTION_OKAY`; el stream binario hacia Docker no registró error y Docker terminó exit 0. Consulta sintética del catálogo confirmó **al menos una tabla no perteneciente a los esquemas de sistema** en la base restaurada. **S4B RESTAURACIÓN TÉCNICA PASS; primera restauración completa del archive v04 confirmada en laboratorio.** Esta evidencia procede de etiquetas compartidas, no de inspección remota del PC.
+
+**Corrección aplicada y aprendizaje R7→R8:** R7 quedó en `BOOTSTRAP_FAILED` sin log persistente; conflicto comprobado de diseño entre `docker run --read-only` y necesidad de escritura de clave temporal `pgsodium` en `/etc/postgresql-custom/pgsodium_root.key`, cuya causalidad histórica exacta no se pudo demostrar. R8 retiró **solo** `--read-only`, preservó entrypoint, migraciones, imagen fijada, `--network none --rm --pull=never --log-driver none`, ausencia de puertos/bind mounts y `tmpfs` para PGDATA, `/tmp` y socket. R8 pasó con esta configuración; es evidencia de solución operativa, no prueba forense de la única causa de R7. La capa escribible efímera puede producir huellas temporales en disco host; no afirmar cero huella ni seguridad ante pérdida del PC. No se conectó ni modificó producción durante este procedimiento.
+
+**Alcance que NO certifica R8:** la consulta de catálogo solo comprobó existencia de tabla(s), NO cantidades de filas, integridad semántica/datos esperados, FK/índices, owners, ACL/GRANT, políticas RLS efectivas, funciones SECURITY DEFINER, aislamiento entre talleres A/B con roles no privilegiados, ni componentes Supabase fuera del dump (Auth operativo, archivos Storage, Edge Functions, configuración/secretos, Render). `--no-owner --no-acl` impide considerar restaurados los propietarios y privilegios originales. **S4 restauración técnica PASS; S4 recuperación integral/seguridad NO CERRADA; S3 servicios/permisos PENDIENTE.** S2-R11 sigue PASS y no se repite ni reexporta.
+
+**Siguiente acción útil, una sola ronda consolidada:** definir y ejecutar validación focalizada de datos/estructura esperados y permisos/RLS negativos de talleres A/B, con evidencia sanitizada y sin filas ni secretos; distinguir cobertura externa S3. Mantener solo `main`, cambios documentales `[skip render]`, sin Codex, producción, Render, SQL remoto, ramas ni nuevas auditorías S2. Guardar este hito en checkpoint único `docs/checkpoints/CHECKPOINT_BT_SEC07_S4B_R8_RESTAURACION_TECNICA_PASS_20261123.md`.
+
+---
+
 ## SEC07-S4B-R7 — BOOTSTRAP_FAILED; conflicto de escritura pgsodium en rootfs RO (23/11/2026)
 
 **Evidencia aportada por propietario:**
