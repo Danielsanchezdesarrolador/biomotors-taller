@@ -1,3 +1,9 @@
+## BT-EXP-01 — SQL, bucket y política instalados, gates OFF (24/11/2026)
+
+Autorización específica del propietario ejecutada: migración `20261124213926_bt_final_archive_private_off` registrada. Bucket privado `bt-closing-documents` (PDF, 20.000.000 bytes) y política restrictiva ALL para anon/authenticated instalados; CP05 intacto. Postflight: 9/9 funciones con grants previstos, 4 tablas COM RLS+FORCE sin acceso directo API, manifiesto inmutable, 4/4 RPC denegadas con gates OFF en contexto SQL simulado de owner/service_role. Rollouts FLOW/REG/COM vacíos, correo OFF y conteos de negocio/Storage conservados. Sin nuevos documentos, Edge, flags, deploy ni Codex. **Próximo: preparar paquete existente de `bt-final-archive`, JWT y gates Edge READ/WRITE OFF; solicitar autorización específica antes de desplegar/configurar.** CP05 Edge v4 ACTIVE verify_jwt=true confirmado en lectura previa. No reinstalar SQL ni repetir SEC07. Mantener main, Auto-Deploy OFF, QA ficticia antes de Ignacio. [Evidencia y límites](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
+
+---
+
 ## BT-COM-01C — SQL instalado, OFF; continuidad EXP-01 (24/11/2026)
 
 Migración `20261124213414_bt_com_01c_private_review_ledger_off` aplicada por autorización específica. 4 tablas privadas vacías RLS+FORCE, 3 triggers inmutables, servicio review denegado con gate OFF, CHECK impide correo ON; FLOW y REG OFF. Sin nuevo bucket, Edge, flags, datos de negocio ni deploy. **Próximo: revisar BT-EXP-01 SQL/bucket/política y pedir autorización específica.** Respaldo S5B+Storage recuperado y PDF abierto, no repetir; no equivale a S4 integral. Reutilizar ejecutores locales correctos y consultar registro de incidentes, no improvisar. [COM-01C](docs/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.md) · [Continuidad y errores de sesión](docs/checkpoints/CHECKPOINT_BT_EXP_01_ARCHIVO_PRIVADO_20261124.md).
