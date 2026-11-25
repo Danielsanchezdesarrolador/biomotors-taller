@@ -1,0 +1,81 @@
+# BT-PDF-UX-01 — rediseño local de documentos
+
+25/11/2026 Chile. Base main `1a5eec5` (continuidad y QA humana documentadas).
+Candidato local; aprobación visual del nuevo PDF pendiente. NO PUSH/DEPLOY/SQL.
+
+## Implementación
+
+Generador compartido `closingDocumentPdf` adaptado para informe y constancia A4:
+logo oficial oscuro íntegro (misma huella que el asset autorizado), cabecera marina,
+secciones azul claro con iconos, tabla con estados diferenciados, importes alineados,
+subtotal/IVA/total destacado y pie corporativo. Texto seleccionable, sin imagen
+estática del mockup. No se cambia la cotización ni se añade multipunto al paquete.
+
+Referencia OT abreviada de su identificador (ocho caracteres iniciales y cuatro
+finales), rotulada referencia, no correlativo oficial ni número de cotización.
+Sin UUID completos, hashes, CP05, IDs de operadores/paquetes, ni estados ingleses
+visibles. No hay nombre de responsable verificado en PreparedClosing: se indica
+neutralmente personal del taller registrado, sin inventar identidad/cargo.
+Modalidades en español, cálculos existentes preservados; no realizados excluidos
+del total ejecutado. Cantidades conservan hasta dos decimales.
+
+El respaldo documental indica procedencia de registros digitales, no que exista
+un archivo confirmado: el generador también se usa antes del commit de archivo.
+Se conservan avisos de declaración del taller, ausencia de firma, pago y valor tributario.
+
+## Integración e integridad
+
+El adaptador real `server/com/finalArchivePorts.ts` sigue invocando este mismo
+generador. Asset horizontal añadido al paquete offline y a Entry con SHA-256
+pinneado; recursos estáticos y verify_jwt del empaquetador conservados. Browser
+y Edge candidato reciben el mismo wordmark. No se despliega ninguna función.
+Los manifiestos completos existentes siguen recuperando bytes originales sin
+render/upload; no se cambian claves, hashes históricos, contratos ni upsert:false.
+La información técnica sigue en PreparedClosing y manifiestos, solo se omite visualmente.
+
+## Validación consolidada
+
+- Generación real con fixture existente: informe y entrega breves de una página.
+  Caso mixto: cotizado $179, realizado $119; partida no realizada $50 no se suma.
+- Extremos sintéticos: 70 partidas con descripciones largas, observaciones extensas
+  y montos del fixture recalculados coherentemente: informe 12 páginas, entrega 5.
+  Sin truncar las 70 descripciones; A4 y texto seleccionable comprobados.
+- Verificación pdftotext: límites de página, ausencia de identificadores técnicos y
+  ocupación mínima del cuerpo en cada página extensa. Se corrigió un tail casi vacío
+  reservando/distribuyendo las últimas líneas de observación con el bloque final.
+  Retest PASS; ajuste también conserva los breves en una página.
+- 15/15 tests focalizados de finalPackage/closingArchiveCandidate PASS, incluyendo
+  inmutabilidad, originales, integridad e idempotencia del candidato. No equivalen
+  a consultar o restaurar originales productivos en esta tarea.
+- TypeScript y builds privado/público PASS, exclusión de fixtures/privados PASS.
+  Paquete Edge offline generado con hashes de recursos y JWT PASS; runtime alojado
+  no evaluado. No se repiten SEC07, backups ni auditorías generales.
+- Inspección visual de ambos documentos rasterizados, con logo, importes y leyendas.
+
+Comandos: bundle rolldown de `tests/pdfPremiumLab.ts` fuera del repositorio y Node;
+`python3 scripts/verify-premium-pdf.py`; Vitest de los dos módulos citados;
+`node scripts/package-final-archive.mjs /tmp/directorio-nuevo-fuera-repo`.
+Evidencia y PDF ficticios: `/workspace/work/pdf-premium/`. Solo muestras para revisión.
+
+## Pendientes
+
+Aprobación visual del propietario, posterior autorización de publicación/CI y
+paquete Edge desplegable con nueva huella aprobada por procedimiento existente.
+No basta desplegar frontend para cambiar los documentos realmente archivados.
+Falta QA alojada con documentos FUTUROS; nunca regenerar los originales históricos.
+No se acredita firma, entrega física, aceptación ni pago. R2 sigue PAUSADO.
+NO cambios Supabase, Storage, Render, Edge productivas, variables, correo ni datos reales.
+
+## Archivos exactos
+
+- `AGENTS.md`
+- `agent.md`
+- `docs/checkpoints/CHECKPOINT_BT_PDF_UX_01_20261125.md`
+- `public/cp05/wordmark.png`
+- `roadmap.md`
+- `scripts/package-final-archive.mjs`
+- `scripts/verify-premium-pdf.py`
+- `server/com/finalArchiveEntry.ts`
+- `server/com/finalArchivePorts.ts`
+- `src/entrega/finalPdf.ts`
+- `tests/pdfPremiumLab.ts`

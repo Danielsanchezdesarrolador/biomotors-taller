@@ -12,13 +12,14 @@ const out = offlineOutput(checkOnly || !process.argv[2]
 const assets = [
   ['public/cp05/DejaVuSans.ttf', 'DejaVuSans.ttf'],
   ['assets/brand/generated/icon-192.png', 'icon-192.png'],
+  ['public/cp05/wordmark.png', 'wordmark.png'],
   ['public/cp05/FONT-LICENSE.txt', 'FONT-LICENSE.txt']
 ]
 const hashes = {}
 const sha = bytes => createHash('sha256').update(bytes).digest('hex')
 for (const [source] of assets) hashes[source] = sha(await readFile(source))
 const entry = await readFile('server/com/finalArchiveEntry.ts', 'utf8')
-for (const source of assets.slice(0, 2).map(x => x[0]))
+for (const source of assets.slice(0, -1).map(x => x[0]))
   if (!entry.includes(hashes[source])) throw Error('ENTRY_ASSET_HASH_MISMATCH')
 let localBuildDependency = false
 try { createRequire(import.meta.url).resolve('rolldown'); localBuildDependency = true } catch {}

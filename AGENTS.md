@@ -1,3 +1,13 @@
+## BT-PDF-UX-01 — candidato visual local (25/11/2026 Chile)
+
+Informe y constancia premium A4 con texto real, logo oficial y lenguaje legible.
+Generador compartido con archivo definitivo y recursos Edge candidatos adaptados;
+originales/hashes históricos intactos. [Entrega y validación](docs/checkpoints/CHECKPOINT_BT_PDF_UX_01_20261125.md).
+Pendiente aprobación visual y autorización de publicación/QA alojada. R2 PAUSADO.
+NO PUSH/DEPLOY/SQL ni cambios de infraestructura, variables, datos o correos.
+
+---
+
 ## 25/11/2026 — QA humana recorrido R1 y expediente: PASS funcional en una visita
 
 Corrección de estados OT LIVE en `d82e86b0defb55793ce0ecccaf163fc03da913c7`, deploy `dep-dc3cvdu7bikc73crf12g`, CI 5/5 SUCCESS. Propietario confirma «todo funciono» y entrega los tres PDF descargados de COT-000002 R1. Consulta read-only confirma cotización issued, OT ready, una aprobación, una ejecución, una entrega y manifiesto prepared_not_sent de tres documentos. SHA-256 y longitud de cada PDF adjuntado coinciden exactamente con el manifiesto alojado: cotización 75.801 bytes, informe 71.638, entrega 71.919. No se confirma aún recuperación tras nueva sesión, QA física móvil ni piloto Ignacio; OT permanece ready, no cerrada automáticamente. No correo enviado. R2 eliminación aprobación sigue PAUSADO.
