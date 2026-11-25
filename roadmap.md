@@ -1,3 +1,14 @@
+## BT-FLOW-UX-01-R1 — estados OT, publicación autorizada (25/11/2026 Chile)
+
+El propietario autoriza publicar en main `bce30ff6c82840f3be427798fa4999d29849416f`
+y permitir la CI correspondiente, conservando íntegra la corrección existente.
+No se modifica código adicional ni se repiten pruebas locales aprobadas.
+Esta autorización levanta exclusivamente el NO PUSH de esta entrega.
+R2 permanece PAUSADO; NO DEPLOY, NO SQL ni cambios de infraestructura.
+Auto-Deploy OFF. QA humana alojada e idempotencia concurrente CP04 pendientes.
+
+---
+
 ## BT-FLOW-UX-01-R1 — estados OT, candidato local (25/11/2026 Chile)
 
 Integradas transiciones explícitas CP04 con updated_at fresco y relectura, sin

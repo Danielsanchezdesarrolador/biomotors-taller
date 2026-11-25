@@ -402,3 +402,17 @@ y posterior QA/despliegue independientes. No se cambia idempotencia de creación
 
 NO PUSH, NO DEPLOY, NO SQL ni cambios Supabase, Storage, Edge, flags, secretos o
 datos alojados. Auto-Deploy OFF. R2 continúa PAUSADO; no se retira aprobación.
+
+## BT-FLOW-UX-01-R1 — estados OT, publicación autorizada (25/11/2026 Chile)
+
+El propietario autoriza publicar en main `bce30ff6c82840f3be427798fa4999d29849416f`
+y permitir la CI correspondiente, conservando íntegra la corrección existente.
+No se modifica código adicional ni se repiten pruebas locales aprobadas.
+Esta autorización levanta exclusivamente el NO PUSH de esta entrega.
+R2 permanece PAUSADO; NO DEPLOY, NO SQL ni cambios de infraestructura.
+Auto-Deploy OFF. QA humana alojada e idempotencia concurrente CP04 pendientes.
+
+---
+
+Base remota verificada: `8b4b21d926f74cd36cbab753be2039c008ba6ff9`.
+Publicación por avance rápido; las CI se consultan por el SHA publicado.
