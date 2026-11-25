@@ -12,10 +12,11 @@ import { Cp04OrdersView } from './Cp04OrdersView'
 function VerifiedOrderScreen({
   client,
   context,
-  onQuote
+  onQuote, onGuided
 }: {
   client: SupabaseClient
   context: Context
+  onGuided?: (id: string) => void
   onQuote?: (id: string) => void
 }) {
   const [repository, setRepository] = useState<ReturnType<typeof cp04Repository> | null>(null)
@@ -27,13 +28,14 @@ function VerifiedOrderScreen({
     return () => binding.dispose()
   }, [client, context])
   if (!repository) return <p role="status">Preparando órdenes autorizadas…</p>
-  return <Cp04OrdersView repository={repository} context={context} onQuote={onQuote} />
+  return <Cp04OrdersView repository={repository} context={context} onGuided={onGuided} onQuote={onQuote} />
 }
 export function Cp04PrivatePanel({
   controller,
-  onQuote
+  onQuote, onGuided
 }: {
   controller: AuthController
+  onGuided?: (id: string) => void
   onQuote?: (id: string) => void
 }) {
   const [ready, setReady] = useState<{ client: SupabaseClient; context: Context } | null>(null)
@@ -72,7 +74,7 @@ export function Cp04PrivatePanel({
   return (
     <VerifiedOrderScreen
       key={ready.context.userId + '-' + ready.context.workshop.id}
-      onQuote={onQuote}
+      onGuided={onGuided} onQuote={onQuote}
       client={ready.client}
       context={ready.context}
     />

@@ -1,3 +1,15 @@
+## BT-FLOW-UX-01 — candidato local implementado (24/11/2026)
+
+Recorrido privado superpuesto de ocho etapas reutilizando CP03/04/05, LIVE-02 y EXP.
+Corrección JSONB, proyección desde servidor, bloqueos de cambios pendientes y validación
+local consolidada. Limitado al taller QA autorizado, owner/admin, con gates existentes.
+[Resultados, archivos y límites](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md).
+Pendiente QA humana alojada y garantía backend de idempotencia de creación OT entre
+sesiones; no se presume resuelta por una consulta previa. NO PUSH/DEPLOY ni cambios
+en SQL, Storage, Edge, flags, secretos o datos reales. No reabrir SEC07 ni auditorías.
+
+---
+
 ## BT-FLOW-UX-01 — nuevo estándar UX aprobado; implementación local (24/11/2026)
 
 El propietario autoriza comenzar el recorrido guiado superpuesto desde Inicio → Nuevo ingreso de vehículo, manteniendo el fondo visible, R2, ocho pasos, guardado confirmado por etapa y reanudación desde servidor. Prioridad antes de Ignacio y QA final. [Especificación y corrección focalizada](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md). Reutilizar repositorios privados CP03/04/05, LIVE-02 y EXP-01; el asistente src/flow es DEMO y no se conecta al flujo real. Incidente COT-000004: ejecución bloqueada antes de RPC por comparación JSON.stringify sensible al orden de claves JSONB; corregir comparación explícita de subtotal/tax/total, mantener validación estricta y prueba regresiva. Una entrega funcional, una validación local consolidada; sin push funcional ni deploy hasta aprobación, sin SQL/Edge/Storage/gates/correo, sin repetir SEC07. Director realizó investigación y diseño sin Codex; Codex solo implementación local. No declarar recorrido completo hasta prueba humana.

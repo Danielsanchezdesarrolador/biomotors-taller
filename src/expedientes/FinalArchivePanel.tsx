@@ -5,17 +5,18 @@ import type {FinalArchivePort} from './repository'
 import '../clientes/cp03PilotDirectory.css'
 import './finalArchive.css'
 const names={quote:'Cotización emitida',report:'Informe de trabajos',handover:'Constancia de entrega'}
-export function FinalArchivePanel({repository,vehicleId,onBack}:{repository:FinalArchivePort;vehicleId?:string;onBack:()=>void}){
+export function FinalArchivePanel({repository,vehicleId,revisionId,fixedRow,onBack,onPendingChange}:{repository:FinalArchivePort;vehicleId?:string;revisionId?:string;fixedRow?:ArchiveRow;onPendingChange?:(pending:boolean)=>void;onBack:()=>void}){
  const [query,setQuery]=useState(''),[term,setTerm]=useState(''),[rows,setRows]=useState<ArchiveRow[]>([]),[page,setPage]=useState<{at:string;id:string}>()
  const [selected,setSelected]=useState<ArchiveRow|null>(null),[documents,setDocuments]=useState<ArchivedDocument[]>([])
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[refresh,setRefresh]=useState(0)
  const [preview,setPreview]=useState<{url:string;name:string}|null>(null)
+ useEffect(()=>{onPendingChange?.(busy||loading);return()=>onPendingChange?.(false)},[busy,loading,onPendingChange])
  const request=useRef({revisionId:'',id:''}),generation=useRef(0),alive=useRef(true),lock=useRef(false),dialog=useRef<HTMLDialogElement>(null),heading=useId()
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;generation.current++}},[repository])
  useEffect(()=>{let cancelled=false;const seq=++generation.current;setLoading(true);setRows([]);setSelected(null);setDocuments([]);setError('')
-  void repository.list(term,vehicleId,page).then(data=>{if(!cancelled&&alive.current&&seq===generation.current)setRows(data)}).catch(e=>{if(!cancelled&&alive.current&&seq===generation.current)failed(e)}).finally(()=>{if(!cancelled&&alive.current&&seq===generation.current)setLoading(false)})
+  void (fixedRow?repository.documents(fixedRow.revisionId).then(d=>[{...fixedRow,complete:d.complete,canArchive:!d.complete&&fixedRow.canArchive}]):repository.list(term,vehicleId,page)).then(data=>{if(!cancelled&&alive.current&&seq===generation.current)setRows(revisionId?data.filter(r=>r.revisionId===revisionId):data)}).catch(e=>{if(!cancelled&&alive.current&&seq===generation.current)failed(e)}).finally(()=>{if(!cancelled&&alive.current&&seq===generation.current)setLoading(false)})
   return()=>{cancelled=true}
- },[repository,vehicleId,term,page,refresh])
+ },[repository,vehicleId,revisionId,fixedRow,term,page,refresh])
  useEffect(()=>{if(preview)dialog.current?.showModal();else dialog.current?.close();return()=>{if(preview)URL.revokeObjectURL(preview.url)}},[preview])
  function failed(error:unknown){if(error instanceof ArchiveFailure&&error.kind==='denied'){setRows([]);setSelected(null);setDocuments([]);setPreview(null)}setError(archiveMessage(error))}
  async function open(row:ArchiveRow){if(lock.current)return;lock.current=true;setBusy(true);setError('');setDocuments([]);setSelected(row);const seq=++generation.current

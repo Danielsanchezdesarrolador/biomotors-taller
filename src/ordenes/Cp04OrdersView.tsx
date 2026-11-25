@@ -80,11 +80,12 @@ function safeDate(value: string): string {
 export function Cp04OrdersView({
   repository,
   context,
-  onQuote,
+  onQuote, onGuided,
   initialOrderId
 }: {
   repository: Cp04Port
   context: Context
+  onGuided?: (id: string) => void
   onQuote?: (id: string) => void
   initialOrderId?: string
 }) {
@@ -858,6 +859,7 @@ export function Cp04OrdersView({
               {selected.order.cancelled_at?'Cancelada':workStatusLabel[selected.order.status]}
             </span>
           </div>
+          {onGuided&&<button className="cp04-primary" disabled={busy} onClick={()=>onGuided(selected.order.id)}>Continuar recorrido guiado</button>}
           {onQuote && (
             <button
               className="cp04-secondary"

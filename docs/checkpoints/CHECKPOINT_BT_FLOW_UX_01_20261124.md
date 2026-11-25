@@ -38,3 +38,119 @@ COT-000004 R1 emitida, neto 183000, IVA 34770, total 217770. Supabase consulta r
 ## Aceptación y economía de cuota
 
 Una entrega funcional integrada local, no push, no deploy, no SQL/Edge/Storage/flags/correos/secretos ni datos reales. Usar fixtures existentes, tests de etapa/reanudación/aislamiento/roles y error JSONB, una compilación privada con flags pertinentes y validación visual desktop/móvil del overlay. No volver a ejecutar suites históricas de SEC07, backup, migraciones, CI ya aprobada ni repetir pruebas sin causa. Mantener gate público OFF y comprobar que el grafo público no incorpora módulos DEMO/privados. Registrar resultados y bloqueo, si lo hubiera. Después aprobación visual/publicación y QA humana consolidada desde mismo taller ficticio; no declarar aceptación del piloto ni incorporación de Ignacio sin recorrido real, aislamiento y persistencia. Codex solo ejecución local; investigación/documentación ya realizadas por director.
+
+
+## Entrega local de implementación — BT-FLOW-UX-01 (24/11/2026, Chile)
+
+Base sincronizada por fast-forward a `64616a4d9729a6ebfd6cac1012162a833f628a0b`.
+Referencias ZIP inspeccionadas (cliente/vehículo escritorio, ejecución móvil y
+capturas implementadas); no se incorporan imágenes ni datos ilustrativos al sistema.
+
+### Implementado
+
+- CTA privado en Inicio y overlay nativo modal: foco atrapado/restaurado, Escape
+  protegido, fondo inerte/desenfocado, cabecera/progreso/footer fijos, scroll interno,
+  animación 250 ms y reduced-motion. Los cinco paneles siguen independientes.
+- Ocho etapas compuestas con CP03, checklist/autosave CP04, QuotePanel CP05,
+  LIVE-02 por sección y archivo EXP sobre la revisión y OT exactas. No nuevos
+  repositorios, backend ni tablas. Cliente/vehículo se verifican de nuevo al avanzar.
+- Recepción consulta órdenes abiertas antes de insertar. Una respuesta ambigua
+  bloquea la repetición en la instancia; se muestran registros para conciliación.
+- Progreso/reanudación proyectados desde OT, hallazgos confirmados, revisión emitida,
+  approval/execution/handover y manifiesto original; no hay paso persistido en localStorage.
+- Borradores CP03/CP05 mantienen sus mecanismos existentes por usuario/taller.
+  Cambios/operaciones pendientes bloquean salida y avance; el formulario conserva
+  sus propias acciones de guardado explícito. Footer verifica servidor, no simula guardar.
+- Modo cotización guiado fija OT, filtra cotizaciones y separa las etapas LIVE.
+  Entrega permite transición existente a lista, con confirmación; no cierra OT sola.
+- EXP consulta metadatos de revisión exacta aunque quede fuera de la primera página
+  del catálogo. Nunca regenera originales. Éxito final solo tras manifiesto confirmado.
+- Reutiliza gates existentes y limita entrada al taller QA aprobado
+  `c943ad51-6d90-447b-8aa7-68866f69a4bc`, activo, owner/admin; no concede
+  escrituras a otros talleres ni amplía roles. Sesión/taller revocados invalidan bindings.
+- executionPreview compara subtotal/tax/total y exactamente tres claves. La regresión
+  acepta JSONB reordenado y rechaza alteración de IVA/total o claves adicionales.
+
+### Validación realizada y alcance real
+
+- 18/18 pruebas focalizadas: proyección, alcance piloto/rol y suite del componente
+  afectado con regresión JSONB. Sin SEC07, SQL ni suites históricas ajenas.
+- TypeScript y builds privado ON/público OFF satisfactorios; exclusión del grafo
+  privado y fixtures del build público comprobada. Callback/binding documental
+  exacto posterior revisado con typecheck y escenas focalizadas.
+- Chromium 1366/768/390: selección, recepción, vuelta a Inicio, reanudación de OT,
+  bloqueo por ausencia de inspección y ausencia de segunda inserción al reanudar.
+- Escenas 4–8 en Chromium 1366/390: recuperación de etapas desde evidencia sintética,
+  editores reales y expediente completo. Son puertos de prueba en loopback; **no
+  equivalen a ejecutar todas las escrituras en Supabase ni a aceptación humana**.
+- Capturas y logs fuera de Git en `/workspace/work/flow-ux/`; fixture solo en harness.
+  No mocks en producción; datos ficticios no se convierten en registros productivos.
+
+### Límites comprobables y siguiente autorización
+
+- La API CP04 existente `createOrder` inserta sin request_id idempotente. La nueva
+  interfaz bloquea retries ambiguos en su instancia y concilia órdenes abiertas,
+  pero no puede garantizar atomicidad frente a dos sesiones simultáneas o cierre
+  del navegador durante una respuesta incierta. Resolver esa garantía requiere
+  contrato backend autorizado; no se cambió SQL ni se debilitó una guarda.
+- Reanudación desde Inicio cubre el listado reciente existente (40 órdenes), no
+  búsqueda histórica ilimitada. Antes de tener OT solo se promete ficha confirmada
+  y borrador temporal autorizado; las notas LIVE no confirmadas no se declaran guardadas.
+- Falta recorrido humano alojado de ocho etapas con escrituras, nueva sesión,
+  red incierta real y confirmación visual del propietario. No se certifica al piloto
+  ni a Ignacio. Safari/Android físicos y lector de pantalla pendientes.
+- El cambio executionPreview participa en dependencias documentales; cualquier
+  futuro paquete Edge actualizado requiere revisión/autorización separada.
+- **NO PUSH, NO DEPLOY, NO SQL/Storage/Edge/secrets/flags, correos ni datos reales.**
+  Auto-Deploy permanece OFF; no se consultó ni modificó producción.
+
+### Ampliación focalizada del propietario: trabajos simultáneos
+
+Entradas conectadas a Inicio, ficha de vehículo (CP03) y detalle de OT (CP04),
+sin sustituir cotizaciones ni historial existentes. Cada instancia se enlaza al
+vehicle_id/order_id confirmado; Guardar y salir relee servidor y cierra sin exigir
+que toda la etapa esté terminada. Inicio permite comenzar otro trabajo y recuperar
+las visitas pendientes. No hay un único flujo global persistido ni se atribuye
+una etapa de la visita A a la B.
+
+`verify-guided-multivisit.cjs`: PASS con dos vehículos/OT ficticios independientes,
+Guardar/salir, segundo ingreso, dos pendientes, reanudación A y entrada directa
+desde OT. Exactamente dos inserciones en el puerto de prueba. No es una prueba
+de concurrencia transaccional multiusuario ni de Supabase alojado.
+
+Preparación externa exclusivamente contractual (`ReviewedExternalIntake`): una
+futura solicitud debe revisarse/reconciliarse por administrador autorizado y
+materializar IDs de cliente/vehículo existentes antes de abrir el recorrido. El
+review_id, actor, taller y vínculo deberán comprobarse en servidor; un booleano
+`reviewed` enviado por navegador no autoriza nada. No se agregó endpoint, formulario
+público, registro automático, tabla, flag ni funcionalidad de registro externo.
+
+### Archivos exactos del candidato local
+
+- `AGENTS.md`
+- `agent.md`
+- `docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md`
+- `roadmap.md`
+- `scripts/verify-guided-browser.cjs`
+- `scripts/verify-guided-multivisit.cjs`
+- `scripts/verify-guided-scenes.cjs`
+- `scripts/verify-official-bundle.mjs`
+- `src/App.tsx`
+- `src/clientes/Cp03PrivatePanel.tsx`
+- `src/clientes/cp03PilotDirectoryView.tsx`
+- `src/cp05/QuotePanel.tsx`
+- `src/entrega/FlowLive02Panel.tsx`
+- `src/entrega/WorkExecutionDraft.tsx`
+- `src/entrega/executionPreview.test.tsx`
+- `src/entrega/executionPreview.ts`
+- `src/expedientes/FinalArchivePanel.tsx`
+- `src/guided/GuidedWorkspace.tsx`
+- `src/guided/guided.css`
+- `src/guided/progress.test.ts`
+- `src/guided/progress.ts`
+- `src/official/OfficialPanels.tsx`
+- `src/ordenes/Cp04OrdersView.tsx`
+- `src/ordenes/Cp04PrivatePanel.tsx`
+- `tests/harness/GuidedFixture.tsx`
+- `tests/harness/main.tsx`
+- `vite.config.ts`

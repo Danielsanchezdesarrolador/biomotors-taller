@@ -178,9 +178,10 @@ const metrics: Record<
 }
 export function OfficialPanel({
   screen,
-  onNavigate
+  onNavigate, onIntake
 }: {
   screen: Screen
+  onIntake?:()=>void
   onNavigate: (screen: Screen) => void
 }) {
   const [title, subtitle] = headings[screen]
@@ -231,19 +232,16 @@ export function OfficialPanel({
                 <span className="official-eyebrow">Flujo de trabajo</span>
                 <h2>Nuevo ingreso de vehículo</h2>
                 <p>Recepción, orden, inspección, cotización, trabajo e informe hasta la entrega.</p>
-                <UnavailableAction>
-                  <Plus />
-                  Nuevo ingreso de vehículo
-                </UnavailableAction>
-                <small>{unavailableReason}</small>
+                {onIntake?<button className="rp-primary" onClick={onIntake}><Plus/> Nuevo ingreso de vehículo</button>:<UnavailableAction><Plus/> Nuevo ingreso de vehículo</UnavailableAction>}
+                <small>{onIntake?"Recorrido privado · habilitación verificada al abrir":unavailableReason}</small>
               </div>
             </section>
             <EmptyCard
               icon={Wrench}
-              title="Todavía no hay trabajos por continuar"
-              message="Las órdenes de tu taller aparecerán aquí cuando se habilite el registro seguro."
+              title={onIntake?"Continuar trabajos pendientes":"Todavía no hay trabajos por continuar"}
+              message={onIntake?"Consulta las visitas confirmadas y retoma su etapa pendiente real.":"Las órdenes de tu taller aparecerán aquí cuando se habilite el registro seguro."}
             >
-              <button className="rp-secondary" onClick={() => onNavigate('ordenes')}>
+              <button className="rp-secondary" onClick={onIntake??(() => onNavigate('ordenes'))}>
                 Ver órdenes de trabajo
                 <ArrowRight size={17} />
               </button>

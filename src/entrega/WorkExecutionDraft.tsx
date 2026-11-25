@@ -2,7 +2,7 @@
  * Authenticated CP05 view only: operator-assisted PRELIMINARY WORK REVIEW.
  * Does not infer performance, persist choices, send messages, sign, or deliver.
  */
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Quote, Revision } from '../cp05/contracts'
 import { clp } from '../ordenes/orderMoney'
 import { executionPreview, type ExecutionDecision, type ExecutionInput } from './executionPreview'
@@ -11,8 +11,9 @@ import './execution.css'
 export function WorkExecutionDraft({
   revision,
   quote,
-  onRecord
+  onRecord, onPendingChange
 }: {
+  onPendingChange?:(pending:boolean)=>void
   revision: Revision
   quote: Quote
   /** Only supplied by BT-FLOW-LIVE-02 after explicit private rollout approval. */
@@ -23,6 +24,7 @@ export function WorkExecutionDraft({
   const [reviewed, setReviewed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  useEffect(()=>{onPendingChange?.(busy||Object.keys(decisions).length>0||!!pendingExplanation||reviewed);return()=>onPendingChange?.(false)},[busy,decisions,pendingExplanation,reviewed,onPendingChange])
   const lock = useRef(false)
   let review: ReturnType<typeof executionPreview> | null = null
   try {

@@ -47,13 +47,16 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName, draftScope, onVehicleQuotes, renderHistory, refreshRevision = 0
+  repository, role, workshopName, draftScope, onVehicleQuotes, vehicleActionLabel, onGuided, onPendingChange, renderHistory, refreshRevision = 0
 }: {
   refreshRevision?: number
   repository: PilotDirectoryPort
   role: Role
   workshopName: string
   renderHistory?: (vehicle:VehicleRecord,onBack:()=>void)=>import('react').ReactNode
+  onPendingChange?:(pending:boolean)=>void
+  onGuided?:(id:string)=>void
+  vehicleActionLabel?:string
   onVehicleQuotes?: (id:string)=>void
   draftScope?: DraftScope
 }) {
@@ -83,6 +86,7 @@ export function Cp03PilotDirectoryView({
   const [message, setMessage] = useState('')
   const [notice, setNotice] = useState('')
 
+  useEffect(()=>{onPendingChange?.(saving||!!editor);return()=>onPendingChange?.(false)},[saving,editor,onPendingChange])
   // Save each form change to the same-tab temporary draft, not Supabase.
   // React flushes these updates on input changes, before focus can trigger R1
   // revalidation and temporarily unmount this component.
@@ -495,8 +499,9 @@ export function Cp03PilotDirectoryView({
             ))}
             {vehicle && <div className="cp03-vehicle">
               <h3>Vehículo seleccionado</h3>
+              {onGuided&&<button className="cp03-primary" disabled={saving} onClick={()=>onGuided(vehicle.id)}>Iniciar recorrido con este vehículo</button>}
               {renderHistory&&<button className="cp03-secondary" disabled={saving} onClick={()=>setHistoryVehicle(vehicle)}>Ver historial</button>}
-              {onVehicleQuotes && <button className="cp03-secondary" disabled={saving} onClick={()=>onVehicleQuotes(vehicle.id)}>Consultar cotizaciones del vehículo</button>}
+              {onVehicleQuotes && <button className="cp03-secondary" disabled={saving} onClick={()=>onVehicleQuotes(vehicle.id)}>{vehicleActionLabel??'Consultar cotizaciones del vehículo'}</button>}
               <p>{vehicle.make} {vehicle.model} · {vehicle.plate ?? 'Sin patente'}</p>
               <p>{vehicle.model_year ?? 'Año no indicado'} · {vehicle.odometer_km === null ?
                 'Kilometraje no indicado' : vehicle.odometer_km.toLocaleString('es-CL')+' km'}</p>

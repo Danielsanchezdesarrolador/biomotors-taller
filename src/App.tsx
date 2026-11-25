@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import { RealAccess } from './auth/RealAccess'
 import { InviteAcceptancePreview } from './auth/InviteAcceptancePreview'
 import { inviteAcceptancePath, scrubInviteLocation } from './auth/inviteLinkRouting'
@@ -28,14 +28,16 @@ function PrivateWorkshopSettings({controller}:{controller:AuthController}) {
 /** A separately approved private R1 rollout. No public-review route can mount it. */
 function PrivateWorkOrders({
   controller,
-  onQuote
+  onQuote, onGuided
 }: {
   controller: AuthController
+  onGuided?: (id: string) => void
   onQuote?: (id: string) => void
 }) {
   const [Panel, setPanel] = useState<ComponentType<{
     controller: AuthController
-    onQuote?: (id: string) => void
+    onGuided?: (id: string) => void
+  onQuote?: (id: string) => void
   }> | null>(null)
   const [failed, setFailed] = useState(false)
   useEffect(() => {
@@ -54,7 +56,7 @@ function PrivateWorkOrders({
   }, [controller])
   if (failed) return <p role="alert">No se pudo cargar el módulo de órdenes. Revisa el acceso.</p>
   return Panel ? (
-    <Panel controller={controller} onQuote={onQuote} />
+    <Panel controller={controller} onGuided={onGuided} onQuote={onQuote} />
   ) : (
     <p role="status">Preparando órdenes autorizadas…</p>
   )
@@ -92,14 +94,16 @@ function PrivateQuotes(props: {
 }
 function PrivateClientDirectory({
   controller,
-  onVehicleQuotes
+  onVehicleQuotes, onGuided
 }: {
   controller: AuthController
+  onGuided?: (id: string) => void
   onVehicleQuotes?: (id: string) => void
 }) {
   const [Panel, setPanel] = useState<ComponentType<{
     controller: AuthController
-    onVehicleQuotes?: (id: string) => void
+    onGuided?: (id: string) => void
+  onVehicleQuotes?: (id: string) => void
   }> | null>(null)
   const [failed, setFailed] = useState(false)
   useEffect(() => {
@@ -119,11 +123,13 @@ function PrivateClientDirectory({
   if (failed)
     return <p role="alert">No se pudo cargar el directorio privado. Reintenta el acceso.</p>
   return Panel ? (
-    <Panel controller={controller} onVehicleQuotes={onVehicleQuotes} />
+    <Panel controller={controller} onGuided={onGuided} onVehicleQuotes={onVehicleQuotes} />
   ) : (
     <p role="status">Preparando clientes y vehículos del taller autorizado…</p>
   )
 }
+const GuidedWorkspace = import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED==='true' && import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED==='true' && import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' ? lazy(()=>import('./guided/GuidedWorkspace')) : null
+
 export function OfficialWorkspaceView({
   review = false,
   onReviewExit,
@@ -140,6 +146,8 @@ export function OfficialWorkspaceView({
   review?: boolean
   onReviewExit?: () => void
 }) {
+  const [guidedStart,setGuidedStart]=useState<{vehicleId?:string;orderId?:string}>({})
+  const [guidedOpen,setGuidedOpen]=useState(false)
   const privateSession = !!session && !review
   const navigation = useWorkspaceNavigation(privateSession)
   const {screen,navigate:navigateScreen} = navigation
@@ -152,6 +160,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
       session?.directoryController &&
       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
         <PrivateWorkOrders
+          onGuided={GuidedWorkspace?(id)=>{setGuidedStart({orderId:id});setGuidedOpen(true)}:undefined}
           controller={session.directoryController}
           onQuote={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -179,6 +188,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
         session?.directoryController &&
         import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ? (
         <PrivateClientDirectory
+          onGuided={GuidedWorkspace?(id)=>{setGuidedStart({vehicleId:id});setGuidedOpen(true)}:undefined}
           controller={session.directoryController}
           onVehicleQuotes={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -191,7 +201,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
           }
         />
       ) : (
-        <OfficialPanel screen={screen} onNavigate={navigateScreen} />
+        <OfficialPanel screen={screen} onNavigate={navigateScreen} onIntake={!review&&session?.directoryController&&GuidedWorkspace?()=>{setGuidedStart({});setGuidedOpen(true)}:undefined} />
       )
   )
   const privateOrders =
@@ -260,6 +270,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
           {renderPanel(section)}
         </div>)}
       </div>
+      {guidedOpen&&GuidedWorkspace&&session?.directoryController&&<Suspense fallback={<p role="status">Abriendo recorrido…</p>}><GuidedWorkspace start={guidedStart} controller={session.directoryController} onClose={()=>setGuidedOpen(false)}/></Suspense>}
     </AppShell>
   )
 }

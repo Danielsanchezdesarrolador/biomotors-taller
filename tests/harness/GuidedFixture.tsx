@@ -1,0 +1,33 @@
+/** Isolated synthetic UI harness; never imported by the production graph. */
+import {useEffect,useState} from 'react'
+import {Workspace} from '../../src/guided/GuidedWorkspace'
+import {finalArchiveFixture} from '../fixtures/finalArchive'
+import type {Context} from '../../src/auth/controller'
+const wid='c943ad51-6d90-447b-8aa7-68866f69a4bc',id=(n:number)=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0')
+const customer={id:id(2),workshop_id:wid,full_name:'Cliente ficticio UX',archived_at:null,email:null,mobile_e164:null,notes:null,created_at:'2026-11-24',updated_at:'2026-11-24'}
+const vehicle={id:id(3),workshop_id:wid,customer_id:customer.id,plate:'QA1234',make:'Vehículo',model:'Ficticio',model_year:2023,odometer_km:12000,archived_at:null,created_at:'2026-11-24',updated_at:'2026-11-24'}
+let creates=0
+const saved=new Map<string,typeof record>()
+const secondVehicle={...vehicle,id:id(9),plate:"QA5678"}
+const record={order:{id:id(4),workshop_id:wid,vehicle_id:vehicle.id,status:'received',complaint:'Recepción ficticia',updated_at:'2026-11-24'},vehicle}
+const context={userId:id(1),role:'owner',workshop:{id:wid,name:'Taller ficticio · entorno local',status:'active'}} as Context
+const p={directory:{recentCustomers:async()=>[customer],search:async()=>({customers:[customer],vehicles:[vehicle]}),getCustomer:async()=>customer,getVehicle:async(id:string)=>id===secondVehicle.id?secondVehicle:vehicle,vehiclesForCustomer:async()=>[vehicle,secondVehicle]},orders:{recentOrders:async()=>[...saved.values()],getOrder:async(id:string)=>saved.get(id)??null,findingsForOrder:async()=>[],createOrder:async(input:{vehicle_id:string;complaint:string})=>{creates++;const v=input.vehicle_id===secondVehicle.id?secondVehicle:vehicle;const row={vehicle:v,order:{...record.order,id:id(10+creates),vehicle_id:v.id,complaint:input.complaint}};saved.set(row.order.id,row);return row.order}},quotes:{forOrder:async()=>null},live:{},archive:{}} as unknown as Parameters<typeof Workspace>[0]['p']
+function BasicFixture(){const [open,setOpen]=useState(true),[start,setStart]=useState<{vehicleId?:string;orderId?:string}>({});return <><h1>Inicio · fixture sin Supabase</h1><button onClick={()=>{setStart({});setOpen(true)}}>Abrir recorrido</button><button onClick={()=>{setStart({vehicleId:secondVehicle.id});setOpen(true)}}>Abrir desde segundo vehículo</button><button onClick={()=>{setStart({orderId:[...saved.keys()][0]});setOpen(true)}}>Abrir desde OT</button><output data-testid="create-count">{creates}</output>{open&&<Workspace start={start} client={{} as never} context={context} p={p} onClose={()=>setOpen(false)}/>}</>}
+
+export default function GuidedFixture(){
+ const scene=Number(new URLSearchParams(location.search).get('stage')??0)
+ const [fixture,setFixture]=useState<Parameters<typeof Workspace>[0]|null>(null)
+ useEffect(()=>{if(scene<3)return;void finalArchiveFixture().then(f=>{
+ const snapshot=JSON.parse(JSON.stringify(f.snapshot).replaceAll('00000000-0000-4000-8000-000000000001',wid))
+ const q={...snapshot.quote,status:scene===3?'draft':'issued'}
+ const r=snapshot.revision
+ const h={approval:scene>4?snapshot.evidence.approvals[0]:null,execution:scene>5?snapshot.evidence.executions[0]:null,handover:scene>6?snapshot.evidence.deliveries[0]:null}
+ const client={auth:{getUser:async()=>({data:{user:{id:context.userId,email_confirmed_at:'2026-11-24'}},error:null})},from:(table:string)=>{const builder={select:()=>builder,eq:()=>builder,maybeSingle:async()=>({data:table==='bt_flow_quote_approvals'?h.approval:table==='bt_flow_execution_reports'?h.execution:h.handover,error:null})};return builder}}
+ const row={...record,order:{...record.order,status:'ready'}}
+ const documents={complete:scene===8,documents:['quote','report','handover'].map(kind=>({kind,fileName:'Documento-ficticio-'+kind+'.pdf',sha256:'a'.repeat(64),byteLength:123,bucket:kind==='quote'?'cp05-quote-documents':'bt-closing-documents',path:'fixture-only'}))}
+ const archiveRow={workshopId:wid,revisionId:r.id,quoteId:q.id,orderId:q.order_id,customerId:q.customer_id,vehicleId:q.vehicle_id,revision:1,number:q.number,issuedAt:r.issued_at,customerName:'Cliente ficticio UX',plate:'QA1234',total:179,complete:documents.complete,canArchive:!documents.complete,deliveryId:snapshot.evidence.deliveries[0].id}
+ const pp={...p,orders:{...p.orders,recentOrders:async()=>[row],getOrder:async()=>row,findingsForOrder:async()=>[{result:'ok',note:'Inspección ficticia',category:'General'}]},quotes:{...p.quotes,list:async()=>[q], orders:async()=>[row],forOrder:async()=>q,load:async()=>({quote:q,source:{...r.payload,order:row.order},items:r.payload.items,revisions:scene===3?[]:[r],deliveries:[],events:[]}),documents:{enabled:false,emailEnabled:false}},live:{history:async()=>h},archive:{...p.archive,documents:async()=>documents,list:async()=>[{...archiveRow,complete:documents.complete,canArchive:!documents.complete}],archive:async()=>{documents.complete=true}}} as unknown as Parameters<typeof Workspace>[0]['p']
+ setFixture({client:client as never,context,p:pp,onClose:()=>{}})
+ })},[scene])
+ return scene<3?<BasicFixture/>:fixture?<Workspace {...fixture}/>:<p>Preparando datos ficticios…</p>
+}

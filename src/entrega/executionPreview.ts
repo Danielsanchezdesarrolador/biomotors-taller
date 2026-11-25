@@ -92,7 +92,9 @@ export function executionPreview(
     return { item, decision }
   })
   if (Object.keys(input.decisions).some(id => !ids.has(id))) return fail('invalid')
-  if (JSON.stringify(totals(quotedNet)) !== JSON.stringify(p.totals)) return fail('identity')
+  const expected = totals(quotedNet)
+  if (Object.keys(p.totals).length !== 3 || expected.subtotal !== p.totals.subtotal ||
+      expected.tax !== p.totals.tax || expected.total !== p.totals.total) return fail('identity')
   const performed = rows.filter(r => r.decision === 'performed')
   const pending = rows.filter(r => r.decision === 'not_performed')
   const unreviewed = rows.filter(r => r.decision === 'unreviewed')

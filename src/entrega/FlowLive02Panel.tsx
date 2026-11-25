@@ -41,13 +41,16 @@ const errorText = 'No se confirmó la operación. Consulta el historial antes de
 type Port = ReturnType<typeof flowLiveCandidate>
 type Records = Awaited<ReturnType<Port['history']>>
 export function FlowLive02Panel({
-  client, context, quote, revision
+  client, context, quote, revision, stage, onPendingChange
 }: {
+  onPendingChange?:(pending:boolean)=>void
+  stage?: 4 | 5 | 6
   client: SupabaseClient
   context: Context
   quote: Quote
   revision: Revision
 }) {
+  const [executionPending,setExecutionPending]=useState(false)
   const [port, setPort] = useState<Port | null>(null)
   const [records, setRecords] = useState<Records | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,6 +64,7 @@ export function FlowLive02Panel({
   const [handoverMethod, setHandoverMethod] = useState<HandoverMethod>('in_person')
   const [handoverNote, setHandoverNote] = useState('')
   const [handoverConfirmed, setHandoverConfirmed] = useState(false)
+  useEffect(()=>{onPendingChange?.(busy||loading||executionPending||(!records?.approval&&!!approvalNote)||(!records?.handover&&!!handoverNote));return()=>onPendingChange?.(false)},[busy,loading,executionPending,records,approvalNote,handoverNote,onPendingChange])
   const lock = useRef(false)
   const requestIds = useRef<Record<string, { key: string; id: string }>>({})
   const alive = useRef(true)
@@ -174,7 +178,7 @@ export function FlowLive02Panel({
       {message && <p role="status">{message}</p>}
       {records && !loading && (
         <>
-          <h4>1. Autorización de cotización · declaración del operador</h4>
+          {(!stage || stage===4) && <div><h4>1. Autorización de cotización · declaración del operador</h4>
           {records.approval ? (
             <p>Declaración registrada ({records.approval.method}). Nota guardada:
               {' '}{records.approval.note}. Asociada a esta revisión; no es una firma verificada.</p>
@@ -203,7 +207,8 @@ export function FlowLive02Panel({
               </button>
             </div>
           )}
-          <h4>2. Trabajos seleccionados como realizados · registro del operador</h4>
+          </div>}
+          {(!stage || stage===5) && <div><h4>2. Trabajos seleccionados como realizados · registro del operador</h4>
           {records.execution ? (
             <div className="cp05-execution-totals">
               <p>Registro confirmado por el servidor. No es comprobante de pago ni garantía de ejecución.</p>
@@ -222,11 +227,12 @@ export function FlowLive02Panel({
                 <p>Trabajos pendientes: {records.execution.pending_note}</p>}
             </div>
           ) : records.approval ? (
-            <WorkExecutionDraft revision={revision} quote={quote} onRecord={recordExecution} />
+            <WorkExecutionDraft onPendingChange={setExecutionPending} revision={revision} quote={quote} onRecord={recordExecution} />
           ) : (
             <p>Primero registra la declaración de aprobación de esta revisión.</p>
           )}
-          <h4>3. Constancia de entrega · declaración del operador</h4>
+          </div>}
+          {(!stage || stage===6) && <div><h4>3. Constancia de entrega · declaración del operador</h4>
           {records.handover ? (
             <p>Constancia registrada por el operador ({records.handover.handover_method}).
               Nota guardada: {records.handover.handover_note}.
@@ -269,6 +275,7 @@ export function FlowLive02Panel({
           ) : (
             <p>Registra primero el informe de ejecución. El servidor también exigirá que la OT esté lista para entregar.</p>
           )}
+          </div>}
           <small>Si se cambia la cotización, sus nuevos documentos requieren otra revisión;
             los registros históricos originales se conservan sin sobrescritura.
             Ninguna acción de esta pantalla envía correos ni cierra automáticamente la OT.</small>

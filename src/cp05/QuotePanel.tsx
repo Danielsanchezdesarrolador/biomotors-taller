@@ -51,6 +51,8 @@ export function QuotePanel({
   context,
   initialVehicleId,
   initialOrderId,
+  guided = false,
+  onPendingChange,
   isActive = true,
   onBack
 }: {
@@ -59,6 +61,8 @@ export function QuotePanel({
   context: Context
   initialVehicleId?: string
   initialOrderId?: string
+  onPendingChange?:(pending:boolean)=>void
+  guided?: boolean
   isActive?: boolean
   onBack: () => void
 }) {
@@ -95,6 +99,7 @@ export function QuotePanel({
   const dirty =
     !!bundle &&
     JSON.stringify(draftPayload(draft)) !== JSON.stringify(draftPayload(draftFrom(bundle)))
+  useEffect(()=>{onPendingChange?.(busy||dirty||!!editing||!!readPending);return()=>onPendingChange?.(false)},[busy,dirty,editing,readPending,onPendingChange])
   const totals = calculateTotals(draft.items)
   const visibleQuotes=workspaceQuotes(quotes,bundle?.quote??null)
   const issuedRevision=bundle?.revisions.find(r=>r.revision===bundle.quote.issued_revision)
@@ -579,7 +584,7 @@ export function QuotePanel({
           <h2>{initialVehicleId ? 'Cotizaciones del vehículo' : 'Documentos recientes'}</h2>
           <p>Hasta 50 cotizaciones autorizadas.</p>
           {!busy && !visibleQuotes.length && <p>Sin cotizaciones registradas.</p>}
-          {visibleQuotes.map((q) => (
+          {visibleQuotes.filter(q=>!guided||q.order_id===initialOrderId).map((q) => (
             <button
               disabled={busy || !!readPending}
               key={q.id}
@@ -592,7 +597,7 @@ export function QuotePanel({
           ))}
           <label>
             Orden CP04
-            <select disabled={busy||ordersRefreshing||!!ordersError} aria-busy={ordersRefreshing} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
+            <select disabled={guided||busy||ordersRefreshing||!!ordersError} aria-busy={ordersRefreshing} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
               <option value="">Selecciona una orden</option>
               {orderId&&!orders.some(o=>o.order.id===orderId)&&<option value={orderId}>OT seleccionada · {orderId.slice(0,8)} · fuera del listado reciente</option>}
               {orders.map((o) => (
@@ -706,7 +711,7 @@ export function QuotePanel({
                       </button>
                       {executionOpen && (
                         import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
-                          ? <FlowLive02Loader key={revision.id}
+                          ? !guided && <FlowLive02Loader key={revision.id}
                               client={privateClient} context={context}
                               revision={revision} quote={bundle.quote} />
                           : <WorkExecutionDraft key={revision.id}

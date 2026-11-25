@@ -155,3 +155,10 @@ describe('CP03-CP04-CP05 -> informe de ejecución preliminar, SIN persistir ni e
     expect(pdf.getPageCount()).toBeGreaterThan(4)
   })
 })
+
+ it('accepts JSONB key order while rejecting changed amounts and extra fields', () => {
+   const reordered = {...revision, payload:{...snapshot,totals:JSON.parse('{"tax":29,"total":179,"subtotal":150}')}}
+   expect(executionPreview(reordered,quote,input).quoted.total).toBe(179)
+   for(const totals of [{subtotal:150,tax:30,total:179},{subtotal:150,tax:29,total:180},{subtotal:150,tax:29,total:179,extra:0}])
+     expect(()=>executionPreview({...reordered,payload:{...snapshot,totals}},quote,input)).toThrow()
+ })

@@ -117,6 +117,7 @@ assert.ok(
       id.endsWith('.css') ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
+      (finalArchiveEnabled && flowLiveEnabled && /src\/guided\/(?:GuidedWorkspace|progress)\.(?:tsx|ts)$/.test(id)) ||
       (finalArchiveEnabled && /src\/expedientes\//.test(id)) ||
       (recordsEnabled && /src\/records\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||

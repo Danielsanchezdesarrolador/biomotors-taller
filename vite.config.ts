@@ -58,6 +58,7 @@ export default defineConfig(({ mode }) => {
             (id) =>
               /\.test\./.test(id) ||
               (!id.endsWith('.css') &&
+                !(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && env.VITE_BT_FLOW_LIVE_02_ENABLED==='true' && /\/src\/guided\/(?:GuidedWorkspace|progress)\.(?:tsx|ts)$/.test(id)) &&
                 !(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && /\/src\/expedientes\//.test(id)) &&
                 !(env.VITE_BT_RECORDS_PRIVATE_ENABLED==='true' && /\/src\/records\//.test(id)) &&
                 !(env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && /\/src\/workshops\//.test(id)) &&

@@ -18,7 +18,7 @@ const FinalArchiveLoader = import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED === 'tr
 
 type Binding = ReturnType<typeof cp03PilotAccessBinding>
 
-function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { binding: Binding; client:SupabaseClient; onAccessLost:()=>void; onVehicleQuotes?: (id:string)=>void }) {
+function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes, onGuided }: { binding: Binding; client:SupabaseClient; onAccessLost:()=>void; onGuided?: (id:string)=>void; onVehicleQuotes?: (id:string)=>void }) {
   const [administration, setAdministration] = useState(false)
   const [archiveOpen,setArchiveOpen]=useState(false)
   const [directoryRevision, setDirectoryRevision] = useState(0)
@@ -37,12 +37,12 @@ function BoundDirectory({ binding, client, onAccessLost, onVehicleQuotes }: { bi
     <div hidden={showAdministration||showArchive} inert={showAdministration||showArchive}>
     <Cp03PilotDirectoryView refreshRevision={directoryRevision} key={context.userId+'-'+context.workshop.id+'-'+context.role}
     renderHistory={import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true'?(vehicle,onBack)=><Cp06HistoryLoader key={vehicle.id} client={client} context={context} vehicleId={vehicle.id} onBack={onBack} onAccessLost={onAccessLost}/>:undefined}
-    onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
+    onGuided={onGuided} onVehicleQuotes={onVehicleQuotes} repository={repository} role={context.role} workshopName={context.workshop.name}
     draftScope={{userId:context.userId,workshopId:context.workshop.id}}/>
     </div></div>
 }
-function AuthClientDirectory({ controller, client, onVehicleQuotes }: {
-  controller: AuthController; client: SupabaseClient; onVehicleQuotes?: (id:string)=>void
+function AuthClientDirectory({ controller, client, onVehicleQuotes, onGuided }: {
+  controller: AuthController; client: SupabaseClient; onGuided?: (id:string)=>void; onVehicleQuotes?: (id:string)=>void
 }) {
   const [binding, setBinding] = useState<Binding|null>(null)
   useEffect(() => {
@@ -50,10 +50,10 @@ function AuthClientDirectory({ controller, client, onVehicleQuotes }: {
     setBinding(created)
     return () => { created.dispose() }
   }, [controller,client])
-  return binding ? <BoundDirectory binding={binding} client={client} onAccessLost={()=>{void controller.validate()}} onVehicleQuotes={onVehicleQuotes}/> :
+  return binding ? <BoundDirectory binding={binding} client={client} onAccessLost={()=>{void controller.validate()}} onGuided={onGuided} onVehicleQuotes={onVehicleQuotes}/> :
     <p role="status">Validando la sesión del taller…</p>
 }
-export function Cp03PrivatePanel({ controller, onVehicleQuotes }: { controller: AuthController; onVehicleQuotes?: (id:string)=>void }) {
+export function Cp03PrivatePanel({ controller, onVehicleQuotes, onGuided }: { controller: AuthController; onGuided?: (id:string)=>void; onVehicleQuotes?: (id:string)=>void }) {
   const [client,setClient] = useState<SupabaseClient|null>(null)
   const [error,setError] = useState(false)
   useEffect(() => {
@@ -69,6 +69,6 @@ export function Cp03PrivatePanel({ controller, onVehicleQuotes }: { controller: 
     return ()=>{active=false}
   },[controller])
   if (error) return <p role="alert">Acceso al directorio no disponible. Cierra sesión y vuelve a verificar.</p>
-  return client ? <AuthClientDirectory controller={controller} client={client} onVehicleQuotes={onVehicleQuotes}/> :
+  return client ? <AuthClientDirectory controller={controller} client={client} onGuided={onGuided} onVehicleQuotes={onVehicleQuotes}/> :
     <p role="status">Abriendo fichas del taller autorizado…</p>
 }
