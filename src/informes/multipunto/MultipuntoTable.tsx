@@ -8,17 +8,18 @@ import {
 import type { ReactNode } from 'react'
 type Change = (id: string, state: Result) => void
 export function MultipuntoTable({
-  items,
+  items, categoryId,
   onChange,
   renderAfterRow
 }: {
+  categoryId?:string
   items: InspectionItem[]
   onChange?: Change
   renderAfterRow?: (item: InspectionItem) => ReactNode
 }) {
   return (
     <div className="mp-tables">
-      {categories.map((category) => (
+      {categories.filter(c=>!categoryId||c.id===categoryId).map((category) => (
         <section
           className={'mp-category mp-category-' + category.id}
           id={'mp-' + category.id}

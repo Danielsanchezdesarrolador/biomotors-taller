@@ -188,3 +188,112 @@ Render LIVE 3e3fef594a13c8e90fc8851c45bf1b3ba1bd410e, deploy dep-dc3363u7bikc73b
 3. Aprobación compacta con propósito claro: registrar autorización real del presupuesto antes de ejecutar, cotización/revisión/total, medio, nota con ejemplo y declaración humana obligatoria. Mostrar solo lo necesario; aviso breve de que no es firma digital, detalles secundarios desplegables. Consulta automática del historial y opción discreta de actualizar. No eliminar validaciones, no simular aprobación ni marcar check por defecto.
 4. CTA inferior debe orquestar la acción pertinente de cada paso por interfaz/callback explícito, reutilizando validaciones y métodos existentes (no DOM automation, no escrituras directas). En aprobación, guardar y continuar solo tras formulario válido, confirmación humana, RPC existente con requestId estable y relectura positiva; si ya registrada avanzar sin reescribir. En cotización preservar emisión/revisión explícita, en ejecución/entrega preservar confirmaciones, en archivo acción irreversible explícita. Guardar y salir no significa completar etapa; guardar lo permitido o explicar campos pendientes; distinguir falta de requisito (mensaje accionable), operación ambigua (conciliar lectura), denegación y fallo real. No reintentar RPC a ciegas. Deshabilitar avance solo cuando proceda y mostrar razón junto a CTA. Si no hay respuesta confirmada no avanzar. Conservar aislamiento y límites QA.
 5. Pruebas focalizadas: aprobar con datos válidos llama una sola RPC, avance después de relectura, requisito faltante no genérico, respuesta ambigua no duplicada, aprobación ya registrada sin escritura, vuelta activa azul, recepción confirmada y selección cruzada protegida, layout 1366x768/1280x720/768/390 sin overflow de shell y formularios accesibles. Reutilizar harness y mock ports; TypeScript/build público y privado una vez según alcance; prueba humana posterior sobre COT-000004 y continuidad hasta EXP. No repetir SEC07, backups ni CI aprobada. Sin nuevas tablas, permisos, flags, correo o infra. NO PUSH funcional ni deploy. Registrar resultados aquí, no abrir microetapas.
+
+## R1 — entrega local de corrección integrada (24/11/2026, Chile)
+
+Base `d17ece4e731db1209eb587981513f88a5dfb22d4`, sincronizada por fast-forward.
+Diagnóstico del director utilizado sin repetir investigación alojada. Estado:
+candidato local para aprobación del propietario; QA humana productiva todavía pendiente.
+
+### Correcciones implementadas
+
+- Shell con selectores directos de cabecera/nav/footer: ya no cambian los headers
+  y controles de módulos anidados. Modo guiado específico para las ocho etapas,
+  sin los banners, acciones de gestión y UUID repetidos de los paneles independientes.
+- Cliente/vehículo compactos, edición reutilizada y listas paginadas. Guardar desde
+  el footer utiliza las mismas validaciones y operaciones del formulario. La selección
+  se limpia al cambiar de ficha y se verifica contra servidor antes de crear OT.
+- Recepción existente recupera motivo y kilometraje confirmados. Volver al primer
+  paso de una OT existente muestra su cliente/vehículo vinculados y no permite
+  seleccionar otro vehículo sobre esa OT. Otro ingreso requiere otra visita.
+- Multipunto mantiene cola/autoguardado; muestra un sistema y página a la vez,
+  con página más corta cuando hay observaciones técnicas. Cotización conserva
+  editor, IVA, condiciones e historial; paginación por altura y emisión explícita.
+- Aprobación breve: propósito, COT/revisión/total/estado, medio sin selección
+  predeterminada en guiado, nota ejemplificada y confirmación humana obligatoria.
+  Historial consultado automáticamente, actualización discreta y aviso de no firma.
+- Callback explícito `registerSave` entre footer y formularios CP03/CP05/LIVE/EXP.
+  Footer valida, llama operaciones existentes, espera y relee antes de avanzar.
+  No automatiza DOM ni introduce un repositorio paralelo. La emisión y el archivo
+  conservan confirmación explícita; los checks de operador nunca se marcan solos.
+- LIVE concilia historial antes de escribir, conserva requestId estable, verifica
+  el registro después de la respuesta y distingue validación, denegación, conflicto,
+  desconexión y respuesta no confirmada. Una operación existente no se vuelve a escribir.
+- Ejecución y entrega compactas reutilizan declaraciones y validaciones existentes.
+  Guardar/salir no equivale a completar etapa. EXP abre la revisión exacta y conserva
+  los tres originales; confirma manifiesto antes de mostrar éxito o repetir creación.
+- Activo azul tiene prioridad sobre confirmado; otros confirmados verdes con check,
+  pendientes grises. Retroceder no borra evidencia. Feedback y transiciones 250 ms,
+  reduced-motion; footer permanece accesible, safe areas y visualViewport para teclado.
+- Controles táctiles guiados de 44 px. Registro público, correo y roles no ampliados.
+
+### Validación consolidada: resultados reales
+
+- TypeScript y builds privado ON/público OFF PASS, con comprobación de exclusión
+  de módulos privados/fixtures y guardas existentes de bundle.
+- Vitest focalizado: **4 PASS, 14 SKIP** (proyección/alcance QA y regresión JSONB).
+  No se relanzan suites históricas ajenas al cambio.
+- Chromium: ocho etapas en **1366×768, 1280×720, 1920×1080, 360×800, 390×844,
+  430×932, 768×1024 y 800×430**. Sin overflow horizontal de shell/contenido;
+  en escritorios sin overflow vertical del shell, main ni área central con los
+  fixtures probados. Móvil permite scroll interno necesario, con footer visible.
+- Regresión funcional de aprobación: campos faltantes muestran mensajes concretos
+  y cero RPC; formulario válido escribe una sola vez y avanza tras relectura.
+  Volver conserva activo azul; aprobación ya existente avanza sin otra escritura.
+- Respuesta perdida después del commit: siguiente intento concilia lectura y
+  avanza sin otra RPC. Denegación y respuesta sin registro persistido no avanzan.
+- Recepción guardada restaurada, selección cruzada bloqueada y dos visitas
+  independientes reanudadas con exactamente dos inserciones en el fixture.
+- EXP: footer confirma archivo una vez y un manifiesto existente no repite creación.
+- Observaciones técnicas extensas/paginadas: comprobación focalizada en 1280×720
+  y 390×844; campo accesible, cambio de página y escritorio sin desborde.
+- Capturas de ocho etapas en 1366 y 390, revisadas en escritorio/móvil; validación
+  de altura mínima de botones móviles. Evidencia y logs en `/workspace/work/flow-r1/`.
+
+Durante la validación se corrigieron únicamente incidencias del cambio: cascada
+heredada en toolbar/tablas, densidad en altura 720 y carrera entre apertura automática
+de EXP y finalización de su consulta. La apertura ahora espera el fin de loading;
+no se retiran guardas de generación/vida. Retests focalizados de esos casos PASS.
+
+Comandos reproducibles: `node scripts/verify-guided-r1.cjs` y
+`node scripts/verify-guided-multivisit.cjs` con el harness local ya disponible;
+`BT_R1_FUNCTIONAL_ONLY`, `BT_R1_CAPTURE_ONLY` y `BT_R1_TOUCH_ONLY` limitan
+subconjuntos para repetir solo lo afectado. No ejecutan servicios alojados.
+
+### Límites y autorización pendiente
+
+Pruebas con puertos/cliente ficticios en loopback: no certifican el recorrido
+productivo COT-000004 ni descargas/Storage reales. Falta aprobación visual R1,
+publicación autorizada/CI y QA humana alojada por el propietario. No se probaron
+iPhone/Android físicos ni lectores de pantalla; las dimensiones son emulaciones
+Chromium. Teclado se adapta mediante visualViewport, pendiente prueba física.
+
+Idempotencia concurrente CP04 sigue pendiente: la consulta previa y el bloqueo
+local no garantizan atomicidad entre sesiones. No se modifica ese backend.
+Las listas/detalles largos se paginan o se consultan por páginas o scroll interno en móvil; no se
+promete que un volumen arbitrario de datos o un comprobante SHA expandido quepa
+en una pantalla. Se preservan borradores temporales existentes y progreso confirmado.
+
+**SOLO LOCAL: NO PUSH/DEPLOY, NO SQL, Supabase, RLS, Storage, Edge, variables,
+secretos, correos ni datos productivos. Auto-Deploy OFF. JSONB, aislamiento y QA
+owner/admin conservados. SEC07 y auditorías anteriores no se reabren.**
+
+### Archivos exactos de R1
+
+- `AGENTS.md`
+- `agent.md`
+- `docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md`
+- `roadmap.md`
+- `scripts/verify-guided-multivisit.cjs`
+- `scripts/verify-guided-r1.cjs`
+- `src/clientes/cp03PilotDirectoryView.tsx`
+- `src/cp05/QuotePanel.tsx`
+- `src/entrega/FlowLive02Panel.tsx`
+- `src/entrega/WorkExecutionDraft.tsx`
+- `src/expedientes/FinalArchivePanel.tsx`
+- `src/guided/GuidedWorkspace.tsx`
+- `src/guided/guided.css`
+- `src/informes/multipunto/MultipuntoTable.tsx`
+- `src/informes/trabajos/WorkItemsEditor.tsx`
+- `src/ordenes/Cp04MultipuntoChecklist.tsx`
+- `tests/harness/GuidedFixture.tsx`

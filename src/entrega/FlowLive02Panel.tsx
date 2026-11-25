@@ -17,10 +17,10 @@ import {
 import type { ExecutionInput } from './executionPreview'
 
 const methods: [ApprovalMethod, string][] = [
-  ['in_person', 'Declaración presencial del operador'],
-  ['phone', 'Confirmación telefónica anotada'],
-  ['written', 'Confirmación escrita declarada'],
-  ['other', 'Otro medio declarado']
+  ['in_person', 'Presencial'],
+  ['phone', 'Teléfono'],
+  ['written', 'Escrito'],
+  ['other', 'Otro']
 ]
 const handoverMethods: [HandoverMethod, string][] = [
   ['in_person', 'Entrega presencial declarada'],
@@ -41,8 +41,9 @@ const errorText = 'No se confirmó la operación. Consulta el historial antes de
 type Port = ReturnType<typeof flowLiveCandidate>
 type Records = Awaited<ReturnType<Port['history']>>
 export function FlowLive02Panel({
-  client, context, quote, revision, stage, onPendingChange
+  client, context, quote, revision, stage, onPendingChange, registerSave
 }: {
+  registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
   stage?: 4 | 5 | 6
   client: SupabaseClient
@@ -57,7 +58,7 @@ export function FlowLive02Panel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [approvalMethod, setApprovalMethod] = useState<ApprovalMethod>('in_person')
+  const [approvalMethod, setApprovalMethod] = useState<ApprovalMethod|''>(stage?'':'in_person')
   const [approvalNote, setApprovalNote] = useState('')
   const [approvalConfirmed, setApprovalConfirmed] = useState(false)
   const [checklist, setChecklist] = useState<HandoverChecklist>(emptyChecklist)
@@ -65,6 +66,9 @@ export function FlowLive02Panel({
   const [handoverNote, setHandoverNote] = useState('')
   const [handoverConfirmed, setHandoverConfirmed] = useState(false)
   useEffect(()=>{onPendingChange?.(busy||loading||executionPending||(!records?.approval&&!!approvalNote)||(!records?.handover&&!!handoverNote));return()=>onPendingChange?.(false)},[busy,loading,executionPending,records,approvalNote,handoverNote,onPendingChange])
+  const executionSave=useRef<((exit:boolean)=>Promise<boolean>)|null>(null)
+  const bindExecution=useRef((save:((exit:boolean)=>Promise<boolean>)|null)=>{executionSave.current=save}).current
+  useEffect(()=>{registerSave?.(saveStage);return()=>registerSave?.(null)})
   const lock = useRef(false)
   const requestIds = useRef<Record<string, { key: string; id: string }>>({})
   const alive = useRef(true)
@@ -119,7 +123,7 @@ export function FlowLive02Panel({
     onConfirmed: (item: T) => void,
     confirmationMessage: string
   ) {
-    if (!port || lock.current || !records) return
+    if (!port || lock.current || !records) return false
     const version = generation.current
     lock.current = true
     setBusy(true)
@@ -128,10 +132,16 @@ export function FlowLive02Panel({
     try {
       const response = await task()
       if (!current(version)) return
+      const stored=await port.history(quote,revision)
+      if(!current(version))return false
+      if(![stored.approval,stored.execution,stored.handover].some(item=>item?.id===(response as {id:string}).id))throw Error('unconfirmed')
       onConfirmed(response)
+      setRecords(stored)
       setMessage(confirmationMessage)
-    } catch {
-      if (current(version)) setError(errorText)
+      return true
+    } catch (e) {
+      if (current(version)) setError(liveError(e))
+      return false
     } finally {
       if (current(version)) {
         lock.current = false
@@ -139,8 +149,34 @@ export function FlowLive02Panel({
       }
     }
   }
+  function liveError(e:unknown){const kind=(e as {kind?:string})?.kind;return kind==='denied'?'Tu sesión o rol no permite guardar esta operación.':kind==='conflict'?'El registro cambió. Actualiza el historial antes de continuar.':kind==='disabled'?'Esta operación no está habilitada para el taller.':kind==='invalid'?'Revisa los campos y las confirmaciones requeridas.':navigator.onLine===false?'Sin conexión. Conserva esta pantalla y consulta el registro al reconectar.':errorText}
+  async function saveStage(exit:boolean):Promise<boolean>{
+    if(!port||loading||busy){setError('Espera a que termine la consulta o el guardado.');return false}
+    try{
+      const saved=await port.history(quote,revision);setRecords(saved)
+      if(stage===4){
+        if(saved.approval)return true
+        if(exit&&!approvalNote&&!approvalConfirmed)return true
+        if(!approvalMethod){setError('Selecciona un medio de aprobación.');return false}
+        if(approvalNote.trim().length<12){setError('Completa las observaciones requeridas (mínimo 12 caracteres).');return false}
+        if(!approvalConfirmed){setError('Confirma la autorización del cliente.');return false}
+        return (await recordApproval())===true
+      }
+      if(stage===5){if(saved.execution)return true;return await executionSave.current?.(exit)??false}
+      if(stage===6){
+        if(saved.handover)return true
+        if(exit&&!handoverNote&&!handoverConfirmed&&!Object.values(checklist).some(Boolean))return true
+        if(!Object.values(checklist).every(Boolean)){setError('Completa las cuatro verificaciones de entrega.');return false}
+        if(handoverNote.trim().length<12){setError('Describe la entrega (mínimo 12 caracteres).');return false}
+        if(!handoverConfirmed){setError('Confirma explícitamente la entrega del vehículo.');return false}
+        if(!saved.execution){setError('Registra primero los trabajos realizados.');return false}
+        return (await recordHandover(saved.execution))===true
+      }
+      return false
+    }catch(e){setError(liveError(e));return false}
+  }
   const recordApproval = () => write(
-    () => port!.approval(quote, revision, approvalMethod, approvalNote,
+    () => port!.approval(quote, revision, approvalMethod as ApprovalMethod, approvalNote,
       requestId('approval', { revision: revision.id, method: approvalMethod, note: approvalNote })),
     a => setRecords(old => old ? { ...old, approval: a } : old),
     'Declaración de aprobación registrada por el servidor. No constituye firma verificada.'
@@ -160,38 +196,28 @@ export function FlowLive02Panel({
     'Constancia declarada por operador guardada. No se verificó firma ni recepción del cliente.'
   )
   return (
-    <section className="dashboard-card cp05-execution" aria-label="Registro persistente de trabajos y entrega">
-      <h3>Registro técnico y entrega · acceso privado</h3>
-      <p className="cp05-notice">
-        Declaraciones registradas por personal del taller, NO firma del cliente,
-        comprobante tributario, correo enviado ni prueba independiente de entrega.
-        Requiere servidor autorizado, revisión emitida e identidad verificada.
-      </p>
-      <p>COT-{String(quote.number).padStart(6,'0')} · Revisión {revision.revision}
-        {' '}· OT {quote.order_id}</p>
-      <button type="button" className="cp04-secondary" disabled={loading || busy}
-        onClick={() => void reload()}>
-        Consultar registros guardados
-      </button>
+    <section className={"dashboard-card cp05-execution"+(stage?" flow-guided":"")} data-stage={stage} aria-label="Registro persistente de trabajos y entrega">
+      {stage?<div className="flow-guided-summary"><p>{stage===4?'Registra la autorización del presupuesto antes de comenzar los trabajos.':stage===5?'Decide qué trabajos se realizaron y declara los pendientes.':'Verifica los antecedentes y declara la entrega.'}</p><strong>COT-{String(quote.number).padStart(6,'0')} · R{revision.revision} · {clp(revision.payload.totals.total)}{stage===4&&<span className="flow-approval-state"> · {loading?'Consultando':records?.approval?'Aprobación registrada':'Pendiente de aprobación'}</span>}</strong><small>Declaración del operador; no constituye firma digital ni pago.</small><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Actualizar historial</button></div>:<><h3>Registro técnico y entrega · acceso privado</h3><p className="cp05-notice">Declaraciones del operador, no firma del cliente ni comprobante de pago.</p><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Consultar registros guardados</button></>}
       {loading && <p role="status">Consultando registros autorizados…</p>}
       {error && <p role="alert" className="cp04-error">{error}</p>}
       {message && <p role="status">{message}</p>}
       {records && !loading && (
         <>
-          {(!stage || stage===4) && <div><h4>1. Autorización de cotización · declaración del operador</h4>
+          {(!stage || stage===4) && <div>{!stage&&<h4>1. Autorización de cotización · declaración del operador</h4>}
           {records.approval ? (
             <p>Declaración registrada ({records.approval.method}). Nota guardada:
               {' '}{records.approval.note}. Asociada a esta revisión; no es una firma verificada.</p>
           ) : (
             <div className="cp05-execution-form">
-              <label>Medio declarado de aprobación
-                <select value={approvalMethod} disabled={busy}
+              <label>Medio de aprobación
+                <select aria-label={stage?"Medio de aprobación":undefined} value={approvalMethod} disabled={busy}
                   onChange={e => { setApprovalMethod(e.target.value as ApprovalMethod); setApprovalConfirmed(false) }}>
+                  {stage&&<option value="">Selecciona un medio</option>}
                   {methods.map(([value,label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </label>
-              <label>Descripción concreta de la autorización (mínimo 12 caracteres)
-                <textarea value={approvalNote} maxLength={1000} rows={3} disabled={busy}
+              <label>Observaciones de la autorización (mínimo 12 caracteres)
+                <textarea placeholder="Ej.: Cliente autoriza el presupuesto por teléfono el día de hoy." value={approvalNote} maxLength={1000} rows={3} disabled={busy}
                   onChange={e => { setApprovalNote(e.target.value); setApprovalConfirmed(false) }} />
               </label>
               <label className="cp05-execution-confirm">
@@ -208,7 +234,7 @@ export function FlowLive02Panel({
             </div>
           )}
           </div>}
-          {(!stage || stage===5) && <div><h4>2. Trabajos seleccionados como realizados · registro del operador</h4>
+          {(!stage || stage===5) && <div>{!stage&&<h4>2. Trabajos seleccionados como realizados · registro del operador</h4>}
           {records.execution ? (
             <div className="cp05-execution-totals">
               <p>Registro confirmado por el servidor. No es comprobante de pago ni garantía de ejecución.</p>
@@ -227,12 +253,12 @@ export function FlowLive02Panel({
                 <p>Trabajos pendientes: {records.execution.pending_note}</p>}
             </div>
           ) : records.approval ? (
-            <WorkExecutionDraft onPendingChange={setExecutionPending} revision={revision} quote={quote} onRecord={recordExecution} />
+            <WorkExecutionDraft guided={!!stage} registerSave={bindExecution} onPendingChange={setExecutionPending} revision={revision} quote={quote} onRecord={recordExecution} />
           ) : (
             <p>Primero registra la declaración de aprobación de esta revisión.</p>
           )}
           </div>}
-          {(!stage || stage===6) && <div><h4>3. Constancia de entrega · declaración del operador</h4>
+          {(!stage || stage===6) && <div>{!stage&&<h4>3. Constancia de entrega · declaración del operador</h4>}
           {records.handover ? (
             <p>Constancia registrada por el operador ({records.handover.handover_method}).
               Nota guardada: {records.handover.handover_note}.
@@ -276,9 +302,9 @@ export function FlowLive02Panel({
             <p>Registra primero el informe de ejecución. El servidor también exigirá que la OT esté lista para entregar.</p>
           )}
           </div>}
-          <small>Si se cambia la cotización, sus nuevos documentos requieren otra revisión;
+          {!stage&&<small>Si se cambia la cotización, sus nuevos documentos requieren otra revisión;
             los registros históricos originales se conservan sin sobrescritura.
-            Ninguna acción de esta pantalla envía correos ni cierra automáticamente la OT.</small>
+            Ninguna acción de esta pantalla envía correos ni cierra automáticamente la OT.</small>}
         </>
       )}
     </section>

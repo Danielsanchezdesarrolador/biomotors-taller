@@ -1,3 +1,15 @@
+## BT-FLOW-UX-01-R1 — candidato local corregido (24/11/2026 Chile)
+
+Ocho etapas compactas, footer conectado al guardado real y relectura, aprobación
+accionable, indicador activo azul prioritario y recepción/vínculos recuperados.
+[Entrega R1, archivos, validación y límites](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md).
+Pruebas locales proporcionales; pendiente aceptación visual R1 y QA humana alojada.
+La idempotencia concurrente CP04 continúa pendiente, sin cambios de backend.
+NO PUSH/DEPLOY ni SQL, Supabase, Storage, Edge, flags, secretos, correo o datos reales.
+Auto-Deploy OFF; conservar main, roles/QA y corrección JSONB. No repetir auditorías.
+
+---
+
 
 ## BT-FLOW-UX-01-R1 — correcciones de QA humana alojada (24/11/2026 Chile)
 

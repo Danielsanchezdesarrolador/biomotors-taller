@@ -11,13 +11,15 @@ import './execution.css'
 export function WorkExecutionDraft({
   revision,
   quote,
-  onRecord, onPendingChange
+  onRecord, onPendingChange, guided=false, registerSave
 }: {
+  guided?:boolean
+  registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
   revision: Revision
   quote: Quote
   /** Only supplied by BT-FLOW-LIVE-02 after explicit private rollout approval. */
-  onRecord?: (input: ExecutionInput) => Promise<void>
+  onRecord?: (input: ExecutionInput) => Promise<void|boolean>
 }) {
   const [decisions, setDecisions] = useState<Record<string, ExecutionDecision>>({})
   const [pendingExplanation, setPendingExplanation] = useState('')
@@ -25,6 +27,8 @@ export function WorkExecutionDraft({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   useEffect(()=>{onPendingChange?.(busy||Object.keys(decisions).length>0||!!pendingExplanation||reviewed);return()=>onPendingChange?.(false)},[busy,decisions,pendingExplanation,reviewed,onPendingChange])
+  const [page,setPage]=useState(0)
+  useEffect(()=>{registerSave?.(async exit=>{if(exit&&!Object.keys(decisions).length&&!pendingExplanation&&!reviewed)return true;if(!review?.readyForDraftPdf){setError(review?.missing.join(' ')||'Revisa las partidas y confirma los trabajos.');return false}return await record()??false});return()=>registerSave?.(null)})
   const lock = useRef(false)
   let review: ReturnType<typeof executionPreview> | null = null
   try {
@@ -46,11 +50,12 @@ export function WorkExecutionDraft({
     setBusy(true)
     setError('')
     try {
-      await onRecord({
+      const saved=await onRecord({
         decisions: { ...decisions },
         pendingExplanation: review.pendingExplanation,
         operatorReviewed: reviewed
       })
+      return saved!==false
     } catch {
       setError('No se pudo confirmar el registro en el servidor. Consulta los registros antes de repetirlo.')
     } finally {
@@ -81,7 +86,7 @@ export function WorkExecutionDraft({
     }
   }
   return (
-    <section className="dashboard-card cp05-execution" aria-label="Informe técnico preliminar">
+    <section className={"dashboard-card cp05-execution"+(guided?" execution-guided":"")} aria-label="Informe técnico preliminar">
       <h3>Trabajos realizados · revisión preliminar</h3>
       <p role="status" className="cp05-notice">
         {onRecord
@@ -94,7 +99,7 @@ export function WorkExecutionDraft({
         <>
           <p>Basado exclusivamente en COT-{String(revision.payload.quote.number).padStart(6,'0')}
             {' '}· revisión emitida {revision.revision}. No incluye cambios posteriores del borrador.</p>
-          {review.rows.map(({ item, decision }) => (
+          {(guided?review.rows.slice(page*2,page*2+2):review.rows).map(({ item, decision }) => (
             <div key={item.id} className="cp05-execution-line">
               <div>
                 <strong>{item.type} · {item.description}</strong>
@@ -117,6 +122,7 @@ export function WorkExecutionDraft({
               </div>
             </div>
           ))}
+          {guided&&review.rows.length>2&&<div className="guided-pagination"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Anteriores</button><span>Página {page+1} de {Math.ceil(review.rows.length/2)}</span><button disabled={(page+1)*2>=review.rows.length} onClick={()=>setPage(p=>p+1)}>Siguientes</button></div>}
           <div className="cp05-execution-totals">
             <p>Cotizado total: <strong>{clp(review.quoted.total)}</strong></p>
             <p>Marcado realizado · neto: <strong>{clp(review.executed.subtotal)}</strong></p>
@@ -137,7 +143,7 @@ export function WorkExecutionDraft({
             Revisé personalmente las marcas y los importes para este borrador interno.
             No significa aceptación ni entrega del cliente.
           </label>
-          {review.missing.length > 0 && (
+          {review.missing.length > 0 && (!guided||!!error) && (
             <ul className="cp05-execution-missing">
               {review.missing.map(item => <li key={item}>{item}</li>)}
             </ul>

@@ -47,8 +47,12 @@ function formNumber(value: string): number | null {
   return num
 }
 export function Cp03PilotDirectoryView({
-  repository, role, workshopName, draftScope, onVehicleQuotes, vehicleActionLabel, onGuided, onPendingChange, renderHistory, refreshRevision = 0
+  repository, role, workshopName, draftScope, guided=false, initialVehicleId, registerSave, onSelectedVehicle, onVehicleQuotes, vehicleActionLabel, onGuided, onPendingChange, renderHistory, refreshRevision = 0
 }: {
+  onSelectedVehicle?:(id:string)=>void
+  guided?:boolean
+  initialVehicleId?:string
+  registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   refreshRevision?: number
   repository: PilotDirectoryPort
   role: Role
@@ -60,6 +64,9 @@ export function Cp03PilotDirectoryView({
   onVehicleQuotes?: (id:string)=>void
   draftScope?: DraftScope
 }) {
+  const [page,setPage]=useState(0)
+  useEffect(()=>{if(initialVehicleId)void loadVehicle(initialVehicleId)},[initialVehicleId])
+  useEffect(()=>{registerSave?.(async exit=>{if(saving||loading)return false;if(editor){if(editor.includes('customer')){const saved=await saveCustomer();if(!saved)return false;if(exit)return true;if(!vehicle||vehicle.customer_id!==saved.id){setNotice('Cliente guardado. Selecciona o registra su vehículo para continuar.');return false}return true}return !!(await saveVehicle())}return true});return()=>registerSave?.(null)})
   const [historyVehicle,setHistoryVehicle]=useState<VehicleRecord|null>(null)
   const writable = role === 'owner' || role === 'admin' || role === 'reception'
   const [initialDraft] = useState(() => writable && draftScope ? readCp03Draft(draftScope) : null)
@@ -77,6 +84,7 @@ export function Cp03PilotDirectoryView({
   const [customer, setCustomer] = useState<CustomerRecord | null>(null)
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
   const [vehicle, setVehicle] = useState<VehicleRecord | null>(null)
+  useEffect(()=>{onSelectedVehicle?.(vehicle&&customer&&vehicle.customer_id===customer.id?vehicle.id:'')},[vehicle,customer,onSelectedVehicle])
   const [editor, setEditor] = useState<Editor>(initialDraft?.editor === 'new-customer' ? 'new-customer' : null)
   const [customerDraft, setCustomerDraft] = useState<CustomerInput>(() => initialDraft?.customerDraft ?? {...emptyCustomer})
   const [vehicleDraft, setVehicleDraft] = useState<VehicleDraft>(() => initialDraft?.vehicleDraft ?? {...emptyVehicle})
@@ -260,7 +268,7 @@ export function Cp03PilotDirectoryView({
     }
   }
   async function search(event: FormEvent) {
-    event.preventDefault()
+    event?.preventDefault()
     const index = ++requestId.current
     setMessage('')
     setNotice('')
@@ -310,8 +318,8 @@ export function Cp03PilotDirectoryView({
         odometer_km:vehicle.odometer_km === null ? '' : String(vehicle.odometer_km)}
       : {...emptyVehicle})
   }
-  async function saveCustomer(event: FormEvent) {
-    event.preventDefault()
+  async function saveCustomer(event?: FormEvent) {
+    event?.preventDefault()
     if (!writable || savingLock.current) return
     if (editor === 'new-customer' && !confirmed) {
       setMessage('Confirma que tienes autorización para registrar los datos del cliente.')
@@ -342,7 +350,7 @@ export function Cp03PilotDirectoryView({
           if (!active.current) return
           setCustomer(saved)
           setVehicles([])
-          setVehicle(null)
+          if(guided&&vehicle?.customer_id===saved.id){setVehicle(vehicle);onSelectedVehicle?.(vehicle.id)}else{setVehicle(null);onSelectedVehicle?.('')}
           setMatches(null)
           setEditor(null)
           setNotice('Ficha confirmada por el servidor.')
@@ -361,6 +369,7 @@ export function Cp03PilotDirectoryView({
         setNotice(
           'Ficha guardada en el servidor. No pudimos actualizar todos los listados: vuelve a buscar la ficha, pero no la registres nuevamente.'
         )
+      return outcome.saved
     } catch (error) {
       if (active.current) {
         if (error instanceof DirectoryFailure && error.kind === 'conflict' &&
@@ -373,8 +382,8 @@ export function Cp03PilotDirectoryView({
       if (active.current) setSaving(false)
     }
   }
-  async function saveVehicle(event: FormEvent) {
-    event.preventDefault()
+  async function saveVehicle(event?: FormEvent) {
+    event?.preventDefault()
     if (!writable || savingLock.current || !customer) return
     savingLock.current = true
     setSaving(true)
@@ -394,6 +403,7 @@ export function Cp03PilotDirectoryView({
           setDraftRestored(false)
           if (!active.current) return
           setVehicle(saved)
+          onSelectedVehicle?.(saved.id)
           setEditor(null)
           setNotice('Vehículo confirmado por el servidor.')
         },
@@ -408,6 +418,7 @@ export function Cp03PilotDirectoryView({
         setNotice(
           'Vehículo guardado en el servidor. No pudimos actualizar la lista: abre nuevamente la ficha, pero no registres otro vehículo.'
         )
+      return outcome.saved
     } catch(error) {
       if (active.current) setMessage(cp03Message(error))
     } finally {
@@ -418,7 +429,7 @@ export function Cp03PilotDirectoryView({
 
   if(historyVehicle&&renderHistory)return <>{renderHistory(historyVehicle,()=>setHistoryVehicle(null))}</>
   return (
-    <div className="official-panel cp03-pilot">
+    <div className={"official-panel cp03-pilot"+(guided?" cp03-guided"+(editor?" cp03-editor-open":""):"")}>
       <section className="welcome-area">
         <div className="welcome-head">
           <div>
@@ -455,19 +466,20 @@ export function Cp03PilotDirectoryView({
         {loading ? 'Consultando las fichas autorizadas…' : notice || (matches ? 'Búsqueda completada.' : 'Selecciona una ficha para continuar.')}
       </p>
       {message && <p className="cp03-error" role="alert">{message}</p>}
+      {guided&&Math.max((matches?.customers??recent).length,matches?.vehicles.length??0,vehicles.length)>3&&<div className="guided-pagination"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Anteriores</button><span>Página {page+1}</span><button disabled={(page+1)*3>=Math.max((matches?.customers??recent).length,matches?.vehicles.length??0,vehicles.length)} onClick={()=>setPage(p=>p+1)}>Siguientes</button></div>}
       <div className="cp03-layout">
         <section className="dashboard-card cp03-panel" aria-label="Listado de clientes">
           <h2><UsersRound size={20}/> {matches ? 'Resultados de la búsqueda' : 'Clientes recientes'}</h2>
           {matches?.customers.length === 0 && matches.vehicles.length === 0 &&
             <p>No encontramos coincidencias. Comprueba el dato antes de registrar una nueva ficha.</p>}
-          {(matches?.customers ?? recent).map(row=>(
+          {(guided?(matches?.customers??recent).slice(page*3,page*3+3):(matches?.customers??recent)).map(row=>(
             <button type="button" key={row.id} className="cp03-result"
               disabled={loading || saving} onClick={()=>void loadCustomer(row.id)}>
               <strong>{row.full_name}</strong>
               <small>{row.mobile_e164 ?? 'Sin teléfono'} · {row.email ?? 'Sin correo'}</small>
             </button>
           ))}
-          {matches?.vehicles.map(row=>(
+          {(guided?matches?.vehicles.slice(page*3,page*3+3):matches?.vehicles)?.map(row=>(
             <button type="button" key={row.id} className="cp03-result"
               disabled={loading || saving} onClick={()=>void loadVehicle(row.id)}>
               <strong><CarFront size={17}/> {row.plate ?? 'Sin patente'}</strong>
@@ -489,7 +501,7 @@ export function Cp03PilotDirectoryView({
             </div>
             <h3>Vehículos vinculados</h3>
             {vehicles.length===0 && <p>No hay vehículos vinculados a esta ficha.</p>}
-            {vehicles.map(row=>(
+            {(guided?vehicles.slice(page*3,page*3+3):vehicles).map(row=>(
               <button type="button" className="cp03-result" key={row.id}
                 onClick={()=>{setVehicle(row);setEditor(null);setNotice('')}} disabled={saving}>
                 <strong>{row.plate ?? 'Sin patente'} · {row.make} {row.model}</strong>

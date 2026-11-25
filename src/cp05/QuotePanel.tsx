@@ -51,6 +51,7 @@ export function QuotePanel({
   context,
   initialVehicleId,
   initialOrderId,
+  registerSave,
   guided = false,
   onPendingChange,
   isActive = true,
@@ -61,6 +62,7 @@ export function QuotePanel({
   context: Context
   initialVehicleId?: string
   initialOrderId?: string
+  registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
   guided?: boolean
   isActive?: boolean
@@ -338,6 +340,7 @@ export function QuotePanel({
                 ? 'Cotización anulada; las revisiones y archivos anteriores se conservan.'
                 : 'Nuevo borrador abierto; la revisión emitida permanece intacta.'
         )
+      return next
     } catch (e) {
       if (active.current) failure(e)
     } finally {
@@ -405,16 +408,17 @@ export function QuotePanel({
       if (active.current) setBusy(false)
     }
   }
-  async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision, review?: QuoteEmailReview) {
-    if (!bundle || lock.current || !canWrite || readPending) return
-    if (kind === 'issue' && dirty) {
+  async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision, review?: QuoteEmailReview, confirmedSource?:Bundle) {
+    const source=confirmedSource??bundle
+    if (!source || lock.current || !canWrite || readPending) return
+    if (kind === 'issue' && dirty && !confirmedSource) {
       setError('Guarda y revisa el borrador antes de emitir.')
       return
     }
     if (kind === 'send' && (!revision || !review ||
-        revision.revision !== bundle.quote.issued_revision ||
+        revision.revision !== source.quote.issued_revision ||
         !repository.documents.emailEnabled ||
-        bundle.quote.status === 'voided')) return
+        source.quote.status === 'voided')) return
     if (kind !== 'send' && !window.confirm(
       kind === 'issue' ? '¿Emitir y archivar esta revisión inmutable?'
         : '¿Cancelar la reserva pendiente sin emitir?'
@@ -424,16 +428,16 @@ export function QuotePanel({
     setError('')
     setMessage('')
     try {
-      const requestId = documentOperation(context, bundle.quote)
+      const requestId = documentOperation(context, source.quote)
       let status = ''
       if (kind === 'issue') {
-        await repository.documents.issue(bundle.quote, requestId)
+        await repository.documents.issue(source.quote, requestId)
         status = 'Revisión emitida y archivo privado verificado.'
       } else if (kind === 'cancel') {
-        await repository.documents.cancel(bundle.quote, requestId)
+        await repository.documents.cancel(source.quote, requestId)
         status = 'Reserva cancelada; borrador disponible para revisión.'
       } else if (revision) {
-        const attempts = bundle.deliveries.filter((d) => d.revision_id === revision.id)
+        const attempts = source.deliveries.filter((d) => d.revision_id === revision.id)
         const attempt = 1 + Math.max(0, ...attempts.map((d) => d.attempt))
         const result = await repository.documents.send(revision, attempt, review!)
         status =
@@ -444,16 +448,17 @@ export function QuotePanel({
               : 'Envío aceptado por el proveedor; no acredita lectura ni entrega en la bandeja.'
       }
       let next:Bundle
-      try { next=await repository.load(bundle.quote.id) }
+      try { next=await repository.load(source.quote.id) }
       catch(error){
         if(error instanceof QuoteFailure&&error.kind==='denied')throw error
-        throw new QuoteReadPending(bundle.quote.id,bundle.quote.version+(kind==='issue'?1:0))
+        throw new QuoteReadPending(source.quote.id,source.quote.version+(kind==='issue'?1:0))
       }
       if (!active.current) return
       setBundle(next)
       setDraft(draftFrom(next))
       if(kind==='issue')setTab('trabajos')
       setMessage(status)
+      return next
     } catch (e) {
       if (active.current) failure(e)
     } finally {
@@ -461,8 +466,20 @@ export function QuotePanel({
       if (active.current) setBusy(false)
     }
   }
+  useEffect(()=>{registerSave?.(async exit=>{
+    if(busy||readPending||editing){setError('Termina la partida abierta o recupera la operación pendiente antes de continuar.');return false}
+    let current=bundle
+    if(!current){current=await action('create')??null;if(!current)return false}
+    else if(dirty){current=await action('save')??null;if(!current)return false}
+    if(exit)return true
+    if(!current.items.length||current.quote.terms.trim().length<3){setError('Añade las partidas y completa las condiciones antes de emitir.');return false}
+    if(current.quote.status==='issued'&&!current.quote.issue_pending)return true
+    if(!repository.documents.enabled){setError('La emisión archivada no está habilitada. Puedes guardar el borrador y salir.');return false}
+    const issued=await documentAction('issue',undefined,undefined,current)
+    return issued?.quote.status==='issued'&&!issued.quote.issue_pending
+  });return()=>registerSave?.(null)})
   return (
-    <section ref={workspace} className="cp05-panel wt-panel" aria-label="Cotizaciones privadas CP05">
+    <section ref={workspace} className={"cp05-panel wt-panel"+(guided?" quote-guided":"")} aria-label="Cotizaciones privadas CP05">
       <header className="cp05-heading">
         <button className="cp04-secondary" onClick={onBack}>
           <ArrowLeft size={17} /> Volver al panel anterior
@@ -656,7 +673,7 @@ export function QuotePanel({
               )}
 
             <div role="tabpanel" id={workspaceId+'-panel-trabajos'} aria-labelledby={workspaceId+'-tab-trabajos'} hidden={tab!=='trabajos'} className={'cp05-tab-content '+(!editable?'cp05-readonly':'')} tabIndex={0}>
-              <WorkItemsTable
+              {(!guided||!editing)&&<WorkItemsTable guided={guided}
                 document={{ mode: 'quote', items: draft.items }}
                 onEdit={(v) => setEditing(v || true)}
                 onDelete={(v) =>
@@ -664,7 +681,7 @@ export function QuotePanel({
                 }
                 onPerformed={() => {}}
                 readOnly={!editable || busy}
-              />
+              />}
               {editing && editable && !busy && (
                 <div className="dashboard-card cp05-item" role="region" aria-label="Editar partida">
                   <WorkItemForm

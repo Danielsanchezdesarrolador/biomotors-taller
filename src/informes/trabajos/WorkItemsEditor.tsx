@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pencil, Plus, Trash2, Wrench } from 'lucide-react'
 import { calculateTotals } from '../../ordenes/orderMoney'
 import { currency, itemTypes, validateItem, type WorkItem } from './workItemCore'
 export function WorkItemsTable({
-  document: d,
+  document: d, guided=false,
   onEdit,
   onDelete,
   onPerformed,
   onTemplate,
   readOnly = false
 }: {
+  guided?:boolean
   document: { mode: 'quote' | 'work'; items: WorkItem[] }
   onEdit: (item?: WorkItem) => void
   onDelete: (item: WorkItem) => void
@@ -17,15 +18,20 @@ export function WorkItemsTable({
   onTemplate?: () => void
   readOnly?: boolean
 }) {
+  const [page,setPage]=useState(0)
+  const [short,setShort]=useState(false)
+  useEffect(()=>{if(!guided)return;const media=window.matchMedia('(max-height:740px)');const changed=()=>{setShort(media.matches);setPage(0)};changed();media.addEventListener('change',changed);return()=>media.removeEventListener('change',changed)},[guided])
+  const pageSize=short?1:2
   return (
     <section className="dashboard-card wt-items wt-card">
       <header>
         <h2>
           <Wrench />
-          {d.mode === 'quote'
+          {guided?'Partidas':d.mode === 'quote'
             ? 'Detalle de los trabajos a realizar'
             : 'Detalle de trabajos · Confirmación del operador'}
         </h2>
+        {guided&&<button disabled={readOnly} className="rp-inline" onClick={()=>onEdit()}><Plus/> Añadir partida</button>}
         {onTemplate && (
           <button className="rp-secondary" onClick={onTemplate}>
             Cargar plantilla
@@ -38,6 +44,7 @@ export function WorkItemsTable({
           al informe; conservarlos aquí no acredita ejecución.
         </p>
       )}
+      {guided&&d.items.length>pageSize&&<div className="guided-pagination"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Anteriores</button><span>Página {page+1} de {Math.ceil(d.items.length/pageSize)}</span><button disabled={(page+1)*pageSize>=d.items.length} onClick={()=>setPage(p=>p+1)}>Siguientes</button></div>}
       <table>
         <thead>
           <tr>
@@ -54,7 +61,7 @@ export function WorkItemsTable({
           </tr>
         </thead>
         <tbody>
-          {d.items.map((item, i) => (
+          {(guided?d.items.slice(page*pageSize,page*pageSize+pageSize):d.items).map((item, i) => (
             <tr key={item.id} data-item={item.id}>
               <td data-label="N.º">{i + 1}</td>
               <td data-label="Descripción">{item.description}</td>
@@ -114,9 +121,9 @@ export function WorkItemsTable({
       {!d.items.length && (
         <p className="wt-empty">Sin ítems. Agrega un repuesto, insumo, servicio o mano de obra.</p>
       )}
-      <button disabled={readOnly} className="rp-inline" onClick={() => onEdit()}>
+      {!guided&&<button disabled={readOnly} className="rp-inline" onClick={() => onEdit()}>
         <Plus /> Agregar otro ítem
-      </button>
+      </button>}
     </section>
   )
 }

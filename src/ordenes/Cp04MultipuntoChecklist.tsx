@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useSyncExternalStore} from 'react'
+import {useEffect,useMemo,useState,useSyncExternalStore} from 'react'
 import {ArrowLeft,ClipboardCheck,RefreshCcw,WifiOff} from 'lucide-react'
 import {MultipuntoTable} from '../informes/multipunto/MultipuntoTable'
 import type {Finding} from './cp04Contracts'
@@ -10,8 +10,9 @@ import {latestForMultipuntoItem} from './cp04Multipunto'
 import '../informes/multipunto/multipunto.css'
 
 export function Cp04MultipuntoChecklist({
- findings,repository,scope,onSaved,onBack,onQueueChange,disabled,readOnly,plate
+ guided=false,findings,repository,scope,onSaved,onBack,onQueueChange,disabled,readOnly,plate
 }:{
+ guided?:boolean
  findings:readonly Finding[]
  repository:ConstructorParameters<typeof Cp04AutosaveQueue>[0]['port']
  scope:AutosaveScope
@@ -22,6 +23,8 @@ export function Cp04MultipuntoChecklist({
  readOnly:boolean
  plate:string|null
 }){
+ const [category,setCategory]=useState('general')
+ const [part,setPart]=useState(0)
  const queue=useMemo(()=>new Cp04AutosaveQueue({
    scope,initialFindings:findings,port:repository
  }),[scope.userId,scope.workshopId,scope.orderId,scope.vehicleId,repository])
@@ -44,6 +47,8 @@ export function Cp04MultipuntoChecklist({
  },[queue,readOnly])
  useEffect(()=>{queue.setFindings(findings)},[queue,findings])
  const items=queue.getCurrentItems()
+ const groupItems=items.filter(i=>i.category===category)
+ const pageSize=groupItems.some(i=>i.state==='attention'||i.state==='immediate')?1:3
  const unconfirmed=Object.values(entries).filter(v=>v.phase!=='saved').length
  const errors=Object.values(entries).filter(v=>v.phase==='error').length
  const temporaryRecoveryAvailable=queue.hasTemporaryRecovery()
@@ -51,7 +56,7 @@ export function Cp04MultipuntoChecklist({
  const savedCount=queue.getSavedCount()
  useEffect(()=>{onQueueChange?.(unconfirmed,incomplete)},[unconfirmed,incomplete,onQueueChange])
  const readOnlyOrBusy=readOnly||disabled
- return <div className="cp04-checklist" aria-label="Hoja de inspección multipunto con X y autoguardado">
+ return <div className={"cp04-checklist"+(guided?" inspection-guided":"")} aria-label="Hoja de inspección multipunto con X y autoguardado">
    <div className="cp04-checklist-top">
      <div>
        <span className="official-eyebrow">Orden real · {plate??'Vehículo sin patente'}</span>
@@ -87,8 +92,10 @@ export function Cp04MultipuntoChecklist({
        onClick={()=>queue.retryAll()}><RefreshCcw size={16}/> Reintentar guardados</button>
    </p>}
    <div className="mp-sheet mp-edit-sheet cp04-checklist-sheet">
-     <MultipuntoTable items={items}
-       onChange={readOnlyOrBusy?undefined:(itemId,state)=>queue.select(itemId,state)}
+     {guided&&<div className="guided-inspection-groups" role="group" aria-label="Sistema del vehículo">{Array.from(new Set(items.map(i=>i.category))).map(id=><button key={id} aria-pressed={category===id} onClick={()=>{setCategory(id);setPart(0)}}>{({general:'General',capo:'Bajo capó',bajo:'Bajo vehículo',frenos:'Frenos',neumaticos:'Neumáticos'} as Record<string,string>)[id]??id}</button>)}</div>}
+     {guided&&groupItems.length>pageSize&&<div className="guided-pagination"><button disabled={part===0} onClick={()=>setPart(p=>p-1)}>Anteriores</button><span>Página {part+1}</span><button disabled={(part+1)*pageSize>=groupItems.length} onClick={()=>setPart(p=>p+1)}>Siguientes</button></div>}
+     <MultipuntoTable categoryId={guided?category:undefined} items={guided?groupItems.slice(part*pageSize,part*pageSize+pageSize):items}
+       onChange={readOnlyOrBusy?undefined:(itemId,state)=>{if(guided){const needsNote=groupItems.some(i=>i.id===itemId?state==='attention'||state==='immediate':i.state==='attention'||i.state==='immediate');setPart(Math.floor(Math.max(0,groupItems.findIndex(i=>i.id===itemId))/(needsNote?1:3)))}queue.select(itemId,state)}}
        renderAfterRow={item=>{
          const entry=entries[item.id]
          const saved=latestForMultipuntoItem(item,findings,scope)
