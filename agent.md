@@ -1,3 +1,20 @@
+## BT-AGENDA-01 — aprobación visual y publicación autorizada (25/11/2026, Chile)
+
+El propietario aprueba visualmente `30d03fe6fc96e0c80fd68ae2ad5212289715d284`
+y autoriza su publicación en main y las CI existentes. Implementación íntegra;
+solo se actualiza documentación. Se conservan los resultados aprobados: 29 pruebas
+focalizadas, 35 comprobaciones SQL/integración y 18 de navegador, sin repetirlas.
+Agenda OFF (`VITE_BT_AGENDA_ENABLED=false`, rollout privado sin activar).
+Orden futuro: respaldo/recuperación aprobados → SQL candidato nuevo → Edge CP05 y
+archivo final compatibles, JWT verificado → frontend compatible OFF → autorización
+expresa de rollout QA y flag de Agenda → QA humana alojada. Detalles y flags en
+[checkpoint](docs/checkpoints/CHECKPOINT_BT_AGENDA_01_20261125.md).
+Esta autorización levanta solo NO PUSH. NO DEPLOY/SQL alojado ni cambios de Supabase,
+Render, Storage, secretos o variables. Correos OFF, R2 PAUSADO, originales intactos.
+Auto-Deploy OFF. CI se informa por SHA; no se presume éxito mientras esté pendiente.
+
+---
+
 ## BT-AGENDA-01 — candidato local integrado (25/11/2026, Chile)
 
 Base confirmada `1161688e3c4ced40f5c9355140bd9faa9cfc52ba`, main único.

@@ -1,3 +1,41 @@
+## Publicación autorizada — 25/11/2026, Chile
+
+Aprobación visual expresa del propietario para `30d03fe6fc96e0c80fd68ae2ad5212289715d284`.
+Remoto verificado en `1161688e3c4ced40f5c9355140bd9faa9cfc52ba`, ancestro directo:
+publicación por avance rápido, sin sobrescribir cambios. Se conserva íntegro el código
+aprobado y se actualizan únicamente los cuatro documentos de continuidad. Resultados
+previos ratificados: **29 pruebas focalizadas, 35 comprobaciones SQL/integración y
+18 comprobaciones de navegador PASS**, sin repetir pruebas locales.
+Agenda permanece OFF y ninguna activación alojada se ejecuta por esta publicación.
+CI: consultar las ejecuciones del SHA final publicado; pendientes hasta su conclusión.
+Las restricciones históricas NO PUSH que siguen abajo describen la entrega local
+anterior y quedan sustituidas exclusivamente por esta autorización de publicación.
+
+### Secuencia y flags de futura activación (requiere autorización independiente)
+
+1. Confirmar respaldo actualizado y recuperación SEC07, incluyendo objetos Storage.
+2. Aplicar únicamente `docs/sql/BT_AGENDA_01_CANDIDATE.sql`; requiere CP03/04/05,
+   recuperación de emisión CP05, LIVE-02, REG-01 y EXP-01 existentes. No repetirlos.
+   Mantener `bt_agenda_private.rollout.enabled=false` (sin filas ON).
+3. Alinear y desplegar explícitamente **bt-cp05-documents** y **bt-final-archive**
+   desde el código aprobado, utilizando sus empaquetadores oficiales y JWT activado.
+   Mantener `BT_CP05_EMAIL_ENABLED=false`; no cambiar buckets ni políticas.
+   La emisión requiere el gate previo `BT_CP05_ARCHIVE_ENABLED` autorizado; no se
+   habilita aquí ni se presume autorización de cambiarlo. Los gates de lectura/escritura
+   EXP deben conservar su configuración autorizada hasta la activación QA específica.
+4. Desplegar frontend compatible con `VITE_BT_AGENDA_ENABLED=false`, conservando
+   `VITE_BT_CP05_EMAIL_ENABLED=false` y Auto-Deploy OFF. Requiere gates privados
+   Auth R1, CP03, CP04, CP05, CP06, CP05_DOCUMENTS, FLOW_LIVE_02, FINAL_ARCHIVE y
+   RECORDS (`VITE_BT_*_ENABLED` según los nombres exactos de `vite.config.ts`).
+5. Solo con autorización QA: configurar taller/zona IANA en rollout, activar su
+   `enabled=true` y construir/desplegar frontend con `VITE_BT_AGENDA_ENABLED=true`.
+   Validar el recorrido ficticio alojado antes del uso real. R2 sigue pausado.
+
+Sin deploy, SQL alojado, modificaciones de servicios/variables/secretos, correos ni
+regeneración de documentos históricos en esta etapa.
+
+---
+
 # BT-AGENDA-01 — Agenda y cotización anticipada (25/11/2026, Chile)
 
 ## Alcance y autorización
