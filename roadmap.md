@@ -1,3 +1,11 @@
+## 25/11/2026 — QA humana recorrido R1 y expediente: PASS funcional en una visita
+
+Corrección de estados OT LIVE en `d82e86b0defb55793ce0ecccaf163fc03da913c7`, deploy `dep-dc3cvdu7bikc73crf12g`, CI 5/5 SUCCESS. Propietario confirma «todo funciono» y entrega los tres PDF descargados de COT-000002 R1. Consulta read-only confirma cotización issued, OT ready, una aprobación, una ejecución, una entrega y manifiesto prepared_not_sent de tres documentos. SHA-256 y longitud de cada PDF adjuntado coinciden exactamente con el manifiesto alojado: cotización 75.801 bytes, informe 71.638, entrega 71.919. No se confirma aún recuperación tras nueva sesión, QA física móvil ni piloto Ignacio; OT permanece ready, no cerrada automáticamente. No correo enviado. R2 eliminación aprobación sigue PAUSADO.
+
+**Próximo:** propietario solicitará al director de arte mockups del informe de ejecución y constancia de entrega, tomando cotización como referencia; esperar aprobación visual antes de implementar. Mejorar jerarquía, marca, idioma comprensible y paginación (una página cuando contenido lo permita; no truncar); conservar trazabilidad, importes, pendientes, alcance de declaración, ausencia de firma/pago y originales históricos intactos. Cambiar solo generación futura, nunca reemplazar archivos archivados ni hashes existentes. Cuarto PDF multipunto sigue propuesta, no aprobado. Después validación de nueva sesión y diseño/implementación del correo consolidado con autorización separada. No repetir SEC07 ni pruebas cerradas. Main único, Auto-Deploy OFF; sin cambios funcionales ni infraestructura en este cierre.
+
+---
+
 ## BT-FLOW-UX-01-R1 — estados OT, publicación autorizada (25/11/2026 Chile)
 
 El propietario autoriza publicar en main `bce30ff6c82840f3be427798fa4999d29849416f`
