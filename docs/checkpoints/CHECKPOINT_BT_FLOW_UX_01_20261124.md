@@ -1,3 +1,9 @@
+## BT-FLOW-UX-01-R2 — PAUSADO por decisión del propietario (25/11/2026 Chile)
+
+El propietario decide conservar por ahora la aprobación del cliente. R2 queda diferido, no autorizado para ejecución; no ocultar etapa, no enviar encargo a Codex, no aplicar migraciones ni cambios de código, Edge, Render, flags o datos. R1 mantiene sus ocho etapas y requisitos vigentes. La propuesta R2 se conserva como referencia futura, no como tarea activa. Retomar exclusivamente con nueva autorización del propietario.
+
+---
+
 # BT-FLOW-UX-01 — Guided Overlay Workspace
 
 Fecha 24/11/2026. Estado: diseño funcional aprobado por el titular; implementación local pendiente. Base funcional de investigación: e603c439bbba3619e1a28aeb8dc7277945a611c3. Producción permanece en 82c220111bad4e41f236041bf17983104155c250. Autorización de empezar desarrollo no equivale a publicar o desplegar. Mantener main único y Auto-Deploy OFF.
