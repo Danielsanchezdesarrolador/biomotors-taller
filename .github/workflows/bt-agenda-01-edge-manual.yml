@@ -1,0 +1,120 @@
+name: ByteTorque AGENDA-01 - Edge compatibles (SQL OFF instalado)
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe DESPLEGAR_AGENDA_EDGE_SQL_OFF_INSTALADO'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: bytetorque-final-archive-edge-deploy
+  cancel-in-progress: false
+jobs:
+  desplegar-agenda-edge:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmacion == 'DESPLEGAR_AGENDA_EDGE_SQL_OFF_INSTALADO' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_REF: suxcqqnmcjoezfxltoms
+      APPROVED_SHA: de599d539050225cb693f7af42830d89f67ca3ff
+      CP05_PATH: /tmp/bytetorque-agenda-cp05-${{ github.run_id }}-${{ github.run_attempt }}
+      BUNDLE_PATH: /tmp/bytetorque-agenda-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Obtener código exacto aprobado (no el HEAD mutable)
+        uses: actions/checkout@v4
+        with:
+          ref: de599d539050225cb693f7af42830d89f67ca3ff
+          persist-credentials: false
+      - name: Verificar fuente autorizada y entorno
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          [[ "$(git hash-object scripts/package-cp05-edge.mjs)" == f3abfab32b8ce62137c224d7f4905024989bef15 ]]
+          [[ "$(git hash-object scripts/verify-cp05-edge-package.mjs)" == d85825d04dc0db1a68584423d897b7b6c0119041 ]]
+          [[ "$(git hash-object server/cp05/edgeEntryCandidate.ts)" == d57478d084e2ce44f4ce54e0e74d9c7bc521cebb ]]
+          [[ "$(git hash-object scripts/package-final-archive.mjs)" == 8069852b1d1da2bb541145cdfb5eff420b50b7e3 ]]
+          [[ "$(git hash-object server/com/finalArchiveEntry.ts)" == f88939cf907626a87f8ef87cdff6330d42f10566 ]]
+          [[ "$(git hash-object package-lock.json)" == 82dd4240293d61f494f2dfd55bc8b42c39335ad8 ]]
+          docker info >/dev/null
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Construir paquete reproducible sin credenciales de Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          git diff --exit-code
+          node scripts/package-cp05-edge.mjs "$CP05_PATH"
+          node scripts/package-cp05-edge.mjs "$CP05_PATH-check"
+          node scripts/verify-cp05-edge-package.mjs "$CP05_PATH"
+          node scripts/verify-cp05-edge-package.mjs "$CP05_PATH-check"
+          cmp "$CP05_PATH/supabase/functions/bt-cp05-documents/index.js" "$CP05_PATH-check/supabase/functions/bt-cp05-documents/index.js"
+          sha256sum "$CP05_PATH/supabase/functions/bt-cp05-documents/index.js"
+          node scripts/package-final-archive.mjs "$BUNDLE_PATH"
+          node scripts/package-final-archive.mjs "$BUNDLE_PATH-check"
+      - name: Verificar ambos paquetes, hashes, recursos y JWT
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createHash } from 'node:crypto'
+          import { readFile } from 'node:fs/promises'
+          import { join } from 'node:path'
+          const sha = b => createHash('sha256').update(b).digest('hex')
+          const root = process.env.BUNDLE_PATH
+          const path = 'supabase/functions/bt-final-archive/index.js'
+          const assets = [
+            ['public/cp05/DejaVuSans.ttf','DejaVuSans.ttf','57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e'],
+            ['public/cp05/DejaVuSans-Bold.ttf','DejaVuSans-Bold.ttf','a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890'],
+            ['public/cp05/wordmark.png','wordmark.png','aeb7f50302d6d641eeadca83373f103feaa177b557ee7680ec95030b2db37e34'],
+            ['assets/brand/generated/icon-192.png','icon-192.png','1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67'],
+            ['public/cp05/FONT-LICENSE.txt','FONT-LICENSE.txt',null]
+          ]
+          let digest
+          for (const dir of [root,root+'-check']) {
+            const m=JSON.parse(await readFile(join(dir,'offline-package-manifest.json'),'utf8'))
+            assert.equal(m.scope,'CANDIDATE_ONLY_NOT_DEPLOYED')
+            assert.equal(m.production_contacted,false)
+            assert.equal(m.entrypoint,path)
+            const bundle=await readFile(join(dir,path))
+            assert.ok(bundle.length>1000)
+            assert.equal(sha(bundle),m.entrypoint_sha256)
+            if(digest) assert.equal(sha(bundle),digest,'Reproducibility mismatch')
+            digest=sha(bundle)
+            for(const [source,name,expected] of assets){
+              const b=await readFile(join(dir,'supabase/functions/bt-final-archive/assets',name))
+              assert.equal(sha(b),sha(await readFile(source)))
+              assert.equal(sha(b),m.source_asset_sha256[source])
+              if(expected) assert.equal(sha(b),expected)
+            }
+            const config=await readFile(join(dir,'supabase/config.toml'),'utf8')
+            assert.equal(config.split('\n').filter(l=>l.trim()&&!l.startsWith('#')).join('\n'),'[functions.bt-final-archive]\nverify_jwt = true\nentrypoint = "./functions/bt-final-archive/index.js"\nstatic_files = ["./functions/bt-final-archive/assets/*"]')
+            for(const marker of ['BT_FINAL_ARCHIVE_READ_ENABLED','BT_FINAL_ARCHIVE_WRITE_ENABLED','bt_final_archive_commit','bt_final_archive_document','bt-closing-documents','npm:@supabase/supabase-js@2.119.0','npm:pdf-lib@1.17.1','npm:@pdf-lib/fontkit@1.1.1']) assert.ok(bundle.toString('utf8').includes(marker),marker)
+          }
+          console.log('BT_AGENDA_FINAL_ARCHIVE_PACKAGE_SHA256='+digest)
+          JS
+      - uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+      - name: Desplegar solo CP05 y archivo final sin tocar secrets
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]
+          supabase --version
+          supabase functions deploy --help >/dev/null
+          cd "$CP05_PATH"
+          supabase functions deploy bt-cp05-documents --project-ref "$PROJECT_REF"
+          echo "BT_AGENDA_CP05_DEPLOY_SUCCEEDED"
+          cd "$BUNDLE_PATH"
+          supabase functions deploy bt-final-archive --project-ref "$PROJECT_REF"
+          echo "BT_AGENDA_FINAL_ARCHIVE_DEPLOY_SUCCEEDED"
+          supabase functions list --project-ref "$PROJECT_REF"

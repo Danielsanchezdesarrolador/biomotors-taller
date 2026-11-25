@@ -1,3 +1,11 @@
+## 25/11/2026 — Activación BT-AGENDA-01 autorizada, preflight SQL PASS; pendiente respaldo vigente
+
+CI 5/5 SUCCESS en `de599d539050225cb693f7af42830d89f67ca3ff`, código visual aprobado. Propietario autoriza activación alojada secuencial exclusivamente QA. Lectura de PostgreSQL 17.11 confirma firmas CP05/EXP y dependencias, columnas y permisos esperados, Agenda ausente, cero emisiones pendientes, rollouts LIVE/REG/EXP exclusivamente QA y correo OFF. Hay tres objetos CP05 y dos de cierre; respaldo documentado 24/11 incluía un PDF, no cubre los cinco actuales. Antes de instalar SQL confirmar conjunto actualizado DB + Storage con el procedimiento existente; no repetir restauración SEC07 ni suites aprobadas. No se ha aplicado SQL ni desplegado.
+
+Workflow preparado `.github/workflows/bt-agenda-01-edge-manual.yml`: manual, **no ejecutar antes de instalar y verificar migración con rollout OFF**. Checkout SHA fijo aprobado, hashes de fuentes y lockfile, npm ci, doble build de ambos paquetes y verificación de recursos/JWT, deploy secuencial CP05 y EXP sin tocar secretos. Confirmación DESPLEGAR_AGENDA_EDGE_SQL_OFF_INSTALADO. Conector GitHub sin dispatch; propietario lo ejecutará cuando se confirme SQL OFF. Posteriormente Render compatible OFF y activación exclusiva QA. Sin cambios funcionales, flags, Storage ni infraestructura alojada. R2 pausado.
+
+---
+
 ## Publicación autorizada — 25/11/2026, Chile
 
 Aprobación visual expresa del propietario para `30d03fe6fc96e0c80fd68ae2ad5212289715d284`.
