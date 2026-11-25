@@ -355,3 +355,50 @@ Propietario informa haber realizado recorrido R1 y decide eliminar la etapa Apro
 - Etapa entrega: conservar confirmación explícita de listo para entregar y declaración, integrarla en flujo con CTA existente solo cuando se satisfacen requisitos; no marcar ready con formulario inválido, no cerrar OT automáticamente. Mantener pasos confirmados por servidor. Error específico estado no apto en lugar de conflicto genérico, sin exponer SQL/secrets.
 - Pruebas focalizadas en harness: OT inspecting realista -> in_service -> ejecución una vez, sin estado duplicado al reanudar, received pasa por transiciones legales, ready no retrocede, closed/cancelled/denegación/conflicto sin RPC indebida ni pérdida de formulario, respuesta ambigua se concilia por relectura, entrega ready con confirmación, conservar pruebas aprobación y archivo. Usar repositorio y mocks que rechacen estados inválidos (fixture R1 preexistente usaba ready). TypeScript/build público/privado y una validación consolidada; informar resultados comprobados y límites. No repetir SEC07, backups, auditorías generales ni modificar CP04 idempotencia concurrente de creación.
 - SOLO LOCAL main, NO PUSH funcional, NO DEPLOY, NO SQL/Edge/Storage/flags/datos alojados. No activar R2 ni correo. Actualizar checkpoint y documentos de continuidad, entregar SHA local y resultados reales.
+
+## R1 — entrega local focalizada de estados OT (25/11/2026 Chile)
+
+Base documental `8b4b21d926f74cd36cbab753be2039c008ba6ff9`. Diagnóstico
+del director utilizado sin repetir consultas alojadas. Ocho etapas y R2 pausado.
+
+- `ensureOrderStage` reutiliza getOrder/setStatus CP04: verifica taller, OT, vehículo,
+  lifecycle y versión; received → inspecting → in_service → ready solo según acción
+  consentida. getOrder admite lectura explícita del campo cancelled_at ya instalado
+  sin depender del flag visual REG; las llamadas anteriores mantienen contrato.
+- Inspección confirmada puede pasar recibida a inspección al continuar (no al salir).
+  Informe válido/revisado revalida revisión/aprobación, asegura in_service o ready
+  y luego llama RPC existente. Sin transiciones por abrir/reanudar/retroceder,
+  formulario inválido o guardado/salida incompletos. No se crea otra OT.
+- Entrega válida con cuatro verificaciones, nota y declaración pide confirmación
+  explícita de lista para entregar, transiciona/relee y registra entrega. No cierra OT.
+- Cada transición usa updated_at recién leído y se relee. Un error con estado ya
+  confirmado se concilia sin repetir esa escritura; si no está confirmado se detiene.
+  ready nunca retrocede, closed/cancelled o identidad/lifecycle no verificables bloquean.
+- Callback previo a la escritura evita refrescar/remontar el borrador antes del
+  resultado; locks, requestIds, marcas y observaciones se conservan ante error.
+  Relectura LIVE omite RPC si el informe/entrega ya existe. Estado y efecto visibles.
+- BT_FLOW_ORDER_NOT_READY se traduce a mensaje específico sin revelar SQL. También
+  se restauró visibilidad del error de validación que el CSS compacto ocultaba.
+
+Validación offline consolidada:
+- 8/8 pruebas unitarias de proyección/alcance y transiciones: received, inspecting,
+  ready, closed/cancelled, lifecycle ausente, identidad cruzada, denegación/conflicto,
+  versiones frescas, repetición y respuesta perdida después de commit.
+- Harness con mocks que rechazan RPC ejecución fuera de in_service/ready y entrega
+  fuera de ready: inspecting/received transicionan y emiten exactamente un informe;
+  ready no retrocede; entrega explícita llega a expediente; closed no emite y conserva
+  checkbox y observación. Cuatro escenarios Chromium PASS.
+- Regresiones focalizadas R1 de aprobación, reintento ambiguo y archivo PASS, sin
+  suites generales. TypeScript y builds privado/público PASS, guardas de bundle incluidas.
+- Prueba inicial detectó servidor harness ausente; se inició solo Vite loopback.
+  El caso inválido detectó alert oculto por CSS compacto; corregido y retest PASS.
+
+Comandos: `npx vitest run src/guided/progress.test.ts`,
+`node scripts/verify-guided-order-state.cjs`,
+`BT_R1_FUNCTIONAL_ONLY=1 node scripts/verify-guided-r1.cjs` (harness loopback activo).
+Evidencia en `/workspace/work/ot-state/`. Son mocks locales, no prueba sobre
+COT-000002 real ni aceptación humana productiva. Falta autorización de publicación
+y posterior QA/despliegue independientes. No se cambia idempotencia de creación CP04.
+
+NO PUSH, NO DEPLOY, NO SQL ni cambios Supabase, Storage, Edge, flags, secretos o
+datos alojados. Auto-Deploy OFF. R2 continúa PAUSADO; no se retira aprobación.

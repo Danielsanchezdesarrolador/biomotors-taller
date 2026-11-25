@@ -63,7 +63,7 @@ export type HandoverRecord = {
 }
 export class FlowLiveFailure extends Error {
   constructor(public readonly kind: 'disabled' | 'denied' | 'invalid' |
-    'conflict' | 'unavailable' | 'unconfirmed') {
+    'conflict' | 'unavailable' | 'unconfirmed' | 'order_not_ready') {
     super(kind)
   }
 }
@@ -98,13 +98,14 @@ export function flowLiveCandidate(
   }
   async function request<T>(name: string, args: Record<string, unknown>): Promise<T> {
     await authorized()
-    let response: { data: unknown; error: { code?: string } | null }
+    let response: { data: unknown; error: { code?: string; message?:string } | null }
     try {
       response = await client.rpc(name, args)
     } catch { return reject('unavailable') }
     await authorized()
     if (response.error) {
       if (['42501', 'PGRST301'].includes(response.error.code || '')) reject('denied')
+      if(response.error.code==='55000'&&response.error.message?.includes('BT_FLOW_ORDER_NOT_READY'))reject('order_not_ready')
       if (['23505', '40001', '55000'].includes(response.error.code || '')) reject('conflict')
       if (['22023', '23514'].includes(response.error.code || '')) reject('invalid')
       reject('unavailable')

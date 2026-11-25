@@ -49,3 +49,5 @@
 /* Guided touch targets override smaller standalone table/tab controls only here. */
 @media(max-width:800px){.guided-dialog .guided-stage button{min-height:44px!important}.guided-dialog .guided-stage summary,.guided-dialog .guided-stage .cp03-check{min-height:44px}.guided-dialog .guided-stage input:not([type=checkbox]):not([type=radio]),.guided-dialog .guided-stage select{min-height:44px}}
 @media(min-width:801px){.flow-guided-summary>strong{grid-column:1;grid-row:2}.flow-guided-summary>small{grid-column:1;grid-row:3}.flow-guided-summary>button{grid-column:2;grid-row:2/4;justify-self:end}}
+/* Execution validation must remain visible in the compact guided draft. */
+.guided-stage .execution-guided>p[role=alert]{display:block;grid-column:1/-1}

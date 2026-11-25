@@ -1,3 +1,14 @@
+## BT-FLOW-UX-01-R1 — estados OT, candidato local (25/11/2026 Chile)
+
+Integradas transiciones explícitas CP04 con updated_at fresco y relectura, sin
+reabrir OT cerradas/canceladas ni retroceder ready. Ejecución solo tras formulario
+válido, aprobación vigente y declaración humana; entrega conserva confirmación.
+[Validación y alcance](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md).
+R2 PAUSADO. NO PUSH/DEPLOY, SQL ni infraestructura alojada. Auto-Deploy OFF.
+Idempotencia concurrente de creación CP04 no modificada. QA alojada pendiente.
+
+---
+
 ## BT-FLOW-UX-01-R1 — corrección de estados OT (25/11/2026 Chile)
 
 Propietario autoriza implementar de inmediato la integración de estados OT en las ocho etapas existentes. R2 (eliminar aprobación) sigue PAUSADO. R1 LIVE f19b19977ba1c3e16b4866368588cf8906fb5a82, CI 5/5. Incidente COT-000002 R1: guardado/emisión y aprobación confirmados; ejecución rechazada por BT_FLOW_ORDER_NOT_READY porque OT está inspecting, no se guardó informe ni entrega. [Diagnóstico y entrega focalizada](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md). Implementación local autorizada; NO PUSH funcional ni deploy hasta autorización específica. No SQL, Edge, Storage, flags, correos ni modificación directa de registros reales. Reutilizar CP04 setStatus y validación por servidor; no debilitar guardas.

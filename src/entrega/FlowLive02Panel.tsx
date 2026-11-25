@@ -14,7 +14,7 @@ import {
   flowLiveCandidate, type ApprovalMethod, type ExecutionRecord,
   type HandoverChecklist, type HandoverMethod
 } from './flowLiveCandidate'
-import type { ExecutionInput } from './executionPreview'
+import { executionPreview, type ExecutionInput } from './executionPreview'
 
 const methods: [ApprovalMethod, string][] = [
   ['in_person', 'Presencial'],
@@ -41,8 +41,10 @@ const errorText = 'No se confirmó la operación. Consulta el historial antes de
 type Port = ReturnType<typeof flowLiveCandidate>
 type Records = Awaited<ReturnType<Port['history']>>
 export function FlowLive02Panel({
-  client, context, quote, revision, stage, onPendingChange, registerSave
+  client, context, quote, revision, stage, onPendingChange, registerSave, beforeExecution, beforeHandover
 }: {
+  beforeExecution?:()=>Promise<void>
+  beforeHandover?:()=>Promise<boolean>
   registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
   stage?: 4 | 5 | 6
@@ -149,7 +151,7 @@ export function FlowLive02Panel({
       }
     }
   }
-  function liveError(e:unknown){const kind=(e as {kind?:string})?.kind;return kind==='denied'?'Tu sesión o rol no permite guardar esta operación.':kind==='conflict'?'El registro cambió. Actualiza el historial antes de continuar.':kind==='disabled'?'Esta operación no está habilitada para el taller.':kind==='invalid'?'Revisa los campos y las confirmaciones requeridas.':navigator.onLine===false?'Sin conexión. Conserva esta pantalla y consulta el registro al reconectar.':errorText}
+  function liveError(e:unknown){const kind=(e as {kind?:string})?.kind;return kind==='order_not_ready'?'La OT no está habilitada para esta acción: debe estar en servicio para ejecución y lista para entrega. Actualiza la visita.':kind==='denied'?'Tu sesión o rol no permite guardar esta operación.':kind==='conflict'?'El registro cambió. Actualiza el historial antes de continuar.':kind==='disabled'?'Esta operación no está habilitada para el taller.':kind==='invalid'?'Revisa los campos y las confirmaciones requeridas.':navigator.onLine===false?'Sin conexión. Conserva esta pantalla y consulta el registro al reconectar.':errorText}
   async function saveStage(exit:boolean):Promise<boolean>{
     if(!port||loading||busy){setError('Espera a que termine la consulta o el guardado.');return false}
     try{
@@ -182,22 +184,22 @@ export function FlowLive02Panel({
     'Declaración de aprobación registrada por el servidor. No constituye firma verificada.'
   )
   const recordExecution = (input: ExecutionInput) => write(
-    () => port!.execution(quote, revision, input,
-      requestId('execution', { revision: revision.id, input })),
+    async () => {if(!executionPreview(revision,quote,input).readyForDraftPdf)throw {kind:'invalid'};const saved=await port!.history(quote,revision);if(!saved.approval)throw {kind:'invalid'};if(saved.execution)return saved.execution;if(beforeExecution)await beforeExecution();return port!.execution(quote, revision, input,
+      requestId('execution', { revision: revision.id, input }))},
     e => setRecords(old => old ? { ...old, execution: e } : old),
     'Informe de ejecución declarado por operador y confirmado por el servidor.'
   )
   const recordHandover = (report: ExecutionRecord) => write(
-    () => port!.handover(report, checklist, handoverMethod, handoverNote,
+    async () => {const saved=await port!.history(quote,revision);if(saved.handover)return saved.handover;if(!saved.approval||saved.execution?.id!==report.id)throw {kind:'invalid'};if(!handoverConfirmed||handoverNote.trim().length<12||!Object.values(checklist).every(Boolean))throw {kind:'invalid'};if(beforeHandover&&!(await beforeHandover()))throw {kind:'invalid'};return port!.handover(report, checklist, handoverMethod, handoverNote,
       handoverConfirmed, requestId('handover', {
         report: report.id, checklist, method: handoverMethod, note: handoverNote
-      })),
+      }))},
     d => setRecords(old => old ? { ...old, handover: d } : old),
     'Constancia declarada por operador guardada. No se verificó firma ni recepción del cliente.'
   )
   return (
     <section className={"dashboard-card cp05-execution"+(stage?" flow-guided":"")} data-stage={stage} aria-label="Registro persistente de trabajos y entrega">
-      {stage?<div className="flow-guided-summary"><p>{stage===4?'Registra la autorización del presupuesto antes de comenzar los trabajos.':stage===5?'Decide qué trabajos se realizaron y declara los pendientes.':'Verifica los antecedentes y declara la entrega.'}</p><strong>COT-{String(quote.number).padStart(6,'0')} · R{revision.revision} · {clp(revision.payload.totals.total)}{stage===4&&<span className="flow-approval-state"> · {loading?'Consultando':records?.approval?'Aprobación registrada':'Pendiente de aprobación'}</span>}</strong><small>Declaración del operador; no constituye firma digital ni pago.</small><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Actualizar historial</button></div>:<><h3>Registro técnico y entrega · acceso privado</h3><p className="cp05-notice">Declaraciones del operador, no firma del cliente ni comprobante de pago.</p><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Consultar registros guardados</button></>}
+      {stage?<div className="flow-guided-summary"><p>{stage===4?'Registra la autorización del presupuesto antes de comenzar los trabajos.':stage===5?'Decide qué trabajos se realizaron y declara los pendientes. Al guardar el informe confirmado, la OT pasará a En servicio si corresponde.':'Verifica los antecedentes y declara la entrega. Se solicitará confirmar la OT como Lista para entregar.'}</p><strong>COT-{String(quote.number).padStart(6,'0')} · R{revision.revision} · {clp(revision.payload.totals.total)}{stage===4&&<span className="flow-approval-state"> · {loading?'Consultando':records?.approval?'Aprobación registrada':'Pendiente de aprobación'}</span>}</strong><small>Declaración del operador; no constituye firma digital ni pago.</small><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Actualizar historial</button></div>:<><h3>Registro técnico y entrega · acceso privado</h3><p className="cp05-notice">Declaraciones del operador, no firma del cliente ni comprobante de pago.</p><button type="button" disabled={loading||busy} onClick={()=>void reload()}>Consultar registros guardados</button></>}
       {loading && <p role="status">Consultando registros autorizados…</p>}
       {error && <p role="alert" className="cp04-error">{error}</p>}
       {message && <p role="status">{message}</p>}

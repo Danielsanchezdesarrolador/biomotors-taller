@@ -106,9 +106,9 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       return {order,vehicle}
     })
   }
-  async function getOrder(id:string):Promise<OrderWithVehicle|null>{
+  async function getOrder(id:string,includeLifecycle=false):Promise<OrderWithVehicle|null>{
     const key=validId(id),version=await guard()
-    const result=await client.from('work_orders').select(orderCols)
+    const result=await client.from('work_orders').select(orderCols+(includeLifecycle&&!recordsEnabled?',cancelled_at':''))
       .eq('workshop_id',tenant).eq('id',key).maybeSingle()
     if(result.error)workFailure(result.error)
     if(!result.data){valid(version);return null}
