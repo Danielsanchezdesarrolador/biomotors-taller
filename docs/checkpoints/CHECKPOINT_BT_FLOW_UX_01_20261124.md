@@ -154,3 +154,20 @@ público, registro automático, tabla, flag ni funcionalidad de registro externo
 - `tests/harness/GuidedFixture.tsx`
 - `tests/harness/main.tsx`
 - `vite.config.ts`
+
+## BT-FLOW-UX-01 — aprobación visual y publicación autorizada (24/11/2026, Chile)
+
+El propietario aprueba visualmente `45a806e5c71133c1365b1fba626edb677f1ea371`
+y autoriza publicarlo en main con las CI correspondientes. No se modifica código
+ni se repiten pruebas locales. Sigue pendiente la idempotencia concurrente CP04:
+createOrder no tiene request_id transaccional; la consulta previa y el bloqueo
+local no garantizan ausencia de duplicados entre sesiones simultáneas.
+Pendientes QA alojada y autorización de cualquier adaptación backend.
+**NO DEPLOY; Auto-Deploy OFF. Sin cambios en Supabase, SQL, Edge, Storage,
+variables, datos ni correo.** Esta autorización levanta solo el NO PUSH de esta entrega.
+
+---
+
+Base remota comprobada: `64616a4d9729a6ebfd6cac1012162a833f628a0b`;
+publicación normal por avance rápido con el commit funcional original conservado.
+CI: consultar por el SHA de publicación; no se declaran resultados antes de observarlos.

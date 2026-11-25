@@ -1,3 +1,16 @@
+## BT-FLOW-UX-01 — aprobación visual y publicación autorizada (24/11/2026, Chile)
+
+El propietario aprueba visualmente `45a806e5c71133c1365b1fba626edb677f1ea371`
+y autoriza publicarlo en main con las CI correspondientes. No se modifica código
+ni se repiten pruebas locales. Sigue pendiente la idempotencia concurrente CP04:
+createOrder no tiene request_id transaccional; la consulta previa y el bloqueo
+local no garantizan ausencia de duplicados entre sesiones simultáneas.
+Pendientes QA alojada y autorización de cualquier adaptación backend.
+**NO DEPLOY; Auto-Deploy OFF. Sin cambios en Supabase, SQL, Edge, Storage,
+variables, datos ni correo.** Esta autorización levanta solo el NO PUSH de esta entrega.
+
+---
+
 ## BT-FLOW-UX-01 — candidato local implementado (24/11/2026)
 
 Recorrido privado superpuesto de ocho etapas reutilizando CP03/04/05, LIVE-02 y EXP.
