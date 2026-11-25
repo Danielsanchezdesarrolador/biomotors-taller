@@ -1,0 +1,40 @@
+# BT-FLOW-UX-01 — Guided Overlay Workspace
+
+Fecha 24/11/2026. Estado: diseño funcional aprobado por el titular; implementación local pendiente. Base funcional de investigación: e603c439bbba3619e1a28aeb8dc7277945a611c3. Producción permanece en 82c220111bad4e41f236041bf17983104155c250. Autorización de empezar desarrollo no equivale a publicar o desplegar. Mantener main único y Auto-Deploy OFF.
+
+## Objetivo y contrato visual
+
+Inicio, tarjeta Nuevo ingreso de vehículo: habilitar solo sesión privada verificada, taller activo y rol permitido. Abrir dialog modal grande centrado, fondo Inicio visible con overlay semitransparente y blur moderado; header fijo título/identidad/etapa, progreso de ocho pasos, contenido scrollable, footer Volver / Guardar y salir / Guardar y continuar. R2 navy/azul/blanco, responsive; en móvil aprovechar viewport y teclado. Modal semántico, foco atrapado y restaurado, Escape/cierre seguro, impedir acciones del fondo; no ocultar errores ni perder borradores. No simular guardado. Los cinco paneles existentes conservan gestión/consulta independientes.
+
+## Recorrido real
+
+1. Cliente y vehículo: buscar ficha autorizada, seleccionar o crear cliente/vehículo mediante cp03PilotRepository. Confirmar relación; no duplicar por reintento.
+2. Recepción: crear o recuperar una OT mediante cp04Repository, asociada al vehículo seleccionado; confirmar motivo/kilometraje. Si existe orden abierta, ofrecer continuar, no crear otra.
+3. Inspección multipunto: reutilizar 34 X, autoguardado y notas existentes; bloquear avance mientras guardados pendientes/error o diagnóstico provisional; respetar estados permitidos. No inferir inspección realizada.
+4. Cotización: reutilizar QuotePanel/editor y CP05 para la OT exacta, partidas, IVA, condiciones y vigencia; guardar y emitir revisión con confirmación explícita. Proteger idempotencia y reconciliar lecturas ante respuestas ambiguas. No marcar emitida si servidor no confirma.
+5. Aprobación: LIVE-02 sobre revisión emitida vigente; medio, nota >=12, declaración explícita; no firma verificada ni consentimiento inferido.
+6. Ejecución: WorkExecutionDraft + LIVE-02; todas las partidas decididas, ninguna marcada realizada por defecto, explicación si pendientes, totales servidor, confirmación humana.
+7. Entrega: respetar transición CP04 a lista y checklist LIVE-02, modalidad/nota/declaración; no confundir con pago ni firma. Si corresponde cerrar OT, confirmación separada de acción irreversible y solo transición soportada; no saltar guardas.
+8. Expediente: finalArchiveRepository sobre revisión y delivery exactos; confirmar archivar, recuperar originales desde servidor con verificación SHA, no generar sustitutos ni volver a crear ante respuesta ambigua. Correo siempre OFF. Solo owner/admin para archivo; roles sin permiso ven estado y quién debe continuar, no se amplían privilegios.
+
+## Arquitectura verificada
+
+- src/App.tsx OfficialWorkspaceView renderPanel y navegación privada; src/official/OfficialPanels.tsx tarjeta actualmente UnavailableAction. Conectar CTA solo al contexto autenticado; mantener preview público sin nuevas acciones. Nuevo componente privado cargado con gates existentes CP03/04/05/06, documentos, FLOW y EXP; considerar guardas del grafo en vite.config.ts y scripts/verify-official-bundle.mjs sin abrir allowlist genérica. No añadir flag alojado sin autorización. Respetar alcance QA del servidor: no habilitar escrituras nuevas en otros talleres, gates existentes y rol por operación; si no hay evidencia de habilitación de taller para flujo completo, mantener CTA cerrado o hacer lectura autorizada de capacidad existente, no asumir que flag global autoriza.
+- CP03: src/clientes/cp03PilotRepository.ts (search, recentCustomers, vehiclesForCustomer, getCustomer/getVehicle, createCustomer/createVehicle), Cp03PilotDirectoryView y contratos reales.
+- CP04: src/ordenes/cp04Repository.ts (recentOrders, getOrder, createOrder, findingsForOrder, setStatus), Cp04OrdersView, Cp04MultipuntoChecklist, cp04Autosave. Reutilizar mismo contrato y guardas.
+- CP05: src/cp05/Cp05PrivatePanel.tsx, QuotePanel.tsx, repository.ts (forOrder, load, command, documents), documentClient, temporaryDraft, quoteSelection; extraer UI reutilizable o modo guiado sin duplicar escrituras ni usar DOM automation.
+- LIVE: src/entrega/FlowLive02Panel.tsx, flowLiveCandidate.ts (approval/execution/handover/history), WorkExecutionDraft. Proyección de etapas desde history y revisión real, no desde clicks.
+- EXP: src/expedientes/repository.ts (list, documents, bytes, archive), FinalArchivePanel y contratos. Restringir a la revisión de la OT y confirmar manifest. No ampliar roles.
+- src/flow/ReceptionWizard.tsx y FlowHome.tsx son DEMO con demoClients/demoVehicles/flowSession. Solo referencia de UX; nunca importar en privado ni usar fixtures en producción.
+
+## Reanudación y continuidad
+
+Inicio muestra trabajos en curso autorizados usando consultas existentes. Seleccionar OT por identificador confirmado; derivar avance desde cliente/vehículo, OT, inspección confirmada, revisión emitida, historial LIVE-02 y manifiesto EXP. No guardar etapa como autoridad en navegador; los borradores no confirmados mantienen mecanismo existente separado por usuario/taller, TTL y limpieza. Si se cierra antes de crear OT, no prometer expediente persistente: recuperar fichas guardadas y borrador permitido. Releer en sesión nueva, bloquear sesión revocada o contexto cambiado, no reutilizar repositorios dispuestos. Evitar duplicar órdenes, cotizaciones o informes por retries; ante respuesta ambigua consultar registro autorizado antes de repetir. Mostrar explícitamente qué quedó guardado. No introducir tabla o migración solo para un stepper; si un requisito no puede realizarse con contratos actuales, informar bloqueo real antes de tocar backend.
+
+## Incidente real y corrección concreta
+
+COT-000004 R1 emitida, neto 183000, IVA 34770, total 217770. Supabase consulta read-only: 4 OT, 2 revisiones, 0 aprobaciones/reportes/entregas. Logs HTTP GET historial 200, sin POST bt_flow_record_quote_approval observado en ventana 23:30Z–00:10Z. executionPreview.ts compara JSON.stringify(totals(quotedNet)) con JSON.stringify(p.totals). Orden observado del JSONB: tax,total,subtotal; orden calculado: subtotal,tax,total. Reproducción JS exacta: comparación serializada false; comparación de tres campos true. Causa candidata fuerte y reproducible; no declarar remediación hasta test real. Cambiar solo a comparación explícita de tres campos conservando Number.isSafeInteger, integridad de partidas y tenant/revisión. Para mantener rechazo de campos extra si el contrato lo exige, validar claves esperadas sin depender del orden. En executionPreview.test.tsx añadir caso con JSON parse/string orden tax,total,subtotal (mismos importes fixture) y caso negativo de tax/total alterado; revisar flowLiveCandidate.test.ts para aprobación con JSONB realista. No tocar snapshot ni hash de documentos. Revisar alcance de imports backend empaquetado; si cambio afecta Edge, no publicar ni desplegar sin aprobación. Registrar incidente y solución candidata en Toolkit posteriormente con prueba real; no certificar solución antes.
+
+## Aceptación y economía de cuota
+
+Una entrega funcional integrada local, no push, no deploy, no SQL/Edge/Storage/flags/correos/secretos ni datos reales. Usar fixtures existentes, tests de etapa/reanudación/aislamiento/roles y error JSONB, una compilación privada con flags pertinentes y validación visual desktop/móvil del overlay. No volver a ejecutar suites históricas de SEC07, backup, migraciones, CI ya aprobada ni repetir pruebas sin causa. Mantener gate público OFF y comprobar que el grafo público no incorpora módulos DEMO/privados. Registrar resultados y bloqueo, si lo hubiera. Después aprobación visual/publicación y QA humana consolidada desde mismo taller ficticio; no declarar aceptación del piloto ni incorporación de Ignacio sin recorrido real, aislamiento y persistencia. Codex solo ejecución local; investigación/documentación ya realizadas por director.
