@@ -115,3 +115,17 @@ no se incrustan mockups como fondo. PDF y PNG de revisión en
 
 Solo candidato LOCAL, pendiente de nueva aprobación visual. NO PUSH/DEPLOY/SQL
 ni cambios de infraestructura. PDFs históricos y hashes existentes intactos.
+
+## BT-PDF-UX-01-R1 — aprobación visual y publicación autorizada (25/11/2026 Chile)
+
+El propietario aprueba visualmente `cc3d0be758ceab3293523c8a9a78ee86e36e7aad`
+y autoriza publicar en main el diseño íntegro existente y permitir CI. Se levanta
+únicamente el NO PUSH de esta entrega; sin código adicional ni repetición de pruebas
+locales aprobadas. Originales históricos intactos y R2 PAUSADO. Auto-Deploy OFF.
+NO DEPLOY, NO SQL, NO desplegar Edge Functions ni modificar Supabase, Storage,
+Render, variables o datos alojados. La activación alojada requiere otra autorización.
+
+---
+
+Base remota verificada: `1a5eec5eb4b01d8e7d37c9b1562cc3f18f8365d3`.
+Publicación por avance rápido, conservando los commits existentes del diseño.

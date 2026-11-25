@@ -1,3 +1,14 @@
+## BT-PDF-UX-01-R1 — aprobación visual y publicación autorizada (25/11/2026 Chile)
+
+El propietario aprueba visualmente `cc3d0be758ceab3293523c8a9a78ee86e36e7aad`
+y autoriza publicar en main el diseño íntegro existente y permitir CI. Se levanta
+únicamente el NO PUSH de esta entrega; sin código adicional ni repetición de pruebas
+locales aprobadas. Originales históricos intactos y R2 PAUSADO. Auto-Deploy OFF.
+NO DEPLOY, NO SQL, NO desplegar Edge Functions ni modificar Supabase, Storage,
+Render, variables o datos alojados. La activación alojada requiere otra autorización.
+
+---
+
 ## BT-PDF-UX-01 — revisión vectorial local, pendiente de aprobación (25/11/2026 Chile)
 
 Primera apariencia rechazada por el director. Corregidos curvas, iconos SVG,
