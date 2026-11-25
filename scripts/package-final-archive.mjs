@@ -12,6 +12,7 @@ const out = offlineOutput(checkOnly || !process.argv[2]
 const assets = [
   ['public/cp05/DejaVuSans.ttf', 'DejaVuSans.ttf'],
   ['assets/brand/generated/icon-192.png', 'icon-192.png'],
+  ['public/cp05/DejaVuSans-Bold.ttf', 'DejaVuSans-Bold.ttf'],
   ['public/cp05/wordmark.png', 'wordmark.png'],
   ['public/cp05/FONT-LICENSE.txt', 'FONT-LICENSE.txt']
 ]

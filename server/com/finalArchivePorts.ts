@@ -9,7 +9,7 @@ async function rpc<T>(client:SupabaseClient,name:string,args:Record<string,unkno
  if(!r.data)throw new ArchiveFailure('missing')
  return r.data as T
 }
-export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,assets:()=>Promise<{font:Uint8Array;logo:Uint8Array;wordmark?:Uint8Array}>){
+export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,assets:()=>Promise<{font:Uint8Array;logo:Uint8Array;wordmark?:Uint8Array;boldFont?:Uint8Array}>){
  async function authenticate(){const r=await user.auth.getUser();if(r.error||!r.data.user?.email_confirmed_at)throw new ArchiveFailure('denied');return {id:r.data.user.id,confirmed:true}}
  async function documents(wid:string,rid:string){await authenticate();return validateDocumentSet(await rpc(user,'bt_final_archive_document',{p_workshop_id:wid,p_revision_id:rid}),wid,rid)}
  async function read(bucket:string,path:string){const r=await trusted.storage.from(bucket).download(path);if(r.error||!r.data)throw new ArchiveFailure('missing');return new Uint8Array(await r.data.arrayBuffer())}

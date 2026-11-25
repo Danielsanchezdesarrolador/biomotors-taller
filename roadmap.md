@@ -1,3 +1,13 @@
+## BT-PDF-UX-01 — revisión vectorial local, pendiente de aprobación (25/11/2026 Chile)
+
+Primera apariencia rechazada por el director. Corregidos curvas, iconos SVG,
+tarjetas, jerarquía, datos en columnas, negrita embebida, badges, totales y referencia
+OT corta. [Detalle y validación focalizada](docs/checkpoints/CHECKPOINT_BT_PDF_UX_01_20261125.md).
+Nuevos PDF para revisión; no se presume aprobación. SOLO LOCAL, NO PUSH/DEPLOY
+ni SQL o infraestructura. Originales históricos intactos. R2 sigue pausado.
+
+---
+
 ## BT-PDF-UX-01 — candidato visual local (25/11/2026 Chile)
 
 Informe y constancia premium A4 con texto real, logo oficial y lenguaje legible.

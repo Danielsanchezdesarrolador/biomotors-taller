@@ -79,3 +79,39 @@ NO cambios Supabase, Storage, Render, Edge productivas, variables, correo ni dat
 - `server/com/finalArchivePorts.ts`
 - `src/entrega/finalPdf.ts`
 - `tests/pdfPremiumLab.ts`
+
+## Revisión vectorial tras rechazo visual (25/11/2026 Chile)
+
+El director rechaza la apariencia de las muestras de `b6504ce`; no se registra
+aprobación visual. Se corrigen las once diferencias indicadas, sin reconstruir
+los contratos ni tocar originales históricos:
+
+- Franjas de cabecera e inferior trazadas con curvas Bézier/SVG, sin escalones.
+- Iconos específicos vectoriales (taller, cliente, vehículo, patente, documento,
+  calendario, kilometraje, herramientas, entrega, monedas, lista y alcance), sin
+  caracteres Unicode usados como iconos. Tarjetas y badges con bordes redondeados.
+- Datos generales como mockup: taller/cliente/vehículo/patente a izquierda y OT,
+  cotización, ingreso, kilometraje y motivo a derecha; iconos, etiquetas y valores
+  en negrita real. OT se abrevia a los ocho caracteres finales del UUID, rotulada
+  referencia, no correlativo oficial; el identificador completo sigue en backend.
+- DejaVu Sans Bold embebida (archivo de la familia instalada, bajo la licencia
+  DejaVu ya incluida), para evitar sustitución de fuente estándar del visor.
+  Asset y SHA-256 añadidos al paquete Edge candidato y al navegador; nada desplegado.
+- Jerarquía de títulos, «Detalle de trabajos», etiquetas realizadas/no realizadas
+  redondeadas con check/indicador vectorial y total azul intenso con panel celeste,
+  acento lateral, esquinas redondeadas y valores alineados en negrita.
+- Mejor distribución A4 y separación entre tarjetas. Motivo extenso continúa a
+  ancho completo en lugar de trasladar una fila enorme dejando vacía la primera
+  página. Cálculos, fechas, nombres neutrales, trazabilidad e integridad conservados.
+
+Validación solo de diseño: generación real de los dos PDF breves en una página
+y casos extensos; extracción de texto, límites y ocupación de páginas mediante
+`verify-premium-pdf.py`; 2 tests PDF seleccionados PASS (otros 3 omitidos),
+TypeScript PASS y empaquetado Edge offline con recursos verificados PASS.
+No se repiten backups, SEC07, auditorías ni pruebas generales de aplicación.
+Inspección visual de ambos rasterizados. Los datos siguen dinámicos/seleccionables;
+no se incrustan mockups como fondo. PDF y PNG de revisión en
+`/workspace/work/pdf-premium/`, fuera de Git.
+
+Solo candidato LOCAL, pendiente de nueva aprobación visual. NO PUSH/DEPLOY/SQL
+ni cambios de infraestructura. PDFs históricos y hashes existentes intactos.
