@@ -1,3 +1,9 @@
+## BT-PDF-UX-01-R1 — despliegue autorizado, CI 5/5 SUCCESS (25/11/2026 Chile)
+
+Código aprobado y CI verificada en b00c0df1cdd5cf3410a1d1edc85bb0ecdbedb0a2. Edge bt-final-archive v4 ACTIVE verify_jwt=true antes del despliegue. Nuevo workflow manual [PDF UX-01](.github/workflows/bt-pdf-ux-01-manual.yml), confirmación DESPLEGAR_PDF_UX_01, checkout SHA aprobado fijo, npm ci, doble empaquetado reproducible, comprobación de hashes de recursos, manifiesto y JWT. El hash JS anterior pertenece a v4 y no se reutiliza; se registra la nueva huella generada por ambos builds del commit autorizado, sin afirmar una huella preexistente independiente. No hay modificación de secretos, SQL, flags, permisos, Storage ni archivos históricos; solo deploy de bt-final-archive cuando el propietario ejecute el workflow. Conector sin dispatch; pendiente ejecución humana, verificación versión/JWT, Render para alinear generador/assets del cliente y QA alojada de nuevos PDF. Auto-Deploy OFF. Correo OFF. R2 pausado. No repetir SEC07.
+
+---
+
 # BT-PDF-UX-01 — rediseño local de documentos
 
 25/11/2026 Chile. Base main `1a5eec5` (continuidad y QA humana documentadas).
