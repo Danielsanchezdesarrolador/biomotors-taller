@@ -1,3 +1,10 @@
+
+## BT-FLOW-UX-01-R1 — correcciones de QA humana alojada (24/11/2026 Chile)
+
+SHA frontend LIVE `3e3fef594a13c8e90fc8851c45bf1b3ba1bd410e`, deploy `dep-dc3363u7bikc73bttehg`, CI 5/5 SUCCESS. Propietario detecta overflow horizontal/vertical, exceso de contenido, etapa activa anterior verde y mensaje genérico en aprobación. QA funcional NO aceptada aún. Diagnóstico y alcance R1 en [checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md). Implementación local única, sin push funcional/deploy/SQL/Edge/Storage/flags/correo hasta autorización específica. No repetir investigación ni pruebas cerradas; cero Codex para dirección técnica.
+
+---
+
 ## BT-FLOW-UX-01 — aprobación visual y publicación autorizada (24/11/2026, Chile)
 
 El propietario aprueba visualmente `45a806e5c71133c1365b1fba626edb677f1ea371`
