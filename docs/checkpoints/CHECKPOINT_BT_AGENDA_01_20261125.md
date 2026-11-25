@@ -1,3 +1,11 @@
+## 25/11/2026 — BT-AGENDA-01 SQL instalado OFF
+
+El propietario autorizó expresamente continuar sin respaldo nuevo hasta la tarde. Excepción puntual: último conjunto DB+Storage verificado no incluye cuatro PDF posteriores; no se declara respaldo vigente ni recuperación completa. Actualizar conjunto cifrado esta tarde, incluyendo nuevos registros y objetos, sin repetir restauración SEC07. Migración registrada `20261125154009_bt_agenda_01_intake_and_scheduling_off`, desde candidato aprobado de `de599d539050225cb693f7af42830d89f67ca3ff` (DDL original, transacción del migrador, límites de espera). Postflight: 5 tablas RLS, recepción pública FORCE, 7 triggers, anónimo sin RPC, authenticated sin DML directo de recepción/fase, funciones anteriores inaccesibles a roles expuestos. 0 rollout, 0 planificadas, 0 recepciones; 4 OT, 4 cotizaciones, 1 manifiesto y 5 objetos PDF conservan sus conteos. Advisor INFO sin políticas de tablas privadas es intencional (acceso por RPC autorizadas), no se amplían permisos. Correo OFF. No se ha validado QA alojada.
+
+**Siguiente inmediato:** ejecutar workflow manual [Agenda Edge](.github/workflows/bt-agenda-01-edge-manual.yml), confirmación `DESPLEGAR_AGENDA_EDGE_SQL_OFF_INSTALADO`, luego verificar versiones/JWT, desplegar frontend compatible OFF y habilitar solo taller QA. No se ejecutó workflow aún; no alterar secretos, datos históricos ni R2. Auto-Deploy OFF. Sin Codex.
+
+---
+
 ## 25/11/2026 — Activación BT-AGENDA-01 autorizada, preflight SQL PASS; pendiente respaldo vigente
 
 CI 5/5 SUCCESS en `de599d539050225cb693f7af42830d89f67ca3ff`, código visual aprobado. Propietario autoriza activación alojada secuencial exclusivamente QA. Lectura de PostgreSQL 17.11 confirma firmas CP05/EXP y dependencias, columnas y permisos esperados, Agenda ausente, cero emisiones pendientes, rollouts LIVE/REG/EXP exclusivamente QA y correo OFF. Hay tres objetos CP05 y dos de cierre; respaldo documentado 24/11 incluía un PDF, no cubre los cinco actuales. Antes de instalar SQL confirmar conjunto actualizado DB + Storage con el procedimiento existente; no repetir restauración SEC07 ni suites aprobadas. No se ha aplicado SQL ni desplegado.
