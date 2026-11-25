@@ -1,3 +1,9 @@
+## BT-FLOW-UX-01-R1 — corrección de estados OT (25/11/2026 Chile)
+
+Propietario autoriza implementar de inmediato la integración de estados OT en las ocho etapas existentes. R2 (eliminar aprobación) sigue PAUSADO. R1 LIVE f19b19977ba1c3e16b4866368588cf8906fb5a82, CI 5/5. Incidente COT-000002 R1: guardado/emisión y aprobación confirmados; ejecución rechazada por BT_FLOW_ORDER_NOT_READY porque OT está inspecting, no se guardó informe ni entrega. [Diagnóstico y entrega focalizada](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md). Implementación local autorizada; NO PUSH funcional ni deploy hasta autorización específica. No SQL, Edge, Storage, flags, correos ni modificación directa de registros reales. Reutilizar CP04 setStatus y validación por servidor; no debilitar guardas.
+
+---
+
 ## BT-FLOW-UX-01-R2 — PAUSADO por decisión del propietario (25/11/2026 Chile)
 
 El propietario decide conservar por ahora la aprobación del cliente. R2 queda diferido, no autorizado para ejecución; no ocultar etapa, no enviar encargo a Codex, no aplicar migraciones ni cambios de código, Edge, Render, flags o datos. R1 mantiene sus ocho etapas y requisitos vigentes. La propuesta R2 se conserva como referencia futura, no como tarea activa. Retomar exclusivamente con nueva autorización del propietario.
