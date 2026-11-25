@@ -1,3 +1,9 @@
+## BT-FLOW-UX-01-R2 — recorrido de siete etapas, sin aprobación obligatoria (25/11/2026 Chile)
+
+Tras realizar el recorrido R1, el propietario solicita eliminar la etapa Aprobación del cliente por fricción operativa. Cotización emitida → Ejecución, sin crear declaraciones ficticias. Diseño autorizado; implementación local y cambios de contratos pendientes. El director verificó dependencias SQL, transporte, historial y archivo final; no basta ocultar UI. [R2 y alcance](docs/checkpoints/CHECKPOINT_BT_FLOW_UX_01_20261124.md). Preservar documentos originales, aprobaciones históricas, aislamiento y confirmaciones de ejecución/entrega. Una entrega integrada local; NO PUSH funcional, NO DEPLOY, NO SQL/Edge/Storage/flags alojados ni correo hasta aprobación específica. Main único; economía de cuota.
+
+---
+
 ## BT-FLOW-UX-01-R1 — aprobación visual y publicación autorizada (24/11/2026 Chile)
 
 El propietario aprueba visualmente `1c23de9bf6041b226db33c6f9986eb99d1a49bd6`
