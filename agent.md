@@ -1,3 +1,24 @@
+## BT-AGENDA-01 — candidato local integrado (25/11/2026, Chile)
+
+Base confirmada `1161688e3c4ced40f5c9355140bd9faa9cfc52ba`, main único.
+Entrega nueva: cotización anticipada CP05 sobre solicitud OT planificada, aprobación
+LIVE-02 vigente, Agenda real con persistencia/RLS candidata, reagendamiento/cancelación,
+recepción inmutable sobre la misma OT y continuidad CP04 → ejecución/entrega/expediente.
+Diseño escritorio/móvil con AppShell R2 e indicadores desde servidor. Se conserva el
+ingreso tradicional y la aprobación obligatoria; no se regeneran originales históricos.
+[Checkpoint, validación, archivos y activación](docs/checkpoints/CHECKPOINT_BT_AGENDA_01_20261125.md).
+`VITE_BT_AGENDA_ENABLED=false`; rollout SQL sin activar. Migración candidata nueva,
+no aplicada. No ampliar el gate owner/admin+taller piloto del recorrido existente;
+los demás ámbitos autorizados continúan en CP04 tras recibir. Una OT abierta por
+vehículo se conserva; la idempotencia tradicional CP04 no se declara resuelta.
+Pendientes aceptación visual, publicación/CI y autorización independiente de SQL,
+alineación Edge y frontend, rollout QA y validación humana alojada. Reversión debe
+conservar compatibilidad con solicitudes/recepciones, no volver a generadores antiguos.
+SOLO LOCAL. NO PUSH/DEPLOY/SQL alojado/infraestructura/secretos/correos ni datos reales.
+Auto-Deploy OFF. R2 PAUSADO. SEC07 y auditorías cerradas no se reabren.
+
+---
+
 ## BT-PDF-UX-01-R1 — despliegue autorizado, CI 5/5 SUCCESS (25/11/2026 Chile)
 
 Código aprobado y CI verificada en b00c0df1cdd5cf3410a1d1edc85bb0ecdbedb0a2. Edge bt-final-archive v4 ACTIVE verify_jwt=true antes del despliegue. Nuevo workflow manual [PDF UX-01](.github/workflows/bt-pdf-ux-01-manual.yml), confirmación DESPLEGAR_PDF_UX_01, checkout SHA aprobado fijo, npm ci, doble empaquetado reproducible, comprobación de hashes de recursos, manifiesto y JWT. El hash JS anterior pertenece a v4 y no se reutiliza; se registra la nueva huella generada por ambos builds del commit autorizado, sin afirmar una huella preexistente independiente. No hay modificación de secretos, SQL, flags, permisos, Storage ni archivos históricos; solo deploy de bt-final-archive cuando el propietario ejecute el workflow. Conector sin dispatch; pendiente ejecución humana, verificación versión/JWT, Render para alinear generador/assets del cliente y QA alojada de nuevos PDF. Auto-Deploy OFF. Correo OFF. R2 pausado. No repetir SEC07.

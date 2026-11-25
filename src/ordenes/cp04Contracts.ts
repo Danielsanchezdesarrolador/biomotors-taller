@@ -12,7 +12,7 @@ export function inspectionResolutionLabel(item:Pick<Finding,'result'|'resolution
 }
 export type WorkOrder=Readonly<{
   workshop_id:string;id:string;vehicle_id:string;complaint:string;
-  intake_odometer:number|null;status:OrderStatus;opened_by:string;
+  intake_phase?:'planned'|'received';intake_received_at?:string|null;intake_odometer:number|null;status:OrderStatus;opened_by:string;
   opened_at:string;closed_at:string|null;updated_at:string;cancelled_at?:string|null
 }>
 export type Finding=Readonly<{

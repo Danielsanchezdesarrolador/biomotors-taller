@@ -41,7 +41,7 @@ export type Source = {
     model: string
     model_year?: number | null
   }
-  order: { id: string; complaint: string; opened_at: string; intake_odometer: number | null }
+  order: { id: string; complaint: string; intake_phase?:'planned'|'received'; opened_at: string; intake_odometer: number | null }
 }
 export type Snapshot = Source & {
   quote: Quote & { revision: number }

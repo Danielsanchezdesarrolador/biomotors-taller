@@ -130,6 +130,8 @@ function PrivateClientDirectory({
 }
 const GuidedWorkspace = import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP06_PRIVATE_ENABLED==='true' && import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED==='true' && import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED==='true' && import.meta.env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' ? lazy(()=>import('./guided/GuidedWorkspace')) : null
 
+const Agenda = import.meta.env.VITE_BT_AGENDA_ENABLED==='true' ? lazy(()=>import('./agenda/AgendaPrivatePanel')) : null
+
 export function OfficialWorkspaceView({
   review = false,
   onReviewExit,
@@ -151,10 +153,11 @@ export function OfficialWorkspaceView({
   const privateSession = !!session && !review
   const navigation = useWorkspaceNavigation(privateSession)
   const {screen,navigate:navigateScreen} = navigation
+  const [quoteFromAgenda,setQuoteFromAgenda]=useState(false)
   const [quoteOrder, setQuoteOrder] = useState<string | undefined>()
   const [quoteVehicle, setQuoteVehicle] = useState<string | undefined>()
   const renderPanel = (screen: Screen) => (
-screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
+screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspense fallback={<p role="status">Cargando Agenda…</p>}><Agenda controller={session.directoryController} isActive={navigation.screen==='agenda'&&!guidedOpen} onDirectory={()=>navigateScreen('clientes')} onOrders={()=>navigateScreen('ordenes')} onQuote={id=>{setQuoteFromAgenda(true);setQuoteOrder(id);setQuoteVehicle(undefined);navigateScreen('informes')}} onReceive={id=>{setGuidedStart({orderId:id});setGuidedOpen(true)}}/></Suspense> : screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
         <PrivateWorkshopSettings controller={session.directoryController}/>
       ) : screen === 'ordenes' &&
       session?.directoryController &&
@@ -165,6 +168,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
           onQuote={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
               ? (id) => {
+                  setQuoteFromAgenda(false)
                   setQuoteOrder(id)
                   setQuoteVehicle(undefined)
                   navigateScreen('informes')
@@ -182,7 +186,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
           controller={session.directoryController}
           initialVehicleId={quoteVehicle}
           initialOrderId={quoteOrder}
-          onBack={() => navigateScreen(quoteVehicle ? 'clientes' : 'ordenes')}
+          onBack={() => navigateScreen(quoteFromAgenda?'agenda':quoteVehicle ? 'clientes' : 'ordenes')}
         />
       ) : screen === 'clientes' &&
         session?.directoryController &&
@@ -193,6 +197,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
           onVehicleQuotes={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
               ? (id) => {
+                  setQuoteFromAgenda(false)
                   setQuoteVehicle(id)
                   setQuoteOrder(undefined)
                   navigateScreen('informes')
@@ -251,7 +256,7 @@ screen === 'configuracion' && !review && session?.directoryController && import.
               ? 'Conectado al taller autorizado.'
               : session
                 ? session.directoryController &&
-                  (screen === 'clientes' ||
+                  (screen === 'agenda' && !!Agenda || screen === 'clientes' ||
                     (screen === 'informes' &&
                       import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true') ||
                     (screen === 'ordenes' &&

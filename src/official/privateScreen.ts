@@ -8,7 +8,7 @@
 import type { Screen } from '../layout/AppShell'
 
 const key = 'bt:private-screen:v1'
-const permitted: readonly Screen[] = ['inicio', 'ordenes', 'clientes', 'informes', 'configuracion']
+const permitted: readonly Screen[] = ['inicio', 'agenda', 'ordenes', 'clientes', 'informes', 'configuracion']
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
 function browserStore(): Store | null {
@@ -22,7 +22,7 @@ function browserStore(): Store | null {
 export function readPrivateScreen(store: Store | null = browserStore()): Screen {
   try {
     const value = store?.getItem(key)
-    return permitted.includes(value as Screen) ? value as Screen : 'inicio'
+    return (value!=='agenda'||import.meta.env.VITE_BT_AGENDA_ENABLED==='true') && permitted.includes(value as Screen) ? value as Screen : 'inicio'
   } catch {
     return 'inicio'
   }

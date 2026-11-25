@@ -117,6 +117,7 @@ assert.ok(
       id.endsWith('.css') ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
+      (process.env.VITE_BT_AGENDA_ENABLED==='true' && /src\/agenda\//.test(id)) ||
       (finalArchiveEnabled && flowLiveEnabled && /src\/guided\/(?:GuidedWorkspace|progress)\.(?:tsx|ts)$/.test(id)) ||
       (finalArchiveEnabled && /src\/expedientes\//.test(id)) ||
       (recordsEnabled && /src\/records\//.test(id)) ||
@@ -158,3 +159,7 @@ const manifest = JSON.parse(readFileSync('dist/manifest.webmanifest', 'utf8'))
 assert.match(manifest.name, /ByteTorque/)
 assert.equal(manifest.short_name, 'ByteTorque')
 console.log('Public module graph, fixture exclusion and ByteTorque PWA identity: PASS')
+
+if(process.env.VITE_BT_AGENDA_ENABLED!=='true')assert.ok(modules.every(id=>!id.includes('src/agenda/')),'Agenda must remain excluded while OFF')
+
+if(process.env.VITE_BT_AGENDA_ENABLED==='true')for(const flag of ['VITE_BT_AUTH_R1_ENABLED','VITE_BT_CP03_PRIVATE_ENABLED','VITE_BT_CP04_PRIVATE_ENABLED','VITE_BT_CP05_PRIVATE_ENABLED','VITE_BT_CP06_PRIVATE_ENABLED','VITE_BT_CP05_DOCUMENTS_ENABLED','VITE_BT_FLOW_LIVE_02_ENABLED','VITE_BT_FINAL_ARCHIVE_ENABLED','VITE_BT_RECORDS_PRIVATE_ENABLED'])assert.equal(process.env[flag],'true','Agenda needs private prerequisites')

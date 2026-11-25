@@ -60,6 +60,7 @@ export function EmptyCard({
   )
 }
 const headings: Record<Screen, [string, string]> = {
+  agenda:['Agenda de servicios','Acceso autorizado al calendario del taller.'],
   inicio: [
     '¿Qué vamos a hacer hoy?',
     'Tu taller, conectado y organizado desde el primer ingreso hasta la entrega.'
@@ -85,6 +86,7 @@ const metrics: Record<
   Screen,
   { label: string; value: number | string; icon: LucideIcon; color: string }[]
 > = {
+  agenda: [],
   inicio: [
     { label: 'Órdenes activas', value: workspace.orders.length, icon: Wrench, color: 'blue' },
     {

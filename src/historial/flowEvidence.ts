@@ -156,5 +156,15 @@ export async function readFlowEvidence(
         !['vehicleChecked','workChecked','documentsChecked','pendingExplained']
           .every(k => d.checklist[k] === true)) invalid()
   }
-  return { status: 'ready', approvals, executions, deliveries }
+  const planned=revisions.filter(r=>r.payload.order.intake_phase==='planned').map(r=>r.id)
+  const receipts=planned.length?await load<NonNullable<FlowEvidence['receipts']>[number]>('bt_agenda_receipts',planned,'received_at','revision_id',vid):[]
+  const received=new Set<string>()
+  for(const receipt of receipts){
+    const r=revById.get(receipt.revision_id),q=r&&quoteById.get(r.quote_id)
+    if(!q||receipt.workshop_id!==wid||receipt.order_id!==q.order_id||receipt.quote_id!==q.id||receipt.vehicle_id!==vid||receipt.customer_id!==q.customer_id||received.has(receipt.order_id))denied()
+    requireId(receipt.id);requireId(receipt.recorded_by);instant(receipt.received_at)
+    if(!Number.isInteger(receipt.odometer)||receipt.odometer<0||receipt.odometer>3000000||typeof receipt.complaint!=='string'||receipt.complaint.trim().length<3||receipt.complaint.length>2000)invalid()
+    received.add(receipt.order_id)
+  }
+  return { status: 'ready', approvals, executions, deliveries, receipts }
 }

@@ -27,7 +27,9 @@ export type EvidenceDelivery = {
   recorded_at: string; recorded_by: string; checklist: Record<string, boolean>
   handover_method: string; handover_note: string
 }
+export type EvidenceReceipt={workshop_id:string;id:string;order_id:string;vehicle_id:string;customer_id:string;quote_id:string;revision_id:string;received_at:string;odometer:number;complaint:string;recorded_by:string}
 export type FlowEvidence = {
+  receipts?:EvidenceReceipt[]
   status: 'off' | 'unavailable' | 'ready'
   approvals: EvidenceApproval[]
   executions: EvidenceExecution[]

@@ -20,7 +20,7 @@ import {
   type Page
 } from './contracts'
 const orderCols =
-  'workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'
+  'workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'+(import.meta.env.VITE_BT_AGENDA_ENABLED==='true'?',intake_phase,intake_received_at':'')
 type Row = { workshop_id: string; id: string }
 export function historyRepository(
   client: SupabaseClient,

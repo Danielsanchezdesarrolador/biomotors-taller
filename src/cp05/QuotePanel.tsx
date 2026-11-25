@@ -728,7 +728,7 @@ export function QuotePanel({
                       </button>
                       {executionOpen && (
                         import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
-                          ? !guided && <FlowLive02Loader key={revision.id}
+                          ? !guided && <FlowLive02Loader stage={bundle?.source.order.intake_phase==='planned'?4:undefined} key={revision.id}
                               client={privateClient} context={context}
                               revision={revision} quote={bundle.quote} />
                           : <WorkExecutionDraft key={revision.id}

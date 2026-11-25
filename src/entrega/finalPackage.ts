@@ -109,6 +109,16 @@ export function prepareClosingPacket(
       !checkNames.every(([key])=>d.checklist?.[key]===true)) invalid()
   if (!/^[a-f0-9]{64}$/i.test(revision.pdf_sha256) ||
       !/^[a-f0-9]{64}$/i.test(revision.payload_sha256)) invalid()
+  let intake={complaint:p.order.complaint,openedAt:p.order.opened_at,odometer:p.order.intake_odometer}
+  if(p.order.intake_phase==='planned'){
+    const receipts=evidence.receipts?.filter(r=>r.revision_id===revision.id)||[]
+    if(receipts.length!==1)invalid()
+    const r=receipts[0]
+    if(r.workshop_id!==quote.workshop_id||r.quote_id!==quote.id||r.order_id!==quote.order_id||r.vehicle_id!==quote.vehicle_id||r.customer_id!==quote.customer_id)denied()
+    historyId(r.id);historyId(r.recorded_by);instant(r.received_at)
+    if(!Number.isInteger(r.odometer)||r.odometer<0||r.odometer>3000000||typeof r.complaint!=='string'||r.complaint.trim().length<3||r.complaint.length>2000||Date.parse(r.received_at)>Date.parse(e.recorded_at))invalid()
+    intake={complaint:r.complaint,openedAt:r.received_at,odometer:r.odometer}
+  }
   const base='OT-'+fileToken(quote.order_id)+'_R'+revision.revision
   return {
     state:'prepared_locally_not_archived_or_emailed',
@@ -117,8 +127,7 @@ export function prepareClosingPacket(
     customer:{id:quote.customer_id,name:p.customer.full_name},
     vehicle:{id:quote.vehicle_id,plate:p.vehicle.plate,
       description:p.vehicle.make+' '+p.vehicle.model},
-    order:{id:quote.order_id,complaint:p.order.complaint,
-      openedAt:p.order.opened_at,odometer:p.order.intake_odometer},
+    order:{id:quote.order_id,...intake},
     quote:{
       id:quote.id,number:p.quote.number,revision:revision.revision,
       revisionId:revision.id,pdfSha256:revision.pdf_sha256,

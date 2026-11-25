@@ -15,7 +15,9 @@ import {
 } from './cp04Contracts'
 
 const recordsEnabled=import.meta.env.VITE_BT_RECORDS_PRIVATE_ENABLED==='true'
-const orderCols='workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'+(recordsEnabled?',cancelled_at':'')
+function physicalOrder(order:WorkOrder):WorkOrder{return order.intake_received_at?{...order,opened_at:order.intake_received_at}:order}
+const agendaEnabled=import.meta.env.VITE_BT_AGENDA_ENABLED==='true'
+const orderCols='workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at'+(recordsEnabled?',cancelled_at':'')+(agendaEnabled?',intake_phase,intake_received_at':'')
 const findingCols='workshop_id,id,order_id,vehicle_id,category,result,note,resolution,resolved_at,recorded_by,created_at,updated_at'
 const vehicleCols='workshop_id,id,customer_id,plate,plate_key,make,model,odometer_km'
 const staff:readonly Role[]=['owner','admin','reception']
@@ -91,9 +93,10 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       .eq('workshop_id',tenant)
     if(operational)query=query.is('vehicles.archived_at',null).is('vehicles.customers.archived_at',null)
     if(operational&&recordsEnabled)query=query.is('cancelled_at',null)
+    if(agendaEnabled)query=query.eq('intake_phase','received')
     const orders=await query.order('opened_at',{ascending:false}).limit(recentOrdersLimit)
     if(orders.error)workFailure(orders.error)
-    const list=many<WorkOrder>(orders.data,tenant)
+    const list=many<WorkOrder>(orders.data,tenant).map(physicalOrder)
     if(!list.length)return []
     const vehicles=await client.from('vehicles').select(vehicleCols)
       .eq('workshop_id',tenant).in('id',[...new Set(list.map(x=>x.vehicle_id))])
@@ -112,7 +115,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       .eq('workshop_id',tenant).eq('id',key).maybeSingle()
     if(result.error)workFailure(result.error)
     if(!result.data){valid(version);return null}
-    const order=check<WorkOrder>(result.data,tenant)
+    const order=physicalOrder(check<WorkOrder>(result.data,tenant))
     const vehicleRes=await client.from('vehicles').select(vehicleCols)
       .eq('workshop_id',tenant).eq('id',order.vehicle_id).maybeSingle()
     if(vehicleRes.error)workFailure(vehicleRes.error)
@@ -194,7 +197,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
       .insert({workshop_id:tenant,...input}).select(orderCols).single()
     if(result.error)workFailure(result.error)
     valid(version)
-    const order=check<WorkOrder>(result.data,tenant)
+    const order=physicalOrder(check<WorkOrder>(result.data,tenant))
     if(order.vehicle_id!==input.vehicle_id)throw new WorkOrderFailure('unavailable')
     return order
   }

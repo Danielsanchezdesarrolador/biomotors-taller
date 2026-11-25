@@ -486,9 +486,9 @@ export function HistoryView({
               {visits.map(({ order: o, findings }) => (
                 <li className="dashboard-card cp06-visit" key={o.id}>
                   <header>
-                    <time dateTime={o.opened_at}>{date(o.opened_at)}</time>
+                    <time dateTime={o.intake_received_at||o.opened_at}>{date(o.intake_received_at||o.opened_at)}</time>
                     <span className={'cp06-status cp06-status-' + o.status}>
-                      {workStatusLabel[o.status]}
+                      {o.intake_phase==='planned'?'Solicitud anticipada':workStatusLabel[o.status]}
                     </span>
                   </header>
                   <h3>Motivo de ingreso</h3>

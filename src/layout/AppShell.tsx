@@ -1,3 +1,4 @@
+import {CalendarDays} from 'lucide-react'
 import { BrandLogo } from '../brand/BrandLogo'
 import { planDetail, planLabel, type PlanStatus } from '../plans/planStatus'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -18,9 +19,10 @@ import {
   X,
   type LucideIcon
 } from 'lucide-react'
-export type Screen = 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
+export type Screen = 'inicio' | 'agenda' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
 export const navItems: { id: Screen; label: string; compact: string; icon: LucideIcon }[] = [
   { id: 'inicio', label: 'Inicio', compact: 'Inicio', icon: House },
+  ...(import.meta.env.VITE_BT_AGENDA_ENABLED==='true' ? [{id:'agenda' as const,label:'Agenda',compact:'Agenda',icon:CalendarDays}] : []),
   { id: 'ordenes', label: 'Órdenes de trabajo', compact: 'Órdenes', icon: Wrench },
   { id: 'clientes', label: 'Clientes y vehículos', compact: 'Clientes', icon: CarFront },
   { id: 'informes', label: 'Informes y cotizaciones', compact: 'Informes', icon: FileText },
@@ -281,8 +283,8 @@ export function AppShell({
           {children}
         </main>
       </div>
-      <nav className="bottom-nav" aria-label="Navegación móvil">
-        {navItems.map(({ id, compact, icon: Icon }) => (
+      <nav className={"bottom-nav"+(import.meta.env.VITE_BT_AGENDA_ENABLED==='true'?' agenda-bottom':'')} aria-label="Navegación móvil">
+        {navItems.filter(item=>import.meta.env.VITE_BT_AGENDA_ENABLED!=='true'||['inicio','agenda','clientes'].includes(item.id)).map(({ id, compact, icon: Icon }) => (
           <button
             type="button"
             key={id}
@@ -294,6 +296,7 @@ export function AppShell({
             <span>{compact}</span>
           </button>
         ))}
+        {import.meta.env.VITE_BT_AGENDA_ENABLED==='true'&&<button type="button" className="bottom-item" aria-label="Más secciones" onClick={()=>setMobileMenuOpen(true)}><Menu size={22}/><span>Más</span></button>}
       </nav>
     </div>
   )

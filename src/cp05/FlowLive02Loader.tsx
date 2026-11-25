@@ -8,6 +8,7 @@ type Props = {
   client: SupabaseClient
   context: Context
   quote: Quote
+  stage?:4
   revision: Revision
 }
 export function FlowLive02Loader(props: Props) {

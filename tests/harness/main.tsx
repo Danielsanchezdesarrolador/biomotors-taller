@@ -1,6 +1,7 @@
 import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './WorkflowApp'
+const AgendaFixture=lazy(()=>import('./AgendaFixture'))
 const GuidedFixture=lazy(()=>import('./GuidedFixture'))
 const FinalArchiveFixture=lazy(()=>import('./FinalArchiveFixture'))
 const RecordsFixture = lazy(() => import('./RecordsFixture'))
@@ -17,7 +18,7 @@ import '../../src/premium.css'
 const path = publicAccessPath(window.location)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {path === '/guided-qa' ? (<Suspense fallback={<p>Cargando fixture…</p>}><GuidedFixture/></Suspense>) : path === '/final-archive-qa' ? (<Suspense fallback={<p>Preparando expediente ficticio…</p>}><FinalArchiveFixture/></Suspense>) : path === '/records-qa' ? (<Suspense fallback={<p>Preparando registros sintéticos…</p>}><RecordsFixture/></Suspense>) : path === '/com01d-review-qa' ? (
+    {path === '/agenda-qa' ? <Suspense fallback={<p>Cargando Agenda…</p>}><AgendaFixture/></Suspense> : path === '/guided-qa' ? (<Suspense fallback={<p>Cargando fixture…</p>}><GuidedFixture/></Suspense>) : path === '/final-archive-qa' ? (<Suspense fallback={<p>Preparando expediente ficticio…</p>}><FinalArchiveFixture/></Suspense>) : path === '/records-qa' ? (<Suspense fallback={<p>Preparando registros sintéticos…</p>}><RecordsFixture/></Suspense>) : path === '/com01d-review-qa' ? (
       <Suspense fallback={<p>Preparando revisión documental aislada…</p>}>
         <ClosingReviewFixture />
       </Suspense>
