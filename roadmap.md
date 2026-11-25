@@ -1,3 +1,14 @@
+## BT-FLOW-UX-01-R1 — aprobación visual y publicación autorizada (24/11/2026 Chile)
+
+El propietario aprueba visualmente `1c23de9bf6041b226db33c6f9986eb99d1a49bd6`
+y autoriza publicar los cambios existentes en main y permitir las CI correspondientes.
+No se modifican funcionalidades ni se repiten las pruebas locales aprobadas.
+Esta autorización levanta únicamente el NO PUSH de R1; siguen pendientes QA humana
+alojada e idempotencia concurrente CP04. Auto-Deploy OFF. **NO DEPLOY, NO SQL,
+NO cambios en Supabase, Storage, Edge Functions ni variables.**
+
+---
+
 ## BT-FLOW-UX-01-R1 — candidato local corregido (24/11/2026 Chile)
 
 Ocho etapas compactas, footer conectado al guardado real y relectura, aprobación

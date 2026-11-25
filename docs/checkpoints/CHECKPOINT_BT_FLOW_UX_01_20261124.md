@@ -297,3 +297,17 @@ owner/admin conservados. SEC07 y auditorías anteriores no se reabren.**
 - `src/informes/trabajos/WorkItemsEditor.tsx`
 - `src/ordenes/Cp04MultipuntoChecklist.tsx`
 - `tests/harness/GuidedFixture.tsx`
+
+## BT-FLOW-UX-01-R1 — aprobación visual y publicación autorizada (24/11/2026 Chile)
+
+El propietario aprueba visualmente `1c23de9bf6041b226db33c6f9986eb99d1a49bd6`
+y autoriza publicar los cambios existentes en main y permitir las CI correspondientes.
+No se modifican funcionalidades ni se repiten las pruebas locales aprobadas.
+Esta autorización levanta únicamente el NO PUSH de R1; siguen pendientes QA humana
+alojada e idempotencia concurrente CP04. Auto-Deploy OFF. **NO DEPLOY, NO SQL,
+NO cambios en Supabase, Storage, Edge Functions ni variables.**
+
+---
+
+Base remota comprobada: `d17ece4e731db1209eb587981513f88a5dfb22d4`.
+Publicación por avance rápido, conservando íntegro el commit funcional aprobado.
