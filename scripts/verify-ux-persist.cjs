@@ -70,11 +70,30 @@ async function stable(p,value){
   assert.equal(await row.getByRole('radio',{name:/ · OK$/}).isChecked(),true)
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(businessWrites(requests).length,attempts)
   state.failFindings=false;await row.getByRole('button',{name:'Reintentar esta X',exact:true}).click();await row.getByText('Guardado',{exact:true}).waitFor();assert.equal(state.findings.length,1)
-  await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
-  await p.locator('.cp04-pdf-preview iframe').waitFor()
-  await p.evaluate(()=>{window.__uxPdf=document.querySelector('.cp04-pdf-preview iframe')})
+  // The approved PDF preview now uses a modal: background navigation is intentionally blocked until it closes.
+  const pdfWrites=businessWrites(requests).length
+  const modal=p.getByRole('dialog',{name:'Vista previa del borrador · No enviado'})
+  const frame=modal.getByTitle('Vista previa de la inspección multipunto en PDF')
+  const openPdf=async()=>{
+   await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
+   await modal.waitFor();await frame.waitFor()
+   const src=await frame.getAttribute('src');assert.ok(src?.startsWith('blob:'))
+   const digest=await p.evaluate(async url=>{
+    const response=await fetch(url.split('#')[0]);if(!response.ok)throw Error('PDF unavailable')
+    const bytes=await response.arrayBuffer()
+    if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw Error('Not a PDF')
+    return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
+   },src)
+   await modal.getByRole('button',{name:'Cerrar vista previa PDF'}).click()
+   await modal.waitFor({state:'detached'})
+   return digest
+  }
+  const originalPdf=await openPdf()
+  const pdfReads=dataReads(requests)
   await nav(3);await nav(1)
-  assert.equal(await p.evaluate(()=>window.__uxPdf===document.querySelector('.cp04-pdf-preview iframe')&&window.__uxPdf.isConnected),true)
+  assert.deepEqual(await openPdf(),originalPdf,'Same cached PDF bytes after returning to the mounted module')
+  assert.equal(dataReads(requests),pdfReads,'Reopening the same PDF does not reload business records')
+  assert.equal(businessWrites(requests).length,pdfWrites,'Preview and navigation do not write or issue')
   // CP03 selection and CP06 subview stay mounted while visiting another module.
   await nav(2);await p.getByRole('button',{name:'Cerrar formulario',exact:true}).click()
   await p.getByRole('button',{name:/Cliente sintético UX/}).first().click()
@@ -99,7 +118,7 @@ async function stable(p,value){
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(await p.locator('.workspace-views').count(),0)
   assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),false)
   assert.deepEqual(errors,[])
-  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF iframe retained','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
+  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF modal reopen retains exact cached bytes without business reads/writes','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
   await p.close();console.log('BT_UX_PERSIST_PASS',engine,width)
  }
  fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2))
