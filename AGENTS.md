@@ -1,3 +1,11 @@
+## 26/11/2026 — QA real del taller piloto (en curso)
+
+LIVE-FIX-01 integrado en `9381d103f8b32c56e535b3085c8938843c0c79f1`, CI 5/5 SUCCESS incluyendo nueva regresión Chromium/WebKit; Render dep-dc49raeq1p3s73dbmleg LIVE, luego titular habilitó VITE_BT_PLAN04_WORKSHOPS_ENABLED y confirmó interfaz activa. MFA, Full permanente, creación de taller propio, identidad comercial persistente, registro móvil y aceptación de mecánico (1/8 activos, 0 reservas) verificados en QA real. Activación individual de operaciones, agenda y archivo autorizada y verificada en Supabase 21:24 UTC, sin alterar los dos talleres previos. No implica aceptación completa.
+
+Pendientes agrupados: BT-UX-SESSION-01 (restaurar taller/pantalla con revalidación servidor), BT-UX-NAV-01 (navegación Configuración), BT-UX-INVITE-01 (continuidad invitación tras confirmación de registro), **BT-UX-KM-01** (kilometraje chileno: 120.000 rechazado, 120000 aceptado por titular; normalizar separadores de miles sin reinterpretar decimales ni datos inválidos, mostrar validación explícita). Registrar y resolver juntos tras completar QA multiusuario; no repetir suites históricas, ni Codex por cada incidencia. [Checkpoint QA real](docs/checkpoints/CHECKPOINT_BT_PILOTO_QA_REAL_20261126.md). Las notas anteriores se conservan como histórico.
+
+---
+
 ## 26/11/2026 — BT-PLAN-04BC-LIVE-FIX-01, candidato privado
 
 Cuenta personal accesible desde el menú aun con membresías; licencia personal y plan efectivo del taller consultados por separado al servidor. Creación con RPC existente, cambio autorizado de taller y borradores aislados; Básico neutro, Plus azul y Full con corona dorada. Invalidación tras mutación confirmada del creador y reconsulta automática, sin conceder permisos desde la UI. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_LIVE_FIX_01_20261126.md).
