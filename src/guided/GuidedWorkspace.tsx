@@ -1,3 +1,4 @@
+import {parseKilometres} from '../clientes/kilometres'
 import {useCallback,useEffect,useRef,useState} from 'react'
 import {CarFront,CheckCircle2,ClipboardCheck,FileText,ListChecks,RefreshCw,ShieldCheck,Wrench,X} from 'lucide-react'
 import {clp} from '../ordenes/orderMoney'
@@ -149,9 +150,10 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
    const existing=(await p.orders.recentOrders(true)).filter(x=>x.vehicle.id===vehicle&&!['closed'].includes(x.order.status))
    if(existing.length){setOrders(existing);setError('Existe una orden abierta. Selecciona Continuar para evitar duplicarla.');return}
    if(uncertain.current)throw Error('uncertain')
-   if(!complaint.trim()||(km!==''&&!/^\d+$/.test(km)))throw Error('input')
+   if(!complaint.trim())throw Error('input')
+   const mileage=parseKilometres(km)
    uncertain.current=true
-   const created=await p.orders.createOrder({vehicle_id:vehicle,complaint,intake_odometer:km===''?null:Number(km)})
+   const created=await p.orders.createOrder({vehicle_id:vehicle,complaint,intake_odometer:mileage})
    id=created.id;uncertain.current=false
   }
   if(!id)throw Error('order')
@@ -190,7 +192,7 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
    <div className="guided-stage">
    {step===0&&order&&<section className="guided-reception"><h3>Cliente y vehículo de esta visita</h3><p>{customerName}</p><p>{order.vehicle.plate} · {order.vehicle.make} {order.vehicle.model}</p><p>La OT conserva su cliente y vehículo originales. Para otro ingreso, guarda y sal e inicia una visita nueva.</p></section>}
    {step===0&&!order&&<><details><summary>Continuar trabajo confirmado</summary>{orders.map(x=><button key={x.order.id} disabled={busy} onClick={()=>void resume(x.order.id)}>{x.vehicle.plate??'Sin patente'} · {x.order.complaint} · Continuar</button>)}</details><Cp03PilotDirectoryView onSelectedVehicle={selectVehicle} guided initialVehicleId={vehicle||undefined} registerSave={registerSave} onPendingChange={setQuotePending} vehicleActionLabel="Usar este vehículo en el recorrido" repository={p.directory} role={context.role} workshopName={context.workshop.name} draftScope={{userId:context.userId,workshopId:context.workshop.id}} onVehicleQuotes={id=>{selectVehicle(id);setNotice('Vehículo seleccionado; confirma el vínculo para continuar.')}}/>{vehicle&&<p>Vehículo seleccionado para este recorrido.</p>}</>}
-   {step===1&&<section className="guided-reception"><label>Motivo de ingreso<textarea value={complaint} disabled={!!order||busy} onChange={e=>setComplaint(e.target.value)}/></label><label>Kilometraje<input inputMode="numeric" value={km} disabled={!!order||busy} onChange={e=>setKm(e.target.value)}/></label>{order&&<p>Recepción ya registrada. No se creará otra orden.</p>}{orders.filter(x=>x.vehicle.id===vehicle&&x.order.status!=='closed').map(x=><button key={x.order.id} onClick={()=>void resume(x.order.id)} disabled={busy}>Continuar OT {x.order.id.slice(0,8)}</button>)}</section>}
+   {step===1&&<section className="guided-reception"><label>Motivo de ingreso<textarea value={complaint} disabled={!!order||busy} onChange={e=>setComplaint(e.target.value)}/></label><label>Kilometraje<input aria-label="Kilometraje" inputMode="numeric" value={km} disabled={!!order||busy} onChange={e=>setKm(e.target.value)}/>{(()=>{try{parseKilometres(km);return null}catch(e){return <small role="alert">{(e as Error).message}</small>}})()}</label>{order&&<p>Recepción ya registrada. No se creará otra orden.</p>}{orders.filter(x=>x.vehicle.id===vehicle&&x.order.status!=='closed').map(x=><button key={x.order.id} onClick={()=>void resume(x.order.id)} disabled={busy}>Continuar OT {x.order.id.slice(0,8)}</button>)}</section>}
    {step===2&&order&&<p role="status">Inspección registrada · {inspectionSummary.reviewed} revisados · {inspectionSummary.notChecked} declarados sin revisar · {inspectionSummary.resolved} resueltos. Los restantes conservan su estado.</p>}
    {step===2&&order&&<Cp04MultipuntoChecklist findings={findings} repository={p.orders} scope={{userId:context.userId,workshopId:context.workshop.id,orderId:order.order.id,vehicleId:order.vehicle.id}} onSaved={f=>setFindings(rows=>[...rows.filter(x=>x.id!==f.id),f])} onQueueChange={(n,i)=>{setOutstanding(n);setIncomplete(i)}} onBack={()=>{if(!outstanding&&!incomplete)setStep(1)}} disabled={busy} readOnly={['ready','closed'].includes(order.order.status)} plate={order.vehicle.plate}/>}
    {step===2&&order&&<Cp04MultipuntoPdfPreview workshopName={context.workshop.name} order={order} findings={findings} outstanding={outstanding} incomplete={incomplete} disabled={busy||!isActive} loadIdentity={p.orders.pdfIdentity}/>}

@@ -51,6 +51,16 @@ export class AuthFailure extends Error {
     super(kind)
   }
 }
+const selectionKey='bt:workshop-hint:v1'
+function selectionHint(userId?:string,workshopId?:string):string|undefined {
+ try {
+  if(typeof window==='undefined')return
+  if(!userId){window.localStorage.removeItem(selectionKey);return}
+  if(workshopId){window.localStorage.setItem(selectionKey,JSON.stringify({userId,workshopId}));return workshopId}
+  const value=JSON.parse(window.localStorage.getItem(selectionKey)||'null')
+  return value?.userId===userId&&typeof value.workshopId==='string'?value.workshopId:undefined
+ }catch{return}
+}
 const expired = 'La sesión venció o dejó de ser válida. Vuelve a iniciar sesión.'
 export class AuthController {
   private state: AuthState
@@ -156,6 +166,7 @@ export class AuthController {
     if (!this.gateway || this.cleanup) return () => {}
     this.cleanup = this.gateway.subscribe((event, observedUserId) => {
       if (event === 'SIGNED_OUT') {
+        selectionHint()
         if (this.blocked && this.state.phase === 'signing-out') return
         this.epoch++
         this.validation = undefined
@@ -238,6 +249,7 @@ export class AuthController {
         this.selected = undefined
         this.set({phase:'checking',message:'Verificando sesión y autorización…'})
       }
+      if(!requested)requested=selectionHint(user.id)
       const rows = await this.gateway.memberships(user.id)
       if (epoch !== this.epoch) return
       const active = rows.filter(
@@ -254,7 +266,9 @@ export class AuthController {
           return matching.length === 1 ? [{ workshop, role: matching[0].role as Role }] : []
         })
       if (epoch !== this.epoch) return
-      if (!choices.length || (requested && !choices.some((c) => c.workshop.id === requested))) {
+      const lostSelection=!!requested&&!choices.some(c=>c.workshop.id===requested)
+      if(lostSelection){requested=undefined;this.selected=undefined;selectionHint()}
+      if (!choices.length||(lostSelection&&selection!==undefined)) {
         this.selected = undefined
         if (routine && previous.phase==='no-membership' && previous.identityId===user.id &&
             previous.identityName===user.displayName) return
@@ -268,7 +282,7 @@ export class AuthController {
         })
         return
       }
-      if (!requested && choices.length > 1) {
+      if (lostSelection||!requested && choices.length > 1) {
         this.set({
           phase: 'choose',
           message: 'Selecciona un taller autorizado. Se verificará nuevamente la membresía.',
@@ -285,6 +299,7 @@ export class AuthController {
         ? await this.gateway.workshopAccess(choice.workshop.id)
         : { operationsEnabled: false, documentsEnabled: false }
       if (epoch !== this.epoch) return
+      selectionHint(user.id,choice.workshop.id)
       const nextContext = { ...choice, userId: user.id, displayName: user.displayName, ...access }
       const sameContext = JSON.stringify(previous.context) === JSON.stringify(nextContext)
       const phase = choice.role === 'reception' ? 'restricted' : 'authorized'
@@ -354,6 +369,7 @@ export class AuthController {
     }
   }
   async logout() {
+    selectionHint()
     if (!this.gateway || this.state.phase === 'signing-out') return
     const epoch = ++this.epoch
     this.validation = undefined
@@ -375,6 +391,7 @@ export class AuthController {
   }
   choose = (id: string) => this.validate(id)
   changeWorkshop = () => {
+    selectionHint()
     this.epoch++
     this.validation = undefined
     this.selected = undefined

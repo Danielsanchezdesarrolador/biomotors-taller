@@ -1,8 +1,8 @@
 /**
  * ByteTorque: remember only the visible navigation section in this browser.
  *
- * No user ID, workshop ID, customer/vehicle data, authorization state or
- * credentials are stored. Every visit still requires live R1 Auth/RLS.
+ * Verified actor/workshop identifiers scope a section hint; no customer/vehicle
+ * data, authorization state or credentials are stored. Each visit requires live R1 Auth/RLS.
  * localStorage lets a new tab opened from chat restore the section as well.
  */
 import type { Screen } from '../layout/AppShell'
@@ -19,27 +19,28 @@ function browserStore(): Store | null {
   }
 }
 
-export function readPrivateScreen(store: Store | null = browserStore()): Screen {
+export function readPrivateScreen(store: Store | null = browserStore(), scope?:string): Screen {
   try {
-    const value = store?.getItem(key)
+    const value = store?.getItem(scope?key+':'+scope:key)
     return (value!=='agenda'||import.meta.env.VITE_BT_AGENDA_ENABLED==='true') && permitted.includes(value as Screen) ? value as Screen : 'inicio'
   } catch {
     return 'inicio'
   }
 }
 
-export function rememberPrivateScreen(screen: Screen, store: Store | null = browserStore()): void {
+export function rememberPrivateScreen(screen: Screen, store: Store | null = browserStore(), scope?:string): void {
   if (!permitted.includes(screen)) return
   try {
-    store?.setItem(key, screen)
+    store?.setItem(scope?key+':'+scope:key, screen)
   } catch {
     // Private browsing or blocked storage: navigation works in memory.
   }
 }
 
-export function clearPrivateScreen(store: Store | null = browserStore()): void {
+export function clearPrivateScreen(store: Store | null = browserStore(), scope?:string): void {
   try {
-    store?.removeItem(key)
+    if(scope)store?.removeItem(key+':'+scope)
+    else {store?.removeItem(key);if(store&&'length' in store){const full=store as Storage;for(let i=full.length-1;i>=0;i--){const k=full.key(i);if(k?.startsWith(key+':'))full.removeItem(k)}}}
   } catch {
     // Best effort; Auth itself remains the security boundary.
   }

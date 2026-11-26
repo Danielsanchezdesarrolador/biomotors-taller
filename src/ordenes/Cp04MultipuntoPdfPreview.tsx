@@ -11,11 +11,13 @@ export function Cp04MultipuntoPdfPreview({
  outstanding:number;incomplete:boolean;disabled:boolean
  loadIdentity?:(orderId:string)=>Promise<InspectionPdfIdentity>
 }){
+ const dialog=useRef<HTMLDialogElement>(null)
  const generation=useRef(0),cached=useRef<Uint8Array|null>(null)
  const [url,setUrl]=useState<string|null>(null)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState('')
  const [display,setDisplay]=useState(false)
+ useEffect(()=>{if(display&&url&&dialog.current&&!dialog.current.open)dialog.current.showModal()},[display,url])
  const blocked=outstanding>0||incomplete||hasCurrentProvisionalFindings(findings)
  const reason=outstanding>0
    ?'Hay X que todavía no se han confirmado en el servidor.'
@@ -70,14 +72,14 @@ export function Cp04MultipuntoPdfPreview({
    </div>
    {blocked&&<p className="cp04-pdf-hint" role="status">{reason} El PDF solo se prepara con datos confirmados.</p>}
    {error&&<p className="cp04-error" role="alert">{error}</p>}
-   {display&&url&&<div className="cp04-pdf-preview">
+   {display&&url&&<dialog ref={dialog} className="bt-inspection-dialog" aria-label="Vista previa del borrador · No enviado" onCancel={()=>setDisplay(false)} onClick={e=>{if(e.target===e.currentTarget)setDisplay(false)}}>
      <div className="cp04-pdf-preview-title">
        <strong>Vista previa del borrador · No enviado</strong>
        <button type="button" className="cp04-secondary" onClick={()=>setDisplay(false)}
          aria-label="Cerrar vista previa PDF"><X size={16}/> Cerrar</button>
      </div>
-     <iframe src={url} title="Vista previa de la inspección multipunto en PDF" />
+     <iframe src={url+'#view=FitH'} title="Vista previa de la inspección multipunto en PDF" />
      <p>Si el dispositivo no muestra PDF integrados, selecciona «Descargar borrador» para abrirlo en tu lector.</p>
-   </div>}
+   </dialog>}
  </section>
 }

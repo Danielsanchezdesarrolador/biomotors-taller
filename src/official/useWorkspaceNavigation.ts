@@ -3,13 +3,13 @@ import type {Screen} from '../layout/AppShell'
 import {readPrivateScreen,rememberPrivateScreen} from './privateScreen'
 const screens:Screen[]=['inicio','agenda','ordenes','clientes','informes','configuracion']
 /** At most six mounted views with Agenda enabled. Only a section hint enters history; records stay in React. */
-export function useWorkspaceNavigation(privateSession:boolean) {
- const [screen,setScreen]=useState<Screen>(()=>privateSession?readPrivateScreen():'inicio')
+export function useWorkspaceNavigation(privateSession:boolean,scope?:string) {
+ const [screen,setScreen]=useState<Screen>(()=>privateSession?readPrivateScreen(undefined,scope):'inicio')
  const [visited,setVisited]=useState<Screen[]>([screen])
  const current=useRef(screen),positions=useRef<Partial<Record<Screen,number>>>({}),instance=useRef(''),initial=useRef(true)
  const root=useRef<HTMLDivElement>(null)
  const fields=useRef<Partial<Record<Screen,{node:HTMLInputElement|HTMLTextAreaElement;start:number|null;end:number|null}>>>({})
- const visit=(next:Screen)=>{current.current=next;setVisited(old=>old.includes(next)?old:[...old,next]);setScreen(next);if(privateSession)rememberPrivateScreen(next)}
+ const visit=(next:Screen)=>{current.current=next;setVisited(old=>old.includes(next)?old:[...old,next]);setScreen(next);if(privateSession)rememberPrivateScreen(next,undefined,scope)}
  const capture=()=>{
   positions.current[current.current]=window.scrollY
   const node=document.activeElement

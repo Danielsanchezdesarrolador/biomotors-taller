@@ -1,3 +1,4 @@
+import {parseKilometres} from '../clientes/kilometres'
 /**
  * BT-CP03-P3 · Pilot directory view. Reuses official visual vocabulary.
  * Mounted only from the verified private R1 CP03 route; not public preview.
@@ -392,7 +393,7 @@ export function Cp03PilotDirectoryView({
     try {
       const input = vehiclePayload({...vehicleDraft,customer_id:customer.id,
         model_year:formNumber(vehicleDraft.model_year),
-        odometer_km:formNumber(vehicleDraft.odometer_km)})
+        odometer_km:parseKilometres(vehicleDraft.odometer_km)})
       const outcome = await commitAndRefresh(
         () => editor === 'edit-vehicle' && vehicle
           ? repository.updateVehicle(vehicle.id, vehicle.updated_at, input)
@@ -531,7 +532,7 @@ export function Cp03PilotDirectoryView({
         <p className="cp03-wide cp03-draft-note" role="status">
           {draftRestored ? 'Borrador recuperado. ' : ''}
           Borrador temporal en esta pestaña (hasta {DRAFT_TTL_HOURS} horas).
-          Aún no está guardado en Supabase; al guardar la ficha se eliminará el borrador.
+          Aún no está guardado en el servidor; al guardar la ficha se eliminará el borrador.
         </p>
         <div className="cp03-inline cp03-heading">
           <h2>{editor === 'new-customer' ? 'Registrar cliente' :
@@ -577,9 +578,9 @@ export function Cp03PilotDirectoryView({
               onChange={e=>setVehicleDraft(d=>({...d,model:e.target.value}))}/></label>
             <label>Año<input type="number" min={1900} max={2100} value={vehicleDraft.model_year ?? ''}
               onChange={e=>setVehicleDraft(d=>({...d,model_year:e.target.value}))}/></label>
-            <label>Kilometraje<input type="number" min={0} max={3000000}
+            <label>Kilometraje<input aria-label="Kilometraje" type="text" inputMode="numeric" maxLength={10}
               value={vehicleDraft.odometer_km ?? ''}
-              onChange={e=>setVehicleDraft(d=>({...d,odometer_km:e.target.value}))}/></label>
+              onChange={e=>setVehicleDraft(d=>({...d,odometer_km:e.target.value}))}/>{(()=>{try{parseKilometres(vehicleDraft.odometer_km);return null}catch(e){return <small role="alert">{(e as Error).message}</small>}})()}</label>
             <button className="cp03-primary" type="submit" disabled={saving}>
               {saving ? <RefreshCw size={17}/> : <Plus size={17}/>}
               {saving ? 'Guardando…' : 'Guardar ficha del vehículo'}

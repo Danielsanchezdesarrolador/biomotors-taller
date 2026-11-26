@@ -132,6 +132,7 @@ assert.ok(
       (closingReviewEnabled && flowLiveEnabled && cp06PrivateEnabled &&
         process.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
         /src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)) ||
+      ((cp03PrivateEnabled||cp04PrivateEnabled)&&/src\/clientes\/kilometres\.ts$/.test(id)) ||
       /src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
       (plan04PrivateEnabled && /src\/plans\/planChanges\.ts$/.test(id)) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||

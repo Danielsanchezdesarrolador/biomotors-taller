@@ -120,6 +120,6 @@ export function RegistroVisitaDemo({onComplete}:{onComplete:(draft:VisitaDraft)=
         <button type="submit" className="cv-primary">{review?'Finalizar simulación':step===3?'Revisar datos':'Continuar'} <ArrowRight size={17}/></button>
       </footer>
     </form>
-    <p className="btreg-footnote"><ShieldCheck size={15}/> Solo memoria temporal del navegador; sin Supabase, correos, enlaces reales ni almacenamiento persistente.</p>
+    <p className="btreg-footnote"><ShieldCheck size={15}/> Solo memoria temporal del navegador; sin guardado permanente, correos, enlaces reales ni almacenamiento persistente.</p>
   </div>
 }

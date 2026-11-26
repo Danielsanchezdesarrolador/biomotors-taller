@@ -101,7 +101,7 @@ export function InformeMultipuntoPanel({
         </div>
       </header>
       <p className="mp-demo">
-        DEMO · Datos ficticios. Cambios y fotografías solo en memoria hasta recargar; sin Supabase
+        DEMO · Datos ficticios. Cambios y fotografías solo en memoria hasta recargar; sin guardado permanente
         ni correo real.
       </p>
       {message && (

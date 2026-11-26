@@ -19,11 +19,11 @@ import {
   publicEntryPath,
   resolveAccessPath
 } from './access/accessContract'
-function PrivateWorkshopSettings({controller}:{controller:AuthController}) {
+function PrivateWorkshopSettings({controller,onBack}:{controller:AuthController;onBack:()=>void}) {
  const [Panel,setPanel]=useState<ComponentType<{controller:AuthController}>|null>(null)
  const [failed,setFailed]=useState(false)
  useEffect(()=>{let active=true;void import('./workshops/WorkshopSettings').then(m=>{if(active)setPanel(()=>m.WorkshopSettings)}).catch(()=>{if(active)setFailed(true)});return()=>{active=false}},[controller])
- return failed?<p role="alert">No se pudo cargar la configuración del taller.</p>:Panel?<Panel controller={controller}/>:<p role="status">Cargando configuración autorizada…</p>
+ return <><button className="cp04-secondary" onClick={onBack}>Volver al inicio</button>{failed?<p role="alert">No se pudo cargar la configuración del taller.</p>:Panel?<Panel controller={controller}/>:<p role="status">Cargando configuración autorizada…</p>}</>
 }
 /** A separately approved private R1 rollout. No public-review route can mount it. */
 function PrivateWorkOrders({
@@ -171,14 +171,14 @@ export function OfficialWorkspaceView({
     setGuidedStart(start);setGuidedOpen(true);setGuidedVisible(true)
   }
   const privateSession = !!session && !review
-  const navigation = useWorkspaceNavigation(privateSession)
+  const navigation = useWorkspaceNavigation(privateSession,session?.directoryController?.getSnapshot().context?.userId+':'+session?.directoryController?.getSnapshot().context?.workshop.id)
   const {screen,navigate:navigateScreen} = navigation
   const [quoteFromAgenda,setQuoteFromAgenda]=useState(false)
   const [quoteOrder, setQuoteOrder] = useState<string | undefined>()
   const [quoteVehicle, setQuoteVehicle] = useState<string | undefined>()
   const renderPanel = (screen: Screen) => (
 screen==='inicio'&&!review&&session?.directoryController&&OperationsCenter?<Suspense fallback={<p>Cargando operaciones…</p>}><OperationsCenter fallback={<OfficialPanel screen="inicio" onNavigate={navigateScreen} onIntake={GuidedWorkspace?()=>showGuided({}):undefined}/>} controller={session.directoryController} isActive={navigation.screen==='inicio'&&!guidedVisible} onNew={()=>showGuided({})} onResume={id=>showGuided({orderId:id})}/></Suspense>:screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspense fallback={<p role="status">Cargando Agenda…</p>}><Agenda controller={session.directoryController} isActive={navigation.screen==='agenda'&&!(guidedOpen&&guidedVisible)} onDirectory={()=>navigateScreen('clientes')} onOrders={()=>navigateScreen('ordenes')} onQuote={id=>{setQuoteFromAgenda(true);setQuoteOrder(id);setQuoteVehicle(undefined);navigateScreen('informes')}} onReceive={id=>{showGuided({orderId:id})}}/></Suspense> : screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
-        <PrivateWorkshopSettings controller={session.directoryController}/>
+        <PrivateWorkshopSettings controller={session.directoryController} onBack={()=>navigateScreen('inicio')}/>
       ) : screen === 'ordenes' &&
       session?.directoryController &&
       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (

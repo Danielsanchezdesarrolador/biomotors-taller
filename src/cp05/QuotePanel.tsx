@@ -265,7 +265,7 @@ export function QuotePanel({
         setDraft(cached.draft)
         operation.current = { id: cached.requestId, fingerprint: cached.fingerprint }
         setMessage(
-          'Cambios temporales recuperados en esta pestaña. Todavía no están guardados en Supabase.'
+          'Cambios temporales recuperados en esta pestaña. Todavía no están guardados en el servidor.'
         )
       } else {
         setDraft(draftFrom(loaded))
@@ -282,7 +282,7 @@ export function QuotePanel({
       if (active.current && request === sequence.current) setBusy(false)
     }
   }
-  async function action(kind: 'create' | 'save' | 'revise' | 'void') {
+  async function action(kind: 'create' | 'recover' | 'save' | 'revise' | 'void') {
     if (lock.current || !canWrite || readPending) return
     const request = sequence.current
     lock.current = true
@@ -291,7 +291,12 @@ export function QuotePanel({
     setMessage('')
     try {
       let next: Bundle
-      if (kind === 'create') next = await repository.open(orderId, op('create:' + orderId))
+      if(kind==='recover'){
+        const existing=await repository.forOrder(orderId)
+        if(!existing||existing.status!=='draft'){setMessage('No hay un borrador de esta OT. Usa Crear cotización para iniciar uno.');return}
+        next=await repository.load(existing.id)
+      }
+      else if (kind === 'create') next = await repository.open(orderId, op('create:' + orderId))
       else if (!bundle) return
       else if (kind === 'save')
         next = await repository.save(
@@ -336,7 +341,7 @@ export function QuotePanel({
       if (active.current)
         setMessage(
           kind === 'save'
-            ? 'Borrador confirmado en Supabase.'
+            ? 'Guardado correctamente.'
             : kind === 'create'
               ? 'Borrador creado y numerado por el servidor.'
               : kind === 'void'
@@ -533,7 +538,7 @@ export function QuotePanel({
                     disabled={busy}
                     onClick={() => void action('save')}
                   >
-                    <Save size={17} /> Guardar borrador en Supabase
+                    <Save size={17} /> Guardar borrador
                   </button>
                 )}
                 <button
@@ -603,6 +608,7 @@ export function QuotePanel({
         <aside className={"dashboard-card cp05-list "+(bundle&&!browseOpen?"cp05-source-collapsed":"")}>
           <button type="button" className="cp04-secondary cp05-source-toggle" aria-expanded={!bundle||browseOpen} onClick={()=>setBrowseOpen(!browseOpen)}>Cambiar cotización u OT <ChevronDown size={16}/></button>
           <div className="cp05-list-body">
+          <button type="button" className="cp04-primary" disabled={!canWrite||busy||!!readPending||!orderId||ordersRefreshing||!!ordersError} onClick={()=>{if(!dirty||window.confirm('¿Continuar sin guardar los cambios actuales?'))void action('create')}}><Plus size={16}/> Crear cotización</button>
           <h2>{initialVehicleId ? 'Cotizaciones del vehículo' : 'Documentos recientes'}</h2>
           <p>Hasta 50 cotizaciones autorizadas.</p>
           {!busy && !visibleQuotes.length && <p>Sin cotizaciones registradas.</p>}
@@ -641,10 +647,10 @@ export function QuotePanel({
               disabled={busy || ordersRefreshing || !!ordersError || !!readPending || !orderId}
               onClick={() => {
                 if (!dirty || window.confirm('¿Continuar sin guardar los cambios actuales?'))
-                  void action('create')
+                  void action('recover')
               }}
             >
-              <Plus size={16} /> Crear / recuperar borrador de la OT
+              <History size={16} /> Recuperar borrador de la OT
             </button>
           )}
           </div>

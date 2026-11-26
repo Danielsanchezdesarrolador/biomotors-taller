@@ -1,3 +1,9 @@
+## 26/11/2026 — BT-PILOT-FIX-01: integración autorizada, CI pendiente
+
+El titular autorizó continuar revisión, integración, CI y posterior instalación/despliegue sujetos a puertas técnicas. Se transfirieron 49 archivos desde el delta privado y GitHub reconstruyó exactamente el árbol candidato 4d2ab82bcc1172f08b0b646432cd83b3a405708d, con base funcional 6691a8d4 y anotación 9fe4602. SHA-256 independiente de 8 archivos críticos PASS; manifiesto completo de evidencias no recalculado por límite de llamadas (Codex reportó PASS). Se verificó árbol completo de código, no se publican evidencias privadas. El único cambio técnico adicional respecto del candidato es activar CI focalizada automática al cambiar sus archivos propios; conservar workflow manual, mismo runner/aserciones y ambos motores. Las decisiones de BT-PLAN-LIMITS-01 y el checkpoint posterior se preservan. No declarar CI, SQL, LIVE ni aceptación humana aprobados hasta comprobarlos. Auto-Deploy OFF comprobado en Render antes de publicar. SQL primero tras CI, preflight y recuperación vigente; frontend después. Sin nueva ejecución Codex, no reabrir SEC07. [Checkpoint del candidato](docs/checkpoints/CHECKPOINT_BT_PILOT_FIX_01_20261126.md).
+
+---
+
 ## 26/11/2026 — BT-PLAN-LIMITS-01 y piloto completo con clientes reales (decisión del titular)
 
 **Nuevo bloque obligatorio después de BT-PILOT-FIX-01, antes de incorporar BIOMOTORS.** Solo decisión documental; no implementación ni activación.
@@ -20,6 +26,14 @@ Criterios técnicos propuestos: ventana móvil de 48 h para Básico y semanas lu
 **Orden vigente antes de Ignacio:** (1) BT-PILOT-FIX-01, revisión/CI/SQL/deploy autorizados y aceptación focalizada; (2) BT-PLAN-LIMITS-01; (3) logos privados por taller y cobertura de respaldo; (4) BT-REG-02 REAL / BT-REQ-REG-VEH-01, registro autónomo de cliente/vehículo/motivo mediante enlace seguro y solicitud revisada por taller; (5) CP05 correo y BT-COM-01, activar Resend con remitente verificado, cotización, informe y constancia final, revisión de destinatario, consentimientos, historial y reintentos; (6) BT-MOBILE-02A–D, experiencia Android nativa e iPhone PWA y QA física; (7) incorporar Ignacio y dos mecánicos, validación de operación con clientes reales. No postergar registro por enlace ni correo/documentos al marketing. Pagos, prueba comercial, facturación y captación quedan fuera hasta cerrar el piloto. Reutilizar componentes y contratos existentes. No modificar producción ni iniciar bloques adicionales mientras la entrega activa esté pendiente de revisión y autorización.
 
 [Checkpoint de decisión y recepción](docs/checkpoints/CHECKPOINT_BT_PLAN_LIMITS_01_ROADMAP_20261126.md).
+
+---
+
+## 26/11/2026 — BT-PILOT-FIX-01, once correcciones candidatas
+
+Delta consolidado privado: guardas de revocación CP04 y de inspecciones finalizadas; reactivación auditada con cupos; continuidad de taller/pantalla y de invitaciones confirmadas; retorno de Configuración; kilometraje chileno; cabecera/detalle compactos sin rediseñar multipunto; visor PDF modal; crear/recuperar cotización separados; lenguaje de guardado sin proveedor ni éxito falso. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_PILOT_FIX_01_20261126.md).
+
+Base funcional `6691a8d4e4eb10e372e6d4233c8f43a2ea1c570e` más anotación obligatoria `9fe4602a7337c0ca3b21c8db417f82f179832094`. SQL incremental y reversión SOLO candidatos. Servidor aislado: 22 comprobaciones PASS. Unitarias focalizadas: 48 casos distintos PASS (11 iniciales y 40 de Auth, tres compartidos). Chromium 1440/390 focalizado PASS; TypeScript y builds/fronteras público/privado PASS. WebKit BLOCKED_ENVIRONMENT, pendiente CI oficial, sin intentos de descarga. Entrega exclusiva DTK-ERR-056; no push oficial, cambios alojados, migraciones, despliegues ni SEC07. BT-MOBILE-02 no iniciado. Integración y aplicación requieren revisión/autorización independiente de Dirección Técnica. Las anotaciones siguientes son historia.
 
 ---
 

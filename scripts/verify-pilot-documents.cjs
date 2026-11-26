@@ -178,7 +178,7 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
     )
     await p.locator('.cp04-order').first().click()
     await p.getByRole('button', { name: 'Preparar / consultar cotización' }).click()
-    await p.getByRole('button', { name: 'Crear / recuperar borrador de la OT' }).click()
+    await p.getByRole('button', { name: 'Crear cotización' }).click()
     await p.locator('.cp05-context').waitFor()
     for (const [description, type, price] of [
       ['Pastillas QA', 'Repuesto', 52900],
@@ -192,8 +192,8 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
       await p.getByRole('button', { name: 'Confirmar partida en el borrador' }).click()
     }
     await p.getByLabel('Condiciones', { exact: true }).fill('Validez diez días QA.')
-    await p.getByRole('button', { name: 'Guardar borrador en Supabase' }).click()
-    await p.getByText('Borrador confirmado en Supabase.', { exact: true }).waitFor()
+    await p.getByRole('button', { name: 'Guardar borrador' }).click()
+    await p.getByText('Guardado correctamente.', { exact: true }).waitFor()
     await p.getByRole('button', { name: 'Emitir revisión archivada', exact: true }).click()
     await p.getByText('Revisión emitida y archivo privado verificado.', { exact: true }).waitFor()
     const download = p.waitForEvent('download')

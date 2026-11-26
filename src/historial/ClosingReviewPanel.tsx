@@ -153,7 +153,7 @@ export function ClosingReviewPanel({
               <div className="cp06-closing-review">
                 <strong>Lista de revisión local</strong>
                 <p>Las marcas son temporales en esta pantalla. No se guardan en
-                  Supabase ni sustituyen la confirmación del operador en el backend.</p>
+                  el servidor ni sustituyen la confirmación del operador en el backend.</p>
                 <label><input type="checkbox" checked={recipientChecked}
                   disabled={!historicEmail}
                   onChange={e => setRecipientChecked(e.target.checked)} />

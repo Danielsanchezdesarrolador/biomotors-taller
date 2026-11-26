@@ -26,7 +26,7 @@ describe('CP04 private operational UI',()=>{
    expect(html).toContain('Órdenes de trabajo')
    expect(html).toContain('Nueva recepción')
    expect(html).toContain('Buscar patente registrada')
-   expect(html).toContain('Guardar orden en Supabase')
+   expect(html).toContain('Guardar orden')
    expect(html).not.toContain('OT-1002')
    expect(repo.recentOrders).not.toHaveBeenCalled()
  })
@@ -35,6 +35,6 @@ describe('CP04 private operational UI',()=>{
    const html=renderToStaticMarkup(<Cp04OrdersView repository={repo}
      context={{...scope,role:'mechanic'}}/>)
    expect(html).toContain('no puede crear órdenes')
-   expect(html).not.toContain('Guardar orden en Supabase')
+   expect(html).not.toContain('Guardar orden')
  })
 })

@@ -302,7 +302,7 @@ export function AccessScreens({
             <div className="access-review-note" role="note">
               <ShieldCheck />
               <div>
-                <strong>Acceso seguro · Supabase Auth</strong>
+                <strong>Acceso seguro</strong>
                 <span>
                   {realRegistration
                     ? 'Registro con correo verificado. Crear una cuenta no concede acceso a ningún taller.'
@@ -450,7 +450,7 @@ export function AccessScreens({
                             disabled={realLogin || !interactive}
                             onChange={(e) => patch('remember', e.target.checked)}
                           />
-                          {realLogin ? 'Sesión guardada por Supabase' : 'Recordarme'}
+                          {realLogin ? 'Mantener sesión iniciada' : 'Recordarme'}
                         </label>
                         <button type="button" onClick={() => navigate(accessPaths.recover)}>
                           ¿Olvidaste tu contraseña?

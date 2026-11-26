@@ -133,7 +133,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           await p.getByRole('button', { name: 'Buscar vehículo', exact: true }).click()
           await p.locator('.cp04-found').waitFor()
           await p.getByLabel('Motivo de ingreso *').fill('Recepción sintética de comprobación')
-          await p.getByRole('button', { name: 'Guardar orden en Supabase', exact: true }).click()
+          await p.getByRole('button', { name: 'Guardar orden', exact: true }).click()
           await p.getByText('Orden de trabajo guardada en el servidor.', { exact: true }).waitFor()
           assert.equal(state.orders.length, 6)
           assert.equal(state.orders[5].vehicle_id, uuid(999))

@@ -1,0 +1,60 @@
+name: BT-PILOT-FIX-01 focused candidate
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt-pilot-fix-focused.yml'
+      - 'docs/sql/BT_PILOT_FIX_01_*.sql'
+      - 'scripts/security/verify-pilot-fix-local.sh'
+      - 'scripts/verify-pilot-fix-*.cjs'
+      - 'scripts/verify-pilot-fix-ui.py'
+      - 'tests/pilotFixLab.ts'
+permissions:
+  contents: read
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: docker pull postgres:17
+      - run: bash scripts/security/verify-pilot-fix-local.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pilot-fix-server
+          path: /tmp/bt-pilot-fix-evidence/
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    env:
+      BT_PILOT_BROWSER: ${{ matrix.engine }}
+      BT_PILOT_EVIDENCE_DIR: /tmp/bt-pilot-fix-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Prepare synthetic browser runner
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-pilot-playwright" --no-save --no-package-lock --no-audit --no-fund playwright
+          "$RUNNER_TEMP/bt-pilot-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-pilot-playwright/node_modules" >> "$GITHUB_ENV"
+      - run: python3 scripts/verify-pilot-fix-ui.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pilot-fix-${{ matrix.engine }}
+          path: /tmp/bt-pilot-fix-evidence/

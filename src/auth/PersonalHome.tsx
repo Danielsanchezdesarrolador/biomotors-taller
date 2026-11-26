@@ -8,9 +8,11 @@ import {PlanBadge} from '../plans/PlanBadge'
 type Props = { controller: AuthController; plan: PlanStatus | null; name?: string; workshopPlan?:PlanStatus|null; onBack?:()=>void; onCreated?:(id:string)=>Promise<void>; onCreator?: () => void; onRefresh?: () => void }
 export function PersonalHome({ controller, plan, name, workshopPlan, onBack, onCreated, onCreator, onRefresh }: Props) {
   const [Workshop, setWorkshop] = useState<ComponentType<{controller:AuthController;planSnapshot?:string;onCreated?:(id:string)=>Promise<void>}> | null>(null)
+  const [Invites,setInvites]=useState<ComponentType<{controller:AuthController}>|null>(null)
   const [failed, setFailed] = useState(false)
   useEffect(() => {
     let active = true
+    if(import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true')void import('../workshops/PendingInvitations').then(m=>{if(active)setInvites(()=>m.PendingInvitations)}).catch(()=>{if(active)setFailed(true)})
     if (import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true')
       void import('../workshops/WorkshopHome').then(m => { if (active) setWorkshop(() => m.WorkshopHome) })
         .catch(() => { if (active) setFailed(true) })
@@ -29,6 +31,7 @@ export function PersonalHome({ controller, plan, name, workshopPlan, onBack, onC
       <nav aria-label="Herramientas públicas"><a href="/#/revision/publica">Explorar la interfaz pública</a><a href="/privacidad">Privacidad</a><a href="/terminos">Términos</a></nav>
     </section>
     {failed && <p role="alert">No se pudo cargar la gestión del taller. Reintenta desde tu cuenta.</p>}
+    {Invites&&<Invites controller={controller}/>}
     {Workshop && <Workshop controller={controller} planSnapshot={JSON.stringify(plan)} onCreated={onCreated} />}
   </main>
 }

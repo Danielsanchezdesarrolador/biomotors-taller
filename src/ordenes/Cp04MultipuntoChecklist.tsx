@@ -68,7 +68,7 @@ export function Cp04MultipuntoChecklist({
      </button>
    </div>
    <div className="cp04-count" role="status" aria-live="polite">
-     <strong>{savedCount}/34</strong> componentes guardados en Supabase.
+     <strong>{savedCount}/34</strong> componentes · {savedCount>0?'Guardado correctamente.':'Sin componentes guardados.'}
      {unconfirmed>0&&<span> · {unconfirmed} cambio(s) sin confirmar</span>}
      {errors>0&&<strong className="cp04-error-text"> · {errors} error(es) de guardado</strong>}
      {incomplete&&<span> · Hay observaciones técnicas pendientes de completar</span>}
@@ -84,7 +84,7 @@ export function Cp04MultipuntoChecklist({
      hasta confirmar las X en el servidor; si pierdes la sesión podrían perderse esos cambios.
    </p>}
    {errors>0&&<p className="cp04-error" role="alert">
-     <WifiOff size={17} aria-hidden="true"/> Algunas X no están confirmadas en Supabase.
+     <WifiOff size={17} aria-hidden="true"/> Algunas X aún no tienen confirmación de guardado.
      {temporaryRecoveryAvailable
        ? ' Hay una copia temporal en esta pestaña; no es un respaldo permanente.'
        : ' El borrador local no pudo conservarse: mantén abierta esta vista.'}

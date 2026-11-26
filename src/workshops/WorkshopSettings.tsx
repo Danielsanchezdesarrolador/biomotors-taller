@@ -40,9 +40,9 @@ export function WorkshopSettings({controller}:{controller:AuthController}) {
   useEffect(()=>{if(!link)return;const clear=()=>setLink(''),hidden=()=>{if(document.visibilityState!=='visible')clear()};const timer=window.setTimeout(clear,300_000);
     window.addEventListener('pagehide',clear);window.addEventListener('offline',clear);document.addEventListener('visibilitychange',hidden);
     return()=>{window.clearTimeout(timer);window.removeEventListener('pagehide',clear);window.removeEventListener('offline',clear);document.removeEventListener('visibilitychange',hidden)}},[link])
-  async function action(kind:'invite'|'rotate'|'revoke'|'disable',target:string|null=null) {
+  async function action(kind:'invite'|'rotate'|'revoke'|'disable'|'reactivate',target:string|null=null) {
     if(locked.current||!wid)return
-    if((kind==='disable'||kind==='revoke')&&!window.confirm('¿Confirmar la operación? No se borran usuarios ni historiales.'))return
+    if((kind==='disable'||kind==='revoke'||kind==='reactivate')&&!window.confirm('¿Confirmar la operación? No se borran usuarios ni historiales.'))return
     locked.current=true;setBusy(true);setLink('');setNotice('')
     try{const result=await workshopRpc(controller,'bt_plan04_manage_mechanic',{p_workshop_id:wid,p_action:kind,p_email:kind==='invite'?email.trim():null,p_target_id:target,
       p_request_id:identity.current.for(JSON.stringify([wid,kind,target,email.trim()]))}) as {token?:unknown}
@@ -95,7 +95,7 @@ export function WorkshopSettings({controller}:{controller:AuthController}) {
       {team.overCapacity&&<p role="alert">Hay más plazas ocupadas o reservadas que las disponibles. Regulariza el equipo; no se borró ni desactivó a nadie automáticamente.</p>}
       <form onSubmit={e=>{e.preventDefault();void action('invite')}}><label>Correo del mecánico<input type="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)}/></label><button disabled={busy||team.active+team.pending>=team.capacity}>Reservar invitación</button></form>
       {link&&<div role="status"><p>Enlace confidencial de un solo uso, válido para el correo invitado. Compártelo solo con su titular. No se guarda en este navegador.</p><button onClick={()=>void navigator.clipboard.writeText(link).then(()=>setNotice('Enlace copiado. Compártelo únicamente con su destinatario.')).catch(()=>setNotice('El navegador bloqueó la copia. Genera un enlace nuevo desde una conexión segura.'))}>Copiar enlace seguro</button><button onClick={()=>setLink('')}>Descartar enlace</button></div>}
-      <ul>{team.members.map(m=><li key={m.id}><strong>{m.name}</strong> · {m.status==='active'?'Activo':'Desactivado'} {m.status==='active'&&<button disabled={busy} onClick={()=>void action('disable',m.id)}>Desactivar mecánico</button>}</li>)}</ul>
+      <ul>{team.members.map(m=><li key={m.id}><strong>{m.name}</strong> · {m.status==='active'?'Activo':'Desactivado'} {m.status==='active'&&<button disabled={busy} onClick={()=>void action('disable',m.id)}>Desactivar mecánico</button>}{m.status==='disabled'&&<button disabled={busy||team.active+team.pending>=team.capacity} onClick={()=>void action('reactivate',m.id)}>Reactivar mecánico</button>}</li>)}</ul>
       <ul>{team.invites.map(invite=><li key={invite.id}>{invite.email} · Pendiente <button disabled={busy} onClick={()=>void action('rotate',invite.id)}>Generar enlace nuevo</button><button disabled={busy} onClick={()=>void action('revoke',invite.id)}>Revocar invitación</button></li>)}</ul></>}</section>
     <section className="dashboard-card"><h2>Plan y facturación</h2><p>Plus incluye 4 mecánicos; Full, 8. Las plazas extra requieren confirmación del servidor. El pago real y la contratación de extras permanecen desactivados.</p><p>Powered by ByteTorque</p></section>
   </div>

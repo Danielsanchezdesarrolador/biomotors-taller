@@ -1,3 +1,4 @@
+import {parseKilometres} from '../clientes/kilometres'
 /**
  * ByteTorque CP04 real-data interface, pending separate hosted SQL approval.
  * No fixture, demo item, payment, email, or secret key. The repository is
@@ -68,8 +69,7 @@ const statusNext: Record<OrderStatus, OrderStatus[]> = {
   closed: []
 }
 function odometer(value: string): number | null {
-  if (!value.trim()) return null
-  return /^\d+$/.test(value.trim()) ? Number(value) : Number.NaN
+  return parseKilometres(value)
 }
 function safeDate(value: string): string {
   const parsed = new Date(value)
@@ -411,7 +411,7 @@ export function Cp04OrdersView({
   }
   async function saveFinding(e: FormEvent) {
     e.preventDefault()
-    if (lock.current || !selected || selected.order.status === 'closed' || !canInspect) return
+    if (lock.current || !selected || ['ready','closed'].includes(selected.order.status) || !canInspect) return
     lock.current = true
     setBusy(true)
     setMessage('')
@@ -431,7 +431,7 @@ export function Cp04OrdersView({
           setNote('')
           setResult('not_checked')
           multipuntoCommitted(saved)
-          setNotice('Resultado de inspección guardado en Supabase.')
+          setNotice('Guardado correctamente.')
         },
         async () => {
           const [list, outstanding] = await Promise.all([
@@ -496,7 +496,7 @@ export function Cp04OrdersView({
       setNotice(
         next === 'closed'
           ? 'Orden cerrada y conservada en el historial del vehículo.'
-          : 'Estado de la orden actualizado en Supabase.'
+          : 'Guardado correctamente.'
       )
     } catch (error) {
       if (active.current) setMessage(workMessage(error))
@@ -584,7 +584,7 @@ export function Cp04OrdersView({
       <div className="cp04-autosave-bar" role="note">
         <CloudUpload aria-hidden="true" />
         <strong>Guardado automático</strong>
-        <span>Las X de inspección se sincronizan con Supabase.</span>
+        <span>Los cambios se guardan automáticamente al recibir confirmación.</span>
         <details className="cp04-save-help">
           <summary aria-label="Información sobre el guardado">
             <Info aria-hidden="true" />
@@ -810,15 +810,16 @@ export function Cp04OrdersView({
                 <label>
                   Kilometraje de recepción
                   <input
-                    type="number"
-                    min={0}
-                    max={3000000}
+                    type="text"
+                    aria-label="Kilometraje de recepción"
+                    inputMode="numeric"
+                    maxLength={10}
                     value={intake}
                     onChange={(e) => setIntake(e.target.value)}
-                  />
+                  />{(()=>{try{parseKilometres(intake);return null}catch(e){return <small role="alert">{(e as Error).message}</small>}})()}
                 </label>
                 <button className="cp04-primary" disabled={busy || !vehicle} type="submit">
-                  <Plus size={17} /> Guardar orden en Supabase
+                  <Plus size={17} /> Guardar orden
                 </button>
               </form>
             </>
@@ -879,7 +880,7 @@ export function Cp04OrdersView({
               <ClipboardCheck size={18} /> Abrir inspección multipunto con X
             </button>
             <small>
-              Revisar los componentes de la hoja original y registrar cada X en Supabase.
+              Revisar los componentes de la hoja original y guardar cada X con confirmación.
             </small>
           </div>
           <Cp04MultipuntoPdfPreview
@@ -943,7 +944,7 @@ export function Cp04OrdersView({
                   setMultipuntoIncomplete(incomplete)
                 }}
                 disabled={busy || loading}
-                readOnly={!canInspect || selected.order.status === 'closed'}
+                readOnly={!canInspect || ['ready','closed'].includes(selected.order.status)}
                 plate={selected.vehicle.plate}
                 onBack={() => {setMultipuntoOpen(false);setDetailTab('summary')}}
               />
@@ -963,7 +964,7 @@ export function Cp04OrdersView({
             </div>
             {currentFindings(findings).filter(row=>!row.category.startsWith('Multipunto · ')).map(row=><article key={row.id} className="cp04-finding"><strong>{row.category} · {row.result==='ok'?'OK':row.result==='attention'?'Requiere atención':'Sin revisar'}</strong><p>{row.note}</p><small>{inspectionResolutionLabel(row)}</small></article>)}
             <details className="cp04-additional-finding"><summary>Registrar diagnóstico adicional por categoría</summary>
-              {canInspect && selected.order.status !== 'closed' && (
+              {canInspect && !['ready','closed'].includes(selected.order.status) && (
                   <form className="cp04-form" onSubmit={saveFinding}>
                     <label>
                       Punto a revisar
@@ -1021,7 +1022,7 @@ export function Cp04OrdersView({
                       <p>{item.note}</p>
                       <small>Detectado el {safeDate(item.created_at)}</small>
                     </div>
-                    {canInspect && (
+                    {(canCreate||!['ready','closed'].includes(selected.order.status)) && (
                       <button
                         className="cp04-secondary"
                         type="button"

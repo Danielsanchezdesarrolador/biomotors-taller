@@ -16,7 +16,7 @@ const {isOperationsStatusRead}=require('../tests/harness/cp04BrowserFixture.cjs'
    const dock=p.locator('.cp05-workspace-toolbar')
    await p.locator('.cp04-order').first().click()
    await p.getByRole('button',{name:'Preparar / consultar cotización'}).click()
-   await p.getByRole('button',{name:'Crear / recuperar borrador de la OT'}).click()
+   await p.getByRole('button',{name:'Crear cotización'}).click()
    await dock.waitFor()
    for(const [description,type,quantity,price] of [['Repuesto','Repuesto','1','52900'],['Mano de obra','Mano de obra','1.5','24900'],['Insumo','Insumo','1.05','10']]){
      await panel('Trabajos y repuestos').getByRole('button',{name:'Agregar otro ítem'}).click()
@@ -41,11 +41,11 @@ const {isOperationsStatusRead}=require('../tests/harness/cp04BrowserFixture.cjs'
    assert.equal(await tab('Condiciones').getAttribute('aria-selected'),'true')
    assert.equal(await tab('Condiciones').evaluate(el=>document.activeElement===el),true)
    assert.equal(await panel('Condiciones').locator('textarea').first().inputValue(),'Condiciones del borrador vigente')
-   await dock.getByRole('button',{name:'Guardar borrador en Supabase'}).click()
+   await dock.getByRole('button',{name:'Guardar borrador'}).click()
    if(width===390){
      await p.getByRole('button',{name:'Recuperar operación confirmada'}).click()
      await p.getByText('Guardado confirmado y versión recuperada del servidor.',{exact:true}).waitFor()
-   }else await p.getByText('Borrador confirmado en Supabase.',{exact:true}).waitFor()
+   }else await p.getByText('Guardado correctamente.',{exact:true}).waitFor()
    assert.equal(commands.size,2,'No duplicate save RPC during reconciliation')
    if(width===1366)await p.getByText(/Operación confirmada. No se pudo actualizar el listado/).waitFor()
    assert.match(await p.getByLabel('Total siempre visible').innerText(),/107.411/)

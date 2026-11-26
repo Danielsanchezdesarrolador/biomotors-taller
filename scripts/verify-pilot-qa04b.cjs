@@ -27,7 +27,7 @@ async function createOrder(p, plate, reason) {
   await p.getByRole('button', { name: 'Buscar vehículo' }).click()
   await p.locator('.cp04-found').waitFor()
   await p.getByLabel('Motivo de ingreso *').fill(reason)
-  await p.getByRole('button', { name: 'Guardar orden en Supabase' }).click()
+  await p.getByRole('button', { name: 'Guardar orden' }).click()
 }
 async function run(browser, id, width, task) {
   const ctx = await cp04Page(browser, width, { injectFault: id })
@@ -88,7 +88,7 @@ async function run(browser, id, width, task) {
         const stored = state.orders[5].id
         assert.equal(writes(requests, 'work_orders'), 1)
         assert.equal(await p.getByLabel('Motivo de ingreso *').inputValue(), '')
-        assert.equal(await p.getByText('Guardar orden en Supabase', { exact: true }).count(), 1)
+        assert.equal(await p.getByText('Guardar orden', { exact: true }).count(), 1)
         state.failList = false
         state.failOrderDetail = false
         await p.getByRole('button', { name: 'Actualizar', exact: true }).click()

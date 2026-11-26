@@ -90,7 +90,7 @@ export function OrdenesPanel({ globalSearch, onNotify, initialOrderId, onClient,
       recommendation: 'Completar revisión técnica.', pending: draft.notes.trim() ? [draft.notes.trim()] : [],
     }
     registerSessionOrder(created)
-    onNotify('Orden creada únicamente en memoria DEMO. No se guardó en Supabase ni en un servidor; se perderá al recargar.')
+    onNotify('Orden creada únicamente en memoria DEMO. No se guardó en un servidor; se perderá al recargar.')
     openDetail(id)
   }
   function resetFilters() {
