@@ -34,3 +34,23 @@ describe('guided explicit OT state transitions',()=>{
  it('blocks closed, cancelled, unknown lifecycle and crossed identity before writing',async()=>{for(const kind of ['closed','cancelled','missing','crossed']){const f=statusPort(kind==='closed'?'closed':'inspecting');if(kind==='cancelled')f.row.order.cancelled_at='date';if(kind==='missing')delete (f.row.order as {cancelled_at?:string|null}).cancelled_at;if(kind==='crossed')f.row.vehicle.id='other';await expect(ensureOrderStage(f.port,scope,'in_service')).rejects.toThrow();expect(f.writes).toEqual([])}})
  it('does not retry a denied or unresolved conflicting transition',async()=>{for(const mode of ['denied','conflict']){const f=statusPort('inspecting',mode);await expect(ensureOrderStage(f.port,scope,'in_service')).rejects.toThrow(mode);expect(f.writes).toEqual([])}})
 })
+
+describe('BT-FLOW-NEXT-01 continuity',()=>{
+ const complete:Evidence={order:true,inspection:true,issued:true,approval:true,execution:true,handover:true,archive:true}
+ it('requires approval for the current revision after a changed inspection',()=>{
+  expect(confirmedStage({...complete,needsRevision:true})).toBe(3)
+  expect(confirmedStage({...complete,approval:false,execution:false,handover:false,archive:false})).toBe(4)
+ })
+ it('routes anticipated work to quote, approval and physical reception in order',()=>{
+  expect(confirmedStage({...complete,planned:true,order:false,inspection:false,issued:false,approval:false})).toBe(3)
+  expect(confirmedStage({...complete,planned:true,order:false,inspection:false,approval:false})).toBe(4)
+  expect(confirmedStage({...complete,planned:true,order:false,inspection:false})).toBe(1)
+  expect(confirmedStage({...complete,planned:false,inspection:false})).toBe(2)
+ })
+ it('derives each visit independently on re-entry without storing a step',()=>{
+  const repairing={...complete,execution:false,handover:false,archive:false}
+  const received={...complete,inspection:false,issued:false,approval:false,execution:false,handover:false,archive:false}
+  expect([repairing,received].map(confirmedStage)).toEqual([5,2])
+  expect(confirmedStage(JSON.parse(JSON.stringify(repairing)))).toBe(5)
+ })
+})

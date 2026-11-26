@@ -41,8 +41,9 @@ const errorText = 'No se confirmó la operación. Consulta el historial antes de
 type Port = ReturnType<typeof flowLiveCandidate>
 type Records = Awaited<ReturnType<Port['history']>>
 export function FlowLive02Panel({
-  client, context, quote, revision, stage, onPendingChange, registerSave, beforeExecution, beforeHandover
+  client, context, quote, revision, stage, onPendingChange, registerSave, beforeExecution, beforeHandover, beforeWrite
 }: {
+  beforeWrite?:()=>Promise<void>
   beforeExecution?:()=>Promise<void>
   beforeHandover?:()=>Promise<boolean>
   registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
@@ -132,6 +133,8 @@ export function FlowLive02Panel({
     setError('')
     setMessage('')
     try {
+      await beforeWrite?.()
+      if(!current(version))return false
       const response = await task()
       if (!current(version)) return
       const stored=await port.history(quote,revision)
@@ -151,7 +154,7 @@ export function FlowLive02Panel({
       }
     }
   }
-  function liveError(e:unknown){const kind=(e as {kind?:string})?.kind;return kind==='order_not_ready'?'La OT no está habilitada para esta acción: debe estar en servicio para ejecución y lista para entrega. Actualiza la visita.':kind==='denied'?'Tu sesión o rol no permite guardar esta operación.':kind==='conflict'?'El registro cambió. Actualiza el historial antes de continuar.':kind==='disabled'?'Esta operación no está habilitada para el taller.':kind==='invalid'?'Revisa los campos y las confirmaciones requeridas.':navigator.onLine===false?'Sin conexión. Conserva esta pantalla y consulta el registro al reconectar.':errorText}
+  function liveError(e:unknown){const message=e instanceof Error?e.message:'';if(message==='scope')return 'Revisa el alcance técnico frente al presupuesto vigente antes de guardar.';if(message==='budget')return 'Revisa las partidas y obtén aprobación de la revisión vigente.';if(message==='stale')return 'La atención cambió. Conserva los campos y actualiza la evidencia.';const kind=(e as {kind?:string})?.kind;return kind==='order_not_ready'?'La OT no está habilitada para esta acción: debe estar en servicio para ejecución y lista para entrega. Actualiza la visita.':kind==='denied'?'Tu sesión o rol no permite guardar esta operación.':kind==='conflict'?'El registro cambió. Actualiza el historial antes de continuar.':kind==='disabled'?'Esta operación no está habilitada para el taller.':kind==='invalid'?'Revisa los campos y las confirmaciones requeridas.':navigator.onLine===false?'Sin conexión. Conserva esta pantalla y consulta el registro al reconectar.':errorText}
   async function saveStage(exit:boolean):Promise<boolean>{
     if(!port||loading||busy){setError('Espera a que termine la consulta o el guardado.');return false}
     try{

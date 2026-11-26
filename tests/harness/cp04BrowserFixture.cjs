@@ -25,6 +25,7 @@ const token = () =>
   ).toString('base64url') +
   '.synthetic'
 async function cp04Page(browser, width, options = {}) {
+  const tenant=options.workshopId||module.exports.tenant
   const p = await browser.newPage({ viewport: { width, height: 950 }, reducedMotion: 'reduce' })
   const states = ['received', 'inspecting', 'in_service', 'ready', 'closed']
   const vehicles = states.map((_, i) => ({

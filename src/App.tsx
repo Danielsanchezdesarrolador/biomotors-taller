@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { RealAccess } from './auth/RealAccess'
 import { InviteAcceptancePreview } from './auth/InviteAcceptancePreview'
 import { inviteAcceptancePath, scrubInviteLocation } from './auth/inviteLinkRouting'
@@ -150,6 +150,23 @@ export function OfficialWorkspaceView({
 }) {
   const [guidedStart,setGuidedStart]=useState<{vehicleId?:string;orderId?:string}>({})
   const [guidedOpen,setGuidedOpen]=useState(false)
+  const [guidedVisible,setGuidedVisible]=useState(false)
+  const guidedPending=useRef(false)
+  const guidedIdentity=useRef<{orderId?:string;vehicleId?:string}>({})
+  const guidedGeneration=useRef(0)
+  const [guidedInstance,setGuidedInstance]=useState(0)
+  useEffect(()=>{const leave=()=>setGuidedVisible(false);window.addEventListener('popstate',leave);return()=>window.removeEventListener('popstate',leave)},[])
+  const showGuided=(start:{vehicleId?:string;orderId?:string})=>{
+    // A specific confirmed visit can reuse its mounted workspace and drafts.
+    // Empty/vehicle entries always request a new independent intake.
+    if(guidedOpen&&start.orderId&&start.orderId===guidedIdentity.current.orderId){setGuidedVisible(true);return}
+    if(guidedOpen&&guidedPending.current){setGuidedVisible(true);window.alert('Conserva o guarda los cambios de la atención activa antes de abrir otra.');return}
+    const instance=++guidedGeneration.current
+    guidedIdentity.current={}
+    guidedPending.current=false
+    setGuidedInstance(instance)
+    setGuidedStart(start);setGuidedOpen(true);setGuidedVisible(true)
+  }
   const privateSession = !!session && !review
   const navigation = useWorkspaceNavigation(privateSession)
   const {screen,navigate:navigateScreen} = navigation
@@ -157,13 +174,13 @@ export function OfficialWorkspaceView({
   const [quoteOrder, setQuoteOrder] = useState<string | undefined>()
   const [quoteVehicle, setQuoteVehicle] = useState<string | undefined>()
   const renderPanel = (screen: Screen) => (
-screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspense fallback={<p role="status">Cargando Agenda…</p>}><Agenda controller={session.directoryController} isActive={navigation.screen==='agenda'&&!guidedOpen} onDirectory={()=>navigateScreen('clientes')} onOrders={()=>navigateScreen('ordenes')} onQuote={id=>{setQuoteFromAgenda(true);setQuoteOrder(id);setQuoteVehicle(undefined);navigateScreen('informes')}} onReceive={id=>{setGuidedStart({orderId:id});setGuidedOpen(true)}}/></Suspense> : screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
+screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspense fallback={<p role="status">Cargando Agenda…</p>}><Agenda controller={session.directoryController} isActive={navigation.screen==='agenda'&&!(guidedOpen&&guidedVisible)} onDirectory={()=>navigateScreen('clientes')} onOrders={()=>navigateScreen('ordenes')} onQuote={id=>{setQuoteFromAgenda(true);setQuoteOrder(id);setQuoteVehicle(undefined);navigateScreen('informes')}} onReceive={id=>{showGuided({orderId:id})}}/></Suspense> : screen === 'configuracion' && !review && session?.directoryController && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED === 'true' ? (
         <PrivateWorkshopSettings controller={session.directoryController}/>
       ) : screen === 'ordenes' &&
       session?.directoryController &&
       import.meta.env.VITE_BT_CP04_PRIVATE_ENABLED === 'true' ? (
         <PrivateWorkOrders
-          onGuided={GuidedWorkspace?(id)=>{setGuidedStart({orderId:id});setGuidedOpen(true)}:undefined}
+          onGuided={GuidedWorkspace?(id)=>{showGuided({orderId:id})}:undefined}
           controller={session.directoryController}
           onQuote={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -192,7 +209,7 @@ screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspen
         session?.directoryController &&
         import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true' ? (
         <PrivateClientDirectory
-          onGuided={GuidedWorkspace?(id)=>{setGuidedStart({vehicleId:id});setGuidedOpen(true)}:undefined}
+          onGuided={GuidedWorkspace?(id)=>{showGuided({vehicleId:id})}:undefined}
           controller={session.directoryController}
           onVehicleQuotes={
             !review && import.meta.env.VITE_BT_CP05_PRIVATE_ENABLED === 'true'
@@ -206,7 +223,7 @@ screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspen
           }
         />
       ) : (
-        <OfficialPanel screen={screen} onNavigate={navigateScreen} onIntake={!review&&session?.directoryController&&GuidedWorkspace?()=>{setGuidedStart({});setGuidedOpen(true)}:undefined} />
+        <OfficialPanel screen={screen} onNavigate={navigateScreen} onIntake={!review&&session?.directoryController&&GuidedWorkspace?()=>{showGuided({})}:undefined} />
       )
   )
   const privateOrders =
@@ -217,7 +234,7 @@ screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspen
   return (
     <AppShell
       screen={screen}
-      onNavigate={navigateScreen}
+      onNavigate={next=>{setGuidedVisible(false);navigateScreen(next)}}
       preserveNavigationPosition={privateSession}
       copy={
         session
@@ -269,13 +286,15 @@ screen==='agenda' && !review && session?.directoryController && Agenda ? <Suspen
         </div>
         {privateOrders && session?.controls}
       </div>
-      <div ref={navigation.root} className="workspace-views">
+      <div ref={navigation.root} hidden={guidedOpen&&guidedVisible} className="workspace-views">
         {navigation.rendered.map(section=><div key={section} data-workspace-section={section}
           hidden={section!==screen} inert={section!==screen}>
           {renderPanel(section)}
         </div>)}
       </div>
-      {guidedOpen&&GuidedWorkspace&&session?.directoryController&&<Suspense fallback={<p role="status">Abriendo recorrido…</p>}><GuidedWorkspace start={guidedStart} controller={session.directoryController} onClose={()=>setGuidedOpen(false)}/></Suspense>}
+      {guidedOpen&&!guidedVisible&&<button className="cp04-primary" onClick={()=>setGuidedVisible(true)}>Retomar atención activa</button>}
+      {guidedOpen&&GuidedWorkspace&&session?.directoryController&&<div hidden={!guidedVisible}><Suspense fallback={<p role="status">Abriendo recorrido…</p>}><GuidedWorkspace key={guidedInstance} isActive={guidedVisible} onPendingChange={pending=>{if(guidedInstance===guidedGeneration.current)guidedPending.current=pending}} onVisitChange={identity=>{if(guidedInstance===guidedGeneration.current)guidedIdentity.current=identity}} onAgenda={()=>{setGuidedVisible(false);navigateScreen('agenda')}} start={guidedStart} controller={session.directoryController} onClose={()=>setGuidedVisible(false)}/></Suspense></div>}
+
     </AppShell>
   )
 }

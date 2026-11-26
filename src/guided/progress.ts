@@ -1,9 +1,10 @@
 /** Progress is a projection of confirmed records, never a stored step number. */
-export type Evidence = {order:boolean;inspection:boolean;issued:boolean;approval:boolean;execution:boolean;handover:boolean;archive:boolean}
+export type Evidence = {order:boolean;inspection:boolean;issued:boolean;approval:boolean;execution:boolean;handover:boolean;archive:boolean;planned?:boolean;needsRevision?:boolean}
 export function confirmedStage(e:Evidence):number {
+ if(e.planned){if(!e.issued)return 3;if(!e.approval)return 4;return 1}
  if(!e.order)return 1
  if(!e.inspection)return 2
- if(!e.issued)return 3
+ if(!e.issued||e.needsRevision)return 3
  if(!e.approval)return 4
  if(!e.execution)return 5
  if(!e.handover)return 6

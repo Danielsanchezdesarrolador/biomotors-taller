@@ -53,6 +53,7 @@ export function QuotePanel({
   initialOrderId,
   registerSave,
   guided = false,
+  orderLocked = false,
   onPendingChange,
   isActive = true,
   onBack
@@ -65,6 +66,7 @@ export function QuotePanel({
   registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
   guided?: boolean
+  orderLocked?: boolean
   isActive?: boolean
   onBack: () => void
 }) {
@@ -282,6 +284,7 @@ export function QuotePanel({
   }
   async function action(kind: 'create' | 'save' | 'revise' | 'void') {
     if (lock.current || !canWrite || readPending) return
+    const request = sequence.current
     lock.current = true
     setBusy(true)
     setError('')
@@ -315,7 +318,7 @@ export function QuotePanel({
           reason,
           op('void:' + bundle.quote.id + ':' + bundle.quote.version + ':' + reason)
         )
-      if (!active.current) return
+      if (!active.current || request!==sequence.current) return
       clearLocalDraft()
       setEditing(null)
       setBundle(next)
@@ -364,6 +367,7 @@ export function QuotePanel({
   }
   async function pdf(revision?: Revision) {
     if (!bundle || lock.current || readPending) return
+    const request = sequence.current
     lock.current = true
     setBusy(true)
     setError('')
@@ -396,7 +400,7 @@ export function QuotePanel({
       const bytes = revision
         ? await repository.documents.download(revision)
         : await renderer.browserQuotePdf(previewSnapshot(bundle, draft), true, templatePdf)
-      if (active.current)
+      if (active.current && request===sequence.current)
         renderer.downloadPdf(
           bytes,
           `${quoteNumber(bundle.quote)}-${revision ? 'r' + revision.revision : 'borrador'}.pdf`
@@ -423,6 +427,7 @@ export function QuotePanel({
       kind === 'issue' ? '¿Emitir y archivar esta revisión inmutable?'
         : '¿Cancelar la reserva pendiente sin emitir?'
     )) return
+    const request = sequence.current
     lock.current = true
     setBusy(true)
     setError('')
@@ -453,7 +458,7 @@ export function QuotePanel({
         if(error instanceof QuoteFailure&&error.kind==='denied')throw error
         throw new QuoteReadPending(source.quote.id,source.quote.version+(kind==='issue'?1:0))
       }
-      if (!active.current) return
+      if (!active.current || request!==sequence.current) return
       setBundle(next)
       setDraft(draftFrom(next))
       if(kind==='issue')setTab('trabajos')
@@ -601,7 +606,7 @@ export function QuotePanel({
           <h2>{initialVehicleId ? 'Cotizaciones del vehículo' : 'Documentos recientes'}</h2>
           <p>Hasta 50 cotizaciones autorizadas.</p>
           {!busy && !visibleQuotes.length && <p>Sin cotizaciones registradas.</p>}
-          {visibleQuotes.filter(q=>!guided||q.order_id===initialOrderId).map((q) => (
+          {visibleQuotes.filter(q=>!(guided||orderLocked)||q.order_id===initialOrderId).map((q) => (
             <button
               disabled={busy || !!readPending}
               key={q.id}
@@ -614,7 +619,7 @@ export function QuotePanel({
           ))}
           <label>
             Orden CP04
-            <select disabled={guided||busy||ordersRefreshing||!!ordersError} aria-busy={ordersRefreshing} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
+            <select disabled={guided||orderLocked||busy||ordersRefreshing||!!ordersError} aria-busy={ordersRefreshing} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
               <option value="">Selecciona una orden</option>
               {orderId&&!orders.some(o=>o.order.id===orderId)&&<option value={orderId}>OT seleccionada · {orderId.slice(0,8)} · fuera del listado reciente</option>}
               {orders.map((o) => (
@@ -712,7 +717,7 @@ export function QuotePanel({
                   tributario.
                 </small>
               </div>
-              {canWrite && bundle.quote.status === 'issued' &&
+              {canWrite && !orderLocked && bundle.quote.status === 'issued' &&
                 bundle.revisions
                   .filter(r => r.revision === bundle.quote.issued_revision)
                   .map(revision => (
@@ -728,7 +733,7 @@ export function QuotePanel({
                       </button>
                       {executionOpen && (
                         import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' && privateClient
-                          ? !guided && <FlowLive02Loader stage={bundle?.source.order.intake_phase==='planned'?4:undefined} key={revision.id}
+                          ? !(guided||orderLocked) && <FlowLive02Loader stage={bundle?.source.order.intake_phase==='planned'?4:undefined} key={revision.id}
                               client={privateClient} context={context}
                               revision={revision} quote={bundle.quote} />
                           : <WorkExecutionDraft key={revision.id}

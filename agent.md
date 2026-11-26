@@ -1,3 +1,31 @@
+## 26/11/2026 — BT-FLOW-NEXT-01 integración aprobada, pendiente de CI y deploy
+
+El propietario autoriza integrar el candidato definitivo y mantener el repositorio oficial público temporalmente. No autoriza despliegue ni cambios alojados. Business comunicó PASS definitivo B05 e integridad del candidato; respaldo consolidado cifrado DB + Storage 6/6 PDF restaurados/verificados y abiertos por el titular, con alcance acotado, sin paridad de seguridad ni DR integral. El requisito de respaldo previo queda satisfecho sujeto a vigencia. No repetir SEC07, exportaciones ni suites locales por rutina. Auto-Deploy OFF confirmado en Render antes de integrar; correo OFF y FLOW-UX-01-R2 pausado se mantienen como restricciones. [Checkpoint de integración](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_01_INTEGRACION_20261126.md). Las entradas anteriores son historia, no autorizaciones vigentes.
+
+Piloto controlado: un editor por OT, sin modificaciones concurrentes de una misma atención ni rutas alternativas que omitan el cotejo económico; aprobación vigente obligatoria y evidencia de inspección persistida válida; excluir visitas completamente vacías. No inventar hallazgos. Atomicidad hallazgo-partida no certificada. QA alojada, aceptación visual del propietario y piloto Ignacio siguen pendientes. Las 33 capturas de evidencia y los paquetes/logs privados permanecen en revisión privada; no transferir datos personales ni secretos. Priorizar reutilización de Toolkit y ejecutores aprobados. No subir respaldos ni credenciales.
+
+**Siguiente:** comprobar CI de la integración, pedir autorización específica de despliegue Render y luego aceptación humana alojada. No activar módulos adicionales.
+
+---
+
+## 25/11/2026 — BT-FLOW-NEXT-01-R1-FIX-ID
+
+Corrección puntual autorizada de B05 sobre la huella visual `59e5a2c0325b34a5d15b676b1ca10a84dac3df9373ee18b2e3404a5a0fbc761d`. La identidad efectiva de la OT se comunica desde la lectura confirmada al contexto de navegación. Retomar conserva la instancia y sus borradores; una nueva entrada usa una identidad de instancia independiente cuando las guardas lo permiten. Se protegen los cambios internos de atención y se ignoran las notificaciones de instancias obsoletas. [Checkpoint FIX-ID](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_01_R1_FIX_ID_20261125.md).
+
+Validación focalizada de las secuencias solicitadas, aislamiento de escrituras, respuestas tardías, TypeScript y compilaciones pertinentes. Las aceptaciones previas B01–B04 para el piloto y R2 técnico comunicadas por Dirección Técnica se conservan en su alcance. Las restricciones productivas y la evaluación pendiente de atomicidad siguen vigentes.
+
+## 25/11/2026 — BT-FLOW-NEXT-01-R1, corrección local tras NO-GO
+
+B01–B05 corregidos sobre el candidato existente. La cotización usa un puerto limitado a la OT activa, las inspecciones parciales conservan sus resultados originales, el alcance requiere cotejo explícito y las escrituras dependientes consultan precondiciones vigentes. La navegación mantiene el recorrido y sus borradores montados. Validación final focalizada de 80 pruebas, Chromium 1366/390 y builds público/privado con TypeScript. Candidato para revisión independiente, sujeto al alcance y límites del [checkpoint R1](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_01_R1_20261125.md).
+
+El cotejo de alcance es una confirmación operativa en memoria por conjunto de evidencias, adicional a la aprobación persistida. La asociación económica entre hallazgos y partidas y la atomicidad de esa asociación no existen en los contratos actuales. Respaldo diferido y restricciones productivas vigentes. La carpeta original de revisión BT-FLOW-NEXT-01 se conserva.
+
+## 25/11/2026 — BT-FLOW-NEXT-01 candidato local
+
+Implementación autorizada de continuidad con control de avance, espacios completos de inspección y cotización, navegación tras lectura confirmada y reanudación por OT. Aprobación obligatoria vinculada a revisión vigente y contratos de Agenda conservados. Validación local consolidada y evidencia en [checkpoint BT-FLOW-NEXT-01](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_01_20261125.md).
+
+El propietario difiere el respaldo cifrado DB + Storage hasta finalizar este bloque funcional. El último conjunto permanece preservado y su vigencia está pendiente de actualización antes de otra intervención alojada que la requiera y del piloto real. Candidato local pendiente de revisión y autorización de publicación.
+
 ## 25/11/2026 — BT-AGENDA-01 SQL instalado OFF
 
 El propietario autorizó expresamente continuar sin respaldo nuevo hasta la tarde. Excepción puntual: último conjunto DB+Storage verificado no incluye cuatro PDF posteriores; no se declara respaldo vigente ni recuperación completa. Actualizar conjunto cifrado esta tarde, incluyendo nuevos registros y objetos, sin repetir restauración SEC07. Migración registrada `20261125154009_bt_agenda_01_intake_and_scheduling_off`, desde candidato aprobado de `de599d539050225cb693f7af42830d89f67ca3ff` (DDL original, transacción del migrador, límites de espera). Postflight: 5 tablas RLS, recepción pública FORCE, 7 triggers, anónimo sin RPC, authenticated sin DML directo de recepción/fase, funciones anteriores inaccesibles a roles expuestos. 0 rollout, 0 planificadas, 0 recepciones; 4 OT, 4 cotizaciones, 1 manifiesto y 5 objetos PDF conservan sus conteos. Advisor INFO sin políticas de tablas privadas es intencional (acceso por RPC autorizadas), no se amplían permisos. Correo OFF. No se ha validado QA alojada.
