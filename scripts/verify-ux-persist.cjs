@@ -4,7 +4,21 @@ const {cp04Page,uuid,tenant,userId,businessWrites}=require('../tests/harness/cp0
 const out=process.env.OUTPUT_DIR||'artifacts/bt-ux-persist'
 const api='https://suxcqqnmcjoezfxltoms.supabase.co'
 const delay=ms=>new Promise(r=>setTimeout(r,ms))
-const dataReads=requests=>requests.filter(r=>r.method==='GET'&&!['/rest/v1/profiles','/rest/v1/workshop_memberships','/rest/v1/workshops'].includes(r.path)&&!r.path.startsWith('/auth/')).length
+const dataReadRecords=requests=>requests.filter(r=>r.method==='GET'&&!['/rest/v1/profiles','/rest/v1/workshop_memberships','/rest/v1/workshops'].includes(r.path)&&!r.path.startsWith('/auth/'))
+const dataReads=requests=>dataReadRecords(requests).length
+// CP05 intentionally refreshes only its order selector on entry. Match the
+// two tenant-scoped operational queries, not a table-wide or timing exemption.
+function assertCp05OrderRefresh(reads,vehicleIds){
+ assert.deepEqual(reads.map(r=>r.path),['/rest/v1/work_orders','/rest/v1/vehicles'],'CP05 entry reads exactly the order options and their vehicles')
+ assert.deepEqual(reads[0].query,{
+  select:'workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at,vehicles!inner(archived_at,customers!inner(archived_at))',
+  workshop_id:'eq.'+tenant,'vehicles.archived_at':'is.null','vehicles.customers.archived_at':'is.null',order:'opened_at.desc',limit:'40'
+ },'CP05 order refresh retains tenant scope, active-record filters and the bounded recent list')
+ const {id,...vehicleQuery}=reads[1].query
+ assert.deepEqual(vehicleQuery,{select:'workshop_id,id,customer_id,plate,plate_key,make,model,odometer_km',workshop_id:'eq.'+tenant},'CP05 vehicle lookup remains tenant-scoped')
+ assert.match(id||'',/^in\.\([0-9a-f-]+(?:,[0-9a-f-]+)*\)$/)
+ assert.deepEqual(id.slice(4,-1).split(',').sort(),[...new Set(vehicleIds)].sort(),'Only vehicles referenced by the expected synthetic orders are read')
+}
 const active=p=>p.locator('[data-workspace-section]:not([hidden])')
 async function stable(p,value){
  assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),true,'Original form node remains mounted')
@@ -21,7 +35,19 @@ async function stable(p,value){
   try {context=await cp04Page(browser,width,{customers:[{id:uuid(50),workshop_id:tenant,full_name:'Cliente sintético UX',email:null,mobile_e164:null,archived_at:null}]})} catch(error){const page=browser.contexts()[0]?.pages()[0];if(page){await page.screenshot({path:out+'/startup-failure.png'});console.log(await page.locator('[role=status],[role=alert]').allTextContents())}throw error}
   const {p,state,requests,errors}=context
   p.setDefaultTimeout(15000)
+  // A separate trace preserves query shape for this assertion without changing
+  // the shared fixture's request-log contract or relaxing its route guards.
+  const httpTrace=[]
+  p.on('request',req=>{
+   const url=new URL(req.url())
+   if(url.origin===api)httpTrace.push({path:url.pathname,method:req.method(),query:Object.fromEntries(url.searchParams)})
+  })
   const nav=index=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
+  const waitQuoteOrders=()=>active(p).locator('.cp05-panel select[aria-busy="false"]:enabled').waitFor()
+  const waitRead=path=>p.waitForResponse(response=>{
+   const url=new URL(response.url())
+   return url.origin===api&&url.pathname===path&&response.request().method()==='GET'
+  })
   // CP05/06 read-only fixture, scoped to the same synthetic tenant.
   await p.route(api+'/rest/v1/**',async route=>{
    const req=route.request(),url=new URL(req.url()),table=url.pathname.split('/').pop()
@@ -65,7 +91,7 @@ async function stable(p,value){
   const row=p.locator('.mp-row').first();state.failFindings=true
   await row.getByRole('radio',{name:/ · OK$/}).check();await row.getByText('Error al guardar',{exact:true}).waitFor()
   const attempts=businessWrites(requests).length
-  await nav(3);await active(p).locator('.cp05-panel').waitFor()
+  await nav(3);await active(p).locator('.cp05-panel').waitFor();await waitQuoteOrders()
   await nav(1);await row.getByText('Error al guardar',{exact:true}).waitFor()
   assert.equal(await row.getByRole('radio',{name:/ · OK$/}).isChecked(),true)
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(businessWrites(requests).length,attempts)
@@ -89,10 +115,26 @@ async function stable(p,value){
    return digest
   }
   const originalPdf=await openPdf()
-  const pdfReads=dataReads(requests)
-  await nav(3);await nav(1)
+  const pdfReads=dataReads(requests),navStart=requests.length,traceStart=httpTrace.length
+  // Wait for both specific CP05 responses and its ready selector before leaving:
+  // do not cancel the intentional refresh or attribute late reads to the PDF.
+  const [orderResponse,vehicleResponse]=await Promise.all([
+   waitRead('/rest/v1/work_orders'),waitRead('/rest/v1/vehicles'),nav(3)
+  ])
+  assert.ok(orderResponse.ok()&&vehicleResponse.ok(),'CP05 selector refresh succeeded')
+  await waitQuoteOrders()
+  const navReads=dataReadRecords(httpTrace.slice(traceStart))
+  console.log('BT_UX_PDF_NAVIGATION_READS',engine,width,JSON.stringify(navReads))
+  assertCp05OrderRefresh(navReads,state.orders.map(o=>o.vehicle_id))
+  assert.deepEqual(dataReadRecords(requests.slice(navStart)).map(r=>r.path),navReads.map(r=>r.path),'Fixture and browser trace agree on the exact two navigation reads')
+  assert.equal(dataReads(requests),pdfReads+2,'No other business reads while visiting CP05')
+  const reopenStart=httpTrace.length
+  await nav(1)
   assert.deepEqual(await openPdf(),originalPdf,'Same cached PDF bytes after returning to the mounted module')
-  assert.equal(dataReads(requests),pdfReads,'Reopening the same PDF does not reload business records')
+  const reopenReads=dataReadRecords(httpTrace.slice(reopenStart))
+  console.log('BT_UX_PDF_REOPEN_READS',engine,width,JSON.stringify(reopenReads))
+  assert.deepEqual(reopenReads,[],'Returning to CP04 and reopening the same PDF perform no business reads')
+  assert.equal(dataReads(requests),pdfReads+2,'Reopening the same PDF does not reload business records')
   assert.equal(businessWrites(requests).length,pdfWrites,'Preview and navigation do not write or issue')
   // CP03 selection and CP06 subview stay mounted while visiting another module.
   await nav(2);await p.getByRole('button',{name:'Cerrar formulario',exact:true}).click()
@@ -118,7 +160,7 @@ async function stable(p,value){
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(await p.locator('.workspace-views').count(),0)
   assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),false)
   assert.deepEqual(errors,[])
-  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF modal reopen retains exact cached bytes without business reads/writes','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
+  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF modal reopen retains exact cached bytes; CP05 entry refreshes exactly two tenant-scoped order-option reads; CP04 return/reopen no business reads; no writes','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
   await p.close();console.log('BT_UX_PERSIST_PASS',engine,width)
  }
  fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2))
