@@ -1,3 +1,9 @@
+## 26/11/2026 — QA real: restitución Full confirmada; bloque consolidado siguiente
+
+Titular confirma recuperación de Full y 8 cupos. Postflight Supabase de solo lectura confirma suscripción full/active/lifetime, operaciones, agenda y archivo habilitados, 1 mecánico activo, 1 OT y 1 entrega conservadas en taller piloto. Revocación parcial: cambio de plan y cupos PASS, brecha de escrituras CP04 pendiente; no declarar aceptación final. Siguiente: bloque BT-PILOT-FIX-01, entrega privada consolidada de las diez incidencias del checkpoint (prioridad servidor para revocación, cierre de OT y reactivación; después siete UX acotadas). Mantener reglas Básico/Plus/Full y aislamiento, probar con datos sintéticos, preservar registros e históricos, no instalar SQL ni desplegar sin autorización específica. Luego validar recuperación/denegación focalizada, logos y BT-MOBILE-02 antes de incorporación de Ignacio. No repetir SEC07 ni suites históricas por rutina.
+
+---
+
 ## 26/11/2026 — QA real: cierre de recorrido y brecha de revocación CP04
 
 Titular confirmó recorrido PC terminado, desactivación y reincorporación del mecánico por nueva invitación exitosas. Revocación Full observada: ambas licencias efectivas Básico, 1/0 cupos, nuevas reservas bloqueadas, membresía conservada. Supabase en solo lectura confirmó suscripción full/revoked, OT de prueba ready, entrega registrada y 1 mecánico activo. Mecánico reporta controles multipunto editables después de revocar; no se ha comprobado una escritura nueva persistida durante la revocación. Inspección de políticas/triggers productivos confirma que cp04_findings_insert/update y guardas existentes no comprueban licencia; INSERT exige orden no closed y guard de actualización solo protege determinados campos en closed. No declarar revocación completa PASS. No modificar datos históricos para comprobar.
