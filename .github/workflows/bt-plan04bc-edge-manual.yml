@@ -1,0 +1,70 @@
+name: ByteTorque PLAN-04BC - Edge CP05 compatible
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe DESPLEGAR_PLAN04BC_CP05 tras instalar las cinco migraciones autorizadas'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: bytetorque-cp05-edge-deploy
+  cancel-in-progress: false
+jobs:
+  desplegar-plan04bc-edge:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmacion == 'DESPLEGAR_PLAN04BC_CP05' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_REF: suxcqqnmcjoezfxltoms
+      APPROVED_SHA: ecdfe58386165a39826249bb8a6b68f3965cdaa6
+      CP05_PATH: /tmp/bytetorque-plan04bc-cp05-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Obtener exactamente el candidato integrado
+        uses: actions/checkout@v4
+        with:
+          ref: ecdfe58386165a39826249bb8a6b68f3965cdaa6
+          persist-credentials: false
+      - name: Verificar fuente y Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          [[ "$(git hash-object scripts/package-cp05-edge.mjs)" == f3abfab32b8ce62137c224d7f4905024989bef15 ]]
+          [[ "$(git hash-object scripts/verify-cp05-edge-package.mjs)" == d85825d04dc0db1a68584423d897b7b6c0119041 ]]
+          [[ "$(git hash-object server/cp05/edgeEntryCandidate.ts)" == 3bf91815810c09e9047b3ac90a40a3c51b00fe80 ]]
+          [[ "$(git hash-object server/cp05/documentHandlerCandidate.ts)" == 3be39ac014bcb7537cbeb55c5a275994fc550037 ]]
+          [[ "$(git hash-object package-lock.json)" == 82dd4240293d61f494f2dfd55bc8b42c39335ad8 ]]
+          docker info >/dev/null
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Construir y verificar CP05 sin credenciales de Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          git diff --exit-code
+          node scripts/package-cp05-edge.mjs "$CP05_PATH"
+          node scripts/package-cp05-edge.mjs "$CP05_PATH-check"
+          node scripts/verify-cp05-edge-package.mjs "$CP05_PATH"
+          node scripts/verify-cp05-edge-package.mjs "$CP05_PATH-check"
+          cmp "$CP05_PATH/supabase/functions/bt-cp05-documents/index.js" "$CP05_PATH-check/supabase/functions/bt-cp05-documents/index.js"
+          grep -Fx 'verify_jwt = true' "$CP05_PATH/supabase/config.toml"
+          sha256sum "$CP05_PATH/supabase/functions/bt-cp05-documents/index.js"
+      - uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+      - name: Desplegar exclusivamente CP05 sin alterar secretos ni otros servicios
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]
+          cd "$CP05_PATH"
+          supabase functions deploy bt-cp05-documents --project-ref "$PROJECT_REF"
+          echo "BT_PLAN04BC_CP05_DEPLOY_SUCCEEDED"
+          supabase functions list --project-ref "$PROJECT_REF"

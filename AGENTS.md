@@ -1,3 +1,11 @@
+## 26/11/2026 — PLAN-04BC-PILOTO-01 y delta integrados
+
+Autorización del titular para integración, SQL y despliegue coordinado, sujeto a las puertas técnicas. Candidato final 1396496df4f6acad591cc13ce83dc891a5610026, árbol f625fab344444916187f805a61ed784e4adf9b24 reconstruido exactamente; commit oficial ecdfe58386165a39826249bb8a6b68f3965cdaa6. 30 archivos, pruebas del candidato 122 unitarias/51 SQL y delta 25 focalizadas reportadas; no reejecutadas por Dirección Técnica. El delta conserva lectura histórica y bloquea escrituras premium tras revocación de Full para talleres gestionados. CI del commit integrado pendiente. No publicar evidencias privadas.
+
+Preflight de solo lectura: cuerpos de tres autorizadores y preparación CP05 coinciden con guardas candidatas; 04B/C aún ausentes, dos talleres, cero licencias, cero MFA verificado, 13 PDF privados vs 11 del último respaldo reportado. Antes de SQL, confirmar respaldo integrado vigente (nuevos documentos), ventana sin editores y CI. Workflow manual CP05 preparado para el SHA fijo; no ejecutarlo hasta confirmar las cinco migraciones en orden. Final Archive permanece en v7. No activar logo, billing, correo externo, registro real ni talleres reales automáticamente. SEC07 no reabierto.
+
+---
+
 ## 26/11/2026 — BT-PLAN-04BC, delta de revocación
 
 Corrección focalizada sobre `5dff5465e46b2903ddabaef4505cefb1c6be0131`: licencia Full vigente y sincronizada comprobada en las escrituras del piloto desde servidor, además del rollout. Revocación con taller todavía habilitado bloquea Agenda/CP05/FLOW/archivo sin borrar históricos ni miembros y conserva lectura autorizada de originales. [Checkpoint del delta](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_REVOCACION_20261126.md). 25 comprobaciones focalizadas; sin repetir 122 unitarias, 51 SQL ni visuales completos.
