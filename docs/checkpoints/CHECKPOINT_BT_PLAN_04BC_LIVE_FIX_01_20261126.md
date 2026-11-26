@@ -46,3 +46,7 @@ Orden propuesto tras revisión: integrar delta autorizado, CI oficial incluidos 
 ## Documentación y contratos consultados
 
 AGENTS.md, agent.md y roadmap.md; CHECKPOINT_BT_PLAN_04BC_LIVE_20261126.md y antecedentes PLAN04BC/04A/04B/04C y revocación; contratos existentes bt_plan04_my_status y bt_plan04_create_workshop y fixtures oficiales de laboratorio; RealAccess/PersonalHome/WorkshopHome, controlador de selección Auth y borradores privados; CreatorConsole/PersonalAccounts y parsers de plan; docs/design/referencias-r2/README.md y catálogo visual/brand oficial R2; guardas de grafo público y verificador de bundle; procedimiento DTK-ERR-056 y entregas privadas anteriores como formato de transferencia. No se consultaron ni modificaron secretos productivos.
+
+## Integración por Dirección Técnica — puerta CI
+
+Árbol candidato exacto `ca2612e372fb9de5a579294fba34c6b67c05a8c8` reconstruido con 20/20 blobs cotejados; commit de integración `3af5788bcc92b1f9e2538b2e860103f61f804f94`. Se añade únicamente selección explícita Chromium/WebKit al ejecutor browser, bloqueo de service workers en fixture, evidencia con motor identificado y job paralelo obligatorio por motor dentro de BT-OFICIAL-01A con build local sintético. Las aserciones originales se conservan. No se ejecutó localmente el nuevo ajuste de CI; resultado remoto pendiente. No se modifican fuentes productivas respecto del candidato ni SQL alojado, permisos, Edge o Render. Despliegue frontend condicionado al resultado verde de ambos motores y CI general.

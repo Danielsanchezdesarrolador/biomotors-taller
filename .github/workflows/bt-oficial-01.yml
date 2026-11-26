@@ -127,3 +127,53 @@ jobs:
             artifacts/bt-r2-a10-webkit/
           if-no-files-found: warn
           retention-days: 30
+  live-personal-workshop:
+    name: LIVE-FIX-01 · cuenta personal y planes (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      BT_LIVE_PERSONAL_BROWSER: ${{ matrix.browser }}
+      LIVE_PERSONAL_URL: http://127.0.0.1:5241
+      OUTPUT_DIR: artifacts/bt-live-personal-${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Preparar navegador y aplicación
+        run: |
+          npm ci --no-audit --no-fund
+          npm install --prefix "$RUNNER_TEMP/bt-live-personal-playwright" --no-save --no-package-lock --no-audit --no-fund playwright
+          ln -s "$RUNNER_TEMP/bt-live-personal-playwright/node_modules/playwright" node_modules/playwright
+          node "$RUNNER_TEMP/bt-live-personal-playwright/node_modules/playwright/cli.js" install --with-deps "$BT_LIVE_PERSONAL_BROWSER"
+      - name: Build privado sintético y regresión de planes
+        env:
+          VITE_BT_AUTH_R1_ENABLED: 'true'
+          VITE_BT_CREATOR_PRIVATE_ENABLED: 'true'
+          VITE_BT_PLAN04_PRIVATE_ENABLED: 'true'
+          VITE_BT_PLAN04_WORKSHOPS_ENABLED: 'true'
+          VITE_BT_CP03_PRIVATE_ENABLED: 'true'
+          VITE_BT_CP04_PRIVATE_ENABLED: 'true'
+          VITE_SUPABASE_URL: https://suxcqqnmcjoezfxltoms.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_build_mock
+        run: |
+          node node_modules/vite/bin/vite.js build --outDir /tmp/bt-live-personal-build
+          node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-live-personal-build --port 5241 --strictPort > /tmp/bt-live-personal.log 2>&1 &
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 "$LIVE_PERSONAL_URL/" > /dev/null; then
+            cat /tmp/bt-live-personal.log
+            exit 1
+          fi
+          node scripts/verify-live-personal-workshop.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BT-LIVE-FIX-01-${{ matrix.browser }}
+          path: ${{ env.OUTPUT_DIR }}/
+          if-no-files-found: warn
+          retention-days: 30

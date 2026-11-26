@@ -1,11 +1,13 @@
 // LIVE-FIX-01: real React/SDK, synthetic intercepted HTTP only.
-const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
+const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
+const engine=process.env.BT_LIVE_PERSONAL_BROWSER||'chromium'
+assert.ok(['chromium','webkit'].includes(engine),'Unsupported browser engine')
 const base=process.env.LIVE_PERSONAL_URL||'http://127.0.0.1:5241',out=process.env.OUTPUT_DIR||'/tmp/bt-live-personal-evidence'
 const api='https://suxcqqnmcjoezfxltoms.supabase.co',uid='00000000-0000-4000-8000-000000000002',old='00000000-0000-4000-8000-000000000011',own='00000000-0000-4000-8000-000000000012'
 const jwt=()=>Buffer.from('{"alg":"HS256"}').toString('base64url')+'.'+Buffer.from(JSON.stringify({sub:uid,role:'authenticated',aud:'authenticated',aal:'aal2',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')+'.'+Buffer.from('synthetic-test-signature').toString('base64url')
-;(async()=>{fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});const results=[]
+;(async()=>{fs.mkdirSync(out,{recursive:true});const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{}),args:['--no-sandbox']});const results=[]
 try{for(const width of [1440,390]){
- const p=await browser.newPage({viewport:{width,height:940}}),errors=[],unexpected=[],mutations=[]
+ const p=await browser.newPage({viewport:{width,height:940},serviceWorkers:'block'}),errors=[],unexpected=[],mutations=[]
  const user={id:uid,aud:'authenticated',email:'live-personal@invalid.test',email_confirmed_at:'2026-11-26T00:00:00Z',user_metadata:{full_name:'Operador sintético'},factors:[]}
  let personal='full',lifetime=true,expiry=null,created=false,ownPlan='full',badPersonal=false
  const oldWorkshop={id:old,name:'Taller Básico existente · Sintético',status:'active'},oldSub={plan:'basic',state:'active'}
@@ -75,8 +77,8 @@ try{for(const width of [1440,390]){
  personal='plus';lifetime=true;expiry=null;ownPlan='plus';await m.locator('[data-plan=plus]').waitFor({timeout:8000});await m.getByRole('button',{name:'Mi cuenta personal',exact:true}).click();home=p.locator('.personal-home:visible');await home.locator('header [data-plan=plus]').waitFor();await p.screenshot({path:out+'/personal-plus-'+width+'.png',fullPage:true})
  badPersonal=true;await home.locator('header [data-plan=unknown]').waitFor({timeout:8000});await home.getByText('La creación de taller requiere Plus o Full vigente.',{exact:false}).waitFor();assert.equal(await home.getByRole('button',{name:'Crear mi taller',exact:true}).count(),0)
  assert.equal(JSON.stringify([oldWorkshop,oldSub,membership]),before);assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[])
- results.push({width,status:'PASS',oldBasicUnchanged:true,memberships:members.length,serverMutationKinds:mutations,fullCrown:true,plusBlue:true,draftPreservedOnPersonalNavigation:true,tenantSwitchDisposesOldDraft:true,creatorChangesRequeried:true,externalChangesAutomaticallyRequeried:true,wrongScopeFailsClosed:true})
- await p.close();console.log('LIVE_PERSONAL_WORKSHOP_BROWSER_PASS',width)
+ results.push({engine,width,status:'PASS',oldBasicUnchanged:true,memberships:members.length,serverMutationKinds:mutations,fullCrown:true,plusBlue:true,draftPreservedOnPersonalNavigation:true,tenantSwitchDisposesOldDraft:true,creatorChangesRequeried:true,externalChangesAutomaticallyRequeried:true,wrongScopeFailsClosed:true})
+ await p.close();console.log('LIVE_PERSONAL_WORKSHOP_BROWSER_PASS',engine,width)
 }
 fs.writeFileSync(out+'/browser-results.json',JSON.stringify(results,null,2)+'\n')
 }catch(e){const page=browser.contexts()[0]?.pages()[0];if(page){await page.screenshot({path:out+'/failure.png',fullPage:true});console.log(await page.locator('body').innerText())}throw e}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1})
