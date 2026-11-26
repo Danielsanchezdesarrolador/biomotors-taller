@@ -141,12 +141,12 @@ export function flowLiveCandidate(
     const record = await request<ApprovalRecord>('bt_flow_record_quote_approval', {
       p_workshop_id: workshopId, p_quote_id: quote.id,
       p_revision_id: revision.id, p_request_id: rid,
-      p_method: method, p_note: textNote(note, 12, 1000)
+      p_method: method, p_note: textNote(note, 0, 1000)
     })
     checkResponse(record, rid)
     if (record.quote_id !== quote.id || record.revision_id !== revision.id ||
       record.order_id !== quote.order_id || record.recorded_by !== userId ||
-      record.method !== method || record.note !== textNote(note, 12, 1000))
+      record.method !== method || record.note !== textNote(note, 0, 1000))
       reject('unconfirmed')
     return record
   }
@@ -200,7 +200,7 @@ export function flowLiveCandidate(
     const record = await request<HandoverRecord>('bt_flow_record_handover', {
       p_workshop_id: workshopId, p_report_id: validId(report.id),
       p_request_id: rid, p_checklist: checklist,
-      p_handover_method: method, p_handover_note: textNote(note,12,1000),
+      p_handover_method: method, p_handover_note: textNote(note,0,1000),
       p_operator_confirmed: true
     })
     checkResponse(record,rid)
@@ -208,7 +208,7 @@ export function flowLiveCandidate(
       record.vehicle_id !== report.vehicle_id ||
       record.quote_id !== report.quote_id || record.revision_id !== report.revision_id ||
       record.recorded_by !== userId || record.handover_method !== method ||
-      record.handover_note !== textNote(note, 12, 1000))
+      record.handover_note !== textNote(note, 0, 1000))
       reject('unconfirmed')
     return record
   }
@@ -258,8 +258,7 @@ export function flowLiveCandidate(
           !item.id || validId(item.id) !== item.id) reject('unconfirmed')
     }
     if (a && (!(['in_person', 'phone', 'written', 'other'] as string[]).includes(a.method) ||
-        typeof a.note !== 'string' || a.note.trim().length < 12 ||
-        a.note.length > 1000)) reject('unconfirmed')
+        typeof a.note !== 'string' || a.note.length > 1000)) reject('unconfirmed')
     if (e && (!a || e.approval_id !== a.id ||
         e.vehicle_id !== quote.vehicle_id)) reject('unconfirmed')
     if (e) {
@@ -278,8 +277,7 @@ export function flowLiveCandidate(
     }
     if (d && (!e || d.report_id !== e.id ||
         d.vehicle_id !== quote.vehicle_id ||
-        typeof d.handover_note !== 'string' || d.handover_note.trim().length < 12 ||
-        d.handover_note.length > 1000)) reject('unconfirmed')
+        typeof d.handover_note !== 'string' || d.handover_note.length > 1000)) reject('unconfirmed')
     return { approval: a, execution: e, handover: d }
   }
   return Object.freeze({

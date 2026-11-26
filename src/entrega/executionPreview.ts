@@ -104,8 +104,8 @@ export function executionPreview(
   const missing: string[] = []
   if (!rows.length) missing.push('La cotización emitida no contiene partidas.')
   if (unreviewed.length) missing.push('Revisa todas las partidas: realizadas y no realizadas.')
-  if ((pending.length || unreviewed.length) && explanation.length < 8)
-    missing.push('Explica los trabajos pendientes o no realizados (mínimo 8 caracteres).')
+  if ((pending.length || unreviewed.length) && explanation.length < 1)
+    missing.push('Explica los trabajos pendientes o no realizados.')
   if (!input.operatorReviewed)
     missing.push('El operador debe confirmar la revisión de las partidas marcadas.')
   return {

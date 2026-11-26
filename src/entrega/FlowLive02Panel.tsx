@@ -68,7 +68,7 @@ export function FlowLive02Panel({
   const [handoverMethod, setHandoverMethod] = useState<HandoverMethod>('in_person')
   const [handoverNote, setHandoverNote] = useState('')
   const [handoverConfirmed, setHandoverConfirmed] = useState(false)
-  useEffect(()=>{onPendingChange?.(busy||loading||executionPending||(!records?.approval&&!!approvalNote)||(!records?.handover&&!!handoverNote));return()=>onPendingChange?.(false)},[busy,loading,executionPending,records,approvalNote,handoverNote,onPendingChange])
+  useEffect(()=>{onPendingChange?.(busy||loading||executionPending||(!records?.approval&&(!!approvalNote||!!approvalMethod||approvalConfirmed))||(!records?.handover&&(!!handoverNote||handoverConfirmed||Object.values(checklist).some(Boolean))));return()=>onPendingChange?.(false)},[busy,loading,executionPending,records,approvalNote,approvalMethod,approvalConfirmed,handoverNote,handoverConfirmed,checklist,onPendingChange])
   const executionSave=useRef<((exit:boolean)=>Promise<boolean>)|null>(null)
   const bindExecution=useRef((save:((exit:boolean)=>Promise<boolean>)|null)=>{executionSave.current=save}).current
   useEffect(()=>{registerSave?.(saveStage);return()=>registerSave?.(null)})
@@ -163,7 +163,6 @@ export function FlowLive02Panel({
         if(saved.approval)return true
         if(exit&&!approvalNote&&!approvalConfirmed)return true
         if(!approvalMethod){setError('Selecciona un medio de aprobación.');return false}
-        if(approvalNote.trim().length<12){setError('Completa las observaciones requeridas (mínimo 12 caracteres).');return false}
         if(!approvalConfirmed){setError('Confirma la autorización del cliente.');return false}
         return (await recordApproval())===true
       }
@@ -172,7 +171,6 @@ export function FlowLive02Panel({
         if(saved.handover)return true
         if(exit&&!handoverNote&&!handoverConfirmed&&!Object.values(checklist).some(Boolean))return true
         if(!Object.values(checklist).every(Boolean)){setError('Completa las cuatro verificaciones de entrega.');return false}
-        if(handoverNote.trim().length<12){setError('Describe la entrega (mínimo 12 caracteres).');return false}
         if(!handoverConfirmed){setError('Confirma explícitamente la entrega del vehículo.');return false}
         if(!saved.execution){setError('Registra primero los trabajos realizados.');return false}
         return (await recordHandover(saved.execution))===true
@@ -193,7 +191,7 @@ export function FlowLive02Panel({
     'Informe de ejecución declarado por operador y confirmado por el servidor.'
   )
   const recordHandover = (report: ExecutionRecord) => write(
-    async () => {const saved=await port!.history(quote,revision);if(saved.handover)return saved.handover;if(!saved.approval||saved.execution?.id!==report.id)throw {kind:'invalid'};if(!handoverConfirmed||handoverNote.trim().length<12||!Object.values(checklist).every(Boolean))throw {kind:'invalid'};if(beforeHandover&&!(await beforeHandover()))throw {kind:'invalid'};return port!.handover(report, checklist, handoverMethod, handoverNote,
+    async () => {const saved=await port!.history(quote,revision);if(saved.handover)return saved.handover;if(!saved.approval||saved.execution?.id!==report.id)throw {kind:'invalid'};if(!handoverConfirmed||!Object.values(checklist).every(Boolean))throw {kind:'invalid'};if(beforeHandover&&!(await beforeHandover()))throw {kind:'invalid'};return port!.handover(report, checklist, handoverMethod, handoverNote,
       handoverConfirmed, requestId('handover', {
         report: report.id, checklist, method: handoverMethod, note: handoverNote
       }))},
@@ -221,7 +219,7 @@ export function FlowLive02Panel({
                   {methods.map(([value,label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </label>
-              <label>Observaciones de la autorización (mínimo 12 caracteres)
+              <label>Observaciones de la autorización
                 <textarea placeholder="Ej.: Cliente autoriza el presupuesto por teléfono el día de hoy." value={approvalNote} maxLength={1000} rows={3} disabled={busy}
                   onChange={e => { setApprovalNote(e.target.value); setApprovalConfirmed(false) }} />
               </label>
@@ -232,7 +230,7 @@ export function FlowLive02Panel({
                 este registro es mi declaración, no una firma del cliente.
               </label>
               <button type="button" className="cp04-primary" disabled={
-                busy || !approvalConfirmed || approvalNote.trim().length < 12
+                busy || !approvalConfirmed
               } onClick={() => void recordApproval()}>
                 Registrar declaración de aprobación
               </button>
@@ -286,7 +284,7 @@ export function FlowLive02Panel({
                   {handoverMethods.map(([value,label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </label>
-              <label>Nota concreta de entrega (mínimo 12 caracteres)
+              <label>Nota concreta de entrega
                 <textarea maxLength={1000} rows={3} value={handoverNote} disabled={busy}
                   onChange={e => { setHandoverNote(e.target.value); setHandoverConfirmed(false) }} />
               </label>
@@ -297,8 +295,7 @@ export function FlowLive02Panel({
                 No se obtuvo una firma digital del cliente.
               </label>
               <button className="cp04-primary" type="button" disabled={
-                busy || !handoverConfirmed || handoverNote.trim().length < 12 ||
-                !Object.values(checklist).every(Boolean)
+                busy || !handoverConfirmed || !Object.values(checklist).every(Boolean)
               } onClick={() => void recordHandover(records.execution!)}>
                 Registrar constancia del operador (OT debe estar lista)
               </button>

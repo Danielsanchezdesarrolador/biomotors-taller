@@ -92,7 +92,7 @@ export async function readFlowEvidence(
     verifyBase(a, 'approval')
     verifyActor(a)
     if (!methods.includes(a.method) || typeof a.note !== 'string' ||
-        a.note.trim().length < 12 || a.note.length > 1000) invalid()
+        a.note.length > 1000) invalid()
     approvalMap.set(a.id, a)
   }
   for (const e of executions) {
@@ -129,7 +129,7 @@ export async function readFlowEvidence(
     }
     if (Object.keys(e.decisions).some(k => !itemIds.has(k))) invalid()
     const quoted = amount(totalNet), performed = amount(performedNet)
-    if (pending && e.pending_note.trim().length < 8) invalid()
+    if (pending && e.pending_note.trim().length < 1) invalid()
     if (!safeMoney(e.quoted_net) || !safeMoney(e.quoted_tax) ||
         !safeMoney(e.quoted_total) || !safeMoney(e.performed_net) ||
         !safeMoney(e.performed_tax) || !safeMoney(e.performed_total) ||
@@ -151,7 +151,7 @@ export async function readFlowEvidence(
         e.order_id !== d.order_id) denied()
     if (!handoverMethods.includes(d.handover_method) ||
         typeof d.handover_note !== 'string' ||
-        d.handover_note.trim().length < 12 || d.handover_note.length > 1000 ||
+        d.handover_note.length > 1000 ||
         !d.checklist ||
         !['vehicleChecked','workChecked','documentsChecked','pendingExplained']
           .every(k => d.checklist[k] === true)) invalid()
@@ -163,7 +163,7 @@ export async function readFlowEvidence(
     const r=revById.get(receipt.revision_id),q=r&&quoteById.get(r.quote_id)
     if(!q||receipt.workshop_id!==wid||receipt.order_id!==q.order_id||receipt.quote_id!==q.id||receipt.vehicle_id!==vid||receipt.customer_id!==q.customer_id||received.has(receipt.order_id))denied()
     requireId(receipt.id);requireId(receipt.recorded_by);instant(receipt.received_at)
-    if(!Number.isInteger(receipt.odometer)||receipt.odometer<0||receipt.odometer>3000000||typeof receipt.complaint!=='string'||receipt.complaint.trim().length<3||receipt.complaint.length>2000)invalid()
+    if(!Number.isInteger(receipt.odometer)||receipt.odometer<0||receipt.odometer>3000000||typeof receipt.complaint!=='string'||receipt.complaint.trim().length<1||receipt.complaint.length>2000)invalid()
     received.add(receipt.order_id)
   }
   return { status: 'ready', approvals, executions, deliveries, receipts }

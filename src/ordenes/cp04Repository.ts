@@ -256,7 +256,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     if(!order.data||order.data.workshop_id!==tenant||order.data.status==='closed')
       throw new WorkOrderFailure('denied')
     const text=note.trim()
-    if(current.data.result==='attention'&&text.length<3)
+    if(current.data.result==='attention'&&text.length<1)
       throw new WorkOrderFailure('invalid')
     valid(version)
     const result=await client.from('inspection_findings').update({note:text||null})

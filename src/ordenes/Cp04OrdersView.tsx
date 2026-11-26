@@ -800,7 +800,7 @@ export function Cp04OrdersView({
                   <textarea
                     rows={3}
                     maxLength={2000}
-                    minLength={3}
+                    minLength={1}
                     required
                     value={complaint}
                     placeholder="Ej.: Ruido en el tren delantero al pasar por baches"
@@ -993,7 +993,7 @@ export function Cp04OrdersView({
                         value={note}
                         maxLength={2000}
                         required={result === 'attention'}
-                        minLength={result === 'attention' ? 3 : undefined}
+                        minLength={result === 'attention' ? 1 : undefined}
                         placeholder="Detalle técnico y recomendación"
                         onChange={(e) => setNote(e.target.value)}
                       />

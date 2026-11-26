@@ -47,7 +47,7 @@ export function multipuntoFinding(
   const item=template.find(i=>i.id===itemId)
   if(!item||state==='unreviewed')throw Error('Selecciona primero una casilla con X.')
   const text=state==='ok'&&note.trim()===CP04_PROVISIONAL_NOTE?'':note.trim()
-  if((state==='attention'||state==='immediate')&&text.length<3)
+  if((state==='attention'||state==='immediate')&&text.length<1)
     throw Error('Agrega una observación técnica para este problema.')
   const saved=state==='immediate'?CP04_IMMEDIATE_PREFIX+text:text
   if(saved.length>2000)throw Error('Observación demasiado larga.')

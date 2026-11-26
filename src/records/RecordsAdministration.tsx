@@ -51,7 +51,7 @@ export function RecordsAdministration({repository, onBack}: {repository: Records
     finally{lock.current=false;if(alive.current)setBusy(false)}
   }
   async function execute() {
-    if (lock.current || !selected || !action || !confirmed || reason.trim().length < 3) return
+    if (lock.current || !selected || !action || !confirmed || reason.trim().length < 1) return
     lock.current = true; setBusy(true); setError('')
     const seq = generation.current
     request.current ??= crypto.randomUUID()
@@ -122,11 +122,11 @@ export function RecordsAdministration({repository, onBack}: {repository: Records
         <p>{selected.row.label}</p>
         <p>{action === 'delete' ? 'Esta eliminación es irreversible. No elimina registros vinculados ni historiales.' : action === 'restore' ? 'El registro volverá a estar disponible. Sus registros archivados individualmente seguirán archivados.' : action === 'archive' ? 'Se ocultará de los selectores operativos. Sus vínculos e historial se conservarán y podrás restaurarlo.' : 'Se conservarán sus documentos e historial. Esta acción no declara una reparación ni elimina sus dependencias.'}</p>
         {action === 'delete' && selected.inspection.draft_items > 0 && <p>Se eliminarán también {selected.inspection.draft_items} partidas editables del borrador, que nunca fue emitido.</p>}
-        <label>Motivo (sin datos sensibles)<textarea required minLength={3} maxLength={500} value={reason} disabled={busy || uncertain} onChange={e => {request.current = null; setReason(e.target.value)}} /></label>
+        <label>Motivo (sin datos sensibles)<textarea required minLength={1} maxLength={500} value={reason} disabled={busy || uncertain} onChange={e => {request.current = null; setReason(e.target.value)}} /></label>
         <label className="bt-records-confirm"><input type="checkbox" checked={confirmed} disabled={busy || uncertain} onChange={e => setConfirmed(e.target.checked)}/> Confirmo explícitamente esta acción sobre el registro indicado.</label>
         {error && <p role="alert">{error}</p>}
         <div className="bt-records-actions"><button type="button" className="cp03-secondary" disabled={busy || uncertain} onClick={resetAction}>Volver sin cambios</button>
-          <button className={action === 'delete' ? 'bt-records-danger' : 'cp03-primary'} disabled={busy || !confirmed || reason.trim().length < 3}>{busy ? 'Confirmando…' : uncertain ? 'Comprobar misma solicitud' : actionLabels[action]}</button></div>
+          <button className={action === 'delete' ? 'bt-records-danger' : 'cp03-primary'} disabled={busy || !confirmed || reason.trim().length < 1}>{busy ? 'Confirmando…' : uncertain ? 'Comprobar misma solicitud' : actionLabels[action]}</button></div>
       </form>}
     </dialog>
   </section>

@@ -44,7 +44,7 @@ export function recordsRepository(client: SupabaseClient, context: Context): Rec
       return row
     },
     async execute(inspection, action: Action, request, reason) {
-      if (!inspection.actions.includes(action) || reason.trim().length < 3 || reason.trim().length > 500) throw new RecordsFailure('invalid')
+      if (!inspection.actions.includes(action) || reason.trim().length < 1 || reason.trim().length > 500) throw new RecordsFailure('invalid')
       const receipt = await rpc('bt_records_execute', {p_resource: resource(inspection.resource), p_id: recordId(inspection.id),
         p_action: action, p_token: inspection.token, p_request_id: recordId(request), p_reason: reason.trim()}) as Receipt
       if (!receipt || receipt.id !== inspection.id || receipt.resource !== inspection.resource || receipt.action !== action || receipt.request_id !== request) return unavailable()

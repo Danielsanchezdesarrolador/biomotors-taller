@@ -7,6 +7,7 @@ import {cp03PilotRepository} from '../clientes/cp03PilotRepository'
 import {Cp03PilotDirectoryView} from '../clientes/cp03PilotDirectoryView'
 import {cp04Repository} from '../ordenes/cp04Repository'
 import {type OrderWithVehicle,type Finding} from '../ordenes/cp04Contracts'
+import {Cp04MultipuntoPdfPreview} from '../ordenes/Cp04MultipuntoPdfPreview'
 import {Cp04MultipuntoChecklist} from '../ordenes/Cp04MultipuntoChecklist'
 import {inspectionEvidence,budgetMatches,scopeEvidence} from './continuity'
 import {orderWorkspace} from '../cp05/orderWorkspace'
@@ -22,7 +23,7 @@ import {canOpen,confirmedStage,ensureOrderStage,type Evidence} from './progress'
 import './guided.css'
 const findingResults={ok:'Revisado',attention:'Requiere atención',not_checked:'Sin revisar'}
 const findingResolutions={not_applicable:'Sin reparación pendiente',pending:'Resolución pendiente',resolved:'Resolución registrada'}
-const actions=['Guardar y continuar a recepción','Confirmar e iniciar inspección','Finalizar inspección y preparar cotización','Emitir y continuar a aprobación','Confirmar e iniciar trabajos','Finalizar trabajos y preparar entrega','Confirmar entrega y abrir expediente','Cerrar atención']
+const actions=['Guardar y continuar a recepción','Confirmar e iniciar inspección','Finalizar inspección y preparar cotización','Emitir y continuar a aprobación','Confirmar e iniciar trabajos','Finalizar trabajos y preparar entrega','Confirmar entrega y abrir expediente','Confirmar expediente definitivo']
 const stages=['Cliente y vehículo','Recepción','Inspección multipunto','Cotización','Aprobación del cliente','Ejecución de trabajos','Entrega del vehículo','Expediente final']
 const empty:Evidence={order:false,inspection:false,issued:false,approval:false,execution:false,handover:false,archive:false}
 function ports(client:SupabaseClient,context:Context){
@@ -120,7 +121,7 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
   if(!fresh.bundle||fresh.bundle.quote.id!==quote.id||fresh.bundle.quote.version!==quote.version||fresh.r?.id!==revision.id||fresh.current.order.cancelled_at||fresh.current.order.status==='closed')throw Error('stale')
   const reason=window.prompt('Describe los trabajos adicionales o el cambio de alcance para crear una nueva revisión de cotización.')
   if(reason===null)return
-  if(reason.trim().length<12){setError('Describe el cambio de alcance con al menos 12 caracteres.');return}
+  if(!reason.trim()){setError('Describe el cambio de alcance.');return}
   const changed=await p.quotes.revise(fresh.bundle.quote,reason.trim(),crypto.randomUUID())
   if(!activeView.current||generation!==epoch.current)throw Error('stale')
   const confirmed=await fetchVisit(order.order.id)
@@ -164,7 +165,7 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
   if(!ok&&step!==2)throw Error('unconfirmed')
   if(step===2)await ensureOrderStage(p.orders,{workshopId:context.workshop.id,orderId:id,vehicleId:vehicle},'inspecting')
   if(!alive.current||!activeView.current||generation!==epoch.current)return
-  setNotice('Registro confirmado por el servidor.');if(exit){onClose();return}if(step<7)setStep(step===2&&!e.inspection?3:confirmedStage(e));else if(e.archive)onClose()
+  setNotice('Registro confirmado por el servidor.');if(exit){onClose();return}if(step<7)setStep(step===2&&!e.inspection?3:confirmedStage(e));else if(e.archive)setNotice('Atención finalizada. Consulta sus tres documentos originales.')
  })}
  const confirmed=[!!order,evidence.order,evidence.inspection,evidence.issued&&!evidence.needsRevision,evidence.approval,evidence.execution,evidence.handover,evidence.archive]
  return <section className="guided-dialog flow-next-workspace" ref={dialog} aria-labelledby="guided-title">
@@ -192,6 +193,7 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
    {step===1&&<section className="guided-reception"><label>Motivo de ingreso<textarea value={complaint} disabled={!!order||busy} onChange={e=>setComplaint(e.target.value)}/></label><label>Kilometraje<input inputMode="numeric" value={km} disabled={!!order||busy} onChange={e=>setKm(e.target.value)}/></label>{order&&<p>Recepción ya registrada. No se creará otra orden.</p>}{orders.filter(x=>x.vehicle.id===vehicle&&x.order.status!=='closed').map(x=><button key={x.order.id} onClick={()=>void resume(x.order.id)} disabled={busy}>Continuar OT {x.order.id.slice(0,8)}</button>)}</section>}
    {step===2&&order&&<p role="status">Inspección registrada · {inspectionSummary.reviewed} revisados · {inspectionSummary.notChecked} declarados sin revisar · {inspectionSummary.resolved} resueltos. Los restantes conservan su estado.</p>}
    {step===2&&order&&<Cp04MultipuntoChecklist findings={findings} repository={p.orders} scope={{userId:context.userId,workshopId:context.workshop.id,orderId:order.order.id,vehicleId:order.vehicle.id}} onSaved={f=>setFindings(rows=>[...rows.filter(x=>x.id!==f.id),f])} onQueueChange={(n,i)=>{setOutstanding(n);setIncomplete(i)}} onBack={()=>{if(!outstanding&&!incomplete)setStep(1)}} disabled={busy} readOnly={['ready','closed'].includes(order.order.status)} plate={order.vehicle.plate}/>}
+   {step===2&&order&&<Cp04MultipuntoPdfPreview workshopName={context.workshop.name} order={order} findings={findings} outstanding={outstanding} incomplete={incomplete} disabled={busy||!isActive} loadIdentity={p.orders.pdfIdentity}/>}
    {step===3&&order&&quoteWorkspace?.id===order.order.id&&<QuotePanel orderLocked registerSave={registerSave} onPendingChange={setQuotePending} repository={quoteWorkspace.port} context={context} privateClient={client} initialOrderId={order.order.id} onBack={()=>{if(!quotePending)setStep(2)}}/>}
    {(step===4||step===5||step===6)&&quote&&revision&&<section className="flow-scope-card" aria-label="Cotejo del alcance técnico">
     <header className="flow-card-heading"><span className="flow-card-icon"><ShieldCheck aria-hidden="true" size={21}/></span><div><h3>Cotejo del alcance técnico</h3><p>Confirma que el trabajo corresponde al presupuesto vigente.</p></div></header>
@@ -211,10 +213,11 @@ export function Workspace({client,context,p,onClose,start,onAgenda,isActive=true
    </section>}
 
    {(step===4||step===5||step===6)&&quote&&revision&&<><FlowLive02Panel beforeWrite={()=>preflight(order!.order.id)} beforeExecution={async()=>{if(!order)throw Error('order');await ensureOrderStage(p.orders,{workshopId:context.workshop.id,orderId:order.order.id,vehicleId:order.vehicle.id},'in_service');await preflight(order.order.id)}} beforeHandover={async()=>{if(!order)throw Error('order');if(!window.confirm('¿Confirmar OT lista para entregar y registrar la entrega declarada?'))return false;await ensureOrderStage(p.orders,{workshopId:context.workshop.id,orderId:order.order.id,vehicleId:order.vehicle.id},'ready');await preflight(order.order.id);return true}} registerSave={registerSave} onPendingChange={setQuotePending} key={revision.id+':'+step} client={client} context={context} quote={quote} revision={revision} stage={step as 4|5|6}/></>}
-   {step===7&&revision&&<FinalArchivePanel registerSave={registerSave} fixedRow={archiveRow} onPendingChange={setQuotePending} repository={p.archive} vehicleId={vehicle} revisionId={revision.id} onBack={()=>setStep(6)}/>}
+   {step===7&&evidence.archive&&<section className="dashboard-card" aria-label="Atención finalizada"><h2>Atención finalizada</h2><p>Expediente confirmado. Consulta y descarga los tres PDF originales de esta visita.</p><button className="flow-next-primary" onClick={onClose}>Volver al centro de operaciones</button></section>}
+   {step===7&&revision&&<FinalArchivePanel guided orderId={order?.order.id} registerSave={registerSave} fixedRow={archiveRow} onPendingChange={setQuotePending} repository={p.archive} vehicleId={vehicle} revisionId={revision.id} onBack={()=>setStep(6)}/>}
 
    </div>
   </main>
-  <footer hidden={overview}><button disabled={busy||outstanding>0||incomplete||quotePending||step===0} onClick={()=>{setNotice('');setError('');setStep(s=>s-1)}}>Volver</button><small role="status" className={notice||step===7&&evidence.archive?'guided-footer-confirmed':''}>{busy?'Guardando y comprobando servidor…':outstanding?'Espera a que termine el autoguardado.':incomplete?'Completa las observaciones técnicas pendientes.':step===7&&evidence.archive?'✓ Expediente definitivo confirmado. Originales disponibles con comprobación de integridad.':notice||'Guardar y continuar valida y confirma esta etapa.'}</small><button disabled={busy||outstanding>0||incomplete} onClick={()=>void next(true)}>Guardar y salir</button><button disabled={busy||outstanding>0||incomplete} onClick={()=>void next()}>{actions[step]}</button></footer>
+  <footer hidden={overview||step===7&&evidence.archive}><button disabled={busy||outstanding>0||incomplete||quotePending||step===0} onClick={()=>{setNotice('');setError('');setStep(s=>s-1)}}>Volver</button><small role="status" className={notice||step===7&&evidence.archive?'guided-footer-confirmed':''}>{busy?'Guardando y comprobando servidor…':outstanding?'Espera a que termine el autoguardado.':incomplete?'Completa las observaciones técnicas pendientes.':step===7&&evidence.archive?'✓ Expediente definitivo confirmado. Originales disponibles con comprobación de integridad.':notice||'Guardar y continuar valida y confirma esta etapa.'}</small><button disabled={busy||outstanding>0||incomplete} onClick={()=>void next(true)}>Guardar y salir</button><button disabled={busy||outstanding>0||incomplete} onClick={()=>void next()}>{actions[step]}</button></footer>
  </section>
 }

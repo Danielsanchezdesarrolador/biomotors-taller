@@ -477,7 +477,7 @@ export function QuotePanel({
     if(!current){current=await action('create')??null;if(!current)return false}
     else if(dirty){current=await action('save')??null;if(!current)return false}
     if(exit)return true
-    if(!current.items.length||current.quote.terms.trim().length<3){setError('Añade las partidas y completa las condiciones antes de emitir.');return false}
+    if(!current.items.length){setError('Añade las partidas antes de emitir.');return false}
     if(current.quote.status==='issued'&&!current.quote.issue_pending)return true
     if(!repository.documents.enabled){setError('La emisión archivada no está habilitada. Puedes guardar el borrador y salir.');return false}
     const issued=await documentAction('issue',undefined,undefined,current)
@@ -562,7 +562,7 @@ export function QuotePanel({
                     bundle.quote.status !== 'draft' ||
                     dirty ||
                     !!readPending ||
-                    draft.terms.trim().length<3 ||
+
                     !draft.items.length
                   }
                   className="cp04-secondary"
@@ -786,7 +786,7 @@ export function QuotePanel({
                     Motivo de nueva revisión o anulación
                     <textarea
                       maxLength={1000}
-                      minLength={3}
+                      minLength={1}
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
                     />
@@ -794,7 +794,7 @@ export function QuotePanel({
                   <div className="cp05-actions">
                     <button
                       className="cp04-secondary"
-                      disabled={busy || reason.trim().length < 3}
+                      disabled={busy || reason.trim().length < 1}
                       onClick={() => void action('revise')}
                     >
                       Abrir nuevo borrador
@@ -802,7 +802,7 @@ export function QuotePanel({
                     {bundle.quote.status === 'issued' && (
                       <button
                         className="cp04-secondary"
-                        disabled={busy || reason.trim().length < 3}
+                        disabled={busy || reason.trim().length < 1}
                         onClick={() => {
                           if (window.confirm('¿Anular conservando las revisiones históricas?'))
                             void action('void')

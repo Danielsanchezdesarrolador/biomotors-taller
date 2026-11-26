@@ -115,7 +115,7 @@ export function validOdometer(value:number|null):number|null {
 }
 export function orderInput(input:NewOrder) {
   const vehicle_id=validId(input.vehicle_id)
-  if(typeof input.complaint!=='string'||input.complaint.trim().length<3||
+  if(typeof input.complaint!=='string'||input.complaint.trim().length<1||
      input.complaint.trim().length>2000)throw invalid()
   return {vehicle_id,complaint:input.complaint.trim(),
     intake_odometer:validOdometer(input.intake_odometer)}
@@ -127,7 +127,7 @@ export function findingInput(input:NewFinding) {
     !['ok','attention','not_checked'].includes(input.result))throw invalid()
   const note=typeof input.note==='string' ? input.note.trim():null
   if(note!==null&&note.length>2000)throw invalid()
-  if(input.result==='attention'&&(!note||note.length<3))throw invalid()
+  if(input.result==='attention'&&(!note||note.length<1))throw invalid()
   return {order_id,vehicle_id,category,result:input.result,note:note||null,
     resolution:input.result==='attention'?'pending' as const:'not_applicable' as const}
 }

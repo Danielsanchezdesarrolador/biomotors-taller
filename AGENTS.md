@@ -1,3 +1,19 @@
+## 26/11/2026 — BT-FLOW-FIX-01 integración autorizada
+
+Candidato 8a5b573f99aae7e145398060c49f9b06d03a1dba, transferencia privada 27f0a3f1c6f57a400066726a9d46f6ddffb3bbf6, base oficial f3f512f89b05fece5adb19bafbfc4bf2770e6153. Dirección Técnica revisó las tres correcciones y el propietario autorizó su publicación en main. CI pendiente. Los 26 archivos no documentales deben coincidir por blob con el candidato; cuatro documentos incluyen notas de integración. Evidencias privadas no publicadas. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_FIX_01_20261126.md).
+
+No aplicar SQL, Edge ni desplegar frontend sin autorización específica. Orden: verificar vigencia del respaldo y ventana sin editores, cotejar definiciones instaladas, desplegar Edge compatible, aplicar migración incremental transaccional, desplegar frontend y recargar sesiones. La reversión propuesta no cubre automáticamente todos los posibles registros incompatibles con mínimos previos (por ejemplo condiciones vacías o explicación breve de pendientes). No ejecutar rollback automático después de habilitar textos breves; conservar lectores compatibles y corregir hacia adelante. Sin reabrir SEC07 ni repetir suites históricas por rutina. Auto-Deploy OFF y correo OFF. QA humana focalizada pendiente. Anotaciones anteriores históricas.
+
+---
+
+## 26/11/2026 — BT-FLOW-FIX-01 candidato para revisión privada
+
+PDF multipunto original recuperado en inspección guiada; mínimos arbitrarios eliminados de textos operativos sin debilitar máximos/confirmaciones; cierre conserva pantalla con los tres originales privados y correspondencia estricta de OT/revisión. Migración incremental de ocho funciones y ocho CHECKs basada en metadatos instalados, con guard de deriva y rollback condicionado; no aplicada. Validación local: 6 unitarias, 21 SQL aisladas, 6 escenarios de navegador, TypeScript, builds público/privado y empaquetadores oficiales PASS. [Detalle y orden de activación](docs/checkpoints/CHECKPOINT_BT_FLOW_FIX_01_20261126.md).
+
+Solo transferencia privada por DTK-ERR-056. NO PUSH oficial, DEPLOY ni cambios alojados. Auto-Deploy/correo OFF, R2 pausado, históricos intactos. Pendientes revisión humana y autorización independiente de SQL, Edge y frontend; sesiones antiguas deben recargarse antes de admitir textos breves. Las entradas anteriores conservan carácter histórico.
+
+---
+
 ## 26/11/2026 — BT-FLOW-NEXT-02 integración autorizada
 
 Centro de operaciones multiatención: candidato original 539de905e90e4ff17d797498301e6b501d047d5e, corregido bb8385801d5340515092dac54d6c70a337f21de4, revisión privada bf183225ae8ba7ae13a67caab1fa55bf5e1e1db0. Dirección Técnica acepta los tres ajustes de acceso al Inicio, invalidación de autoridad y recuperación del borrador sin OT. El propietario autoriza publicación en main; CI pendiente. Despliegue requiere autorización específica. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_02_20261126.md).
