@@ -1,3 +1,11 @@
+## 26/11/2026 — S5B integrado: cierre operacional
+
+Según informe de Seguridad y aceptación del titular, se corrigió el fallo recurrente de validación local y se instaló el respaldo semanal integrado PostgreSQL + Storage mediante el acceso directo existente. 18/18 pruebas sintéticas y nueva ejecución real PASS reportadas; restauración técnica y 11 PDF verificados. Development Toolkit v1.1.4, commit b3386e1be44028359f1822d888a618ac77289582, documentación de cierre comprobada. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_SEC07_S5B_INTEGRADO_20261126.md).
+
+SEC07 permanece cerrado en su alcance aprobado. No repetir respaldo/restauración para documentar. Los cambios del ejecutor son locales, no incorporados al repositorio oficial. No equivale a DR integral ni paridad de seguridad; apertura visual del último conjunto automático no certificada. El respaldo previo recuperado sí tiene apertura 11/11 reportada. Pendiente BT-FLOW-FIX-01: ventana sin editores y autorizaciones específicas para Edge, SQL y frontend en ese orden. CI del código 2585e1fb7f8499bf5d95537ba28c9fb5f2b47e71: 5/5 PASS. No activar producción por esta anotación.
+
+---
+
 ## 26/11/2026 — BT-FLOW-FIX-01 integración autorizada
 
 Candidato 8a5b573f99aae7e145398060c49f9b06d03a1dba, transferencia privada 27f0a3f1c6f57a400066726a9d46f6ddffb3bbf6, base oficial f3f512f89b05fece5adb19bafbfc4bf2770e6153. Dirección Técnica revisó las tres correcciones y el propietario autorizó su publicación en main. CI pendiente. Los 26 archivos no documentales deben coincidir por blob con el candidato; cuatro documentos incluyen notas de integración. Evidencias privadas no publicadas. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_FIX_01_20261126.md).
