@@ -42,3 +42,12 @@ Las pruebas sintéticas no certifican aceptación visual humana ni QA productiva
 ## Integración oficial autorizada — 26/11/2026
 
 Dirección Técnica revisó el candidato y el propietario autorizó exclusivamente la integración en main. Se incorporan 26 archivos no documentales idénticos por blob Git y cuatro documentos con notas de integración. Capturas, PDFs sintéticos, manifiesto y diff quedan privados. CI pendiente. Sin aplicación de SQL, deploy de Edge/frontend ni cambios en producción. Auto-Deploy OFF comprobado. Antes de activar: confirmar vigencia del respaldo, ausencia de editores y compatibilidad de Edge/SQL/frontend. La reversión candidata no detecta todos los datos incompatibles posibles (p. ej. condiciones vacías y notas de ejecución breves), por lo que queda prohibido ejecutarla automáticamente tras admitir datos nuevos; conservar lectores compatibles y corregir hacia adelante. Aceptación humana focalizada pendiente.
+
+## 26/11/2026 — BT-FLOW-FIX-01 LIVE y aceptación del propietario
+
+Cierre autorizado. Edge CP05 v9 y Final Archive v7 ACTIVE, JWT conservado, workflow manual 45855550767 SUCCESS. Migración 20261126160911 bt_flow_fix_01_text_validation aplicada, preflight 16/16 y verificación 8/8 cuerpos y 8/8 CHECKs, fingerprint de seguridad sin cambios; 11 objetos privados presentes. Render dep-dc45jrd9el5s73a9pjf0 LIVE en 04d922c9961cbd4fee23572a81e2efe6ecd6e4de. El propietario aprobó la etapa y aportó captura del borrador multipunto visible; las otras dos mejoras no tienen comprobación humana individual aportada. Aceptación general registrada sin atribuir evidencia inexistente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_FIX_01_20261126.md). SEC07 permanece cerrado.
+
+Siguiente: BT-PLAN-04B. El candidato SQL y frontend de alta de taller existen desde 17/11; no reconstruir. Revisar compatibilidad con catálogo actual, gates, licencias y acceso guiado multiempresa; 04A instalado, MFA real pendiente. 04C/branding y habilitación del taller piloto requieren pasos autorizados separados. No crear cuentas de terceros, conceder planes reales, activar gates ni migrar sin autorización específica. Pagos y correo externo OFF; Auto-Deploy OFF. Auditoría independiente en curso según titular; conservar alcance y distinguir hallazgos P0 de mejoras comerciales.
+
+---
+
