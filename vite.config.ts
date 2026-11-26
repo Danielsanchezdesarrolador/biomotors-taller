@@ -101,7 +101,8 @@ export default defineConfig(({ mode }) => {
                     id
                   )
                 ) &&
-                !/\/src\/plans\/planStatus\.ts$/.test(id) &&
+                !/\/src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx)$/.test(id) &&
+                !(env.VITE_BT_PLAN04_PRIVATE_ENABLED==='true' && /\/src\/plans\/planChanges\.ts$/.test(id)) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(
                   id
                 ))

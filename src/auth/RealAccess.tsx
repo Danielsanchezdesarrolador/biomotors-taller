@@ -61,27 +61,41 @@ export function RealAccess({
   const [creatorGrant, setCreatorGrant] = useState<{scope:string;allowed:boolean}|null>(null)
   const creatorAccess = creatorGrant?.scope === principalScope && creatorGrant.allowed
   const [planRevision, setPlanRevision] = useState(0)
+  const [personalPane,setPersonalPane]=useState<{scope:string;open:boolean}|null>(null)
+  const personalOpen=personalPane?.scope===privateScope&&personalPane.open
+  const personalVisited=personalPane?.scope===privateScope
   useEffect(() => {
-    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') setPlanRevision(v => v + 1) }, 30_000)
-    return () => window.clearInterval(timer)
-  }, [])
+    if(import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED!=='true')return
+    let active=true;let stop=()=>{}
+    const refresh=()=>{if(document.visibilityState==='hidden'||!['authorized','restricted','no-membership'].includes(controller.getSnapshot().phase))return
+      setPlanRevision(v=>v+1);controller.requestRevalidation()}
+    void import('../plans/planChanges').then(mod=>{if(active)stop=mod.watchPlanChanges(refresh)})
+    // Same-flow mutations invalidate immediately; other devices are rechecked automatically.
+    const timer=window.setInterval(refresh,5000)
+    window.addEventListener('focus',refresh);window.addEventListener('online',refresh)
+    document.addEventListener('visibilitychange',refresh)
+    return()=>{active=false;stop();window.clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);document.removeEventListener('visibilitychange',refresh)}
+  },[controller])
   const planScope = [principalScope,state.context?.workshop.id].join(':')
-  const [planResponse, setPlanResponse] = useState<{scope:string;value:PlanStatus|null}|null>(null)
-  const planStatus = planResponse?.scope === planScope ? planResponse.value : null
-  useEffect(() => {
-    let active = true
-    if (import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED !== 'true' ||
-        !['authorized', 'restricted', 'no-membership'].includes(state.phase)) {setPlanResponse(null);return}
-    void controller.personalPlanClient().then(async (client) => {
-      if (!client) return null
-      const { data, error } = await client.rpc('bt_plan04_my_status', {
-        p_workshop_id: state.context?.workshop.id ?? null
-      })
-      return !error ? parsePlanStatus(data) : null
-    }).then(plan => { if (active) setPlanResponse({scope:planScope,value:plan}) })
-      .catch(() => { if (active) setPlanResponse({scope:planScope,value:null}) })
-    return () => { active = false }
-  }, [controller, planScope, planRevision])
+  const [planResponse,setPlanResponse]=useState<{scope:string;personal:PlanStatus|null;workshop:PlanStatus|null}|null>(null)
+  const personalStatus=planResponse?.scope===planScope?planResponse.personal:null
+  const planStatus=planResponse?.scope===planScope?planResponse.workshop:null
+  useEffect(()=>{
+    let active=true
+    if(import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED!=='true'||!['authorized','restricted','no-membership'].includes(state.phase)){setPlanResponse(null);return}
+    void controller.personalPlanClient().then(async client=>{
+      const read=async(wid:string|null)=>{
+        if(!client)return null
+        try{const {data,error}=await client.rpc('bt_plan04_my_status',{p_workshop_id:wid})
+          const value=!error?parsePlanStatus(data):null
+          return value&&value.scope===(wid?'workshop':'personal')&&value.workshopId===wid?value:null
+        }catch{return null}
+      }
+      const [personal,workshop]=await Promise.all([read(null),state.context?read(state.context.workshop.id):Promise.resolve(null)])
+      if(active)setPlanResponse(previous=>{const next={scope:planScope,personal,workshop};return JSON.stringify(previous)===JSON.stringify(next)?previous:next})
+    }).catch(()=>{if(active)setPlanResponse({scope:planScope,personal:null,workshop:null})})
+    return()=>{active=false}
+  },[controller,planScope,planRevision])
   useEffect(() => {
     let active = true
     setCreatorGrant(null)
@@ -144,6 +158,7 @@ export function RealAccess({
   const refreshAccess = () => { void controller.validate().then(() => setPlanRevision(value => value + 1)) }
   const controls = (
     <div className="auth-session-controls">
+      {import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED==='true'&&<button type="button" onClick={()=>setPersonalPane({scope:privateScope,open:true})}>Mi cuenta personal</button>}
       <button type="button" onClick={logout}>
         Cerrar sesión
       </button>
@@ -164,23 +179,37 @@ export function RealAccess({
       )}
     </div>
   )
+  const createdWorkshop=async(id:string)=>{
+    clearPrivateScreen();clearCp03Draft();clearOperationalDrafts()
+    await controller.choose(id)
+    if(controller.getSnapshot().context?.workshop.id!==id)throw Error('ACCESS_NOT_CONFIRMED')
+    setPersonalPane(null);setPlanRevision(v=>v+1)
+  }
+  const personalView=<PersonalHome controller={controller} plan={personalStatus} workshopPlan={planStatus}
+    name={state.context?.displayName??state.identityName} onRefresh={refreshAccess}
+    onBack={state.context?()=>setPersonalPane({scope:privateScope,open:false}):undefined}
+    onCreated={createdWorkshop} onCreator={creatorAccess?()=>setCreatorOpen(true):undefined}/>
   const creatorView = CreatorPanel
     ? <CreatorPanel key={privateScope} controller={controller} onBack={()=>{setCreatorOpen(false);refreshAccess()}}/>
     : <p role="status">{creatorLoadError?'No se pudo cargar el panel del creador.':'Cargando panel privado del creador…'}</p>
+  const withAccountViews=(workspace:ReactNode)=><>
+    <div hidden={(creatorOpen&&creatorAccess)||personalOpen} inert={(creatorOpen&&creatorAccess)||personalOpen}>{workspace}</div>
+    {personalVisited&&<div hidden={!personalOpen||(creatorOpen&&creatorAccess)} inert={!personalOpen||(creatorOpen&&creatorAccess)}>{personalView}</div>}
+    {creatorOpen&&creatorAccess&&creatorView}
+  </>
   if (page==='login' && creatorOpen && creatorAccess && state.phase==='restricted') return creatorView
+  if(page==='login'&&personalOpen&&state.phase==='restricted')return personalView
   if (page==='login' && ['authorized','restricted','no-membership'].includes(state.phase) &&
       typeof window !== 'undefined' && window.location.hash==='#/auth/aceptar-invitacion' && Invitation) return <main className="personal-home"><Invitation key={privateScope} controller={controller}/><button onClick={()=>onNavigate('/acceso')}>Volver a mi cuenta</button></main>
   if (page === 'login' && state.phase === 'no-membership' && import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true') {
     return <><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
-      <PersonalHome key={privateScope} controller={controller} plan={planStatus} name={state.identityName}
-        onRefresh={refreshAccess}
-        onCreator={creatorAccess ? () => setCreatorOpen(true) : undefined} />
+      {personalView}
       </div>{creatorOpen && creatorAccess && creatorView}</>
   }
   // The only private entry is the login route; public review routes never render this component.
   if (page === 'login' && state.phase === 'authorized' && state.context) {
     const { workshop, role } = state.context
-    if(role==='mechanic' && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && Mechanic) return <Mechanic key={privateScope} controller={controller} plan={planStatus} controls={controls}/>
+    if(role==='mechanic' && import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true' && Mechanic) return withAccountViews(<Mechanic key={privateScope} controller={controller} plan={planStatus} controls={controls}/>)
     if (role === 'mechanic')
       return (
         <TechnicianReview
@@ -201,18 +230,18 @@ export function RealAccess({
         />
       )
     if (role === 'owner' || role === 'admin') {
-      return (<><div hidden={creatorOpen && creatorAccess} inert={creatorOpen && creatorAccess}>
+      return withAccountViews(<>
         <OfficialWorkspaceView
           key={privateScope}
           session={{ workshop: workshop.name, role: roleNames[role],
             displayName: state.context.displayName, controls,
+            personalPlan: import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED==='true'?personalStatus:undefined,
             planStatus: import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true'
               ? planStatus : undefined,
             directoryController: import.meta.env.VITE_BT_CP03_PRIVATE_ENABLED === 'true'
               ? controller : undefined }}
         />
-        </div>{creatorOpen && creatorAccess && creatorView}</>
-      )
+        </>)
     }
   }
   const real = state.phase !== 'disabled'
@@ -239,7 +268,7 @@ export function RealAccess({
           void controller.login(email, password)
         },
         content: needsPanel ? (
-          <AuthStatus state={state} controller={controller} busy={busy} planStatus={planStatus} />
+          <AuthStatus state={state} controller={controller} busy={busy} planStatus={personalStatus} onPersonal={import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED==='true'?()=>setPersonalPane({scope:privateScope,open:true}):undefined} />
         ) : undefined
       }}
     />
@@ -249,12 +278,14 @@ function AuthStatus({
   state,
   controller,
   busy,
-  planStatus
+  planStatus,
+  onPersonal
 }: {
   state: AuthState
   controller: AuthController
   busy: boolean
   planStatus: PlanStatus | null
+  onPersonal?:()=>void
 }) {
   return (
     <section className="auth-status" aria-label="Estado del acceso" aria-busy={busy}>
@@ -287,6 +318,7 @@ function AuthStatus({
             {choice.workshop.name} · {roleNames[choice.role]}
           </button>
         ))}
+      {onPersonal&&state.phase==='restricted'&&<button className="access-secondary" onClick={onPersonal}>Mi cuenta personal</button>}
       {!busy && (
         <>
           <button

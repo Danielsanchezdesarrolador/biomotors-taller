@@ -1,3 +1,5 @@
+import {PlanBadge} from '../plans/PlanBadge'
+import {announcePlanChange} from '../plans/planChanges'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { AuthController } from '../auth/controller'
 
@@ -28,7 +30,7 @@ function parseAccount(value: unknown): Account | null {
     personalPlan:plan,isLifetime:row.isLifetime,expiresAt:row.expiresAt,
     workshopCount:row.workshopCount}
 }
-export function PersonalAccounts({controller,mfa}:{controller:AuthController;mfa:boolean}) {
+export function PersonalAccounts({controller,mfa,onChanged}:{controller:AuthController;mfa:boolean;onChanged?:()=>void}) {
   const [query,setQuery] = useState('')
   const [accounts,setAccounts] = useState<Account[]>([])
   const [selectedId,setSelectedId] = useState('')
@@ -92,10 +94,12 @@ export function PersonalAccounts({controller,mfa}:{controller:AuthController;mfa
         p_reason:reason.trim(),p_request_id:requestId
       })
       if (result.error) throw result.error
+      announcePlanChange()
       requestIdRef.current=null
       setReason('')
       setNotice('Beneficio personal registrado y auditado. No se cobró ni creó taller alguno.')
       await load(query)
+      onChanged?.()
     } catch {
       setError('No se pudo registrar el beneficio. Verifica MFA, estado de cuenta y reintenta sin cambiar la operación.')
     } finally {setBusy(false)}
@@ -118,13 +122,13 @@ export function PersonalAccounts({controller,mfa}:{controller:AuthController;mfa
         onClick={()=>{setSelectedId(account.userId);setNotice('');setError('')}}>
         <span><strong>{account.displayName}</strong>
           <small>{account.email} · {account.workshopCount} taller(es) propio(s)</small></span>
-        <span className="creator-account-plan">{plans[account.personalPlan]}{account.isLifetime?' · Permanente':''}</span>
+        <span className="creator-account-plan"><PlanBadge plan={account.personalPlan}/>{account.isLifetime?' · Permanente':''}</span>
       </button>)}
       {!loading&&accounts.length===0&&<p className="creator-help">No hay cuentas que coincidan con esta búsqueda.</p>}
     </div>
     {selected&&<>
       <div className="creator-selected-account" role="status">
-        <strong>Cuenta seleccionada:</strong> {selected.displayName} · {plans[selected.personalPlan]}
+        <strong>Cuenta seleccionada:</strong> {selected.displayName} · <PlanBadge plan={selected.personalPlan}/>
         {selected.isLifetime?' permanente':''}. No se concede rol de Creador.
       </div>
       <form className="creator-form" onSubmit={e=>void submit(e)}>

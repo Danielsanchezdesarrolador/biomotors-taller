@@ -35,8 +35,9 @@ if (plan04PrivateEnabled) {
   assert.equal(process.env.VITE_BT_CREATOR_PRIVATE_ENABLED,'true','Personal plan UI needs private creator gate')
   assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED,'true','Personal plan UI needs Auth')
 }
-assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/planStatus\.ts$/.test(id)),
-  'Only the pure plan status formatter may enter the public app')
+assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
+  (plan04PrivateEnabled && /src\/plans\/planChanges\.ts$/.test(id))),
+  'Only pure plan presentation and explicitly gated invalidation may enter the app')
 const finalArchiveEnabled=process.env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true'
 if(finalArchiveEnabled){for(const flag of ['VITE_BT_CP03_PRIVATE_ENABLED','VITE_BT_CP05_PRIVATE_ENABLED','VITE_BT_CP06_PRIVATE_ENABLED'])assert.equal(process.env[flag],'true','Final archive requires private history')}
 else assert.ok(modules.every(id=>!id.includes('src/expedientes/')),'Final archive must stay excluded while OFF')
@@ -131,7 +132,8 @@ assert.ok(
       (closingReviewEnabled && flowLiveEnabled && cp06PrivateEnabled &&
         process.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
         /src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)) ||
-      /src\/plans\/planStatus\.ts$/.test(id) ||
+      /src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
+      (plan04PrivateEnabled && /src\/plans\/planChanges\.ts$/.test(id)) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&
         /src\/clientes\/(?:Cp06HistoryLoader|Cp03PrivatePanel|cp03Pilot(?:Repository|Contracts|DirectoryView|AccessBinding))\.(?:ts|tsx|js)/.test(

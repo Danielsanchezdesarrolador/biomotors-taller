@@ -1,3 +1,5 @@
+import {PlanBadge} from '../plans/PlanBadge'
+import {announcePlanChange} from '../plans/planChanges'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Crown, LockKeyhole, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { AuthController } from '../auth/controller'
@@ -44,8 +46,8 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
   const [days,setDays] = useState(30)
   const [reason,setReason] = useState('')
   const requestIdRef = useRef<{signature:string; id:string}|null>(null)
-  const refresh = useCallback(async () => {
-    setLoading(true); setError('')
+  const refresh = useCallback(async (background=false) => {
+    if(!background)setLoading(true); setError('')
     try {
       const client = await controller.personalPlanClient()
       if (!client) throw new Error('SESSION')
@@ -108,6 +110,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
         factorId,challengeId:challenge.data.id,code:verificationCode
       })
       if (result.error) throw result.error
+      announcePlanChange()
       setVerificationCode('');setFactorId('');setQrCode('')
       await refresh()
     } catch {
@@ -146,6 +149,7 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
         p_reason:reason.trim(),p_request_id:requestId
       })
       if (result.error) throw result.error
+      announcePlanChange()
       setReason('')
       requestIdRef.current = null
       await refresh()
@@ -200,14 +204,14 @@ export function CreatorConsole({controller,onBack}:{controller:AuthController;on
             <div><span>Full</span><strong>{overview.workshops.filter(w=>w.effectivePlan==='full').length}</strong></div>
           </section>
           {import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED === 'true' &&
-            <PersonalAccounts controller={controller} mfa={mfa}/>}
+            <PersonalAccounts controller={controller} mfa={mfa} onChanged={()=>void refresh(true)}/>}
           <section className="creator-section">
             <h2>Talleres y planes efectivos</h2>
             <div className="creator-table-wrap"><table className="creator-table">
               <thead><tr><th>Taller</th><th>Plan</th><th>Vigencia</th><th>Mecánicos</th></tr></thead>
               <tbody>{overview.workshops.map(w=><tr key={w.id}>
                 <td><strong>{w.name}</strong><small>{w.ownerEmail||'Propietario aún no asignado'}</small></td>
-                <td><span className={'creator-plan creator-plan-'+w.effectivePlan}>{names[w.effectivePlan]}</span>{w.state==='revoked'&&<small>Revocado</small>}</td>
+                <td><PlanBadge plan={w.effectivePlan}/>{w.state==='revoked'&&<small>Revocado</small>}</td>
                 <td>{w.isLifetime&&w.state==='active'?'Permanente':dateLabel(w.expiresAt)}</td>
                 <td>{w.mechanics}</td>
               </tr>)}</tbody>

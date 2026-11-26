@@ -1,4 +1,5 @@
 import {CalendarDays} from 'lucide-react'
+import {PlanBadge} from '../plans/PlanBadge'
 import { BrandLogo } from '../brand/BrandLogo'
 import { planDetail, planLabel, type PlanStatus } from '../plans/planStatus'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -7,8 +8,6 @@ import {
   Bell,
   CarFront,
   ChevronDown,
-  Crown,
-  Gem,
   FileText,
   House,
   Menu,
@@ -36,6 +35,7 @@ type ShellCopy = {
   accountTitle: string
   accountSubtitle: string
   accountPlan?: PlanStatus | null
+  personalPlan?: PlanStatus | null
   notifications: string
   avatarText?: string
   notificationDot?: boolean
@@ -198,13 +198,7 @@ export function AppShell({
           </div>
           <div className="topbar-controls">
             {copy.accountPlan !== undefined && (
-              <span className={'mobile-plan-indicator plan-badge-' +
-                (copy.accountPlan?.effectivePlan || 'unknown')}
-                title={planDetail(copy.accountPlan)}>
-                {copy.accountPlan?.effectivePlan === 'plus' && <Crown size={13} aria-hidden="true" />}
-                {copy.accountPlan?.effectivePlan === 'full' && <Gem size={13} aria-hidden="true" />}
-                <span>{planLabel(copy.accountPlan)}</span>
-              </span>
+              <PlanBadge className="mobile-plan-indicator" plan={copy.accountPlan?.effectivePlan??null} text={planLabel(copy.accountPlan)} detail={'Plan del taller · '+planDetail(copy.accountPlan)}/>
             )}
             <div className="popover-anchor">
               <button
@@ -230,7 +224,8 @@ export function AppShell({
             <span className="top-divider" />
             <div className="popover-anchor">
               <button
-                className="account-trigger"
+                className={'account-trigger'+(copy.personalPlan!==undefined?' personal-account-trigger':'')}
+                aria-label="Menú de usuario"
                 type="button"
                 aria-expanded={showAccount}
                 onClick={() => {
@@ -244,13 +239,7 @@ export function AppShell({
                   <span className="account-meta">
                     <small>{copy.accountSubtitle}</small>
                     {copy.accountPlan !== undefined && (
-                      <span className={'account-plan-badge plan-badge-' +
-                        (copy.accountPlan?.effectivePlan || 'unknown')}
-                        title={planDetail(copy.accountPlan)}>
-                        {copy.accountPlan?.effectivePlan === 'plus' && <Crown size={13} aria-hidden="true" />}
-                        {copy.accountPlan?.effectivePlan === 'full' && <Gem size={13} aria-hidden="true" />}
-                        <span>{planLabel(copy.accountPlan)}</span>
-                      </span>
+                      <PlanBadge className="account-plan-badge" plan={copy.accountPlan?.effectivePlan??null} text={planLabel(copy.accountPlan)} detail={'Plan del taller · '+planDetail(copy.accountPlan)}/>
                     )}
                   </span>
                 </span>
@@ -258,6 +247,10 @@ export function AppShell({
               </button>
               {showAccount && (
                 <div className="top-popover account-popover">
+                  {copy.personalPlan!==undefined&&<section className="account-plan-summary" aria-label="Licencia personal y plan del taller">
+                    <p>Licencia personal<PlanBadge plan={copy.personalPlan?.effectivePlan??null} text={planLabel(copy.personalPlan)} detail={planDetail(copy.personalPlan)}/></p>
+                    <p>Plan del taller actual · {copy.workshopTitle}<PlanBadge plan={copy.accountPlan?.effectivePlan??null} text={planLabel(copy.accountPlan??null)} detail={planDetail(copy.accountPlan??null)}/></p>
+                  </section>}
                   {accountControls || (
                     <>
                       <strong>ByteTorque</strong>

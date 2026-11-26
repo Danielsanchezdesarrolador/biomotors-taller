@@ -144,6 +144,7 @@ export function OfficialWorkspaceView({
     role: string
     displayName?: string
     planStatus?: PlanStatus | null
+    personalPlan?: PlanStatus | null
     controls: ReactNode
     directoryController?: AuthController
   }
@@ -248,6 +249,7 @@ screen==='inicio'&&!review&&session?.directoryController&&OperationsCenter?<Susp
               accountTitle: session.displayName || session.workshop,
               accountSubtitle: session.role,
               accountPlan: session.planStatus,
+              personalPlan: session.personalPlan,
               avatarText: session.displayName
                 ? session.displayName.split(' ').slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('')
                 : undefined,

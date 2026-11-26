@@ -1,3 +1,11 @@
+## 26/11/2026 — BT-PLAN-04BC-LIVE-FIX-01, candidato privado
+
+Cuenta personal accesible desde el menú aun con membresías; licencia personal y plan efectivo del taller consultados por separado al servidor. Creación con RPC existente, cambio autorizado de taller y borradores aislados; Básico neutro, Plus azul y Full con corona dorada. Invalidación tras mutación confirmada del creador y reconsulta automática, sin conceder permisos desde la UI. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_LIVE_FIX_01_20261126.md).
+
+Base `dab762c0a9bb183a236599822f544485dbcfce31`. Regresión SQL aislada PASS, 9 unitarias focalizadas PASS, Chromium 1440/390 PASS, TypeScript y bundles público/privado con fronteras PASS. WebKit BLOCKED_ENVIRONMENT y CI oficial pendientes; no repetir suites históricas ni intentar descargas. Sin SQL productivo/migraciones, permisos/RLS, dependencias, respaldos ni SEC07. Solo delta privado DTK-ERR-056; sin push oficial, despliegue ni cambios en producción. Integración y aceptación alojada requieren revisión de Dirección Técnica. Las notas siguientes son históricas.
+
+---
+
 ## 26/11/2026 — BT-PLAN-04BC LIVE; instalación técnica completada
 
 CI oficial 5/5 SUCCESS en dc056b1620398e050c0d00f7d96abd88efec0684. [SQL instalado](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_SQL_INSTALADO_20261126.md): cinco migraciones registradas, 13 PDF conservados y guardas de licencia instaladas. Edge workflow [45884708021](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45884708021) SUCCESS, marcador BT_PLAN04BC_CP05_DEPLOY_SUCCEEDED, paquete reproducible y JWT true; CP05 v10 ACTIVE, Final Archive v7 y Owner Onboarding v8 sin cambios. Render dep-dc48l50u01pc73f6r5tg LIVE en 05bb77fddf236f5eea966d393dd3cef505a8f149 (solo documentación adicional sobre SHA CI aprobado), finalizado 19:38:22 UTC; Auto-Deploy OFF confirmado. [Checkpoint LIVE](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_LIVE_20261126.md).
