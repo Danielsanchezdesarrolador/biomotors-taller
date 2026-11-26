@@ -1,3 +1,11 @@
+## 26/11/2026 — BT-PLAN-04BC-CI-FIX, candidato privado
+
+Corrección exclusiva de preparación del laboratorio histórico PLAN04 (dependencias Agenda/FLOW-FIX-01) y simulador Auth R1 (RPC de capacidades por POST exacto con método, payload, actor y taller verificados). Laboratorio SQL afectado y ejecutor Auth en sus dos modalidades CI PASS local; sintaxis e integridad verificadas. Sin modificar lógica comercial, Auth productivo, SQL aprobado, RLS ni permisos. [Checkpoint CI-FIX](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_CI_FIX_20261126.md).
+
+Base oficial `6c52420b30121341c87db4323ad9cf2ae825febf`; entrega solo por DTK-ERR-056 a revisión privada. No repetir 122 unitarias, 51 SQL, 25 de revocación ni visuales ajenos. CI remota corregida pendiente de integración por Dirección Técnica; no push oficial ni cambios alojados. Respaldo integrado con 13 PDF actualizado/restaurado y cotejado con Supabase según Dirección Técnica; no se reejecutó ni se reabrió SEC07. No activar migraciones/despliegues, logos, correo, pagos ni cuentas reales desde este bloque.
+
+---
+
 ## 26/11/2026 — PLAN-04BC-PILOTO-01 y delta integrados
 
 Autorización del titular para integración, SQL y despliegue coordinado, sujeto a las puertas técnicas. Candidato final 1396496df4f6acad591cc13ce83dc891a5610026, árbol f625fab344444916187f805a61ed784e4adf9b24 reconstruido exactamente; commit oficial ecdfe58386165a39826249bb8a6b68f3965cdaa6. 30 archivos, pruebas del candidato 122 unitarias/51 SQL y delta 25 focalizadas reportadas; no reejecutadas por Dirección Técnica. El delta conserva lectura histórica y bloquea escrituras premium tras revocación de Full para talleres gestionados. CI del commit integrado pendiente. No publicar evidencias privadas.

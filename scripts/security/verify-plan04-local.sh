@@ -30,7 +30,19 @@ GRANT USAGE ON SCHEMA storage TO anon,authenticated;
 GRANT ALL ON storage.objects TO anon,authenticated;
 CREATE POLICY lab_existing_broad_storage_policy ON storage.objects FOR ALL TO anon,authenticated USING(true) WITH CHECK(true);
 SQL
-for file in docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql docs/sql/BT_CP05_QUOTES_CANDIDATE.sql docs/sql/BT_CREATOR_01_PRIVATE_SUBSCRIPTIONS_CANDIDATE.sql docs/sql/BT_PLAN_04A_PERSONAL_ENTITLEMENTS_CANDIDATE.sql docs/sql/BT_PLAN_04B_WORKSHOPS_CANDIDATE.sql docs/sql/BT_PLAN_04C_MECHANICS_CANDIDATE.sql docs/sql/BT_PLAN_04D_BILLING_CANDIDATE.sql docs/sql/BT_PLAN_04B_BRANDING_STORAGE_CANDIDATE.sql docs/sql/BT_PLAN_04_CP05_BRANDING_CANDIDATE.sql; do psql_lab < "$file" >/dev/null; done
+# Reuse the PLAN04BC schema preparation. Agenda renames the original CP05
+# preparation function; FLOW-FIX restores its approved current text contract.
+# Only dependency DDL/recorded metadata are reused, never PLAN04BC assertions.
+for file in docs/sql/BT_CP03_P1_CUSTOMERS_VEHICLES_CANDIDATE.sql docs/sql/BT_CP04_ORDERS_INSPECTIONS_CANDIDATE.sql docs/sql/BT_CP05_QUOTES_CANDIDATE.sql docs/sql/BT_CP05_COMPLETED_ISSUE_RECOVERY_CANDIDATE.sql docs/sql/BT_FLOW_LIVE_02_CANDIDATE.sql docs/sql/BT_COM_01C_REVIEW_LEDGER_CANDIDATE.sql docs/sql/BT_RECORDS_ADMINISTRATION_CANDIDATE.sql docs/sql/BT_FINAL_ARCHIVE_CANDIDATE.sql docs/sql/BT_AGENDA_01_CANDIDATE.sql; do psql_lab < "$file" >/dev/null; done
+python3 - <<'SCHEMA' | psql_lab >/dev/null
+import json
+m=json.load(open('tests/fixtures/flowFixInstalled.json'))
+for f in m['functions']:print(f['definition']+';')
+for c in m['constraints']:
+ table='"'+c['schema']+'"."'+c['table_name']+'"';name='"'+c['name']+'"'
+ print('ALTER TABLE '+table+' DROP CONSTRAINT '+name+'; ALTER TABLE '+table+' ADD CONSTRAINT '+name+' '+c['definition']+';')
+SCHEMA
+for file in docs/sql/BT_FLOW_FIX_01_CANDIDATE.sql docs/sql/BT_CREATOR_01_PRIVATE_SUBSCRIPTIONS_CANDIDATE.sql docs/sql/BT_PLAN_04A_PERSONAL_ENTITLEMENTS_CANDIDATE.sql docs/sql/BT_PLAN_04B_WORKSHOPS_CANDIDATE.sql docs/sql/BT_PLAN_04C_MECHANICS_CANDIDATE.sql docs/sql/BT_PLAN_04D_BILLING_CANDIDATE.sql docs/sql/BT_PLAN_04B_BRANDING_STORAGE_CANDIDATE.sql docs/sql/BT_PLAN_04_CP05_BRANDING_CANDIDATE.sql; do psql_lab < "$file" >/dev/null; done
 psql_lab < scripts/security/bt-plan04-lab-assertions.sql >/dev/null
 # Three reserved Plus seats: exactly one of two concurrent requests may take the fourth.
 psql_lab -c "UPDATE bt_platform_private.mechanic_invites SET state='revoked' WHERE id=(SELECT id FROM bt_platform_private.mechanic_invites WHERE email='quota-1@invalid.test');" >/dev/null

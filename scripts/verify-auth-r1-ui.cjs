@@ -6,6 +6,7 @@ const out = process.env.OUTPUT_DIR || 'artifacts/bt-auth-01b-r1'
 const harness = process.env.AUTH_R1_BASE_URL || 'http://127.0.0.1:5177'
 const publicUrl = process.env.PUBLIC_URL || 'http://127.0.0.1:5173'
 const api = 'https://suxcqqnmcjoezfxltoms.supabase.co'
+const operationsStatusPath = '/rest/v1/rpc/bt_plan04_operations_status'
 const userId = '00000000-0000-4000-8000-000000000001'
 const a = '00000000-0000-4000-8000-000000000011'
 const b = '00000000-0000-4000-8000-000000000012'
@@ -77,6 +78,23 @@ async function stubPage(browser, width, options = {}) {
       })
     }
     if (url.pathname === '/auth/v1/logout') return reply({})
+    if (url.pathname === operationsStatusPath) {
+      assert.equal(req.method(), 'POST')
+      assert.equal(url.search, '')
+      const args = req.postDataJSON()
+      assert.deepEqual(Object.keys(args), ['p_workshop_id'])
+      const wid = args.p_workshop_id
+      assert.ok(wid === a || (state.multiple && wid === b), 'Capability request must name a fixture workshop')
+      const bearer = req.headers().authorization || ''
+      assert.match(bearer, /^Bearer [^\s]+$/)
+      const token = bearer.slice(7).split('.')
+      assert.equal(token[2], 'synthetic-signature')
+      assert.equal(JSON.parse(Buffer.from(token[1], 'base64url').toString()).sub, userId)
+      if (!state.confirmed || state.revoked || state.member !== 'active')
+        return reply({ code: '42501', message: 'Workshop not authorized' }, 403)
+      // R1 scenarios verify authentication only; no operational rollout is enabled.
+      return reply({ workshopId: wid, operationsEnabled: false, documentsEnabled: false })
+    }
     if (url.pathname === '/rest/v1/profiles') {
       assert.equal(req.method(), 'GET')
       assert.equal(url.searchParams.get('user_id'), 'eq.' + userId)
@@ -198,7 +216,8 @@ async function shot(p, name) {
           (r) =>
             r.method === 'GET' ||
             r.path.startsWith('/auth/v1/token') ||
-            r.path.startsWith('/auth/v1/logout')
+            r.path.startsWith('/auth/v1/logout') ||
+            (r.method === 'POST' && r.path === operationsStatusPath)
         )
       )
       results.push({
