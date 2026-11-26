@@ -1,3 +1,11 @@
+## 26/11/2026 — BT-PLAN-04BC LIVE; instalación técnica completada
+
+CI oficial 5/5 SUCCESS en dc056b1620398e050c0d00f7d96abd88efec0684. [SQL instalado](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_SQL_INSTALADO_20261126.md): cinco migraciones registradas, 13 PDF conservados y guardas de licencia instaladas. Edge workflow [45884708021](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/45884708021) SUCCESS, marcador BT_PLAN04BC_CP05_DEPLOY_SUCCEEDED, paquete reproducible y JWT true; CP05 v10 ACTIVE, Final Archive v7 y Owner Onboarding v8 sin cambios. Render dep-dc48l50u01pc73f6r5tg LIVE en 05bb77fddf236f5eea966d393dd3cef505a8f149 (solo documentación adicional sobre SHA CI aprobado), finalizado 19:38:22 UTC; Auto-Deploy OFF confirmado. [Checkpoint LIVE](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_LIVE_20261126.md).
+
+Cierre de instalación técnica, no aceptación funcional alojada ni alta de Ignacio. Siguiente: QA humana focalizada con cuenta existente, MFA real del creador y alta/licencia/activación puntual de BIOMOTORS bajo autorización correspondiente. No conceder licencias ni habilitar cuentas reales automáticamente. Logos, correo externo y pagos permanecen fuera del alcance; SEC07 cerrado, sin nuevas ejecuciones Codex. Mantener históricos y no repetir suites por rutina.
+
+---
+
 ## 26/11/2026 — BT-PLAN-04BC SQL instalado; Edge pendiente
 
 CI oficial 5/5 SUCCESS en dc056b1620398e050c0d00f7d96abd88efec0684, incluido WebKit. Titular autorizó hasta Render, confirmó ventana sin editores y My Workspace; S5B restaurado, 13 PDF verificados, snapshot 19:27:31 UTC. Preflight sin cambios posteriores detectados en datos comerciales/Auth/Storage consultados; cuatro firmas previas coincidentes y Auto-Deploy OFF comprobado. Cinco migraciones aprobadas aplicadas en orden y verificadas en historial: 20261126192950 bt_plan04b_workshops, 20261126192959 bt_plan04c_mechanics, 20261126193003 bt_plan04bc_pilot, 20261126193008 bt_plan04_cp05_branding, 20261126193013 bt_plan04bc_revocation_delta.
