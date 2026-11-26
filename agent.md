@@ -1,3 +1,11 @@
+## 26/11/2026 — BT-PLAN-04BC-CI-FIX-02, delta con WebKit pendiente
+
+Simuladores CP04/CP05 y auditorías adaptados al POST de lectura de capacidades, con validación exacta de actor/taller y separación de escrituras comerciales. CP04, doce F01–F06, CP05, persistencia Chromium y Auth R1 final PASS local. Las dos ejecuciones WebKit quedan BLOCKED_ENVIRONMENT: navegador ausente y descarga oficial 403. Dirección Técnica dispone validar WebKit en CI oficial; no repetir descargas, buscar alternativas ni cambiar red. No declarar verde el workflow completo ni sustituir WebKit. [Checkpoint CI-FIX-02](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_CI_FIX_02_20261126.md).
+
+Base `f549b0846bdd50bb16d223f5adb279e2fa9915c1`; entrega exclusiva por DTK-ERR-056 a revisión privada con WebKit BLOCKED_ENVIRONMENT, pendiente de CI oficial por instrucción de Dirección Técnica. Chromium completado; no repetir pruebas aprobadas. Sin lógica productiva, SQL, RLS, permisos, workflows ni dependencias modificados; laboratorio SQL aprobado no repetido, sin respaldos ni SEC07. No push oficial ni cambios alojados o de red. Logos, correo, pagos y cuentas reales OFF.
+
+---
+
 ## 26/11/2026 — BT-PLAN-04BC-CI-FIX, candidato privado
 
 Corrección exclusiva de preparación del laboratorio histórico PLAN04 (dependencias Agenda/FLOW-FIX-01) y simulador Auth R1 (RPC de capacidades por POST exacto con método, payload, actor y taller verificados). Laboratorio SQL afectado y ejecutor Auth en sus dos modalidades CI PASS local; sintaxis e integridad verificadas. Sin modificar lógica comercial, Auth productivo, SQL aprobado, RLS ni permisos. [Checkpoint CI-FIX](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_CI_FIX_20261126.md).

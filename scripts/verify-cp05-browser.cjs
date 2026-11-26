@@ -1,12 +1,14 @@
 // CP05 affected UI only. Real React/SDK; all hosted requests are intercepted.
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
+const {isOperationsStatusRead}=require('../tests/harness/cp04BrowserFixture.cjs')
 ;(async()=>{
  const browser=await chromium.launch({executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
  const out=process.env.OUTPUT_DIR||'artifacts/cp05';fs.mkdirSync(out,{recursive:true})
  const qa=process.env.CP05_QA_DOCUMENTS==='true',results=[]
  try{for(const width of (process.env.CP05_WIDTHS||'360,390,430,768,1366,1440,1920').split(',').map(Number)){
   const f=await cp05Page(browser,width),{p,quotes,requests,errors,commands}=f
+  const nonCapabilityCount=()=>requests.filter(r=>!isOperationsStatusRead(r)).length
   if(width<=760)await p.setViewportSize({width,height:780})
   try{
    const tab=name=>p.getByRole('tab',{name,exact:true})
@@ -28,12 +30,12 @@ const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
    await panel('Trabajos y repuestos').getByRole('button',{name:'Agregar otro ítem'}).click()
    await p.getByLabel('Descripción del ítem').fill('Edición sin confirmar')
    const node=await p.getByLabel('Descripción del ítem').elementHandle()
-   const reads=requests.length
+   const reads=nonCapabilityCount()
    await tab('Condiciones').click()
    await panel('Condiciones').getByLabel('Condiciones',{exact:true}).fill('Condiciones del borrador vigente')
    await tab('Historial').click();await tab('Trabajos y repuestos').click()
    assert.equal(await node.evaluate(el=>el.isConnected&&el.value==='Edición sin confirmar'),true)
-   assert.equal(requests.length,reads,'Tabs must not refetch, write, or reload the document')
+   assert.equal(nonCapabilityCount(),reads,'Tabs must not refetch, write, or reload the document')
    await p.getByRole('button',{name:'Cancelar edición de partida'}).click()
    await tab('Trabajos y repuestos').focus();await p.keyboard.press('ArrowRight')
    assert.equal(await tab('Condiciones').getAttribute('aria-selected'),'true')
@@ -82,9 +84,9 @@ const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
    await detail.waitFor();assert.equal(await detail.locator('tbody tr').count(),3)
    assert.match(await detail.innerText(),/Cliente histórico congelado/)
    assert.equal(await detail.getByRole('button',{name:/Editar ítem|Eliminar ítem|Agregar otro ítem/}).count(),0)
-   const count=requests.length
+   const count=nonCapabilityCount()
    await tab('Condiciones').click();await tab('Historial').click()
-   assert.equal(requests.length,count,'Selecting frozen history is local presentation')
+   assert.equal(nonCapabilityCount(),count,'Selecting frozen history is local presentation')
    assert.equal(await history.getByRole('button',{name:'Enviar cotización · desactivado'}).isVisible(),false)
    await history.locator('.cp05-email-controls summary').click()
    assert.equal(await history.getByRole('button',{name:'Enviar cotización · desactivado'}).isDisabled(),true)
@@ -122,12 +124,12 @@ const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
      await f.makeRevision();p.once('dialog',d=>d.accept())
      await dock.getByRole('button',{name:'Recargar versión guardada'}).click()
      await dock.getByRole('button',{name:'Ver historial',exact:true}).click()
-     const beforeSelection=requests.length
+     const beforeSelection=nonCapabilityCount()
      await history.getByRole('button',{name:/Revisión 2/}).click()
      await history.getByRole('article',{name:'Contenido de la revisión 2'}).waitFor()
      await history.getByRole('button',{name:/Revisión 1/}).click()
      await history.getByRole('article',{name:'Contenido de la revisión 1'}).waitFor()
-     assert.equal(requests.length,beforeSelection)
+     assert.equal(nonCapabilityCount(),beforeSelection)
      assert.equal(JSON.stringify(f.revisions.find(r=>r.revision===1).payload),frozen)
    }
    await p.screenshot({path:`${out}/cotizacion-${width}.png`,fullPage:true})

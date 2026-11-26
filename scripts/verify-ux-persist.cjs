@@ -1,6 +1,6 @@
 // BT-UX-PERSIST-01: real React/SDK with synthetic HTTP only, never hosted data.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
-const {cp04Page,uuid,tenant,userId}=require('../tests/harness/cp04BrowserFixture.cjs')
+const {cp04Page,uuid,tenant,userId,businessWrites}=require('../tests/harness/cp04BrowserFixture.cjs')
 const out=process.env.OUTPUT_DIR||'artifacts/bt-ux-persist'
 const api='https://suxcqqnmcjoezfxltoms.supabase.co'
 const delay=ms=>new Promise(r=>setTimeout(r,ms))
@@ -64,11 +64,11 @@ async function stable(p,value){
   await p.locator('.cp04-order').first().click();await p.getByRole('button',{name:'Abrir inspección multipunto con X'}).click()
   const row=p.locator('.mp-row').first();state.failFindings=true
   await row.getByRole('radio',{name:/ · OK$/}).check();await row.getByText('Error al guardar',{exact:true}).waitFor()
-  const attempts=requests.filter(r=>r.method==='POST').length
+  const attempts=businessWrites(requests).length
   await nav(3);await active(p).locator('.cp05-panel').waitFor()
   await nav(1);await row.getByText('Error al guardar',{exact:true}).waitFor()
   assert.equal(await row.getByRole('radio',{name:/ · OK$/}).isChecked(),true)
-  await p.evaluate(()=>window.btUxQa.verify());assert.equal(requests.filter(r=>r.method==='POST').length,attempts)
+  await p.evaluate(()=>window.btUxQa.verify());assert.equal(businessWrites(requests).length,attempts)
   state.failFindings=false;await row.getByRole('button',{name:'Reintentar esta X',exact:true}).click();await row.getByText('Guardado',{exact:true}).waitFor();assert.equal(state.findings.length,1)
   await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
   await p.locator('.cp04-pdf-preview iframe').waitFor()

@@ -1,6 +1,11 @@
 // Private browser fixture. Every Supabase request is intercepted; no real Auth/RLS/data writes.
 const assert = require('node:assert/strict')
 const api = 'https://suxcqqnmcjoezfxltoms.supabase.co'
+const operationsStatusPath = '/rest/v1/rpc/bt_plan04_operations_status'
+const isOperationsStatusRead = r => r.method === 'POST' && r.path === operationsStatusPath
+// Unknown RPCs and all other non-GET business requests still count as writes.
+const businessWrites = requests => requests.filter(r => r.method !== 'GET' &&
+  !r.path.startsWith('/auth/v1/') && !isOperationsStatusRead(r))
 const userId = '00000000-0000-4000-8000-000000000001',
   tenant = '00000000-0000-4000-8000-000000000011'
 const uuid = (n) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0')
@@ -42,6 +47,8 @@ async function cp04Page(browser, width, options = {}) {
   const state = {
     role: 'owner',
     revoked: false,
+    operationsEnabled: false,
+    documentsEnabled: false,
     failList: false,
     slowList: false,
     failFindings: false,
@@ -109,6 +116,21 @@ async function cp04Page(browser, width, options = {}) {
       )
     if (url.pathname === '/rest/v1/workshops')
       return reply([{ id: tenant, name: 'Taller QA · HTTP simulado', status: 'active' }])
+    if (url.pathname === operationsStatusPath) {
+      assert.equal(method, 'POST')
+      assert.equal(url.search, '')
+      const args = request.postDataJSON()
+      assert.deepEqual(Object.keys(args), ['p_workshop_id'])
+      assert.equal(args.p_workshop_id, tenant)
+      const bearer = request.headers().authorization || ''
+      assert.match(bearer, /^Bearer [^\s]+$/)
+      const parts = bearer.slice(7).split('.')
+      assert.equal(parts[2], 'synthetic')
+      assert.equal(JSON.parse(Buffer.from(parts[1], 'base64url').toString()).sub, userId)
+      if (state.revoked) return reply({code:'42501',message:'Workshop not authorized'},403)
+      return reply({workshopId:tenant,operationsEnabled:state.operationsEnabled === true,
+        documentsEnabled:state.documentsEnabled === true})
+    }
     const table = url.pathname.split('/').pop()
     assert.ok(
       ['vehicles', 'work_orders', 'inspection_findings', 'customers'].includes(table),
@@ -211,4 +233,4 @@ async function cp04Page(browser, width, options = {}) {
   await p.locator('.cp04-private').waitFor()
   return { p, state, requests, errors }
 }
-module.exports = { cp04Page, uuid, tenant, userId }
+module.exports = { cp04Page, uuid, tenant, userId, operationsStatusPath, isOperationsStatusRead, businessWrites }

@@ -1,9 +1,9 @@
 // CP05 browser fixture: all hosted API/Edge requests are synthetic and intercepted.
 const assert=require('node:assert/strict'),{createHash}=require('node:crypto')
 const {PDFDocument}=require('pdf-lib')
-const {cp04Page,uuid,tenant,userId}=require('./cp04BrowserFixture.cjs')
+const {cp04Page,uuid,tenant,userId,operationsStatusPath}=require('./cp04BrowserFixture.cjs')
 async function cp05Page(browser,width){
- const {p,state,requests,errors}=await cp04Page(browser,width)
+ const {p,state,requests,errors}=await cp04Page(browser,width,{documentsEnabled:process.env.CP05_QA_DOCUMENTS==='true'})
       const quotes = [],
         items = [],
         commands = new Map(), revisions=[]
@@ -32,6 +32,8 @@ async function cp05Page(browser,width){
                 : data
             )
           })
+        // The parent fixture validates this one read RPC, including scope and actor.
+        if (url.pathname === operationsStatusPath) return route.fallback()
         if (url.pathname.includes('/rpc/bt_cp05_')) {
           requests.push({ path: url.pathname, method: req.method() })
           const d = req.postDataJSON()

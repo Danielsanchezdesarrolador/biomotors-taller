@@ -2,7 +2,7 @@
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
   fs = require('node:fs')
-const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.cjs')
+const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/harness/cp04BrowserFixture.cjs')
 ;(async () => {
   const browser = await chromium.launch({
     executablePath: fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined,
@@ -143,6 +143,7 @@ const { cp04Page, uuid, tenant } = require('../tests/harness/cp04BrowserFixture.
           requests.every(
             (r) =>
               r.method === 'GET' ||
+              isOperationsStatusRead(r) ||
               r.path.startsWith('/auth/v1/') ||
               r.path === '/rest/v1/inspection_findings' ||
               r.path === '/rest/v1/work_orders'
