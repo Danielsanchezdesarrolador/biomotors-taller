@@ -118,7 +118,7 @@ assert.ok(
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
       (process.env.VITE_BT_AGENDA_ENABLED==='true' && /src\/agenda\//.test(id)) ||
-      (finalArchiveEnabled && flowLiveEnabled && /src\/guided\/(?:GuidedWorkspace|progress|continuity)\.(?:tsx|ts)$/.test(id)) ||
+      (finalArchiveEnabled && flowLiveEnabled && /src\/guided\/(?:GuidedWorkspace|progress|continuity|OperationsCenter|operations)\.(?:tsx|ts)$/.test(id)) ||
       (finalArchiveEnabled && /src\/expedientes\//.test(id)) ||
       (recordsEnabled && /src\/records\//.test(id)) ||
       (cp06PrivateEnabled&&/src\/historial\//.test(id)) ||

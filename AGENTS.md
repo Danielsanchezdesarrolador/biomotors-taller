@@ -1,3 +1,36 @@
+## 26/11/2026 — BT-FLOW-NEXT-02 integración autorizada
+
+Centro de operaciones multiatención: candidato original 539de905e90e4ff17d797498301e6b501d047d5e, corregido bb8385801d5340515092dac54d6c70a337f21de4, revisión privada bf183225ae8ba7ae13a67caab1fa55bf5e1e1db0. Dirección Técnica acepta los tres ajustes de acceso al Inicio, invalidación de autoridad y recuperación del borrador sin OT. El propietario autoriza publicación en main; CI pendiente. Despliegue requiere autorización específica. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_02_20261126.md).
+
+Conservar el alcance de piloto QA: no habilitar otros talleres ni edición concurrente de la misma OT. Aceptación visual y recorrido autenticado de tres atenciones pendientes. No certificar QA alojada con fixtures; no reabrir SEC07 ni repetir respaldo por rutina; vigencia del conjunto consolidado sujeta a cambios de datos. Auto-Deploy OFF confirmado; correo OFF y restricciones de aprobación/cotejo conservadas. No publicar capturas, manifiestos ni paquetes privados. Siguiente: CI, autorización de despliegue y aceptación humana. Las anotaciones anteriores conservan su carácter histórico.
+
+---
+
+## BT-FLOW-NEXT-02 — corrección focalizada previa a integración (26/11/2026 Chile)
+
+Delta sobre candidato `539de905e90e4ff17d797498301e6b501d047d5e`: Inicio original
+para contextos excluidos por canOpen; suscripción/invalidez inmediata de OperationsCenter
+por sesión/rol/taller/autoridad, con descarte de respuestas tardías; recuperación del
+borrador montado desde Inicio aun sin OT. FIX-ID, contratos y estilos R2 intactos.
+Validación limitada a estos tres ajustes: once pruebas focalizadas, dos escenarios de
+navegador sintético y TypeScript. Sin suites históricas, respaldos ni deploy.
+[Delta y evidencia](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_02_20261126.md).
+Transferencia solo a revisión privada, sin integración ni push oficial.
+
+---
+
+## BT-FLOW-NEXT-02 — candidato local para revisión privada (26/11/2026 Chile)
+
+Centro de operaciones en Inicio autenticado sobre base `32869dbb581025b01e4738bc0b6901d12ab928e3`.
+Lecturas paginadas por taller, evidencias compartidas del recorrido, búsqueda/filtros,
+retoma por identidad y alta independiente reutilizando FIX-ID. No nuevo SQL/Edge,
+infraestructura ni navegación global. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_02_20261126.md).
+Transferencia autorizada solo a `bytetorque-review/BT-FLOW-NEXT-02` mediante DTK-ERR-056;
+NO PUSH oficial/DEPLOY ni cambios alojados. Correo OFF, Auto-Deploy OFF, R2 de eliminación
+aprobación pausado. Mantener un editor por OT; QA humana y aceptación visual pendientes.
+
+---
+
 ## 26/11/2026 — BT-FLOW-NEXT-01 integración aprobada, pendiente de CI y deploy
 
 El propietario autoriza integrar el candidato definitivo y mantener el repositorio oficial público temporalmente. No autoriza despliegue ni cambios alojados. Business comunicó PASS definitivo B05 e integridad del candidato; respaldo consolidado cifrado DB + Storage 6/6 PDF restaurados/verificados y abiertos por el titular, con alcance acotado, sin paridad de seguridad ni DR integral. El requisito de respaldo previo queda satisfecho sujeto a vigencia. No repetir SEC07, exportaciones ni suites locales por rutina. Auto-Deploy OFF confirmado en Render antes de integrar; correo OFF y FLOW-UX-01-R2 pausado se mantienen como restricciones. [Checkpoint de integración](docs/checkpoints/CHECKPOINT_BT_FLOW_NEXT_01_INTEGRACION_20261126.md). Las entradas anteriores son historia, no autorizaciones vigentes.
