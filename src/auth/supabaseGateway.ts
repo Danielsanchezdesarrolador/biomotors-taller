@@ -93,6 +93,14 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
       check(error)
       return (data || []) as Workshop[]
     },
+    async workshopAccess(id) {
+      // Missing migration, denied RPC, stale scope or malformed result all fail closed.
+      try {
+        const {data,error} = await client.rpc('bt_plan04_operations_status', {p_workshop_id:id})
+        if (error || data?.workshopId !== id) return {operationsEnabled:false,documentsEnabled:false}
+        return {operationsEnabled:data.operationsEnabled === true,documentsEnabled:data.documentsEnabled === true}
+      } catch { return {operationsEnabled:false,documentsEnabled:false} }
+    },
     subscribe(callback) {
       const { data } = client.auth.onAuthStateChange((event, session) => {
         callback(event, session?.user.id)

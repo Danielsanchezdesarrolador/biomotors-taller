@@ -18,6 +18,7 @@ export function lazyGateway(config: Extract<AuthConfig, { enabled: true }>): Aut
     signOut: async () => (await get()).signOut(),
     memberships: async (id) => (await get()).memberships(id),
     workshops: async (ids) => (await get()).workshops(ids),
+    workshopAccess: async (id) => (await get()).workshopAccess?.(id) ?? {operationsEnabled:false,documentsEnabled:false},
     subscribe(callback) {
       let disposed = false
       let unsubscribe: (() => void) | undefined

@@ -20,11 +20,10 @@ export function cp05Repository(client: SupabaseClient, context: Context) {
   const wid = quoteId(context.workshop.id),
     uid = quoteId(context.userId),
     orders = cp04Repository(client, context),
-    // The browser UI is only enabled for the configured QA workshop.
-    // Real authorization remains enforced by Edge + membership/RLS.
+    // Server capability plus build kill switch. Edge rechecks the live rollout.
     pilotDocumentsEnabled =
       import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
-      import.meta.env.VITE_BT_CP05_PILOT_WORKSHOP_ID === wid,
+      context.documentsEnabled === true,
     documents = documentClient(client, context, {
       archive: pilotDocumentsEnabled,
       email: pilotDocumentsEnabled && import.meta.env.VITE_BT_CP05_EMAIL_ENABLED === 'true'

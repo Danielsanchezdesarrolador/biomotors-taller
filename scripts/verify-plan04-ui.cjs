@@ -29,6 +29,7 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
     case '/rest/v1/workshop_memberships':return reply(member?[{user_id:uid,workshop_id:wid,role,status:'active'}]:[])
     case '/rest/v1/workshops':return reply([{id:wid,name:profile.name,status:'active'}])
     case '/rest/v1/rpc/bt_creator_is_creator':return reply(false)
+    case '/rest/v1/rpc/bt_plan04_operations_status':return reply({workshopId:wid,operationsEnabled:true,documentsEnabled:true})
     case '/rest/v1/rpc/bt_plan04_my_status':return reply({scope:args.p_workshop_id?'workshop':'personal',effectivePlan:args.p_workshop_id?'full':plan,personalPlan:plan,isLifetime:args.p_workshop_id?true:plan==='full',expiresAt:null,workshopId:args.p_workshop_id||null})
     case '/rest/v1/rpc/bt_plan04_create_workshop':assert.equal(plan,'full');assert.equal(args.p_name,'Taller sintético');member=true;return reply({workshopId:wid})
     case '/rest/v1/rpc/bt_plan04_profile':return reply(profile)
@@ -36,6 +37,9 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
     case '/rest/v1/rpc/bt_plan04_update_profile':assert.equal(args.p_workshop_id,wid);profile={...profile,name:args.p_name,email:args.p_email,phone:args.p_phone,address:args.p_address};return reply({saved:true})
     case '/rest/v1/rpc/bt_plan04_manage_mechanic':assert.equal(args.p_action,'invite');assert.equal(args.p_workshop_id,wid);pending=1;return reply({id:'00000000-0000-4000-8000-000000000099',token:'a'.repeat(64)})
     case '/rest/v1/rpc/bt_plan04_accept_mechanic':assert.equal(args.p_token,'b'.repeat(64));member=true;role='mechanic';return reply({workshopId:wid})
+    case '/rest/v1/bt_agenda_receipts':case '/rest/v1/quote_events':case '/rest/v1/quote_delivery_events':
+    case '/rest/v1/quote_items':case '/rest/v1/inspection_findings':
+    case '/rest/v1/quotes':case '/rest/v1/quote_revisions':case '/rest/v1/bt_flow_quote_approvals':case '/rest/v1/bt_flow_execution_reports':case '/rest/v1/bt_flow_visit_deliveries':
     case '/rest/v1/customers':case '/rest/v1/vehicles':case '/rest/v1/work_orders':case '/rest/v1/inspection_reports':return reply([])
     default:unexpected.push(url.pathname);return route.abort()
    }
@@ -45,7 +49,7 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
   await page.getByLabel('Contraseña',{exact:true}).fill('synthetic-not-a-real-password')
   await page.getByRole('button',{name:'Ingresar',exact:true}).click()
   await page.getByRole('heading',{name:'Mi cuenta ByteTorque'}).waitFor()
-  await page.getByText('Plan Básico',{exact:true}).waitFor()
+  await page.locator('.personal-home > header').getByText('Plan Básico',{exact:true}).waitFor()
   assert.equal(await page.getByRole('button',{name:'Crear mi taller',exact:true}).count(),0)
   await page.screenshot({path:out+'/personal-basic-'+width+'.png',fullPage:true})
   plan='full';await page.getByRole('button',{name:'Actualizar mi plan y accesos'}).click()
@@ -53,9 +57,10 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
   await page.getByLabel('Nombre de mi taller').fill('Taller sintético')
   await page.getByRole('button',{name:'Crear mi taller',exact:true}).click()
   await page.locator('.dashboard-main').waitFor()
-  const nav=page.locator(width>760?'.side-nav button':'.bottom-nav button')
-  await nav.nth(4).click()
+  if(width<=760)await page.getByRole('button',{name:'Más secciones',exact:true}).click()
+  await page.locator('.side-nav button').filter({hasText:'Configuración'}).click()
   await page.getByRole('heading',{name:'Identidad comercial'}).waitFor()
+  assert.equal(await page.getByLabel('Logo propio (PNG o JPEG, máximo 2 MiB)').isDisabled(),true)
   await page.getByLabel('Correo del taller',{exact:true}).fill('workshop@invalid.test')
   await page.getByRole('button',{name:'Guardar datos comerciales'}).click()
   await page.getByText('Datos comerciales guardados en este taller.').waitFor()
@@ -83,9 +88,11 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
   await page.getByText('Full activo',{exact:true}).waitFor()
   assert.equal(await page.getByRole('heading',{name:'Identidad comercial'}).count(),0)
   await page.screenshot({path:out+'/mechanic-'+width+'.png',fullPage:true})
+  await page.waitForLoadState('networkidle')
   assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[])
   await page.close()
  }
+ fs.writeFileSync(out+'/browser-results.json',JSON.stringify({viewports:[1440,390],captures:6,checks:['Basic denied workshop creation','Full workshop creation','Commercial profile save','Logo upload disabled','Manual invite with token absent from storage','Confirmed-account acceptance','Mechanic workspace without settings access','No horizontal overflow or browser errors'],backend:'HTTP mocks; no hosted Auth/DB/Storage requests'},null,2)+'\n')
  console.log('PLAN04_UI_HTTP_MOCK_DESKTOP_MOBILE_PASS: Basic denial, Full create, tenant profile, invitation and token privacy; no real Auth/Storage/DB')
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1})

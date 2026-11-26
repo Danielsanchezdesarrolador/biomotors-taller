@@ -1,5 +1,6 @@
 -- CANDIDATE ONLY. Requires installed Creator-01 and PLAN-04A. No hosted execution authorized.
 BEGIN;
+ALTER TABLE bt_platform_private.subscription_events ADD COLUMN request_payload jsonb;
 ALTER TABLE bt_platform_private.account_entitlement_events ADD COLUMN request_payload jsonb;
 CREATE TABLE bt_platform_private.workshop_creation_requests (
  request_id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES auth.users(id),
@@ -291,7 +292,7 @@ DECLARE
   v_expiry timestamptz;
   v_lifetime boolean;
   v_new jsonb;
-  v_existing jsonb;
+  v_existing record;
 BEGIN
   v_actor := auth.uid();
   IF NOT public.bt_creator_is_creator() OR v_actor IS NULL THEN
@@ -317,9 +318,14 @@ BEGIN
   PERFORM pg_catalog.pg_advisory_xact_lock(
     pg_catalog.hashtextextended('bt_creator:' || p_workshop_id::text, 0)
   );
-  SELECT e.next_state INTO v_existing FROM bt_platform_private.subscription_events e
-  WHERE e.request_id=p_request_id AND e.actor_id=v_actor;
-  IF FOUND THEN RETURN v_existing; END IF;
+  SELECT e.next_state,e.workshop_id,e.actor_id,e.request_payload INTO v_existing FROM bt_platform_private.subscription_events e
+  WHERE e.request_id=p_request_id;
+  IF FOUND THEN
+    IF v_existing.workshop_id<>p_workshop_id OR v_existing.actor_id<>v_actor OR
+      v_existing.request_payload IS DISTINCT FROM pg_catalog.jsonb_build_array(p_workshop_id,p_plan,p_mode,p_days,btrim(p_reason)) THEN
+      RAISE EXCEPTION 'Request id reused' USING ERRCODE='23505'; END IF;
+    RETURN v_existing.next_state;
+  END IF;
   IF EXISTS(SELECT 1 FROM bt_platform_private.subscription_events e
             WHERE e.request_id=p_request_id) THEN
     RAISE EXCEPTION 'ID de operación ya utilizado' USING ERRCODE='23505';
@@ -370,9 +376,9 @@ BEGIN
   RETURNING pg_catalog.to_jsonb(s.*) INTO v_new;
 
   INSERT INTO bt_platform_private.subscription_events
-    (request_id,workshop_id,actor_id,mode,reason,previous_state,next_state)
+    (request_id,workshop_id,actor_id,mode,reason,previous_state,next_state,request_payload)
   VALUES (p_request_id,p_workshop_id,v_actor,p_mode,btrim(p_reason),
-    CASE WHEN v_old.workshop_id IS NULL THEN NULL ELSE pg_catalog.to_jsonb(v_old) END, v_new);
+    CASE WHEN v_old.workshop_id IS NULL THEN NULL ELSE pg_catalog.to_jsonb(v_old) END, v_new,pg_catalog.jsonb_build_array(p_workshop_id,p_plan,p_mode,p_days,btrim(p_reason)));
   RETURN v_new;
 END;
 $fn$;

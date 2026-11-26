@@ -1,7 +1,7 @@
 import {finalArchiveFixture,id} from './fixtures/finalArchive'
 import type {SupabaseClient} from '@supabase/supabase-js'
 import type {Context} from '../src/auth/controller'
-export const context:Context={userId:id(7),role:'owner',workshop:{id:id(1),name:'Taller sintético de operaciones',status:'active'}}
+export const context:Context={userId:id(7),role:'owner',operationsEnabled:true,documentsEnabled:true,workshop:{id:id(1),name:'Taller sintético de operaciones',status:'active'}}
 export async function operationsFixture(count=3){
  const tables:Record<string,any[]>={work_orders:[],vehicles:[],customers:[],quotes:[],quote_items:[],quote_revisions:[],inspection_findings:[],bt_flow_quote_approvals:[],bt_flow_execution_reports:[],bt_flow_visit_deliveries:[],bt_agenda_receipts:[]}
  for(let n=0;n<count;n++){const offset=n*100;const f=await finalArchiveFixture();let text=JSON.stringify(f.snapshot);for(let i=40;i>=2;i--)if(i!==7)text=text.replaceAll(id(i),id(i+offset));const s=JSON.parse(text),q=s.quote,r=s.revision

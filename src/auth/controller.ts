@@ -7,7 +7,8 @@ export type Identity = { id: string; confirmed: boolean; displayName?: string }
 export type Membership = { user_id: string; workshop_id: string; role: string; status: string }
 export type Workshop = { id: string; name: string; status: string }
 export type Choice = { workshop: Workshop; role: Role }
-export type Context = Choice & { userId: string; displayName?: string }
+export type WorkshopAccess = { operationsEnabled: boolean; documentsEnabled: boolean }
+export type Context = Choice & { userId: string; displayName?: string; operationsEnabled?: boolean; documentsEnabled?: boolean }
 export interface AuthGateway {
   /** Obtain the same SDK instance used for login, not a second browser session. */
   getDataClient?(): Promise<SupabaseClient | null>
@@ -18,6 +19,7 @@ export interface AuthGateway {
   signOut(): Promise<void>
   memberships(userId: string): Promise<Membership[]>
   workshops(ids: string[]): Promise<Workshop[]>
+  workshopAccess?(id: string): Promise<WorkshopAccess>
   subscribe(callback: (event: string, observedUserId?: string) => void): () => void
 }
 export type AuthState = {
@@ -278,10 +280,15 @@ export class AuthController {
       }
       const choice = choices.find((c) => c.workshop.id === requested) ?? choices[0]
       this.selected = choice.workshop.id
-      const nextContext = { ...choice, userId: user.id, displayName: user.displayName }
+      // Capability is read from private server rollout records, never metadata or build IDs.
+      const access = this.gateway.workshopAccess
+        ? await this.gateway.workshopAccess(choice.workshop.id)
+        : { operationsEnabled: false, documentsEnabled: false }
+      if (epoch !== this.epoch) return
+      const nextContext = { ...choice, userId: user.id, displayName: user.displayName, ...access }
       const sameContext = JSON.stringify(previous.context) === JSON.stringify(nextContext)
       const phase = choice.role === 'reception' ? 'restricted' : 'authorized'
-      const sameAuthority = previous.context?.userId===user.id && previous.context?.workshop.id===choice.workshop.id && previous.context?.role===choice.role
+      const sameAuthority = previous.context?.userId===user.id && previous.context?.workshop.id===choice.workshop.id && previous.context?.role===choice.role && previous.context?.operationsEnabled===access.operationsEnabled && previous.context?.documentsEnabled===access.documentsEnabled
       if (routine && previous.phase === phase && sameContext && JSON.stringify(previous.choices) === JSON.stringify(choices)) return
       this.set({
         phase,

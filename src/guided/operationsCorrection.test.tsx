@@ -7,7 +7,7 @@ import {operationsScope,watchOperations,type OperationsState,type Operation} fro
 import {OfficialPanel} from '../official/OfficialPanels'
 const pilot='c943ad51-6d90-447b-8aa7-68866f69a4bc'
 function authority(){
- let state:AuthState={phase:'authorized',message:'',authorityVersion:1,context:{userId:'owner',role:'owner',workshop:{id:pilot,status:'active',name:'Taller sintético'}}}
+ let state:AuthState={phase:'authorized',message:'',authorityVersion:1,context:{userId:'owner',role:'owner',operationsEnabled:true,documentsEnabled:true,workshop:{id:pilot,status:'active',name:'Taller sintético'}}}
  const listeners=new Set<()=>void>()
  const client={} as SupabaseClient
  const controller={getSnapshot:()=>state,subscribe:(fn:()=>void)=>{listeners.add(fn);return()=>{listeners.delete(fn)}},directoryClient:vi.fn(async()=>client)} as unknown as AuthController
@@ -19,7 +19,7 @@ const rows=[{id:'private-OT'}] as Operation[]
 describe('NEXT-02 focused correction: access, invalidation and draft recovery',()=>{
  it.each(['mechanic','reception','other-workshop','anonymous'])('preserves original Inicio for %s without querying operations',role=>{
   const a=authority()
-  a.set(role==='anonymous'?{phase:'anonymous',message:''}:{...a.state,context:{...a.state.context!,role:role==='other-workshop'?'owner':role as 'mechanic'|'reception',workshop:{...a.state.context!.workshop,id:role==='other-workshop'?'other':pilot}}})
+  a.set(role==='anonymous'?{phase:'anonymous',message:''}:{...a.state,context:{...a.state.context!,role:role==='other-workshop'?'owner':role as 'mechanic'|'reception',operationsEnabled:role!=='other-workshop',workshop:{...a.state.context!.workshop,id:role==='other-workshop'?'other':pilot}}})
   expect(operationsScope(a.controller)).toBe('')
   const html=renderToStaticMarkup(<OperationsCenter controller={a.controller} isActive onNew={()=>{}} onResume={()=>{}} fallback={<OfficialPanel screen="inicio" onNavigate={()=>{}}/>}/>)
   expect(html).toContain('¿Qué vamos a hacer hoy?');expect(html).not.toContain('Centro de operaciones');expect(a.controller.directoryClient).not.toHaveBeenCalled()

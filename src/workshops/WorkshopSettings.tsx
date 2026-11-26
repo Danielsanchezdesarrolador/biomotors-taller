@@ -2,7 +2,6 @@ import { useEffect,useRef,useState,type FormEvent } from 'react'
 import type { AuthController } from '../auth/controller'
 import { parseTeam,requestIdentity,workshopRpc,type Team } from './client'
 import './workshops.css'
-import {uploadWorkshopLogo} from './logo'
 import {
   validPdfTemplateStatus, uploadWorkshopPdfTemplate, restoreOfficialPdfTemplate,
   type PdfTemplateStatus
@@ -59,8 +58,8 @@ export function WorkshopSettings({controller}:{controller:AuthController}) {
     catch{setNotice('No se pudo guardar. Verifica sesión y permisos.')}finally{locked.current=false;setBusy(false)}}
   return <div className="workshop-settings"><section className="dashboard-card"><h1>Configuración</h1><p>Tu taller y equipo · Sin cobros ni envíos externos automáticos.</p><p role="status">{notice}</p></section>
     <section className="dashboard-card"><h2>Identidad comercial</h2>{logoUrl&&<img src={logoUrl} alt="Logo de mi taller" style={{maxWidth:220,maxHeight:80,objectFit:'contain'}}/>}<form onSubmit={e=>void save(e)}>{(['name','email','phone','address'] as const).map((key,i)=><label key={key}>{['Nombre comercial','Correo del taller','Teléfono','Dirección'][i]}<input disabled={busy||!team} value={profile[key]} maxLength={[120,254,30,240][i]} type={key==='email'?'email':'text'} required={key==='name'} onChange={e=>setProfile({...profile,[key]:e.target.value})}/></label>)}<button disabled={busy||!team} className="rp-primary">Guardar datos comerciales</button></form>
-      <label>Logo propio (PNG o JPEG, máximo 2 MiB)<input type="file" accept="image/png,image/jpeg" disabled={busy||!team} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(!file||locked.current)return;locked.current=true;setBusy(true);void uploadWorkshopLogo(controller,file).then(()=>setNotice('Logo privado guardado para este taller.')).catch(()=>setNotice('No se pudo guardar. Usa PNG/JPEG válido, revisa tamaño y permisos; no se reemplazó el logo anterior.')).finally(()=>{locked.current=false;setBusy(false)})}}/></label>
-      <p>El logo se conserva en almacenamiento privado. El arte oficial ByteTorque no se modifica.</p></section>
+      <label>Logo propio (PNG o JPEG, máximo 2 MiB)<input type="file" accept="image/png,image/jpeg" disabled /></label>
+      <p>Logo privado pendiente de habilitación del respaldo. Los nuevos documentos usan los datos comerciales guardados; los históricos se conservan.</p></section>
     {import.meta.env.VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED==='true' && 
     <section className="dashboard-card"><h2>Plantilla PDF de cotizaciones</h2>
       <p>El formato oficial premium de ByteTorque viene incluido. Plus y Full pueden usar una hoja base PDF A4 privada de su propio taller, dejando libres las zonas donde se imprimen cliente, vehículo, partidas y totales. No se aceptan PDF con datos de clientes reales.</p>

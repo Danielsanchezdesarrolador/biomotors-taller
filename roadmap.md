@@ -1,3 +1,19 @@
+## 26/11/2026 — BT-PLAN-04BC, delta de revocación
+
+Corrección focalizada sobre `5dff5465e46b2903ddabaef4505cefb1c6be0131`: licencia Full vigente y sincronizada comprobada en las escrituras del piloto desde servidor, además del rollout. Revocación con taller todavía habilitado bloquea Agenda/CP05/FLOW/archivo sin borrar históricos ni miembros y conserva lectura autorizada de originales. [Checkpoint del delta](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_REVOCACION_20261126.md). 25 comprobaciones focalizadas; sin repetir 122 unitarias, 51 SQL ni visuales completos.
+
+Solo delta por DTK-ERR-056 a revisión privada, con migración incremental candidata posterior a las cuatro anteriores. No push oficial, SQL alojado ni cambios productivos. Identidad visual, contratos base CP03/CP04 y piloto legacy QA conservados. SEC07 cerrado, correo y Auto-Deploy OFF; logos/bucket y FLOW-UX-01-R2 siguen pausados. Esta nota corrige exclusivamente la relación licencia/autorización operativa de la entrega inicial.
+
+---
+
+## 26/11/2026 — BT-PLAN-04BC-PILOTO-01, candidato consolidado privado
+
+Alta de taller/licencia Full permanente y equipo 04B/04C reutilizados; autorización operativa por taller desde servidor en lugar de UUID QA; perfil comercial textual para nuevas emisiones compatible con FLOW-FIX-01 y Agenda. Logo/bucket y plantillas propias OFF hasta confirmar recuperación segura en S5B. 122 unitarias pertinentes, 51 SQL aisladas, navegador 1440/390, TypeScript, builds y paquete Edge offline PASS. Incidencias de fixtures/selectores registradas, sin repetir suites históricas ni respaldos. [Checkpoint consolidado](docs/checkpoints/CHECKPOINT_BT_PLAN_04BC_PILOTO_01_20261126.md).
+
+Base `6f63bbdea12dbfa73b24eec43c055bbbcddb50a3`, única rama local main; entrega solo por DTK-ERR-056 a revisión privada. Sin push oficial, cambios en Supabase/Render, SQL alojado, cuentas/licencias reales, pagos, correo o despliegues. Integración, MFA real, alta de Ignacio y activación puntual de BIOMOTORS requieren autorizaciones posteriores del orden documentado. SEC07 cerrado, FLOW-FIX-01 LIVE conservado, Auto-Deploy OFF y FLOW-UX-01-R2 pausado. Las entradas siguientes son historia.
+
+---
+
 ## 26/11/2026 — BT-FLOW-FIX-01 LIVE y aceptación del propietario
 
 Cierre autorizado. Edge CP05 v9 y Final Archive v7 ACTIVE, JWT conservado, workflow manual 45855550767 SUCCESS. Migración 20261126160911 bt_flow_fix_01_text_validation aplicada, preflight 16/16 y verificación 8/8 cuerpos y 8/8 CHECKs, fingerprint de seguridad sin cambios; 11 objetos privados presentes. Render dep-dc45jrd9el5s73a9pjf0 LIVE en 04d922c9961cbd4fee23572a81e2efe6ecd6e4de. El propietario aprobó la etapa y aportó captura del borrador multipunto visible; las otras dos mejoras no tienen comprobación humana individual aportada. Aceptación general registrada sin atribuir evidencia inexistente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_FLOW_FIX_01_20261126.md). SEC07 permanece cerrado.

@@ -10,9 +10,9 @@ export function confirmedStage(e:Evidence):number {
  if(!e.handover)return 6
  return 7
 }
-export function canOpen(context:{role:string;workshop:{id:string;status?:string}}){
- // Existing approved pilot scope only. Global build gates never authorize another tenant.
- return context.workshop.status==='active'&&['owner','admin'].includes(context.role)&&context.workshop.id==='c943ad51-6d90-447b-8aa7-68866f69a4bc'
+export function canOpen(context:{role:string;workshop:{id:string;status?:string};operationsEnabled?:boolean}){
+ // The capability is bound to the verified Auth scope; SQL still authorizes every operation.
+ return context.workshop.status==='active'&&['owner','admin'].includes(context.role)&&context.operationsEnabled===true
 }
 
 /** Future adapter contract only: no public registration or automatic writes.

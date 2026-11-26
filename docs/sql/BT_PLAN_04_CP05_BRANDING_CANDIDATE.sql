@@ -1,6 +1,19 @@
--- CANDIDATE after PLAN04B + CP05 installed. Preserves existing archived revisions.
+-- CANDIDATE ONLY after PLAN04B and LIVE FLOW-FIX-01. No Storage activation.
+-- Only future issue requests snapshot commercial text. Historical revisions and retries unchanged.
+-- Logo/template buckets deliberately excluded pending separate safe recovery confirmation.
 BEGIN;
-CREATE OR REPLACE FUNCTION bt_cp05_private.prepare_issue(wid uuid,qid uuid,expected bigint,rid uuid,actor uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+DO $guard$ BEGIN
+ IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='bt_cp05_private.prepare_issue_before_agenda(uuid,uuid,bigint,uuid,uuid)'::regprocedure)
+    IS DISTINCT FROM '4e72581761dadd9837be2465bf4dc555' THEN
+  RAISE EXCEPTION 'PLAN04_CP05_BASE_DRIFT' USING ERRCODE='55000';
+ END IF;
+END $guard$;
+CREATE OR REPLACE FUNCTION bt_cp05_private.prepare_issue_before_agenda(wid uuid, qid uuid, expected bigint, rid uuid, actor uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog'
+AS $function$
 DECLARE q public.quotes;req bt_cp05_private.issue_requests;snapshot jsonb;lines jsonb;net bigint;rev integer;
 BEGIN
  PERFORM bt_cp05_private.authorize(wid,actor,true);
@@ -12,11 +25,11 @@ BEGIN
   RETURN jsonb_build_object('request_id',rid,'revision',req.revision,'payload',req.payload,'payload_sha256',req.payload_sha256);
  END IF;
  IF q.version<>expected THEN RAISE EXCEPTION 'CP05_CONFLICT' USING ERRCODE='40001'; END IF;
- IF q.status<>'draft' OR q.issue_pending OR char_length(btrim(q.terms))<3 THEN RAISE EXCEPTION 'CP05_NOT_READY' USING ERRCODE='55000'; END IF;
+ IF q.status<>'draft' OR q.issue_pending THEN RAISE EXCEPTION 'CP05_NOT_READY' USING ERRCODE='55000'; END IF;
  SELECT jsonb_agg(to_jsonb(i) ORDER BY i.position),sum(i.line_net) INTO lines,net FROM public.quote_items i WHERE workshop_id=wid AND quote_id=qid;
  IF lines IS NULL THEN RAISE EXCEPTION 'CP05_ITEMS_REQUIRED' USING ERRCODE='22023'; END IF;
  rev:=q.issued_revision+1;
- SELECT jsonb_build_object('quote',to_jsonb(q)||jsonb_build_object('status','issued','revision',rev),'workshop',jsonb_build_object('id',w.id,'name',w.name,'logoPath',p.logo_path,'templatePath',p.quote_template_path,'contactEmail',p.contact_email,'phone',p.phone,'address',p.address),
+ SELECT jsonb_build_object('quote',to_jsonb(q)||jsonb_build_object('status','issued','revision',rev),'workshop',jsonb_build_object('id',w.id,'name',coalesce(p.commercial_name,w.name),'contactEmail',coalesce(p.contact_email,''),'phone',coalesce(p.phone,''),'address',coalesce(p.address,'')),
  'customer',jsonb_build_object('id',c.id,'full_name',c.full_name,'email',c.email,'mobile_e164',c.mobile_e164),
  'vehicle',jsonb_build_object('id',v.id,'plate',v.plate,'make',v.make,'model',v.model,'model_year',v.model_year),
  'order',jsonb_build_object('id',o.id,'complaint',o.complaint,'opened_at',o.opened_at,'intake_odometer',o.intake_odometer),
@@ -30,6 +43,6 @@ BEGIN
  INSERT INTO bt_cp05_private.issue_requests(workshop_id,request_id,quote_id,expected_version,revision,actor_id,payload,payload_sha256) VALUES(wid,rid,qid,expected,rev,actor,snapshot,bt_cp05_private.hash(snapshot));
  UPDATE public.quotes SET issue_pending=true WHERE workshop_id=wid AND id=qid;
  RETURN jsonb_build_object('request_id',rid,'revision',rev,'payload',snapshot,'payload_sha256',bt_cp05_private.hash(snapshot));
-END $$;
-
+END $function$
+;
 COMMIT;

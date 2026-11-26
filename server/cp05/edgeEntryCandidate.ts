@@ -31,6 +31,7 @@ Deno.serve(
       archiveApproved,
       emailApproved,
       pilotWorkshopId,
+      serverWorkshopAccess: true,
       allowedOrigin:
         Deno.env.get('BT_CP05_ALLOWED_ORIGIN') || 'https://bytetorque.cl'
     },

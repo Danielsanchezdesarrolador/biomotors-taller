@@ -10,6 +10,7 @@ export type DocumentPolicy = {
   emailApproved: boolean
   allowedOrigin: string
   pilotWorkshopId: string
+  serverWorkshopAccess?: boolean
 }
 export type DocumentDependencies = {
   userClient: (authorization: string) => SupabaseClient
@@ -59,8 +60,8 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
       if (!policy.archiveApproved || (action === 'send' && !policy.emailApproved))
         return reply({ error: 'SERVICE_DISABLED' }, 503)
       // Pilot allowlist is server-owned. An unset or mismatched workshop fails closed.
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(policy.pilotWorkshopId) ||
-          body.workshopId !== policy.pilotWorkshopId)
+      if (!policy.serverWorkshopAccess && (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(policy.pilotWorkshopId) ||
+          body.workshopId !== policy.pilotWorkshopId))
         return reply({ error: 'SERVICE_DISABLED' }, 503)
       const authorization = request.headers.get('authorization') || ''
       if (!/^Bearer [^\s]+$/.test(authorization)) return reply({ error: 'SESSION_REQUIRED' }, 401)
@@ -97,6 +98,12 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
         (action !== 'download' && !['owner', 'admin', 'reception'].includes(m.role))
       )
         return reply({ error: 'ACCESS_DENIED' }, 403)
+      if (policy.serverWorkshopAccess) {
+        const access = await userClient.rpc('bt_plan04_operations_status', {p_workshop_id:wid})
+        const permitted = action === 'download' ? access.data?.documentsEnabled : access.data?.operationsEnabled
+        if (access.error || access.data?.workshopId !== wid || permitted !== true)
+          return reply({error:'SERVICE_DISABLED'},503)
+      }
       const trusted = deps.trustedClient()
       if (action === 'download') {
         const rid = quoteId(String(body.revisionId || ''))
