@@ -24,9 +24,12 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Preparar pruebas
         run: |
-          npm install --no-audit --no-fund
-          npm install --no-save --no-package-lock playwright
-          npx playwright install --with-deps chromium webkit
+          # Respect the committed application lock; browser tooling must not re-resolve it.
+          npm ci --no-audit --no-fund
+          npm install --prefix "$RUNNER_TEMP/bt-oficial-playwright" --no-save --no-package-lock --no-audit --no-fund playwright
+          ln -s "$RUNNER_TEMP/bt-oficial-playwright/node_modules/playwright" node_modules/playwright
+          node -e 'const locked=require("./package-lock.json").packages["node_modules/vite"].version; const installed=require("vite/package.json").version; if(locked!==installed) throw Error("Vite lock mismatch"); console.log("BT_CI_VITE_LOCK: "+installed)'
+          node "$RUNNER_TEMP/bt-oficial-playwright/node_modules/playwright/cli.js" install --with-deps chromium webkit
       - name: Comprobar tipos, modelos y bundle público
         run: |
           npm run typecheck
@@ -37,14 +40,16 @@ jobs:
         run: |
           npm run preview -- --port 5173 --strictPort > /tmp/bt-oficial-preview.log 2>&1 &
           npm run dev:harness -- --port 5177 --strictPort > /tmp/bt-auth-harness.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
-            sleep 1
-          done
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5177/ > /dev/null; then break; fi
-            sleep 1
-          done
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5173/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5173"
+            cat /tmp/bt-oficial-preview.log
+            exit 1
+          fi
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5177/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5177"
+            cat /tmp/bt-auth-harness.log
+            exit 1
+          fi
           node scripts/verify-official-ui.cjs
           node scripts/verify-auth-ui.cjs
           node scripts/verify-auth-r1-ui.cjs
@@ -57,10 +62,11 @@ jobs:
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp04-design-build
           node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-cp04-design-build --port 5179 --strictPort > /tmp/bt-cp04-design.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5179/ > /dev/null; then break; fi
-            sleep 1
-          done
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5179/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5179"
+            cat /tmp/bt-cp04-design.log
+            exit 1
+          fi
           CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-cp04-redesign.cjs
       - name: BT-PILOT-QA-04B · F01–F06 en navegador con HTTP sintético, sin datos alojados
         run: CP04_BASE_URL=http://127.0.0.1:5179 node scripts/verify-pilot-qa04b.cjs
@@ -68,18 +74,20 @@ jobs:
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_BT_CP05_PRIVATE_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_build_only node node_modules/vite/bin/vite.js build --outDir /tmp/bt-cp05-mobile-build
           node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-cp05-mobile-build --port 5181 --strictPort > /tmp/bt-cp05-mobile.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5181/ > /dev/null; then break; fi
-            sleep 1
-          done
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5181/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5181"
+            cat /tmp/bt-cp05-mobile.log
+            exit 1
+          fi
           CP04_BASE_URL=http://127.0.0.1:5181 OUTPUT_DIR=artifacts/cp05-mobile node scripts/verify-cp05-browser.cjs
       - name: UX persistente · Sesión, navegación y formularios con HTTP simulado
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_BT_CP03_PRIVATE_ENABLED=true VITE_BT_CP04_PRIVATE_ENABLED=true VITE_BT_CP05_PRIVATE_ENABLED=true VITE_BT_CP06_PRIVATE_ENABLED=true npm run dev:harness -- --host 127.0.0.1 --port 5183 --strictPort > /tmp/bt-ux-persist.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5183/ > /dev/null; then break; fi
-            sleep 1
-          done
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5183/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5183"
+            cat /tmp/bt-ux-persist.log
+            exit 1
+          fi
           CP04_BASE_URL=http://127.0.0.1:5183 node scripts/verify-ux-persist.cjs
           BT_UX_BROWSER=webkit CP04_BASE_URL=http://127.0.0.1:5183 OUTPUT_DIR=artifacts/bt-ux-persist-webkit node scripts/verify-ux-persist.cjs
       - name: R2-A6-10 · Prueba WebKit Linux (NO Safari físico)
@@ -91,10 +99,11 @@ jobs:
         run: |
           VITE_BT_AUTH_R1_ENABLED=true VITE_SUPABASE_URL=https://suxcqqnmcjoezfxltoms.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_local_build_mock node node_modules/vite/bin/vite.js build --outDir /tmp/bt-auth-r1-enabled
           node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --outDir /tmp/bt-auth-r1-enabled --port 5178 --strictPort > /tmp/bt-auth-enabled.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:5178/ > /dev/null; then break; fi
-            sleep 1
-          done
+          if ! curl -fsS --retry 29 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:5178/ > /dev/null; then
+            echo "BT_CI_PREVIEW_NOT_READY: 5178"
+            cat /tmp/bt-auth-enabled.log
+            exit 1
+          fi
           AUTH_R1_BASE_URL=http://127.0.0.1:5178 AUTH_R1_ENTRY_PATH=/acceso OUTPUT_DIR=artifacts/bt-auth-01b-r1-production-mock node scripts/verify-auth-r1-ui.cjs
       - uses: actions/upload-artifact@v4
         if: always()
