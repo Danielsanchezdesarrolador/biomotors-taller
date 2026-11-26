@@ -26,6 +26,7 @@ try{for(const width of [1440,390]){
   if(path==='/rest/v1/workshop_memberships'){const w=url.searchParams.get('workshop_id');const rows=members.filter(m=>!w||w==='eq.'+m.workshop_id);return reply(req.headers().accept?.includes('vnd.pgrst.object')?rows[0]??null:rows)}
   if(path==='/rest/v1/workshops'){const all=[oldWorkshop,...created?[{id:own,name:'Mi taller Full sintético',status:'active'}]:[]];const w=url.searchParams.get('id');const rows=all.filter(v=>!w||w.startsWith('in.')||w==='eq.'+v.id);return reply(req.headers().accept?.includes('vnd.pgrst.object')?rows[0]??null:rows)}
   if(path.startsWith('/rest/v1/rpc/'))assert.equal(req.method(),'POST')
+  if(path==='/rest/v1/rpc/bt_plan04_pending_invitations'){assert.deepEqual(args,{});return reply([])}
   if(path==='/rest/v1/rpc/bt_creator_is_creator')return reply(true)
   if(path==='/rest/v1/rpc/bt_plan04_operations_status'){assert.ok([old,own].includes(args.p_workshop_id));return reply({workshopId:args.p_workshop_id,operationsEnabled:false,documentsEnabled:false})}
   if(path==='/rest/v1/rpc/bt_plan04_my_status'){
