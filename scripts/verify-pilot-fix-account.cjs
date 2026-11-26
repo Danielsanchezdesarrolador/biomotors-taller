@@ -62,7 +62,7 @@ try{for(const width of [1440,390]){
  await nav(4);await p.getByRole('heading',{name:'Usuarios y permisos',exact:true}).waitFor()
  await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).click();await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).waitFor();assert.deepEqual(teamMutations,['reactivate'])
  await p.screenshot({path:out+'/settings-reactivated-'+width+'.png',fullPage:true})
- await p.reload();await p.getByRole('heading',{name:'Usuarios y permisos',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:/Taller piloto Full/}).count(),0);assert.equal(await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).count(),1)
+ await p.reload();await p.getByRole('heading',{name:'Usuarios y permisos',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:/Taller piloto Full/}).count(),0);await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).count(),1)
  await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).click();await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).waitFor()
  capacity=0;await p.reload();await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).isDisabled(),true)
  await p.getByRole('button',{name:'Volver al inicio',exact:true}).click();await p.locator('.official-panel').first().waitFor()

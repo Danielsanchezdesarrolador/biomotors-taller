@@ -57,3 +57,7 @@ Consultado: AGENTS.md, agent.md, roadmap.md, CHECKPOINT_BT_PILOTO_QA_REAL_202611
 ## Ajuste focalizado de CI tras integración
 
 CI del commit 6543d2bbbafe5ae711987d7b8726f22e5ed7d5e0: el job Web/iOS PWA falló por expectativa del texto anterior `Acceso seguro · Supabase Auth`; el verificador de cuenta personal LIVE-FIX-01 no reconocía la nueva RPC de lectura de invitaciones pendientes. Se actualizan únicamente la expectativa de texto (manteniendo comprobación de aviso de autorización, sin marca de proveedor) y el fixture sintético (POST y argumentos vacíos, respuesta sin invitaciones, sin permitir otros endpoints). Las fuentes productivas y SQL del candidato permanecen sin cambios. El servidor focalizado y Android aprobaron en primera CI; los demás resultados están pendientes de comprobación. No autoriza instalación/despliegue hasta CI válida. Auto-Deploy OFF; SEC07 cerrado.
+
+### WebKit focalizado: sincronización del verificador
+
+Run 45905398872: servidor y Chromium SUCCESS; WebKit pasó typecheck, builds público/privado, boundaries, inspection-quote-browser y mileage-save-browser; cuenta 1440 PASS, cuenta móvil falló en count del botón Desactivar mecánico tras reload, antes de esperar la consulta de membresía (0 frente a 1). Se espera explícitamente el mismo botón antes de conservar la aserción count=1. Sin relajar permisos, sin modificar fuentes productivas ni SQL. Validación posterior pendiente. No instalar ni desplegar hasta CI aprobada.
