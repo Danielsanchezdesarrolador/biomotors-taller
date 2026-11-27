@@ -2,8 +2,8 @@ import {describe,it,expect,vi} from 'vitest'
 import {monthlySubtotal,billingHandler,hmacAdapter} from '../../server/billing/subscriptions'
 describe('Billing preparation, no real provider or charge',()=>{
  it('prices included and extra mechanics only against the license holder',()=>{
-  expect(monthlySubtotal('plus',5,1).subtotalCents).toBe(700)
-  expect(monthlySubtotal('full',9,1).subtotalCents).toBe(1700)
+  expect(monthlySubtotal('plus',3,1).subtotalCents).toBe(700)
+  expect(monthlySubtotal('full',5,1).subtotalCents).toBe(1700)
   expect(monthlySubtotal('full',2,0,true).subtotalCents).toBe(0)
   expect(()=>monthlySubtotal('plus',5,0)).toThrow('EXTRA_POLICY_REQUIRED')
  })

@@ -1,3 +1,4 @@
+import {CommercialFailure} from '../../src/plans/commercialErrors'
 import {hasCurrentProvisionalFindings} from '../../src/ordenes/cp04Autosave'
 import type {SupabaseClient} from '@supabase/supabase-js'
 import {meteredDocument,CommercialOperationNotCurrent} from './meteredDocument'
@@ -15,10 +16,10 @@ export function commercialDocumentHandler(deps:CommercialDocumentDependencies,or
   if(!request.headers.get('authorization')?.startsWith('Bearer '))throw Error('AUTHORIZATION_REQUIRED')
   let text='';let size=0;const reader=request.body?.getReader();if(!reader)throw Error('REQUEST_REQUIRED');const decoder=new TextDecoder();for(;;){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>64000){await reader.cancel();throw Error('REQUEST_TOO_LARGE')}text+=decoder.decode(chunk.value,{stream:true})}text+=decoder.decode();const body=JSON.parse(text),wid=quoteId(body.workshopId)
   const user=deps.user(request.headers.get('authorization')!),trusted=deps.trusted()
-  const identity=await user.auth.getUser();if(identity.error||!identity.data.user?.email_confirmed_at)throw Error('CONFIRMED_SESSION_REQUIRED')
+  const identity=await user.auth.getUser();if(identity.error||!identity.data.user?.email_confirmed_at)throw new CommercialFailure('session')
   const status=await user.rpc('bt_commercial_status',{p_workshop_id:wid});if(status.error||status.data?.workshopId!==wid)throw Error('TENANT_DENIED')
   const get=async(table:string,id:string)=>{const r=await user.from(table).select('*').eq('workshop_id',wid).eq('id',id).maybeSingle();if(r.error||r.data?.workshop_id!==wid||r.data?.id!==id)throw Error('RESOURCE_DENIED');return r.data}
-  if(body.action==='multipunto'&&status.data.inspectionEnabled!==true)throw Error('INSPECTION_PLAN_REQUIRED')
+  if(body.action==='multipunto'&&status.data.inspectionEnabled!==true)throw new CommercialFailure('plan')
   let bytes:Uint8Array
   if(body.action==='draft'){
    const q=await get('quotes',quoteId(body.quoteId)),[c,v,o,w]=await Promise.all([get('customers',q.customer_id),get('vehicles',q.vehicle_id),get('work_orders',q.order_id),user.from('workshops').select('id,name').eq('id',wid).single()])
@@ -38,5 +39,5 @@ export function commercialDocumentHandler(deps:CommercialDocumentDependencies,or
    bytes=await meteredDocument(user,trusted,{workshopId:wid,capability:'multipunto',resourceId:oid,requestId:quoteId(body.requestId),snapshotHash},async()=>{const assets=await deps.assets();return multipuntoPdf(source,assets.font,{light:assets.light,dark:assets.dark})})
   }else throw Error('ACTION_DENIED')
   return new Response(bytes.slice().buffer,{headers:{...headers,'Content-Type':'application/pdf','Content-Disposition':'inline'}})
- }catch(error){if(error instanceof CommercialOperationNotCurrent)return Response.json({error:'DOCUMENT_OPERATION_NOT_CURRENT'},{status:409,headers});return Response.json({error:'COMMERCIAL_DOCUMENT_DENIED'},{status:403,headers})}
+ }catch(error){if(error instanceof CommercialFailure){const code=error.reason==='quota'?'COMMERCIAL_QUOTA_EXHAUSTED':error.reason==='plan'?'PLAN_CAPABILITY_REQUIRED':error.reason==='session'?'SESSION_INVALID':'PERMISSION_DENIED';return Response.json({error:code},{status:error.reason==='quota'?429:error.reason==='session'?401:403,headers})}if(error instanceof CommercialOperationNotCurrent)return Response.json({error:'DOCUMENT_OPERATION_NOT_CURRENT'},{status:409,headers});return Response.json({error:'COMMERCIAL_DOCUMENT_DENIED'},{status:403,headers})}
 }}

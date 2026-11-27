@@ -1,3 +1,4 @@
+import {CommercialFailure,blockReason} from '../plans/commercialErrors'
 /**
  * BT-CP03-P2 · Candidate repository on real supabase-js Data API syntax.
  * NOT wired to Render, React, Android or an operational Supabase table.
@@ -22,6 +23,8 @@ const vehicleColumns =
   'workshop_id,id,customer_id,plate,plate_key,make,model,model_year,odometer_km,archived_at,updated_at,created_at'
 const writeRoles: readonly Role[] = ['owner', 'admin', 'reception']
 function failure(error: unknown): never {
+  if(error instanceof CommercialFailure)throw error
+  const reason=blockReason(error);if(reason)throw new CommercialFailure(reason)
   const code = (error as { code?: string } | null)?.code
   if (code === '23505') throw new DirectoryFailure('duplicate')
   if (code === '23503' || code === '23514' || code === '22P02')

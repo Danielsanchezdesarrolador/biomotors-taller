@@ -18,7 +18,7 @@ const input = (patch: Partial<MechanicSeatInput> = {}): MechanicSeatInput => ({
   workshopId,
   actor,
   targetRole: 'mechanic',
-  plan: 'basic',
+  plan: 'plus',
   memberships: [],
   invitations: [],
   nowIso: '2026-11-15T00:00:00.000Z',
@@ -26,22 +26,15 @@ const input = (patch: Partial<MechanicSeatInput> = {}): MechanicSeatInput => ({
 })
 describe('BT-AUTH-R2 · política pura de cupos (no prueba RLS ni backend)', () => {
   it('mantiene los cupos comerciales aprobados por taller', () => {
-    expect(mechanicSeatLimits).toEqual({ basic: 2, plus: 8, full: 8 })
+    expect(mechanicSeatLimits).toEqual({ basic: 0, plus: 2, full: 4 })
     expect(Object.isFrozen(mechanicSeatLimits)).toBe(true)
   })
-  it('Básico permite el segundo cupo y bloquea el tercero', () => {
-    expect(evaluateMechanicSeat(input({ memberships: [mechanic()] }))).toMatchObject({
-      allowed: true, limit: 2, occupied: 1
-    })
-    expect(evaluateMechanicSeat(input({ memberships: [mechanic(), mechanic()] }))).toMatchObject({
-      allowed: false, limit: 2, occupied: 2, reason: 'quota-full'
-    })
+  it('Básico no ofrece cupos aunque no haya mecánicos',()=>{
+    expect(evaluateMechanicSeat(input({plan:'basic'}))).toMatchObject({allowed:false,limit:0,reason:'quota-full'})
   })
-  it.each(['plus', 'full'] as const)('%s admite 8 y bloquea el noveno', (plan) => {
-    expect(evaluateMechanicSeat(input({ plan, memberships: Array(7).fill(mechanic()) })).allowed)
-      .toBe(true)
-    expect(evaluateMechanicSeat(input({ plan, memberships: Array(8).fill(mechanic()) })))
-      .toMatchObject({ allowed: false, occupied: 8, limit: 8 })
+  it.each([['plus',2],['full',4]] as const)('%s respeta el último cupo %s',(plan,limit)=>{
+    expect(evaluateMechanicSeat(input({plan,memberships:Array(limit-1).fill(mechanic())})).allowed).toBe(true)
+    expect(evaluateMechanicSeat(input({plan,memberships:Array(limit).fill(mechanic())}))).toMatchObject({allowed:false,occupied:limit,limit})
   })
   it('reserva cupos pendientes vigentes y libera invitaciones caducadas o revocadas', () => {
     expect(evaluateMechanicSeat(input({

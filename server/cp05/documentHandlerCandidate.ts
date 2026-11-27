@@ -1,3 +1,4 @@
+import {CommercialFailure} from '../../src/plans/commercialErrors'
 import {CommercialOperationNotCurrent} from '../commercial/meteredDocument'
 /** Undeployed HTTP boundary. No credentials, endpoint registration or environment activation. */
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -169,6 +170,7 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
       )
       return reply({ revision })
     } catch (error) {
+      if(error instanceof CommercialFailure){const code=error.reason==='quota'?'COMMERCIAL_QUOTA_EXHAUSTED':error.reason==='plan'?'PLAN_CAPABILITY_REQUIRED':error.reason==='session'?'SESSION_INVALID':'PERMISSION_DENIED';return reply({error:code},error.reason==='quota'?429:error.reason==='session'?401:403)}
       if(error instanceof CommercialOperationNotCurrent)return reply({error:'DOCUMENT_OPERATION_NOT_CURRENT'},409)
       // Deliberately sanitized; no SQL, customer details, provider response or token in errors.
       const message = error instanceof Error ? error.message : ''

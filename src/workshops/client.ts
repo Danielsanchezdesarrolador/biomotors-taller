@@ -1,3 +1,4 @@
+import {CommercialFailure,blockReason} from '../plans/commercialErrors'
 import type { AuthController } from '../auth/controller'
 export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export type Team = { workshopId:string; active:number; pending:number; capacity:number; overCapacity:boolean;
@@ -14,9 +15,10 @@ export function parseTeam(value:unknown, workshopId:string):Team {
 export async function workshopRpc(controller:AuthController,name:string,args:Record<string,unknown>={}) {
   const before=controller.getSnapshot()
   const client=await controller.personalPlanClient()
-  if(!client || before!==controller.getSnapshot()) throw Error('SESSION_CHANGED')
+  if(!client || before!==controller.getSnapshot())throw new CommercialFailure('session')
   const result=await client.rpc(name,args)
-  if(before!==controller.getSnapshot() || result.error) throw Error('REQUEST_FAILED')
+  if(before!==controller.getSnapshot())throw new CommercialFailure('session')
+  if(result.error)throw new CommercialFailure(blockReason(result.error)??(result.error.code==='42501'?'permission':'connection'))
   return result.data as unknown
 }
 export function requestIdentity() {

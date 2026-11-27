@@ -1,3 +1,5 @@
+import {BasicInspectionPromotion} from '../workshops/commercialPresentation'
+import {blockMessages} from '../plans/commercialErrors'
 import {parseKilometres} from '../clientes/kilometres'
 /**
  * ByteTorque CP04 real-data interface, pending separate hosted SQL approval.
@@ -871,7 +873,8 @@ export function Cp04OrdersView({
             </button>
           )}
           <div className="cp04-checklist-launch">
-            <button
+            {context.inspectionEnabled===false&&<BasicInspectionPromotion/>}
+              <button
               type="button"
               className="cp04-primary"
               disabled={loading || busy}
@@ -930,6 +933,7 @@ export function Cp04OrdersView({
           </div>
           <div className="cp04-workspace-content">
           <div ref={multipuntoSection} role="tabpanel" data-detail-tab="inspection" onScroll={e=>rememberPanel('inspection',e.currentTarget)} id={tabId+'-panel-inspection'} aria-labelledby={tabId+'-tab-inspection'} hidden={detailTab!=='inspection'} tabIndex={0} className="cp04-tab-content cp04-multipunto-anchor">
+              {['ready','closed'].includes(selected.order.status)&&<p role="status">{blockMessages.readonly}</p>}
               <Cp04MultipuntoChecklist
                 key={selected.order.id}
                 repository={repository}
@@ -953,7 +957,7 @@ export function Cp04OrdersView({
 
           </div>
           <div role="tabpanel" data-detail-tab="summary" onScroll={e=>rememberPanel('summary',e.currentTarget)} id={tabId+'-panel-summary'} aria-labelledby={tabId+'-tab-summary'} hidden={detailTab!=='summary'} tabIndex={0} className="cp04-tab-content">
-            <h3>Diagnóstico vigente de esta visita</h3>
+            {['ready','closed'].includes(selected.order.status)&&<p role="status">{blockMessages.readonly}</p>}<h3>Diagnóstico vigente de esta visita</h3>
             <p className="cp04-info">Una marca por componente. Cambiar a OK no certifica una reparación; limpiar una X significa Sin revisar. Los registros anteriores se conservan en el historial.</p>
             <div className="cp04-current-groups">
               {categories.map(group=><section key={group.id} aria-label={group.name}>

@@ -13,7 +13,7 @@ const jwt=()=>Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'
   const page=await browser.newPage({viewport:{width,height:940}}),errors=[],unexpected=[]
   let plan='basic',member=false,pending=0,role='owner'
   let profile={workshopId:wid,name:'Taller sintético',email:'',phone:'',address:'',logoPath:null}
-  const team=()=>({workshopId:wid,active:0,pending,capacity:8,overCapacity:false,members:[],invites:pending?[{id:'00000000-0000-4000-8000-000000000099',email:'mechanic@invalid.test',expiresAt:'2035-01-01'}]:[]})
+  const team=()=>({workshopId:wid,active:0,pending,capacity:4,overCapacity:false,members:[],invites:pending?[{id:'00000000-0000-4000-8000-000000000099',email:'mechanic@invalid.test',expiresAt:'2035-01-01'}]:[]})
   page.on('pageerror',e=>errors.push(e.message))
   await page.route('**/*',async route=>{
    const request=route.request(),url=new URL(request.url())

@@ -12,7 +12,7 @@ try{for(const [name,plan,width,tab,owned] of cases.filter(c=>!process.env.BT_COM
  const user={id:uid,aud:'authenticated',email:'owner@invalid.test',email_confirmed_at:'2026-11-26T00:00:00Z',user_metadata:{full_name:'Propietario sintético'},factors:[]}
  let profile={workshopId:wid,name:'Taller sintético',email:'workshop@invalid.test',phone:'',address:'Santiago · datos sintéticos',logoPath:null}
  const members=[{id:id(81),name:'Mecánico sintético A',email:'mechanic-a@invalid.test',status:'active'},{id:id(82),name:'Mecánico sintético B',email:'mechanic-b@invalid.test',status:'active'},{id:id(83),name:'Mecánico sintético C',email:'mechanic-c@invalid.test',status:'disabled'}]
- const capacity=plan==='full'?8:plan==='plus'?4:0
+ const capacity=plan==='full'?4:plan==='plus'?2:0
  const status=()=>({workshopId:wid,plan,periodStart:'2026-11-23T03:00:00Z',periodEnd:'2026-11-30T03:00:00Z',customers:2,customerLimit:plan==='basic'?5:null,ownedWorkshops:owned?1:0,inspectionEnabled:plan!=='basic',logoUploadEnabled:false,emailServiceEnabled:false,usage:Object.fromEntries(['quote','email','multipunto'].map((k,i)=>[k,{used:plan==='plus'?[4,3,2][i]:plan==='basic'&&k==='quote'?1:0,reserved:0,limit:plan==='full'?null:plan==='plus'?10:k==='quote'?1:0}]))})
  await p.route('**/*',async route=>{const req=route.request(),url=new URL(req.url()),path=url.pathname;if(url.origin===new URL(base).origin)return route.continue();if(url.origin!==api){unexpected.push(url.origin);return route.abort()}
  const args=req.postData()?req.postDataJSON():{},reply=(value,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(value)})
@@ -39,7 +39,7 @@ try{for(const [name,plan,width,tab,owned] of cases.filter(c=>!process.env.BT_COM
  await navigateSection(p,'mitaller');await p.getByRole('heading',{name:'Mi taller',exact:true}).waitFor();await p.getByLabel('Nombre comercial',{exact:true}).waitFor();await p.waitForFunction(()=>!document.querySelector('.commercial-profile-form input')?.disabled)
  const tabs={commercial:'Información comercial',team:'Mi equipo',plan:'Plan y beneficios',documents:'Documentos e identidad'}
  await p.getByRole('tab',{name:tabs[tab],exact:true}).click();if(tab==='plan')await p.getByRole('heading',{name:'Plan y beneficios',exact:true}).waitFor()
- if(!owned){await p.getByRole('heading',{name:'Desbloquea tu propio taller',exact:true}).waitFor();await p.getByRole('button',{name:'Elegir Plus',exact:true}).first().click();await p.getByText(/No se ha realizado ningún cobro/).waitFor();assert.equal(mutations.length,0)}
+ if(!owned){await p.getByRole('heading',{name:'Conoce los planes ByteTorque',exact:true}).first().waitFor();assert.equal(await p.getByRole('button',{name:/Elegir|Contratar/}).count(),0);assert.equal(mutations.length,0)}
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Horizontal overflow')
  await p.screenshot({path:out+'/'+name+'.png',fullPage:true})
  if(name==='01_full_escritorio'||name==='05_full_movil'){

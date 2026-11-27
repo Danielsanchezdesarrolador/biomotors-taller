@@ -1,0 +1,129 @@
+name: BT-COMMERCIAL-PLANS-01 focused CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt-commercial-plans-focused.yml'
+      - 'docs/sql/BT_COMMERCIAL_PLANS_01_*.sql'
+      - 'scripts/security/verify-commercial-plans-local.sh'
+      - 'tests/commercialPlansLab.ts'
+      - 'src/plans/commercial*.ts'
+      - 'src/workshops/**'
+      - 'src/auth/mechanicInvitationPolicy*'
+      - 'src/access/accessContract.ts'
+      - 'src/access/access.test.tsx'
+      - 'server/billing/subscriptions.ts'
+      - 'src/expedientes/**'
+      - 'src/cp05/documentClient.ts'
+      - 'src/cp05/browserDocument.ts'
+      - 'src/ordenes/cp04Repository.ts'
+      - 'src/auth/documentAccess.ts'
+      - 'src/documents/**'
+      - 'server/commercial/**'
+      - 'server/com/**'
+      - 'server/cp05/**'
+      - 'scripts/verify-commercial-plans*'
+      - 'scripts/verify-archive-commercial-delta.*'
+      - 'tests/harness/ArchiveCommercialDeltaFixture.tsx'
+      - 'tests/harness/archive-commercial-delta.html'
+      - 'scripts/package-commercial-handlers.mjs'
+      - 'scripts/verify-commercial-handlers-package.mjs'
+      - 'scripts/verify-official-bundle.mjs'
+      - 'vite*.ts'
+      - 'package*.json'
+permissions:
+  contents: read
+jobs:
+  server-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: New and affected unit HTTP contracts, including real historical repository
+        run: >-
+          npx vitest run
+          src/workshops/commercialPlans.test.tsx
+          src/workshops/commercialPlansHttp.test.ts
+          src/workshops/client.test.ts
+          src/auth/mechanicInvitationPolicy.test.ts
+          src/workshops/billing.test.ts
+          src/access/access.test.tsx
+          src/expedientes/archiveCommercialDelta.test.ts
+      - name: Prepare PostgreSQL 17 in CI only
+        run: docker pull postgres:17
+      - name: Real SQL 0/2/4, pending seats, last-seat concurrency and rollback
+        env:
+          BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-plans-ci-sql
+        run: bash scripts/security/verify-commercial-plans-local.sh
+      - name: Independently authorized workshop isolation
+        env:
+          BT_COMMERCIAL_PLANS_FOCUS: isolation
+          BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-plans-ci-isolation
+        run: bash scripts/security/verify-commercial-plans-local.sh
+      - name: Reproduce and validate three offline document handlers
+        run: |
+          node scripts/package-commercial-handlers.mjs /tmp/bt-plans-ci-packages-a
+          node scripts/package-commercial-handlers.mjs /tmp/bt-plans-ci-packages-b
+          node scripts/verify-commercial-handlers-package.mjs /tmp/bt-plans-ci-packages-a /tmp/bt-plans-ci-packages-b
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Native Deno checks only, no deployment
+        run: |
+          for kind in ready freeze; do
+            for service in bt-cp05-documents bt-final-archive bt-commercial-documents; do
+              deno check --no-lock "/tmp/bt-plans-ci-packages-a/$kind/supabase/functions/$service/index.js"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commercial-plans-contract-evidence
+          path: |
+            /tmp/bt-plans-ci-sql/*.json
+            /tmp/bt-plans-ci-sql/*.log
+            /tmp/bt-plans-ci-isolation/*.json
+            /tmp/bt-plans-ci-isolation/*.log
+            /tmp/bt-plans-ci-packages-a/release-manifest.json
+            /tmp/bt-commercial-delta-evidence/package-results.json
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    env:
+      BT_COMMERCIAL_BROWSER: ${{ matrix.engine }}
+      BT_COMMERCIAL_EVIDENCE_DIR: /tmp/bt-plans-ci-ui
+      OUTPUT_DIR: /tmp/bt-plans-ci-archive
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Isolated browser dependencies in official CI only
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-plans-playwright" --no-save --no-package-lock --no-audit --no-fund playwright@1.65.1
+          "$RUNNER_TEMP/bt-plans-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-plans-playwright/node_modules" >> "$GITHUB_ENV"
+      - name: Commercial plan UI and private build boundary
+        run: python3 scripts/verify-commercial-plans-ui.py
+      - name: Historical download errors, real repository panel and Blob cleanup
+        run: python3 scripts/verify-archive-commercial-delta.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commercial-plans-${{ matrix.engine }}
+          path: |
+            /tmp/bt-plans-ci-ui/
+            /tmp/bt-plans-ci-archive/

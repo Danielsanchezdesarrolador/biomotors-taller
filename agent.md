@@ -1,3 +1,15 @@
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01-DELTA-01 / REVISIÓN Y CI PENDIENTES
+
+Revisión B PASS parcial: se corrige regresión de clasificación de descarga histórica y limpieza ante CommercialFailure. Base exclusiva f55b8f890c6648cad355d89d89a9fac0f5b5ac80. Se conservan404/409integridad/503 y renovación409 explícita;401/403 de autoridad limpian datos/visor/URLs y generaciones. Workflow nuevo SQL0/2/4, unitarias/HTTP, Chromium/WebKit, TypeScript y paquetes, sin cambios a workflows históricos ni SQL. Local20 unitarias +15 Chromium +7 paquetes PASS; no repetición de84 anteriores. WebKit BLOCKED_ENVIRONMENT, CI/Deno pendientes, no ejecución oficial. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_DELTA_01_20261127.md), [informe](docs/BT_COMMERCIAL_PLANS_01_DELTA_01.md). Entrega privada DTK-ERR-056; sin push oficial, producción, GATE4, deploy, Auto-Deploy, SEC07 ni bloque C. No aceptación integral.
+
+---
+
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / BLOQUE B CANDIDATO
+
+Base oficial e7146903d8456f2b7601290fc7528f3eebf554cb verificada. Bloque B implementado para revisión: cupos servidor 0/2/4 con migración incremental y recuperación guardadas; propietario fuera del cupo, pending/concurrencia/exceso sin eliminar miembros. Tarjetas Básico/Plus/Full siempre visibles, precios 0/5/15, identidad R2, mensajes diferenciados y demo ficticia sin repositorios/exportación/cuota. Hardening, históricos y guardas preservados. [Contrato, instalación/recuperación y límites](docs/BT_COMMERCIAL_PLANS_01.md). [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_20261127.md). Entrega privada DTK-ERR-056, no contrato 0/2/4 activado en producción; revisión/CI/WebKit pendientes. Sin push oficial, SQL alojado, GATE4, Render/Edge, servicios o bloque C. Auto-Deploy OFF según continuidad; no modificado ni reconfigurado.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-CI-FIX-01 / CI_PENDING
 
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-LIVE-01 / ACEPTACIÓN FOCALIZADA PASS / BLOQUE B PROPUESTO

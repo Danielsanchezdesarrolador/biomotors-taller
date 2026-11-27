@@ -1,3 +1,4 @@
+import {commercialPlans} from '../plans/commercialContract'
 /**
  * ByteTorque BT-AUTH-R2 — pure policy for planning mechanic invitations.
  *
@@ -35,9 +36,9 @@ export type MechanicSeatResult = {
   reason: 'available' | 'invalid-context' | 'forbidden' | 'role-not-allowed' | 'quota-full'
 }
 export const mechanicSeatLimits: Readonly<Record<WorkshopPlan, number>> = Object.freeze({
-  basic: 2,
-  plus: 8,
-  full: 8
+  basic: commercialPlans.basic.mechanics,
+  plus: commercialPlans.plus.mechanics,
+  full: commercialPlans.full.mechanics
 })
 export function evaluateMechanicSeat(input: MechanicSeatInput): MechanicSeatResult {
   const { workshopId, actor, targetRole, plan, memberships, invitations, nowIso } = input

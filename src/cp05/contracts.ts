@@ -1,3 +1,4 @@
+import {CommercialFailure} from '../plans/commercialErrors'
 import { UUID } from '../clientes/cp03PilotContracts'
 import { calculateTotals } from '../ordenes/orderMoney'
 import { validateItem, type WorkItem } from '../informes/trabajos/workItemCore'
@@ -197,6 +198,7 @@ export function previewSnapshot(bundle: Bundle, draft: Draft): Snapshot {
   }
 }
 export function quoteMessage(error: unknown) {
+  if(error instanceof CommercialFailure)return error.message
   const kind = error instanceof QuoteFailure ? error.kind : 'unavailable'
   if (kind === 'read_pending') return 'Operación confirmada por el servidor. Falta recuperar la versión guardada; concilia la lectura sin volver a guardar.'
   if (kind === 'delivery_pending')

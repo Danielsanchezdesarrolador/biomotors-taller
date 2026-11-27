@@ -1,8 +1,9 @@
+import {commercialPlans} from '../../src/plans/commercialContract'
 /** Provider-neutral preparation. No checkout, card capture, email or provider call. */
 export type PaidPlan='plus'|'full'
 export function monthlySubtotal(plan:PaidPlan, mechanics:number, maxExtras:number, lifetimeGrant=false) {
  if(!['plus','full'].includes(plan)||!Number.isSafeInteger(mechanics)||mechanics<0||!Number.isSafeInteger(maxExtras)||maxExtras<0)throw Error('INVALID_PRICE_INPUT')
- const included=plan==='plus'?4:8,extras=Math.max(0,mechanics-included)
+ const included=commercialPlans[plan].mechanics,extras=Math.max(0,mechanics-included)
  if(extras>maxExtras)throw Error('EXTRA_POLICY_REQUIRED')
  const subtotalCents=(lifetimeGrant?0:plan==='plus'?500:1500)+extras*200
  if(!Number.isSafeInteger(subtotalCents))throw Error('INVALID_PRICE_INPUT')

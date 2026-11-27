@@ -1,3 +1,4 @@
+import {CommercialFailure} from '../../src/plans/commercialErrors'
 import {CommercialOperationNotCurrent} from '../commercial/meteredDocument'
 /** New endpoint candidate; no deployment/secret lookup. Every read checks the live session twice. */
 import type {SupabaseClient} from '@supabase/supabase-js'
@@ -41,7 +42,7 @@ export function finalArchiveHandler(policy:{read:boolean;write:boolean;origin:st
    const {bytes:pdf,doc}=await ports.download(wid,rid,body.kind as DocumentKind,downloadRequest)
    return new Response(pdf.slice().buffer,{headers:{...headers,'Content-Type':'application/pdf',
     'Content-Disposition':'attachment; filename="'+doc.fileName+'"','Content-Length':String(pdf.length)}})
-  }catch(error){
+  }catch(error){if(error instanceof CommercialFailure){const code=error.reason==='quota'?'COMMERCIAL_QUOTA_EXHAUSTED':error.reason==='plan'?'PLAN_CAPABILITY_REQUIRED':error.reason==='session'?'SESSION_INVALID':'PERMISSION_DENIED';return reply(code,error.reason==='quota'?429:error.reason==='session'?401:403)}
    if(error instanceof CommercialOperationNotCurrent)return reply('DOCUMENT_OPERATION_NOT_CURRENT',409)
    const kind=error instanceof ArchiveFailure?error.kind:'unavailable'
    return reply(kind.toUpperCase(),kind==='denied'?403:kind==='invalid'?400:kind==='disabled'?503:kind==='missing'?404:kind==='integrity'?409:500)

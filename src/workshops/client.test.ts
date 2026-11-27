@@ -3,7 +3,7 @@ import {parseTeam,requestIdentity,workshopRpc} from './client'
 import {AuthController,type AuthGateway} from '../auth/controller'
 describe('PLAN04 scoped RPCs and reservations (mock SDK)',()=>{
  it('rejects wrong-tenant and malformed team data',()=>{
-  const team={workshopId:'a',active:2,pending:0,capacity:8,overCapacity:false,members:[],invites:[]}
+  const team={workshopId:'a',active:2,pending:0,capacity:4,overCapacity:false,members:[],invites:[]}
   expect(parseTeam(team,'a').active).toBe(2)
   for(const value of [{...team,workshopId:'b'},{...team,capacity:-1},{...team,members:[{id:'x',name:'Owner',status:'owner'}]}])expect(()=>parseTeam(value,'a')).toThrow()
  })
@@ -20,6 +20,13 @@ describe('PLAN04 scoped RPCs and reservations (mock SDK)',()=>{
   const pending=workshopRpc(controller,'bt_plan04_team')
   for(let n=0;n<8;n++)await Promise.resolve()
   await controller.logout();resolve({data:{workshopId:'other'},error:null})
-  await expect(pending).rejects.toThrow('REQUEST_FAILED')
+  await expect(pending).rejects.toMatchObject({reason:'session'})
  })
+})
+
+it('classifies an unavailable scoped client as a session failure before sending any RPC',async()=>{
+ const snapshot={},personalPlanClient=vi.fn(async()=>null)
+ const controller={getSnapshot:()=>snapshot,personalPlanClient} as unknown as AuthController
+ await expect(workshopRpc(controller,'bt_plan04_team')).rejects.toMatchObject({reason:'session'})
+ expect(personalPlanClient).toHaveBeenCalledOnce()
 })

@@ -1,9 +1,10 @@
+import {CommercialPlanHelp} from '../workshops/commercialPresentation'
 import {documentFence,documentEpoch,subscribeDocuments,documentURL,revokeDocumentURL} from '../auth/documentAccess'
 import {DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
 import {useEffect,useRef,useState,useId,useSyncExternalStore} from 'react'
 import {Archive,ArrowLeft,Download,Eye,Search,RefreshCw} from 'lucide-react'
-import {ArchiveFailure,archiveMessage,type ArchiveRow,type ArchiveDocumentSet,type ArchivedDocument,type DocumentKind} from './contracts'
+import {ArchiveFailure,isArchiveAccessDenied,archiveMessage,type ArchiveRow,type ArchiveDocumentSet,type ArchivedDocument,type DocumentKind} from './contracts'
 import type {FinalArchivePort} from './repository'
 import '../clientes/cp03PilotDirectory.css'
 import './finalArchive.css'
@@ -22,23 +23,26 @@ export function FinalArchivePanel({repository,vehicleId,revisionId,fixedRow,orde
  useEffect(()=>{registerSave?.(async exit=>{if(loading||busy)return false;const row=selected??fixedRow;if(!row||!matches(row)){setError('No se pudo recuperar la revisión de esta visita.');return false}try{const saved=checked(row,await repository.documents(row.revisionId));if(exit||saved.complete)return true;if(!row.canArchive){setError('La entrega debe estar confirmada antes de archivar.');return false}return await archive(row)??false}catch(e){failed(e);return false}});return()=>registerSave?.(null)})
  function matches(row:ArchiveRow){return (!orderId||row.orderId===orderId)&&(!revisionId||row.revisionId===revisionId)&&(!vehicleId||row.vehicleId===vehicleId)&&(!guided||!!fixedRow&&row.orderId===fixedRow.orderId&&row.revisionId===fixedRow.revisionId&&row.workshopId===fixedRow.workshopId)}
  function checked(row:ArchiveRow,data:ArchiveDocumentSet){if(!matches(row)||data.workshopId!==row.workshopId||data.revisionId!==row.revisionId||data.quoteId!==row.quoteId||data.orderId!==row.orderId||data.vehicleId!==row.vehicleId||data.customerId!==row.customerId||data.revision!==row.revision)throw new ArchiveFailure('denied');return data}
+ const ownedURLs=useRef(new Set<string>())
+ function releaseURL(url:string){ownedURLs.current.delete(url);revokeDocumentURL(url)}
+ useEffect(()=>()=>{for(const url of ownedURLs.current)revokeDocumentURL(url);ownedURLs.current.clear()},[])
  const request=useRef({revisionId:'',id:''}),generation=useRef(0),alive=useRef(true),lock=useRef(false),dialog=useRef<HTMLDialogElement>(null),heading=useId()
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;generation.current++}},[repository])
  useEffect(()=>{let cancelled=false;const seq=++generation.current;setLoading(true);setPreview(null);setRows([]);setSelected(null);setDocuments([]);setError('')
   void (fixedRow&&!matches(fixedRow)?Promise.reject(new ArchiveFailure('denied')):fixedRow?repository.documents(fixedRow.revisionId).then(d=>{checked(fixedRow,d);return [{...fixedRow,complete:d.complete,canArchive:!d.complete&&fixedRow.canArchive}]}):repository.list(term,vehicleId,page)).then(data=>{if(!cancelled&&alive.current&&seq===generation.current)setRows(revisionId?data.filter(r=>r.revisionId===revisionId):data)}).catch(e=>{if(!cancelled&&alive.current&&seq===generation.current)failed(e)}).finally(()=>{if(!cancelled&&alive.current&&seq===generation.current)setLoading(false)})
   return()=>{cancelled=true}
  },[repository,vehicleId,revisionId,fixedRow,orderId,guided,term,page,refresh])
- useEffect(()=>{if(preview)dialog.current?.showModal();else dialog.current?.close();return()=>{if(preview)revokeDocumentURL(preview.url)}},[preview])
+ useEffect(()=>{if(preview)dialog.current?.showModal();else dialog.current?.close();return()=>{if(preview)releaseURL(preview.url)}},[preview])
  useEffect(()=>{if(!preview?.expiresAt)return;const timer=setTimeout(()=>{setPreview(null);setNotice('El visor se cerró por inactividad. Solicita de nuevo el documento para revalidar su autorización.')},Math.max(0,preview.expiresAt-Date.now()));return()=>clearTimeout(timer)},[preview])
- function failed(error:unknown){if(error instanceof DocumentOperationExpired){setPreview(null);setExpired(error);setError(error.message);return}if(error instanceof ArchiveFailure&&error.kind==='denied'){setRows([]);setSelected(null);setDocuments([]);setPreview(null)}setError(archiveMessage(error))}
+ function failed(error:unknown){setPreview(null);if(error instanceof DocumentOperationExpired){setExpired(error);setError(error.message);return}if(isArchiveAccessDenied(error)){generation.current++;setLoading(false);setRows([]);setSelected(null);setDocuments([]);setExpired(null);setNotice('');request.current={revisionId:'',id:''};for(const url of ownedURLs.current)revokeDocumentURL(url);ownedURLs.current.clear()}setError(archiveMessage(error))}
  async function open(row:ArchiveRow){if(lock.current)return;if(!matches(row)){failed(new ArchiveFailure('denied'));return}lock.current=true;setBusy(true);setError('');setDocuments([]);setSelected(row);const seq=++generation.current
   try{const data=checked(row,await repository.documents(row.revisionId));if(alive.current&&seq===generation.current){setDocuments(data.documents);setSelected({...row,complete:data.complete})}}
   catch(e){if(alive.current&&seq===generation.current)failed(e)}finally{lock.current=false;if(alive.current)setBusy(false)}
  }
  async function pdf(kind:DocumentKind,view:boolean){const fence=documentFence();if(!selected||lock.current)return;if(!matches(selected)){failed(new ArchiveFailure('denied'));return}lock.current=true;setBusy(true);setError('');const seq=generation.current
   try{const result=await repository.bytes(selected.revisionId,kind);if(!alive.current||seq!==generation.current||!fence.current())return
-   const url=documentURL(result.bytes,result.expiresAt?result.expiresAt-Date.now():300000)
-   if(view)setPreview({url,name:result.doc.fileName,authority,expiresAt:result.expiresAt,operationKey:result.operationKey});else{const a=document.createElement('a');a.href=url;a.download=result.doc.fileName;a.click();setTimeout(()=>revokeDocumentURL(url),1500)}
+   const url=documentURL(result.bytes,result.expiresAt?result.expiresAt-Date.now():300000);ownedURLs.current.add(url)
+   if(view)setPreview({url,name:result.doc.fileName,authority,expiresAt:result.expiresAt,operationKey:result.operationKey});else{const a=document.createElement('a');a.href=url;a.download=result.doc.fileName;a.click();setTimeout(()=>releaseURL(url),1500)}
   }catch(e){if(alive.current&&seq===generation.current&&fence.current())failed(e)}finally{lock.current=false;if(alive.current)setBusy(false)}
  }
  async function archive(row=selected){if(!row||lock.current||!row.canArchive)return;if(!matches(row)){failed(new ArchiveFailure('denied'));return}
@@ -54,6 +58,7 @@ export function FinalArchivePanel({repository,vehicleId,revisionId,fixedRow,orde
   <header className="welcome-area"><div className="welcome-head"><div><span className="official-eyebrow">Archivo privado del taller</span><h1>Documentos originales</h1><p>Revisiones históricas, incluidos registros archivados, órdenes canceladas y cotizaciones anuladas.</p></div><button className="cp03-secondary" disabled={busy} onClick={onBack}><ArrowLeft size={18}/> Volver</button></div></header>
   <section className="dashboard-card final-archive-controls"><form onSubmit={e=>{e.preventDefault();setPage(undefined);setTerm(query);setRefresh(n=>n+1)}}><label>Buscar cliente, patente o cotización<input value={query} maxLength={80} onChange={e=>setQuery(e.target.value)} disabled={busy}/></label><button className="cp03-primary" disabled={busy}><Search size={17}/> Buscar</button></form><button className="cp03-secondary" disabled={busy} onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={17}/> Actualizar</button></section>
   <DocumentOperationNotice error={expired} onRestart={()=>{setExpired(null);setError('Nueva operación preparada. Solicita de nuevo el documento.')}}/>
+<CommercialPlanHelp message={error}/>
   {notice&&<p role="status">{notice}</p>}{error&&<><p role="alert">{error}</p>{guided&&<button type="button" disabled={busy||loading} onClick={()=>setRefresh(n=>n+1)}>Volver a consultar originales</button>}</>}{loading&&<p role="status">Consultando revisiones autorizadas…</p>}
   <div className="final-archive-layout"><section className="dashboard-card" aria-label="Revisiones documentales">
    {!loading&&!rows.length&&!error&&<p>No hay documentos emitidos para esta consulta.</p>}

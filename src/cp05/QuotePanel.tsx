@@ -1,3 +1,4 @@
+import {CommercialPlanHelp} from '../workshops/commercialPresentation'
 import {documentFence,documentEpoch,subscribeDocuments} from '../auth/documentAccess'
 import {DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
@@ -502,6 +503,7 @@ export function QuotePanel({
           {error}
         </p>
       )}
+<CommercialPlanHelp message={error}/>
       {message && (
         <p className="cp04-success" role="status">
           {message}

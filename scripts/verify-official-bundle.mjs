@@ -35,7 +35,7 @@ if (plan04PrivateEnabled) {
   assert.equal(process.env.VITE_BT_CREATOR_PRIVATE_ENABLED,'true','Personal plan UI needs private creator gate')
   assert.equal(process.env.VITE_BT_AUTH_R1_ENABLED,'true','Personal plan UI needs Auth')
 }
-assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
+assert.ok(modules.every(id => !id.includes('src/plans/') || /src\/plans\/(?:planStatus\.ts|commercialContract\.ts|commercialErrors\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
   (plan04PrivateEnabled && /src\/plans\/planChanges\.ts$/.test(id))),
   'Only pure plan presentation and explicitly gated invalidation may enter the app')
 const finalArchiveEnabled=process.env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true'
@@ -134,7 +134,7 @@ assert.ok(
         process.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true' &&
         /src\/entrega\/closingZip\.(?:ts|tsx|js)$/.test(id)) ||
       ((cp03PrivateEnabled||cp04PrivateEnabled)&&/src\/clientes\/kilometres\.ts$/.test(id)) ||
-      /src\/plans\/(?:planStatus\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
+      /src\/plans\/(?:planStatus\.ts|commercialContract\.ts|commercialErrors\.ts|PlanBadge\.tsx|planBadge\.css)$/.test(id) ||
       (plan04PrivateEnabled && /src\/plans\/planChanges\.ts$/.test(id)) ||
       /src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(id) ||
       (cp03PrivateEnabled &&

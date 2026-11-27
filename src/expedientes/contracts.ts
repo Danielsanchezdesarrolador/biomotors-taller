@@ -1,3 +1,4 @@
+import {CommercialFailure,documentFailure} from '../plans/commercialErrors'
 import { UUID } from '../clientes/cp03PilotContracts'
 import { isArchivedPdf } from '../cp05/pdfEnvelope'
 export type DocumentKind='quote'|'report'|'handover'
@@ -5,8 +6,25 @@ export type ArchivedDocument={kind:DocumentKind;fileName:string;bucket:string;pa
 export type ArchiveRow={workshopId:string;revisionId:string;quoteId:string;orderId:string;customerId:string;vehicleId:string;revision:number;number:number;issuedAt:string;customerName:string;plate:string|null;make:string;model:string;total:number;complete:boolean;quoteStatus:string;customerArchived:boolean;vehicleArchived:boolean;orderCancelled:boolean;deliveryId:string|null;canArchive:boolean}
 export type ArchiveDocumentSet={workshopId:string;revisionId:string;quoteId:string;orderId:string;vehicleId:string;customerId:string;revision:number;issuedAt:string;complete:boolean;documents:ArchivedDocument[]}
 export class ArchiveFailure extends Error {constructor(readonly kind:'denied'|'disabled'|'integrity'|'missing'|'unavailable'|'invalid'){super(kind)}}
+/** All authorization denials must reach the panel's defensive cleanup, regardless of error family. */
+export function isArchiveAccessDenied(error:unknown){return error instanceof ArchiveFailure&&error.kind==='denied'||error instanceof CommercialFailure&&['session','permission'].includes(error.reason)}
+/** Preserve historical HTTP semantics before considering commercial promotion. No response bytes are reused. */
+export async function archiveDownloadFailure(error:unknown,commercial=false):Promise<ArchiveFailure|CommercialFailure>{
+ const response=(error as {context?:Response})?.context
+ if(!(response instanceof Response))return new ArchiveFailure('unavailable')
+ if(response.status===404)return new ArchiveFailure('missing')
+ if(response.status===409)return new ArchiveFailure('integrity')
+ if(response.status===503)return new ArchiveFailure('disabled')
+ if(response.status===401||response.status===403||response.status===429){
+  const failure=await documentFailure(error)
+  if(response.status===401)return failure
+  if(response.status===403)return commercial&&failure.reason==='plan'?failure:new ArchiveFailure('denied')
+  if(commercial&&failure.reason==='quota')return failure
+ }
+ return new ArchiveFailure('unavailable')
+}
 export function archiveId(id:string){if(!UUID.test(id))throw new ArchiveFailure('invalid');return id.toLowerCase()}
-export function archiveMessage(error:unknown){return error instanceof ArchiveFailure?{
+export function archiveMessage(error:unknown){if(error instanceof CommercialFailure)return error.message;return error instanceof ArchiveFailure?{
  denied:'Tu sesión o tus permisos no permiten consultar este expediente.',disabled:'El archivo documental no está habilitado para este taller.',
  integrity:'El documento no coincide con su comprobante de integridad. No se entregaron sus bytes.',missing:'El original no está disponible. No se regenerará ni sustituirá por una copia actual.',
  unavailable:'No se pudo confirmar la consulta. Reintenta; una respuesta incierta al archivar se conciliará con el mismo expediente.',invalid:'La referencia documental no es válida.'

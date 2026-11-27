@@ -1,3 +1,5 @@
+import {CommercialPlanHelp} from '../workshops/commercialPresentation'
+import {CommercialFailure} from '../plans/commercialErrors'
 import {documentFence,documentEpoch,subscribeDocuments,documentURL,revokeDocumentURL} from '../auth/documentAccess'
 import {documentOperation,assertDocumentOperation,DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
@@ -47,7 +49,7 @@ export function Cp04MultipuntoPdfPreview({
    const next=documentURL(bytes)
    if(download){const plate=(order.vehicle.plate||'sin-patente').replace(/[^a-z0-9-]/gi,'');const a=document.createElement('a');a.href=next;a.download='INS-'+plate+'-'+order.order.id.slice(0,8)+'-borrador.pdf';a.click();setTimeout(()=>revokeDocumentURL(next),1500)}
    else{currentURL.current=next;setUrl({value:next,authority,expiresAt:Date.now()+300000,key});setDisplay(true)}
-  }catch(e){if(valid()){closePreview();if(e instanceof DocumentOperationExpired)setExpired(e.operationKey?e:new DocumentOperationExpired(operationKey,'invalidated'));else setError(e instanceof Error&&e.message==='MULTIPUNTO_PDF_FIELD_TOO_LONG'?'Un dato de identificación excede el espacio legible de una hoja A4. Revisa el expediente; no se creó un PDF incompleto.':'No se pudo autorizar el documento. Revisa el plan, la cuota disponible, tu sesión y los permisos del taller.')}}
+  }catch(e){if(valid()){closePreview();if(e instanceof DocumentOperationExpired)setExpired(e.operationKey?e:new DocumentOperationExpired(operationKey,'invalidated'));else setError(e instanceof CommercialFailure?e.message:e instanceof Error&&e.message==='MULTIPUNTO_PDF_FIELD_TOO_LONG'?'Un dato de identificación excede el espacio legible de una hoja A4. Revisa el expediente; no se creó un PDF incompleto.':'No se pudo autorizar el documento. Revisa el plan, la cuota disponible, tu sesión y los permisos del taller.')}}
   finally{if(current===generation.current){locked.current=false;setBusy(false)}}
  }
  return <section className="cp04-pdf-controls" aria-label="Informe PDF de inspección multipunto">
@@ -65,6 +67,7 @@ export function Cp04MultipuntoPdfPreview({
    </div>
    {blocked&&<p className="cp04-pdf-hint" role="status">{reason} El PDF solo se prepara con datos confirmados.</p>}
    {error&&<p className="cp04-error" role="alert">{error}</p>}
+<CommercialPlanHelp message={error}/>
    <DocumentOperationNotice error={expired} onRestart={()=>{setExpired(null);setError('Nueva operación preparada. Solicita el documento para revalidar con el servidor.')}}/>
    {display&&url&&url.authority===authority&&<dialog ref={dialog} className="bt-inspection-dialog" aria-label="Vista previa del borrador · No enviado" onCancel={closePreview} onClick={e=>{if(e.target===e.currentTarget)closePreview()}}>
      <div className="cp04-pdf-preview-title">

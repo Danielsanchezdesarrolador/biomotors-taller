@@ -1,3 +1,4 @@
+import {CommercialFailure,blockReason} from '../plans/commercialErrors'
 /** CP04 candidate contracts: no writes without separately approved hosted SQL. */
 import { UUID, normalizedPlate } from '../clientes/cp03PilotContracts'
 export type OrderStatus='received'|'inspecting'|'in_service'|'ready'|'closed'
@@ -138,6 +139,8 @@ export function validPlateSearch(raw:string):string{
   return plate
 }
 export function workFailure(error:unknown):never {
+  if(error instanceof CommercialFailure)throw error
+  const reason=blockReason(error);if(reason)throw new CommercialFailure(reason)
   if(error instanceof WorkOrderFailure)throw error
   const code=(error as {code?:string}|null)?.code
   if(code==='23505')throw new WorkOrderFailure('duplicate')
@@ -146,6 +149,7 @@ export function workFailure(error:unknown):never {
   throw new WorkOrderFailure('unavailable')
 }
 export function workMessage(error:unknown):string {
+  if(error instanceof CommercialFailure)return error.message
   const kind=error instanceof WorkOrderFailure?error.kind:'unavailable'
   switch(kind){
     case 'invalid':return 'Revisa los datos ingresados; todavía no se guardaron los cambios.'

@@ -1,3 +1,4 @@
+import {documentFailure} from '../plans/commercialErrors'
 import {DocumentOperationExpired,isDocumentOperationNotCurrent} from '../documents/operation'
 import {documentFence} from '../auth/documentAccess'
 /**
@@ -128,7 +129,7 @@ export function cp04Repository(client:SupabaseClient,context:Context){
   async function inspectionDocument(orderId:string,requestId:string):Promise<Uint8Array>{
     const fence=documentFence(),version=await guard(inspectionStaff)
     const result=await client.functions.invoke('bt-commercial-documents',{body:{action:'multipunto',workshopId:tenant,orderId:validId(orderId),requestId:validId(requestId)}})
-    valid(version);if(result.error&&await isDocumentOperationNotCurrent(result.error))throw new DocumentOperationExpired('','invalidated');if(result.error||!(result.data instanceof Blob))throw new WorkOrderFailure('denied')
+    valid(version);if(result.error&&await isDocumentOperationNotCurrent(result.error))throw new DocumentOperationExpired('','invalidated');if(result.error)throw await documentFailure(result.error);if(!(result.data instanceof Blob))throw new WorkOrderFailure('unavailable')
     const bytes=new Uint8Array(await result.data.arrayBuffer());valid(version);fence.assert();if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw new WorkOrderFailure('unavailable');return bytes
   }
   async function pdfIdentity(orderId:string):Promise<InspectionPdfIdentity>{

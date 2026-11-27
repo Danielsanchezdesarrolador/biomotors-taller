@@ -1,3 +1,4 @@
+import {documentFailure} from '../plans/commercialErrors'
 import {documentFence} from '../auth/documentAccess'
 import {documentOperation as authorizedDocumentOperation,documentOperationKey,assertDocumentOperation,DocumentOperationExpired} from '../documents/operation'
 /** Future authenticated document endpoint. Public switches never grant server permission. */
@@ -58,6 +59,7 @@ export function documentClient(
           .json()
           .catch(() => null)
         if(action==='download'&&body?.error==='DOCUMENT_OPERATION_NOT_CURRENT')throw new DocumentOperationExpired(documentOperationKey(context.userId,context.workshop.id,String(args.revisionId)),'invalidated')
+        if(action==='download'&&['PLAN_CAPABILITY_REQUIRED','COMMERCIAL_QUOTA_EXHAUSTED','SESSION_INVALID','PERMISSION_DENIED'].includes(body?.error))throw await documentFailure(r.error)
         if (body?.error === 'DOCUMENT_NOT_CURRENT') throw new QuoteFailure('conflict')
         if (['PROVIDER_ACK_UNKNOWN', 'DELIVERY_PENDING'].includes(body?.error))
           throw new QuoteFailure('delivery_pending')

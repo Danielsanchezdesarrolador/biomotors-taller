@@ -1,3 +1,4 @@
+import {CommercialFailure,blockReason} from '../../src/plans/commercialErrors'
 export class CommercialOperationNotCurrent extends Error {constructor(){super('DOCUMENT_OPERATION_NOT_CURRENT')}}
 const operationNotCurrent=(error:unknown)=>/CONSUMPTION_REPLAY_EXPIRED|CONSUMPTION_CONFLICT|RESERVATION_EXPIRED|PLAN_CHANGED_RETRY/.test(String((error as {message?:unknown})?.message??''))
 import type {SupabaseClient} from '@supabase/supabase-js'
@@ -5,6 +6,7 @@ import type {SupabaseClient} from '@supabase/supabase-js'
 export async function meteredDocument(user:SupabaseClient,trusted:SupabaseClient,input:{workshopId:string;capability:'quote'|'multipunto'|'email';resourceId:string;requestId:string;snapshotHash?:string},read:()=>Promise<Uint8Array>){
  const identity=await user.auth.getUser();if(identity.error||!identity.data.user?.email_confirmed_at)throw Error('COMMERCIAL_ACCESS_DENIED')
  const {data,error}=await user.rpc('bt_commercial_reserve',{p_workshop_id:input.workshopId,p_capability:input.capability,p_resource_id:input.resourceId,p_request_id:input.requestId,p_snapshot_hash:input.snapshotHash??''})
+ if(error&&blockReason(error))throw new CommercialFailure(blockReason(error)!)
  if(operationNotCurrent(error))throw new CommercialOperationNotCurrent()
  if(error||data?.workshop_id!==input.workshopId||data?.resource_id!==input.resourceId||data?.actor_id!==identity.data.user.id||data?.request_id!==input.requestId)throw Error('COMMERCIAL_QUOTA_DENIED')
  // Recovery is only an invitation to request a NEW authorization explicitly, never bytes.

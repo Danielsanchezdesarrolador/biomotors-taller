@@ -1,3 +1,5 @@
+import {CommercialPlanHelp} from '../workshops/commercialPresentation'
+import {CommercialFailure} from '../plans/commercialErrors'
 import {parseKilometres} from '../clientes/kilometres'
 /**
  * BT-CP03-P3 · Pilot directory view. Reuses official visual vocabulary.
@@ -32,6 +34,7 @@ const emptyVehicle: VehicleDraft = {
   plate: '', make: '', model: '', model_year: '', odometer_km: ''
 }
 export function cp03Message(error: unknown) {
+  if(error instanceof CommercialFailure)return error.message
   const kind = error instanceof DirectoryFailure ? error.kind : 'unavailable'
   switch (kind) {
     case 'invalid': return 'Revisa los campos ingresados. No se guardaron los cambios.'
@@ -466,6 +469,7 @@ export function Cp03PilotDirectoryView({
       <p className="cp03-status" role="status" aria-live="polite">
         {loading ? 'Consultando las fichas autorizadas…' : notice || (matches ? 'Búsqueda completada.' : 'Selecciona una ficha para continuar.')}
       </p>
+<CommercialPlanHelp message={message}/>
       {message && <p className="cp03-error" role="alert">{message}</p>}
       {guided&&Math.max((matches?.customers??recent).length,matches?.vehicles.length??0,vehicles.length)>3&&<div className="guided-pagination"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Anteriores</button><span>Página {page+1}</span><button disabled={(page+1)*3>=Math.max((matches?.customers??recent).length,matches?.vehicles.length??0,vehicles.length)} onClick={()=>setPage(p=>p+1)}>Siguientes</button></div>}
       <div className="cp03-layout">
