@@ -42,6 +42,7 @@ async function stable(p,value){
  fs.mkdirSync(out,{recursive:true});const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
  const results=[]
  try{for(const width of (process.env.BT_UX_WIDTHS||'1366,390,768').split(',').map(Number)){
+  console.log('BT_UX_PERSIST_START',engine,width)
   let context
   try {context=await cp04Page(browser,width,{customers:[{id:uuid(50),workshop_id:tenant,full_name:'Cliente sintético UX',email:null,mobile_e164:null,archived_at:null}]})} catch(error){const page=browser.contexts()[0]?.pages()[0];if(page){await page.screenshot({path:out+'/startup-failure.png'});console.log(await page.locator('[role=status],[role=alert]').allTextContents())}throw error}
   const {p,state,requests,errors,documentCalls,documentOperations}=context

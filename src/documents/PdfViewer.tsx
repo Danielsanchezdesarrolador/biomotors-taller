@@ -18,7 +18,9 @@ export function PdfViewer({url,title,authority,onClose,onDownload,className='',c
  },[valid])
  if(!valid)return null
  async function enlarge(){if(document.fullscreenElement===dialog.current){await document.exitFullscreen();setExpanded(false);return}if(expanded){setExpanded(false);return}try{await dialog.current?.requestFullscreen();setExpanded(true)}catch{setExpanded(true)}}
- return <dialog ref={dialog} className={'bt-pdf-viewer '+className+(expanded?' is-expanded':'')} aria-labelledby={heading} onCancel={e=>{e.preventDefault();onClose()}} onClose={onClose}>
+ // A cleanup close event may arrive after StrictMode has reopened this same dialog.
+ // Ignore only that stale event; a genuinely closed dialog still notifies its owner.
+ return <dialog ref={dialog} className={'bt-pdf-viewer '+className+(expanded?' is-expanded':'')} aria-labelledby={heading} onCancel={e=>{e.preventDefault();onClose()}} onClose={e=>{if(!e.currentTarget.open)onClose()}}>
   <header><div><span>ByteTorque · Documento autorizado</span><h2 id={heading}>{title}</h2></div><button type="button" data-pdf-close onClick={onClose} aria-label={closeLabel}><X size={18}/>Cerrar vista previa</button></header>
   <nav aria-label="Controles del visor PDF"><button type="button" aria-label="Alejar PDF" disabled={zoom<=50} onClick={()=>setZoom(z=>Math.max(50,z-25))}><Minus size={17}/></button><output aria-label="Zoom PDF">{zoom}%</output><button type="button" aria-label="Acercar PDF" disabled={zoom>=200} onClick={()=>setZoom(z=>Math.min(200,z+25))}><Plus size={17}/></button><button type="button" onClick={()=>setZoom(100)}>Ajustar al ancho</button><button type="button" onClick={()=>void enlarge()}>{expanded?<Minimize size={17}/>:<Maximize size={17}/>}Ampliar visor</button><button type="button" disabled={busy} onClick={()=>{setBusy(true);void onDownload().catch(()=>setFailed(true)).finally(()=>setBusy(false))}}><Download size={17}/>{busy?'Verificando autorización…':'Descargar PDF autorizado'}</button></nav>
   {loading&&!failed&&<p role="status">Cargando documento…</p>}{failed&&<p role="alert">El navegador no pudo mostrar el PDF. Usa la descarga autorizada para abrirlo en tu lector.</p>}

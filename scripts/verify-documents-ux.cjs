@@ -5,10 +5,16 @@ const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0'),wid=id(1),uid=
 const selected=process.env.BT_DOCUMENTS_CASES?.split(','),run=n=>!selected||selected.includes(n)
 assert.ok(['chromium','webkit'].includes(engine));fs.mkdirSync(out,{recursive:true})
 ;(async()=>{const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{}),args:['--no-sandbox']}),results=[]
-async function fixture({width=1366,plan='full',inspection=false}={}){
+async function fixture({width=1366,plan='full',inspection=false,strictViewer=false}={}){
  const page=await browser.newPage({viewport:{width,height:950},serviceWorkers:'block'}),calls=[],errors=[],unexpected=[],downloads=[],ledger=new Map();let hold=false,release,arrived,quota=false,corrupt=false,uncertain=false
  const state={plan,workshopId:wid,role:'owner',session:'valid'};page.setDefaultTimeout(12000);page.on('pageerror',e=>errors.push(e.message));page.on('download',d=>downloads.push(d))
  await page.addInitScript(()=>{window.documentURLs={created:[],revoked:[]};const make=URL.createObjectURL.bind(URL),revoke=URL.revokeObjectURL.bind(URL);URL.createObjectURL=b=>{const u=make(b);window.documentURLs.created.push(u);return u};URL.revokeObjectURL=u=>{window.documentURLs.revoked.push(u);return revoke(u)}})
+ if(strictViewer)await page.addInitScript(()=>{
+  window.strictViewerCloseEvents=[]
+  document.addEventListener('close',event=>{
+   if(event.target instanceof HTMLDialogElement&&event.target.matches('.bt-pdf-viewer'))window.strictViewerCloseEvents.push(event.target.open)
+  },true)
+ })
  await page.route('**/*',async route=>{const req=route.request(),url=new URL(req.url());if(url.protocol==='chrome:'&&url.hostname==='resources'||url.protocol==='chrome-extension:'&&url.hostname==='mhjfbmdgcfjbbpaeojofohoefgiehjai')return route.continue();if(url.origin!==new URL(base).origin){unexpected.push(url.href);return route.abort()}if(!url.pathname.startsWith('/documents-ux/'))return route.continue()
   const reply=(v,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(v)})
   if(url.pathname==='/documents-ux/status'){assert.equal(req.method(),'GET');return reply(state)}
@@ -41,7 +47,7 @@ async function fixture({width=1366,plan='full',inspection=false}={}){
   }
   unexpected.push(url.pathname);return route.abort()
  })
- await page.goto(base+'/documents-ux.html'+(inspection?'?inspection':''));await page.waitForFunction(()=>typeof window.documentsUx?.refresh==='function')
+ await page.goto(base+'/documents-ux.html'+(inspection?'?inspection'+(strictViewer?'&strict-viewer':''):''));await page.waitForFunction(()=>typeof window.documentsUx?.refresh==='function')
  if(!inspection){await page.locator('.final-archive-row').click();await page.getByRole('button',{name:'Descargar expediente ZIP',exact:true}).waitFor()}
  return {page,calls,errors,unexpected,downloads,ledger,state,inspection,setQuota:()=>{quota=true},setCorrupt:()=>{corrupt=true},setUncertain:()=>{uncertain=true},hold:()=>{hold=true;return new Promise(r=>{arrived=r})},release:()=>{hold=false;release?.()},refresh:async()=>{await page.evaluate(()=>window.documentsUx.refresh());await page.waitForFunction(expected=>document.querySelector('main').dataset.authority===expected,JSON.stringify(state))}}
 }
@@ -56,6 +62,40 @@ try{
  if(run('zip-uncertain-retry')){const f=await fixture();f.setUncertain();await f.page.getByRole('button',{name:'Descargar expediente ZIP',exact:true}).click();await f.page.getByRole('alert').waitFor();assert.equal(f.downloads.length,0);await save(f,'uncertain-recovered.zip',f.page.getByRole('button',{name:'Descargar expediente ZIP',exact:true}),zip);assert.equal(f.calls[0].requestId,f.calls[1].requestId);assert.equal(f.ledger.size,1);await done(f,'zip-uncertain-retry')}
  for(const width of [1366,390]){const name='archive-viewer-'+width;if(!run(name))continue;const f=await fixture({width});await f.page.getByRole('button',{name:'Visualizar cotización emitida',exact:true}).click();await f.page.locator('.bt-pdf-viewer iframe').waitFor();await zoom(f);await f.page.getByRole('button',{name:'No veo el PDF',exact:true}).click();await f.page.getByRole('alert').filter({hasText:'El navegador no pudo mostrar'}).waitFor();await save(f,name+'.pdf',f.page.getByRole('button',{name:'Descargar PDF autorizado',exact:true}),pdfs[0]);assert.equal(f.ledger.size,1);assert.equal(f.calls[0].requestId,f.calls[1].requestId);await f.page.screenshot({path:out+'/'+name+'-open.png',fullPage:false});f.state.session='revoked';await f.refresh();await closed(f);for(const url of await f.page.evaluate(()=>window.documentURLs.created))assert.ok((await f.page.evaluate(()=>window.documentURLs.revoked)).includes(url));await done(f,name)}
  for(const width of [1366,390]){const name='inspection-viewer-'+width;if(!run(name))continue;const f=await fixture({width,inspection:true});await f.page.getByRole('button',{name:'Vista previa PDF',exact:true}).click();await f.page.locator('.bt-pdf-viewer iframe').waitFor();const src=await zoom(f);await f.page.screenshot({path:out+'/'+name+'-open.png',fullPage:false});await save(f,name+'.pdf',f.page.getByRole('button',{name:'Descargar PDF autorizado',exact:true}),multipunto);await closed(f,src);await f.page.getByRole('button',{name:'Vista previa PDF',exact:true}).click();await f.page.locator('.bt-pdf-viewer iframe').waitFor();assert.equal(f.ledger.size,1);assert.ok(f.calls.every(c=>c.requestId===f.calls[0].requestId));f.state.plan='basic';await f.refresh();await closed(f);assert.equal(await f.page.getByRole('button',{name:'Vista previa PDF',exact:true}).isDisabled(),true);await done(f,name)}
+ if(run('inspection-strict-dialog')){
+  // A real React dev StrictMode replay calls cleanup.close() and immediately opens the same native dialog.
+  const f=await fixture({inspection:true,strictViewer:true}),trigger=f.page.getByRole('button',{name:'Vista previa PDF',exact:true})
+  const modal=f.page.getByRole('dialog',{name:'Vista previa del borrador · No enviado',exact:true})
+  const frame=modal.getByTitle('Vista previa de la inspección multipunto en PDF')
+  await trigger.focus();await trigger.evaluate(el=>{window.strictViewerTrigger=el})
+  const open=async n=>{
+   await trigger.click()
+   // Wait for the actual queued close event from cleanup, not an arbitrary sleep or just initial visibility.
+   await f.page.waitForFunction(expected=>window.strictViewerCloseEvents.filter(Boolean).length>=expected,n)
+   await modal.waitFor();await frame.waitFor()
+   assert.equal(await modal.count(),1);assert.equal(await modal.evaluate(el=>el.open),true)
+   assert.equal(await modal.getByRole('button',{name:'Cerrar vista previa PDF',exact:true}).evaluate(el=>document.activeElement===el),true)
+   const url=await frame.getAttribute('src');assert.ok(url?.startsWith('blob:'))
+   assert.equal(f.calls.length,n);assert.equal(f.ledger.size,1);assert.ok(f.calls.every(call=>call.requestId===f.calls[0].requestId))
+   return url
+  }
+  const first=await open(1)
+  await modal.getByRole('button',{name:'Acercar PDF',exact:true}).click()
+  assert.equal(await modal.getByLabel('Zoom PDF').innerText(),'125%')
+  assert.equal(await frame.getAttribute('src'),first);assert.equal(f.calls.length,1);assert.equal(f.ledger.size,1)
+  // Do not swallow a genuinely closed dialog: native close still revokes the URL and restores the trigger.
+  await modal.evaluate(el=>el.close());await closed(f,first)
+  await f.page.locator('dialog.bt-pdf-viewer').waitFor({state:'detached'})
+  await f.page.waitForFunction(()=>document.activeElement===window.strictViewerTrigger)
+  const second=await open(2);await f.page.keyboard.press('Escape');await closed(f,second)
+  await f.page.locator('dialog.bt-pdf-viewer').waitFor({state:'detached'})
+  await f.page.waitForFunction(()=>document.activeElement===window.strictViewerTrigger)
+  const third=await open(3);f.state.plan='basic';await f.refresh();await closed(f,third)
+  await f.page.locator('dialog.bt-pdf-viewer').waitFor({state:'detached'})
+  assert.equal(await trigger.isDisabled(),true);assert.equal(f.downloads.length,0)
+  assert.equal(f.calls.length,3);assert.equal(f.ledger.size,1)
+  await done(f,'inspection-strict-dialog')
+ }
  fs.writeFileSync(out+'/browser-results.json',JSON.stringify({status:'PASS',engine,count:results.length,cases:results,physicalDeviceTests:false},null,2)+'\n')
 }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1})
