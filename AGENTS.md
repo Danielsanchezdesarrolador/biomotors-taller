@@ -1,3 +1,9 @@
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / CI_FINAL_PASS — instalación pendiente
+
+CI 8/8 SUCCESS comprobado directamente para c7e4ace9ed436437a1f4e19ec4816766c4f929d6; integración base fb82fe9625c3b76f0b3a763712eec1b75ed374be, 185/185 SHA-256 y dos árboles exactos reportados por el titular. Se cierran las observaciones de CI-FIX-01: frontera CP03/workshops, aserción obsoleta 0/8 y encabezado ownership Agenda ON; regresión documental preservada. Chromium/WebKit, SQL aislado 0/2/4 y check Deno en CI aprobados; no certifican ejecución alojada ni Safari físico. Auto-Deploy OFF verificado. Siguiente: preflight de solo lectura e instalación coordinada previa autorización específica; SQL, Edge, GATE4, Render y licencias sin intervención en esta etapa. SEC07 cerrado; C no iniciado. [Checkpoint CI FINAL](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_CI_FINAL_20261127.md). Development Toolkit ERR-035/056/062 ampliados en 5a2518b330b6c8c55aea3f877075356ad2f4a835; no duplicar fichas.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-PLANS-01-CI-FIX-01 / CI_PENDING
 
 Base integrada fb82fe9625c3b76f0b3a763712eec1b75ed374be. Tres workflows rojos: CP03 privado importaba presentación de workshops con gate OFF; Auth visual aún exigía 0/8; ownership Agenda ON esperaba encabezado retirado. Extraer presentación pura y CSS a plans; permiso exacto de dos archivos solo CP03 o Workshops ON, exclusión OFF explícita, guardas privadas intactas. Alinear mapping 0/2/4, tarjetas y negativa documental 403 PLAN_CAPABILITY_REQUIRED preservando UUID/SHA-256/ledger. 23/23 comprobaciones previas offline PASS (5 de extracción/equivalencia, 13 casos de ambas guardas sobre grafos simulados, 4 sintaxis CommonJS, 1 preservación de aserciones). No build Vite/Playwright/typecheck real local; nueva CI pendiente. Auto-Deploy OFF comprobado; sin SQL, Edge, GATE4, licencias, producción, SEC07 ni C. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_CI_FIX_01_20261127.md).
