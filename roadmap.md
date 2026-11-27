@@ -1,3 +1,9 @@
+## 27/11/2026 UTC — GATE4_SQL_INSTALL_PASS / REOPEN_BLOCKED
+
+Titular autorizó expresamente instalar SQL comercial transaccional con cuatro barreras cerradas, sin reapertura. Instalación exacta de [INSTALL_GATE4](docs/sql/BT_WORKSHOP_COMMERCIAL_01_INSTALL_GATE4.sql), blob eb39a2a16e1e2592747967644168cd132a3622e6, registrada como bt_workshop_commercial_01_install_gate4. Postflight independiente 02:35:21 UTC: esquema comercial presente; 12/12 denegaciones de cuatro RPC owner-only; dos tablas privadas con RLS habilitado y forzado, sin SELECT authenticated ni USAGE de esquema; 8 definiciones previas conservadas, 0 consumos, 16 documentos, 2 buckets privados. Reserva/own_workshop authenticated, finish/cache service_role; no confundir barrera documental con congelación total. Edge freeze v11/v8/v1 intacto, onboarding v8 intacto; no ready, Render, reapertura ni flags modificados. Próximo: autorización/ejecución coordinada ready manteniendo cuatro ACL cerradas; verificar antes de cualquier reapertura y resolver incertidumbre residual global/URLs históricas. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_SQL_PASS_20261127.md). Sin Codex ni repetir CI/HTTP/SEC07.
+
+---
+
 ## 27/11/2026 UTC — evidencia residual GATE4
 
 9/9 denegaciones, 16 documentos, freeze intacto, cero transacciones antiguas. 23h30 de logs agregados sin coincidencias de rutas de firma y 27 blobs históricos documentales revisados sin mecanismos de firma detectados. No demuestra ausencia histórica absoluta ni convergencia global. Propuesta pendiente de decisión: instalar SQL/ready con cuatro ACL cerradas, separar reapertura y mantenerla bloqueada hasta resolver incertidumbre material; no ejecutar sin autorización específica. Ver [adenda GATE4](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_PREP_20261127.md). Sin mutaciones productivas.
