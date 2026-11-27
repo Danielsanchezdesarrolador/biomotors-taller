@@ -1,0 +1,109 @@
+name: ByteTorque DOCUMENTS-UX-01 - Edge READY
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'DOCUMENTS_UX_READY_GATE_VERIFIED (solo ready, drenaje verificado, GATE4 cerrado)'
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: bytetorque-commercial-edge-release
+  cancel-in-progress: false
+jobs:
+  ready:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APPROVED_SHA: fb261a391a68bfe948657e3f4e4fbaefb26eec9c
+      PACKAGE: /tmp/bt-documents-ux-ready-${{ github.run_id }}-${{ github.run_attempt }}
+      CONFIRMATION: ${{ inputs.confirmacion }}
+      REQUEST_REF: ${{ github.ref }}
+    steps:
+      - name: Reject any unauthorized ref or confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REQUEST_REF" == refs/heads/main ]]
+          [[ "$CONFIRMATION" == DOCUMENTS_UX_READY_GATE_VERIFIED ]]
+      - uses: actions/checkout@v4
+        with:
+          ref: fb261a391a68bfe948657e3f4e4fbaefb26eec9c
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify exact reviewed sources and packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          npm ci --no-audit --no-fund
+          git diff --exit-code
+          git diff --cached --exit-code
+          node scripts/package-commercial-handlers.mjs "$PACKAGE"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFile,readdir,writeFile} from 'node:fs/promises'
+          import {createHash} from 'node:crypto'
+          import {join} from 'node:path'
+          const expected = {"scope":"OFFLINE_REVIEW_ONLY","network":false,"deployed":false,"services":["bt-cp05-documents","bt-final-archive","bt-commercial-documents"],"sourceHashes":{"scripts/package-commercial-handlers.mjs":"a1b21b82e378f6e3c4a2450f877f96142ff4f46ad342934cf6a3386278da2ec3","scripts/package-cp05-edge.mjs":"7dd2b4e009516afe647bce247692974d4e8576d129d778be2a593010c2b5bbc1","scripts/package-final-archive.mjs":"f8f84f65ec59b8513924f0dc5d833d318cbf40dfba7866c6add64c59a312bf5f","scripts/package-commercial-edge.mjs":"7aeb8a9dbcc6d3075aa24e523eaa191b501eeb9ad29a60bfcdc6cb2f9da009f5","server/cp05/edgeEntryCandidate.ts":"525810316795e16b7674c24f8242cf8417f84a3254597184fae4c25b1cd77f51","server/com/finalArchiveEntry.ts":"30df97fa17e8274455fa118e654c1795b77c5f40c6e60975d76c813149edab28","server/commercial/edgeEntryCandidate.ts":"1c3d67a749857c2d26b5fee5edf33f10c41f133c78cd7afdfcfd293ef82f9344","server/com/finalArchiveHandler.ts":"56d398ca6b6e4d402522c4c2738a189fb6c80a1f38500ad492ae212a9c36fa4b","server/com/finalArchivePorts.ts":"a75df271706e4d548d0c66fd2527906907c5095f062b4d019e420e548d417d62","src/expedientes/originalZip.ts":"4de61653d9a15d70e57a80b46e0dc73e20f3302910077eb15e754ee578d8ae79","src/expedientes/contracts.ts":"48c8e199f7ab428c14a78104659592132867225f67a763a24437ea205400e133","src/ordenes/cp04InspectionPdf.ts":"c73b85dcf6ba35c5c65754da459a0508b532ea0fdb380a2bca1f3eac3a795df6","server/commercial/documentHandler.ts":"931785f85893b4cda6aa7ba356641e5a0d29e7e880ddfcf87f4ae7966d463870","server/commercial/meteredDocument.ts":"249ebe718559a88ebdc491571426151578999c3a06446fa1d8dbd9bf95ded8d7","package-lock.json":"965d0a42874b3ebf6d9bc21f3a8413ed855b9c94f91cefc768b262c5f2692230"},"files":{"freeze/supabase/config.toml":"c2bfa857ef6aa9e9b09f1e681b9ef08557cd2ae71714c69d04019dc41ae660c1","freeze/supabase/functions/bt-commercial-documents/index.js":"0fbc0aae7f6e2ea1a5d37399ff5f650cdf263a9729831bd42ef6e90a8fec2f4a","freeze/supabase/functions/bt-cp05-documents/index.js":"0fbc0aae7f6e2ea1a5d37399ff5f650cdf263a9729831bd42ef6e90a8fec2f4a","freeze/supabase/functions/bt-final-archive/index.js":"0fbc0aae7f6e2ea1a5d37399ff5f650cdf263a9729831bd42ef6e90a8fec2f4a","parts/bt-commercial-documents/MANIFEST.json":"239d7cd21d0ad04e720544005e2bfef329bdf7a4d02979de6a80902a6e460999","parts/bt-commercial-documents/supabase/config.toml":"9f8816607b411c1d0747d78609187c93a5f134dc9e4a89ff3a97e85eea4ef5b3","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/assets/logo-dark.png":"fe66f89b0799864fecfbc4939e896f9e41da85e414d1dc6bd2656fe5c3123e8d","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/assets/logo-light.png":"d47484d31979089e12019893fd1632eda980dbc7bddc100a9f40f1d6da3395f4","parts/bt-commercial-documents/supabase/functions/bt-commercial-documents/index.js":"3b1bafdd49e9b4dfabe62977be2c6047507af42cc201795058c32092de31011f","parts/bt-cp05-documents/offline-package-manifest.json":"df970bb08659cf722ab2979d89890528107ebf20bc8832cffb950035c73812b8","parts/bt-cp05-documents/supabase/config.toml":"de2f646c1b0e30ca0e1ed61b3ebdeb8176d0d3639b3dfd8c04d968926dae3fa0","parts/bt-cp05-documents/supabase/functions/bt-cp05-documents/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","parts/bt-cp05-documents/supabase/functions/bt-cp05-documents/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","parts/bt-cp05-documents/supabase/functions/bt-cp05-documents/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","parts/bt-cp05-documents/supabase/functions/bt-cp05-documents/index.js":"920ff232c74466528f7dbb0db8d7e54e57b5734402ac3cbd8e2ad47a54254759","parts/bt-final-archive/offline-package-manifest.json":"35dbdf9abc419e74503b96d447a949457103358f3226e8e169c65d693a332692","parts/bt-final-archive/supabase/config.toml":"b1a2c81ada3d941a118042e244c24df337855135bb040969d82613e85dfc3a28","parts/bt-final-archive/supabase/functions/bt-final-archive/assets/DejaVuSans-Bold.ttf":"a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890","parts/bt-final-archive/supabase/functions/bt-final-archive/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","parts/bt-final-archive/supabase/functions/bt-final-archive/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","parts/bt-final-archive/supabase/functions/bt-final-archive/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","parts/bt-final-archive/supabase/functions/bt-final-archive/assets/wordmark.png":"aeb7f50302d6d641eeadca83373f103feaa177b557ee7680ec95030b2db37e34","parts/bt-final-archive/supabase/functions/bt-final-archive/index.js":"3bf38308537c12baa5cd364d5d44bb7d8ec3439b38c139507b046d92eaac5902","ready/supabase/config.toml":"6485bc3dc4bc0de18d389ec5624ea6f9213373a1875a87e6604544bd36d20ab5","ready/supabase/functions/bt-commercial-documents/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","ready/supabase/functions/bt-commercial-documents/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","ready/supabase/functions/bt-commercial-documents/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","ready/supabase/functions/bt-commercial-documents/assets/logo-dark.png":"fe66f89b0799864fecfbc4939e896f9e41da85e414d1dc6bd2656fe5c3123e8d","ready/supabase/functions/bt-commercial-documents/assets/logo-light.png":"d47484d31979089e12019893fd1632eda980dbc7bddc100a9f40f1d6da3395f4","ready/supabase/functions/bt-commercial-documents/index.js":"3b1bafdd49e9b4dfabe62977be2c6047507af42cc201795058c32092de31011f","ready/supabase/functions/bt-cp05-documents/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","ready/supabase/functions/bt-cp05-documents/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","ready/supabase/functions/bt-cp05-documents/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","ready/supabase/functions/bt-cp05-documents/index.js":"920ff232c74466528f7dbb0db8d7e54e57b5734402ac3cbd8e2ad47a54254759","ready/supabase/functions/bt-final-archive/assets/DejaVuSans-Bold.ttf":"a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890","ready/supabase/functions/bt-final-archive/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","ready/supabase/functions/bt-final-archive/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","ready/supabase/functions/bt-final-archive/assets/icon-192.png":"1daa67c7edb94f093ca303461ef4274d00de386843116fc7d6262e85847b4e67","ready/supabase/functions/bt-final-archive/assets/wordmark.png":"aeb7f50302d6d641eeadca83373f103feaa177b557ee7680ec95030b2db37e34","ready/supabase/functions/bt-final-archive/index.js":"3bf38308537c12baa5cd364d5d44bb7d8ec3439b38c139507b046d92eaac5902"},"runtime":"Deno/Supabase Edge, pinned npm imports, JWT verification true","activation":"Freeze and drain ALL old egress before SQL and ready packages. Provider cross-service atomicity is NOT assumed. See candidate checkpoint."}
+          const actual = JSON.parse(await readFile(join(process.env.PACKAGE,'release-manifest.json'),'utf8'))
+          assert.deepEqual(actual,expected,'REVIEW_MANIFEST_MISMATCH')
+          const sha = bytes => createHash('sha256').update(bytes).digest('hex')
+          const sourcePaths = Object.keys(expected.sourceHashes)
+          const packagePaths = Object.keys(expected.files)
+          assert.equal(sourcePaths.length,15)
+          assert.equal(packagePaths.length,43)
+          for (const [p,h] of Object.entries(expected.sourceHashes)) assert.equal(sha(await readFile(p)),h,p)
+          for (const [p,h] of Object.entries(expected.files)) assert.equal(sha(await readFile(join(process.env.PACKAGE,p))),h,p)
+          const found = []
+          async function walk(root,prefix='') {
+            for(const e of await readdir(root,{withFileTypes:true})){
+              const relative=prefix+e.name
+              if(e.isDirectory()) await walk(join(root,e.name),relative+'/')
+              else if(e.isFile()) found.push(relative)
+              else throw Error('NON_REGULAR_PACKAGE_ENTRY')
+            }
+          }
+          await walk(process.env.PACKAGE)
+          assert.deepEqual(found.sort(),[...packagePaths,'release-manifest.json'].sort(),'PACKAGE_INVENTORY_MISMATCH')
+          await writeFile(join(process.env.PACKAGE,'verify-receipt.json'),JSON.stringify({status:'PASS',sha:process.env.APPROVED_SHA,reviewManifestBlob:'3a2f7cdb1ced86672ddc41714e84bfabf6c42495',sources:15,files:43,manifestEqual:true,deployed:false},null,2)+'\n')
+          console.log('BT_DOCUMENTS_UX_VERIFY: SOURCE_HASHES 15/15 PASS')
+          console.log('BT_DOCUMENTS_UX_VERIFY: PACKAGE_HASHES 43/43 PASS')
+          console.log('BT_DOCUMENTS_UX_VERIFY: EXACT_MANIFEST_AND_INVENTORY PASS')
+          console.log('BT_DOCUMENTS_UX_VERIFY: PRE_DEPLOY_PACKAGE_PASS')
+          JS
+      - name: Preserve verified manifest and receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: commercial-documents-ux-ready-verified-manifest
+          path: |
+            ${{ env.PACKAGE }}/release-manifest.json
+            ${{ env.PACKAGE }}/verify-receipt.json
+          if-no-files-found: error
+      - uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+      - name: Install only three reviewed ready handlers
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: suxcqqnmcjoezfxltoms
+        run: |
+          set -euo pipefail
+          [[ "$REQUEST_REF" == refs/heads/main ]]
+          [[ "$CONFIRMATION" == DOCUMENTS_UX_READY_GATE_VERIFIED ]]
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          supabase --version
+          supabase functions deploy --help >/dev/null
+          cd "$PACKAGE/ready"
+          for service in bt-cp05-documents bt-final-archive bt-commercial-documents; do
+            supabase functions deploy "$service" --project-ref "$PROJECT_REF"
+            echo "BT_DOCUMENTS_UX_READY_DEPLOYED: $service"
+          done
+          supabase functions list --project-ref "$PROJECT_REF"
+          echo "BT_DOCUMENTS_UX_READY: THREE_DEPLOYS_COMPLETE; GATE4_MUST_REMAIN_CLOSED"
