@@ -1,3 +1,9 @@
+## 27/11/2026 UTC — BT-BASIC-MULTIPUNTO-DEMO-01 PLANNED / ACCEPTANCE-07C OPEN
+
+Titular informa borrador descargado bajo Básico, edición bloqueada, solicita vista parcial de demostración con CTA a planes. SHA-256 del PDF coincide exactamente con descarga Plus previa, sin nuevos consumos ni reservas (4 confirmed); no traza HTTP del intento. Posible caché/estado anterior no confirmado. Mantener 07C abierto, repetir sesión nueva/privada y comprobar autorización, descarga y edición; corregir eventual entrega no autorizada antes de cierre. No confundir archivos previamente descargados con entrega nueva. Demo Básico con datos ficticios, pequeña muestra y CTA, sin PDF real, escritura, archivo, envío ni cuotas; coordinar con UX de límites y multipunto definitivo después de aceptación y antes de Ignacio. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_BASIC_MULTIPUNTO_DEMO_01_PLANNED_20261127.md). Solo documentación, Auto-Deploy OFF.
+
+---
+
 ## 27/11/2026 UTC — BT-COMMERCIAL-LIMIT-UX-01 PLANNED
 
 Titular solicita mensaje comercial al agotar cupos en lugar de falso error de guardado/conexión. Básico 2/1 cotizaciones, intento COT-000001 muestra mensaje genérico; consulta read-only conserva 2 quote y 2 multipunto confirmed (1 Full + 1 Plus cada uno), sin nuevo consumo/reserva. Sin traza HTTP individual, causa exacta no certificada. Planificar mensajes específicos y CTA Ver planes y beneficios para cotizaciones/multipunto/clientes/mecánicos/correos; preservar códigos de cuota frente a permisos/red/servicio y no exponer recursos ajenos, ofrecer espera solo si aplica. Sin checkout ni cambio de guardas. Coordinar después de aceptación vigente y antes de Ignacio con bloques de cupos/multipunto. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_LIMIT_UX_01_PLANNED_20261127.md). Auto-Deploy OFF; solo documentación, no implementación.
