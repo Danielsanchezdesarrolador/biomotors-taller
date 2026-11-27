@@ -1,4 +1,4 @@
-import {CommercialPlanHelp} from '../workshops/commercialPresentation'
+import {CommercialPlanHelp} from '../plans/commercialPresentation'
 import {CommercialFailure} from '../plans/commercialErrors'
 import {documentFence,documentEpoch,subscribeDocuments,documentURL,revokeDocumentURL} from '../auth/documentAccess'
 import {documentOperation,assertDocumentOperation,DocumentOperationExpired} from '../documents/operation'

@@ -1,4 +1,4 @@
-import {CommercialPlanHelp} from '../workshops/commercialPresentation'
+import {CommercialPlanHelp} from '../plans/commercialPresentation'
 import {documentFence,documentEpoch,subscribeDocuments} from '../auth/documentAccess'
 import {DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'

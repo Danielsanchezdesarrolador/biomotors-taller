@@ -1,3 +1,9 @@
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01-CI-FIX-01 / CI_PENDING
+
+Base integrada fb82fe9625c3b76f0b3a763712eec1b75ed374be. Tres workflows rojos: CP03 privado importaba presentación de workshops con gate OFF; Auth visual aún exigía 0/8; ownership Agenda ON esperaba encabezado retirado. Extraer presentación pura y CSS a plans; permiso exacto de dos archivos solo CP03 o Workshops ON, exclusión OFF explícita, guardas privadas intactas. Alinear mapping 0/2/4, tarjetas y negativa documental 403 PLAN_CAPABILITY_REQUIRED preservando UUID/SHA-256/ledger. 23/23 comprobaciones previas offline PASS (5 de extracción/equivalencia, 13 casos de ambas guardas sobre grafos simulados, 4 sintaxis CommonJS, 1 preservación de aserciones). No build Vite/Playwright/typecheck real local; nueva CI pendiente. Auto-Deploy OFF comprobado; sin SQL, Edge, GATE4, licencias, producción, SEC07 ni C. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_CI_FIX_01_20261127.md).
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-PLANS-01-DELTA-01 / REVISIÓN Y CI PENDIENTES
 
 Revisión B PASS parcial: se corrige regresión de clasificación de descarga histórica y limpieza ante CommercialFailure. Base exclusiva f55b8f890c6648cad355d89d89a9fac0f5b5ac80. Se conservan404/409integridad/503 y renovación409 explícita;401/403 de autoridad limpian datos/visor/URLs y generaciones. Workflow nuevo SQL0/2/4, unitarias/HTTP, Chromium/WebKit, TypeScript y paquetes, sin cambios a workflows históricos ni SQL. Local20 unitarias +15 Chromium +7 paquetes PASS; no repetición de84 anteriores. WebKit BLOCKED_ENVIRONMENT, CI/Deno pendientes, no ejecución oficial. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_DELTA_01_20261127.md), [informe](docs/BT_COMMERCIAL_PLANS_01_DELTA_01.md). Entrega privada DTK-ERR-056; sin push oficial, producción, GATE4, deploy, Auto-Deploy, SEC07 ni bloque C. No aceptación integral.

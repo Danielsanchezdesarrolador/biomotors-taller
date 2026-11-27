@@ -150,7 +150,10 @@ async function cp04Page(browser, width, options = {}) {
       const actor=JSON.parse(Buffer.from(parts[1],'base64url').toString())
       assert.equal(actor.sub,userId);assert.equal(actor.role,'authenticated')
       const call={...body,status:403,replay:false};documentCalls.push(call)
-      const authorized=()=>!state.revoked&&['owner','admin','reception','mechanic'].includes(state.role)&&['plus','full'].includes(state.documentPlan)
+      const memberAuthorized=()=>!state.revoked&&['owner','admin','reception','mechanic'].includes(state.role)
+      const authorized=()=>memberAuthorized()&&['plus','full'].includes(state.documentPlan)
+      if(!memberAuthorized())return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)
+      if(state.documentPlan==='basic')return reply({error:'PLAN_CAPABILITY_REQUIRED'},403)
       if(!authorized())return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)
       const binding=()=>{
         const order=state.orders.find(o=>o.id===body.orderId&&o.workshop_id===tenant)

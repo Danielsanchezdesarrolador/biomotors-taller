@@ -55,9 +55,13 @@ export default defineConfig(({ mode }) => {
               id.startsWith(root + 'tests/') ||
               id.startsWith(root + 'server/')
           )
+          // Shared presentation only, with no permission to import private workshops.
+          const sharedPlanPresentation = /\/src\/plans\/commercialPresentation\.(?:tsx|css)$/
+          const sharedPlanPresentationEnabled = env.VITE_BT_CP03_PRIVATE_ENABLED==='true' || env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true'
           const forbidden = application.filter(
             (id) =>
               /\.test\./.test(id) ||
+              (sharedPlanPresentation.test(id) && !sharedPlanPresentationEnabled) ||
               (!id.endsWith('.css') &&
                 !(env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && /\/src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx)$/.test(id)) &&
                 !(env.VITE_BT_AGENDA_ENABLED==='true' && /\/src\/agenda\//.test(id)) &&
@@ -103,6 +107,7 @@ export default defineConfig(({ mode }) => {
                   )
                 ) &&
                 !((env.VITE_BT_CP03_PRIVATE_ENABLED==='true'||env.VITE_BT_CP04_PRIVATE_ENABLED==='true')&&/\/src\/clientes\/kilometres\.ts$/.test(id)) &&
+                !(sharedPlanPresentationEnabled && sharedPlanPresentation.test(id)) &&
                 !/\/src\/plans\/(?:planStatus\.ts|commercialContract\.ts|commercialErrors\.ts|PlanBadge\.tsx)$/.test(id) &&
                 !(env.VITE_BT_PLAN04_PRIVATE_ENABLED==='true' && /\/src\/plans\/planChanges\.ts$/.test(id)) &&
                 !/\/src\/(?:main\.tsx|App\.tsx|layout\/|official\/|access\/|brand\/|auth\/)/.test(

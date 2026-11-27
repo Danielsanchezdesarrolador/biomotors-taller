@@ -177,14 +177,15 @@ const { chromium } = require('playwright'),
       await button('Ver usuarios y permisos').click()
       assert.equal(await button('Invitar mecánico').isDisabled(), true)
       assert.match(await p.locator('.access-users-preparation').innerText(), /Cuenta personal sin taller nuevo/)
-      assert.equal(
-        await p
-          .locator('.access-users-preparation dd')
-          .filter({ hasText: 'Mecánicos 0/8' })
-          .count(),
-        1
-      )
-      assert.match(await p.locator('.access-users-preparation').innerText(), /Mecánicos 0\/4/)
+      const seats = p.locator('.access-users-preparation dl[aria-label="Referencia de cupos por plan"] > div')
+      assert.deepEqual(await seats.evaluateAll(rows => rows.map(row => [
+        row.querySelector('dt')?.textContent?.trim(),
+        row.querySelector('dd')?.textContent?.trim()
+      ])), [
+        ['Básico', 'Cuenta personal sin taller nuevo'],
+        ['Plus', 'Mecánicos 0/2'],
+        ['Full', 'Mecánicos 0/4']
+      ], 'Read-only public preview must show the exact current plan/seat mapping')
       assert.match(await p.locator('.access-users-preparation').innerText(), /sin plan activo/)
       await capture('USUARIOS_PERMISOS')
       await p.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click()

@@ -9,6 +9,8 @@ on:
       - 'scripts/security/verify-commercial-plans-local.sh'
       - 'tests/commercialPlansLab.ts'
       - 'src/plans/commercial*.ts'
+      - 'src/plans/commercialPresentation.tsx'
+      - 'src/plans/commercialPresentation.css'
       - 'src/workshops/**'
       - 'src/auth/mechanicInvitationPolicy*'
       - 'src/access/accessContract.ts'

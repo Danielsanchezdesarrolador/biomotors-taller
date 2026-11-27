@@ -2,7 +2,8 @@ import {it,expect,vi} from 'vitest'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {PlanBenefits,BasicInspectionPromotion,type CommercialStatus} from './commercialPresentation'
+import {PlanBenefits,type CommercialStatus} from './commercialPresentation'
+import {BasicInspectionPromotion,PlanComparison} from '../plans/commercialPresentation'
 import {CommercialFailure,blockReason,blockMessages,documentFailure} from '../plans/commercialErrors'
 import {commercialPlans} from '../plans/commercialContract'
 import {meteredDocument,CommercialOperationNotCurrent} from '../../server/commercial/meteredDocument'
@@ -19,6 +20,13 @@ it.each(['basic','plus','full'] as const)('%s always compares all plans and iden
  expect(html).toContain('Plan actual del taller');expect(html).toContain('2 mecánicos incluidos');expect(html).toContain('4 mecánicos incluidos');expect(html).not.toContain('Elegir Full');expect(html).not.toContain('de sin límite');expect(html).toContain('data-plan-icon="crown"');expect(html).toContain('Contratación y pagos no disponibles')
 })
 it('pricing/capacity presentation is 0/2/4, USD 0/5/15',()=>{expect(Object.values(commercialPlans).map(p=>[p.mechanics,p.monthlyUSD])).toEqual([[0,0],[2,5],[4,15]])})
+it('standalone comparison presents exactly 0/2/4 without enabling purchase or workshop creation',()=>{
+ const html=renderToStaticMarkup(createElement(PlanComparison))
+ for(const [name,seats] of [['Básico',0],['Plus',2],['Full',4]] as const){expect(html).toContain('aria-label="Plan '+name+'"');expect(html).toContain(seats+' mecánicos incluidos · propietario fuera del cupo')}
+ expect(html.match(/aria-label="Plan (?:Básico|Plus|Full)"/g)).toHaveLength(3)
+ expect(html).not.toMatch(/<button|<form|<input|<iframe/)
+ expect(html).toContain('contratación y pagos aún no disponibles')
+})
 it('fictional promotion is informational without real order, export or save control',()=>{const html=renderToStaticMarkup(createElement(BasicInspectionPromotion));expect(html).toContain('Ver demostración ficticia');expect(html).toContain('Ver planes y beneficios');expect(html).not.toMatch(/Descargar|Guardar|iframe|blob:/)})
 it.each(Object.keys(blockMessages) as (keyof typeof blockMessages)[])('messages preserve distinct reason %s',reason=>{const e=new CommercialFailure(reason);for(const message of [workMessage(e),cp03Message(e),archiveMessage(e),quoteMessage(e)])expect(message).toBe(blockMessages[reason])})
 it('unknown security/technical errors never promise commercial upgrades',()=>{expect(blockReason({code:'42501',message:'Other guard'})).toBeNull();expect(blockReason({code:'XX000',message:'connection lost'})).toBeNull();expect(blockReason({message:'COMMERCIAL_QUOTA_EXHAUSTED'})).toBe('quota');expect(blockReason({message:'FINAL_INSPECTION_READ_ONLY'})).toBe('readonly');expect(()=>workFailure({message:'FINAL_INSPECTION_READ_ONLY'})).toThrow(blockMessages.readonly)})

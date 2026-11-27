@@ -1,4 +1,4 @@
-import {CommercialPlanHelp} from '../workshops/commercialPresentation'
+import {CommercialPlanHelp} from '../plans/commercialPresentation'
 import {CommercialFailure} from '../plans/commercialErrors'
 import {parseKilometres} from '../clientes/kilometres'
 /**

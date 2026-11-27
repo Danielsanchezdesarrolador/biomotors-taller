@@ -1,4 +1,4 @@
-import {BasicInspectionPromotion} from '../workshops/commercialPresentation'
+import {BasicInspectionPromotion} from '../plans/commercialPresentation'
 import {blockMessages} from '../plans/commercialErrors'
 import {parseKilometres} from '../clientes/kilometres'
 /**

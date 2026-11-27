@@ -165,8 +165,13 @@ async function stable(p,value){
   // A denial before the client sees a plan change cannot reuse locally delivered bytes.
   state.documentPlan='basic'
   const denialStart=httpTrace.length,denialReads=dataReads(requests)
+  const denialResponse=p.waitForResponse(r=>r.url()===api+'/functions/v1/bt-commercial-documents'&&r.request().method()==='POST')
   await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
-  await p.getByText('No se pudo autorizar el documento. Revisa el plan, la cuota disponible, tu sesión y los permisos del taller.',{exact:true}).waitFor()
+  const denial=await denialResponse
+  assert.equal(denial.status(),403);assert.deepEqual(await denial.json(),{error:'PLAN_CAPABILITY_REQUIRED'})
+  const controls=active(p).locator('.cp04-pdf-controls')
+  await controls.getByRole('alert').filter({hasText:'Esta función está disponible en ByteTorque Plus y Full. Conoce los beneficios de nuestros planes.'}).waitFor()
+  await controls.getByRole('button',{name:'Ver planes y beneficios',exact:true}).waitFor()
   assert.equal(await modal.count(),0)
   assertAction(denialStart,denialReads,callStart+2,403,false)
   state.documentPlan='full'

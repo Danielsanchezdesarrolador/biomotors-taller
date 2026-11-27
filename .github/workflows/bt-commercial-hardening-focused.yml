@@ -13,6 +13,8 @@ on:
       - 'src/documents/**'
       - 'src/auth/documentAccess.ts'
       - 'src/ordenes/Cp04MultipuntoPdfPreview.tsx'
+      - 'src/plans/commercialPresentation.tsx'
+      - 'src/plans/commercialPresentation.css'
       - 'server/commercial/**'
 permissions:
   contents: read

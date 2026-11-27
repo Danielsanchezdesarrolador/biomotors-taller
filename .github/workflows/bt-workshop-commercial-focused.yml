@@ -12,6 +12,8 @@ on:
       - 'server/com/**'
       - 'server/cp05/**'
       - 'src/workshops/**'
+      - 'src/plans/commercialPresentation.tsx'
+      - 'src/plans/commercialPresentation.css'
       - 'tests/commercialLab.ts'
 permissions:
   contents: read

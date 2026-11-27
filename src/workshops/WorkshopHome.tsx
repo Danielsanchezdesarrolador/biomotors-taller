@@ -1,4 +1,4 @@
-import {PlanComparison} from './commercialPresentation'
+import {PlanComparison} from '../plans/commercialPresentation'
 import { useEffect,useRef,useState,type FormEvent } from 'react'
 import type { AuthController } from '../auth/controller'
 import { parsePlanStatus,planLabel } from '../plans/planStatus'
