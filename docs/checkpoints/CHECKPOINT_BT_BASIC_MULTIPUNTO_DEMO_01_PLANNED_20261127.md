@@ -16,3 +16,7 @@ Mantener ACCEPTANCE-07C abierto: cerrar sesión, iniciar sesión nueva o ventana
 - Coordinar con BT-COMMERCIAL-LIMIT-UX-01 y BT-MULTIPUNTO-FINAL-01 tras cierre de aceptación; antes de Ignacio. Prioridad previa: resolver hallazgo de descarga, no declararlo solucionado por la demo.
 
 Solo documentación, Auto-Deploy OFF verificado; sin código, SQL, Edge, flags, Render ni Codex.
+
+## Aclaración aprobada — bloqueo explicativo y retest (27/11/2026)
+
+Titular confirma que al repetir prueba con sesión nueva aparece bloqueado multipunto en Básico, pero solo con candado. Retest visual PASS; no se confirma causa de primera descarga ni revocación en sesión abierta, mantener verificación pendiente antes de cierre. El candado nunca será única indicación: título y texto visible explican por qué está bloqueado, beneficio y CTA hacia planes cuando corresponda. Para función no incluida: “Tu plan actual no incluye la inspección multipunto. Con Plus o Full podrás evaluar 34 componentes, registrar observaciones y generar informes para tus clientes.” Para cuota agotada: “Alcanzaste el límite de tu plan” con recurso y próxima disponibilidad si verificable. Para demo: “Estás viendo una demostración. Para utilizar esta herramienta necesitas Plus o Full.” CTA “Ver planes y beneficios”, sin cobro. Distinguir permiso, servicio desactivado, sesión y red; accesibilidad y estado textual incluso con control deshabilitado. Validar PC/PWA/Android. Sin modificar seguridad, datos o cuotas. Implementación pendiente.

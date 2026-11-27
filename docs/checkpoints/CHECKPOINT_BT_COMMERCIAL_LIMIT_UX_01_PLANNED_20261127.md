@@ -13,3 +13,7 @@
 - Auto-Deploy OFF confirmado. Solo documentación, no código, SQL, Edge, Render, flags ni Codex.
 
 Estado: PLANNED / NOT_IMPLEMENTED. ACCEPTANCE-07B rechazo observado sin aumento de consumo; UX pendiente. Continuar prueba de multipunto Básico y demás aceptación.
+
+## Aclaración aprobada — bloqueo explicativo y retest (27/11/2026)
+
+Titular confirma que al repetir prueba con sesión nueva aparece bloqueado multipunto en Básico, pero solo con candado. Retest visual PASS; no se confirma causa de primera descarga ni revocación en sesión abierta, mantener verificación pendiente antes de cierre. El candado nunca será única indicación: título y texto visible explican por qué está bloqueado, beneficio y CTA hacia planes cuando corresponda. Para función no incluida: “Tu plan actual no incluye la inspección multipunto. Con Plus o Full podrás evaluar 34 componentes, registrar observaciones y generar informes para tus clientes.” Para cuota agotada: “Alcanzaste el límite de tu plan” con recurso y próxima disponibilidad si verificable. Para demo: “Estás viendo una demostración. Para utilizar esta herramienta necesitas Plus o Full.” CTA “Ver planes y beneficios”, sin cobro. Distinguir permiso, servicio desactivado, sesión y red; accesibilidad y estado textual incluso con control deshabilitado. Validar PC/PWA/Android. Sin modificar seguridad, datos o cuotas. Implementación pendiente.
