@@ -140,7 +140,7 @@ async function cp05Page(browser,width){
      quote:{...structuredClone(q),status:'issued',revision},items:structuredClone(items),totals:{subtotal,tax,total:subtotal+tax},document_date:'2026-11-23T12:00:00Z',notice:'Cotización no tributaria. No acredita ejecución ni aceptación del cliente.'}
    // Simulate backend-archived bytes independently of the browser PDF renderer.
    // CI serves a built app via Vite preview, which cannot resolve dev-only /@fs/ imports.
-   // Browser draft PDF and CP05 renderer remain covered by their own tests.
+   // Actual server draft rendering and watermarks are covered by commercial unit tests.
    const pdf=await PDFDocument.create()
    pdf.setTitle('ByteTorque CP05 - synthetic archival fixture')
    pdf.setAuthor('ByteTorque QA harness')
@@ -153,6 +153,13 @@ async function cp05Page(browser,width){
    archived.set(r.id,bytes);revisions.unshift(r);q.status='issued';q.issued_revision=revision;q.version++
    return r
  }
+ await p.route('https://suxcqqnmcjoezfxltoms.supabase.co/functions/v1/bt-commercial-documents',async route=>{
+   const req=route.request(),body=req.postDataJSON();assert.equal(req.method(),'POST');assert.equal(body.action,'draft');assert.equal(body.workshopId,tenant)
+   assert.ok(quotes.some(q=>q.id===body.quoteId));assert.ok(Array.isArray(body.draft.items));assert.match(req.headers().authorization||'',/^Bearer /)
+   requests.push({path:'/functions/v1/bt-commercial-documents',method:'POST',action:'draft'})
+   const pdf=await PDFDocument.create(),page=pdf.addPage();for(const [i,text] of ['BORRADOR','NO VALIDO COMO COTIZACION','DOCUMENTO NO EMITIDO'].entries())page.drawText(text,{x:40,y:500-i*40,size:20})
+   return route.fulfill({status:200,contentType:'application/pdf',body:Buffer.from(await pdf.save())})
+ })
  await p.route('https://suxcqqnmcjoezfxltoms.supabase.co/functions/v1/bt-cp05-documents',async route=>{
    const body=route.request().postDataJSON();requests.push({path:'/functions/v1/bt-cp05-documents',method:'POST',action:body.action})
    assert.equal(body.workshopId,tenant)

@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // BT-UX-PERSIST-01: real React/SDK with synthetic HTTP only, never hosted data.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp04Page,uuid,tenant,userId,businessWrites}=require('../tests/harness/cp04BrowserFixture.cjs')
@@ -30,7 +31,7 @@ async function stable(p,value){
  const engine=process.env.BT_UX_BROWSER||'chromium';assert.ok(['chromium','webkit'].includes(engine))
  fs.mkdirSync(out,{recursive:true});const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
  const results=[]
- try{for(const width of [1366,390,768]){
+ try{for(const width of (process.env.BT_UX_WIDTHS||'1366,390,768').split(',').map(Number)){
   let context
   try {context=await cp04Page(browser,width,{customers:[{id:uuid(50),workshop_id:tenant,full_name:'Cliente sintético UX',email:null,mobile_e164:null,archived_at:null}]})} catch(error){const page=browser.contexts()[0]?.pages()[0];if(page){await page.screenshot({path:out+'/startup-failure.png'});console.log(await page.locator('[role=status],[role=alert]').allTextContents())}throw error}
   const {p,state,requests,errors}=context
@@ -42,7 +43,7 @@ async function stable(p,value){
    const url=new URL(req.url())
    if(url.origin===api)httpTrace.push({path:url.pathname,method:req.method(),query:Object.fromEntries(url.searchParams)})
   })
-  const nav=index=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
+  const nav=screen=>navigateSection(p,screen)
   const waitQuoteOrders=()=>active(p).locator('.cp05-panel select[aria-busy="false"]:enabled').waitFor()
   const waitRead=path=>p.waitForResponse(response=>{
    const url=new URL(response.url())
@@ -79,20 +80,20 @@ async function stable(p,value){
   assert.equal(dataReads(requests),reads,'Revalidation does not reload business records')
   assert.equal(await p.evaluate(()=>scrollY),position)
   await p.evaluate(()=>window.btUxQa.refresh());await delay(100);await p.evaluate(()=>window.btUxQa.verify());await stable(p,value)
-  await nav(2);await p.getByRole('button',{name:'Nuevo cliente',exact:true}).click()
+  await nav('clientes');await p.getByRole('button',{name:'Nuevo cliente',exact:true}).click()
   await p.getByLabel('Nombre completo *').fill('Borrador de cliente sin guardar')
-  await nav(0);await nav(4);await p.goBack();await p.goBack()
+  await nav('inicio');await nav('configuracion');await p.goBack();await p.goBack()
   assert.equal(await active(p).getAttribute('data-workspace-section'),'clientes')
   assert.equal(await p.getByLabel('Nombre completo *').inputValue(),'Borrador de cliente sin guardar')
-  const beforeReturn=dataReads(requests);await nav(1);await stable(p,value)
+  const beforeReturn=dataReads(requests);await nav('ordenes');await stable(p,value)
   assert.equal(dataReads(requests),beforeReturn,'Return to a mounted module reuses its view')
   assert.ok(Math.abs(await p.evaluate(()=>scrollY)-position)<=2,JSON.stringify({width,expected:position,actual:await p.evaluate(()=>scrollY)}))
   await p.locator('.cp04-order').first().click();await p.getByRole('button',{name:'Abrir inspección multipunto con X'}).click()
   const row=p.locator('.mp-row').first();state.failFindings=true
   await row.getByRole('radio',{name:/ · OK$/}).check();await row.getByText('Error al guardar',{exact:true}).waitFor()
   const attempts=businessWrites(requests).length
-  await nav(3);await active(p).locator('.cp05-panel').waitFor();await waitQuoteOrders()
-  await nav(1);await row.getByText('Error al guardar',{exact:true}).waitFor()
+  await nav('informes');await active(p).locator('.cp05-panel').waitFor();await waitQuoteOrders()
+  await nav('ordenes');await row.getByText('Error al guardar',{exact:true}).waitFor()
   assert.equal(await row.getByRole('radio',{name:/ · OK$/}).isChecked(),true)
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(businessWrites(requests).length,attempts)
   state.failFindings=false;await row.getByRole('button',{name:'Reintentar esta X',exact:true}).click();await row.getByText('Guardado',{exact:true}).waitFor();assert.equal(state.findings.length,1)
@@ -119,7 +120,7 @@ async function stable(p,value){
   // Wait for both specific CP05 responses and its ready selector before leaving:
   // do not cancel the intentional refresh or attribute late reads to the PDF.
   const [orderResponse,vehicleResponse]=await Promise.all([
-   waitRead('/rest/v1/work_orders'),waitRead('/rest/v1/vehicles'),nav(3)
+   waitRead('/rest/v1/work_orders'),waitRead('/rest/v1/vehicles'),nav('informes')
   ])
   assert.ok(orderResponse.ok()&&vehicleResponse.ok(),'CP05 selector refresh succeeded')
   await waitQuoteOrders()
@@ -129,7 +130,7 @@ async function stable(p,value){
   assert.deepEqual(dataReadRecords(requests.slice(navStart)).map(r=>r.path),navReads.map(r=>r.path),'Fixture and browser trace agree on the exact two navigation reads')
   assert.equal(dataReads(requests),pdfReads+2,'No other business reads while visiting CP05')
   const reopenStart=httpTrace.length
-  await nav(1)
+  await nav('ordenes')
   assert.deepEqual(await openPdf(),originalPdf,'Same cached PDF bytes after returning to the mounted module')
   const reopenReads=dataReadRecords(httpTrace.slice(reopenStart))
   console.log('BT_UX_PDF_REOPEN_READS',engine,width,JSON.stringify(reopenReads))
@@ -137,11 +138,11 @@ async function stable(p,value){
   assert.equal(dataReads(requests),pdfReads+2,'Reopening the same PDF does not reload business records')
   assert.equal(businessWrites(requests).length,pdfWrites,'Preview and navigation do not write or issue')
   // CP03 selection and CP06 subview stay mounted while visiting another module.
-  await nav(2);await p.getByRole('button',{name:'Cerrar formulario',exact:true}).click()
+  await nav('clientes');await p.getByRole('button',{name:'Cerrar formulario',exact:true}).click()
   await p.getByRole('button',{name:/Cliente sintético UX/}).first().click()
   await p.locator('.cp03-result').filter({hasText:'QA1234'}).click();await p.getByRole('button',{name:'Ver historial',exact:true}).click()
   await p.locator('.cp06-history').waitFor();await p.evaluate(()=>{window.__uxHistory=document.querySelector('.cp06-history')})
-  await nav(0);await nav(2);assert.equal(await p.evaluate(()=>window.__uxHistory?.isConnected),true)
+  await nav('inicio');await nav('clientes');assert.equal(await p.evaluate(()=>window.__uxHistory?.isConnected),true)
   assert.equal(await p.evaluate(()=>window.__uxDocument),doc,'No document reload')
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1))
   await p.screenshot({path:out+'/history-'+width+'.png',fullPage:true})

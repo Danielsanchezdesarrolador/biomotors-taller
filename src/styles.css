@@ -242,4 +242,4 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2c83ff; outline-
 .personal-plan-status{font-weight:700;color:#184b90!important}
 @media(max-width:760px){.mobile-plan-indicator{display:inline-block;align-self:center;max-width:125px;overflow:hidden;text-overflow:ellipsis;font-size:10px}}
 
-@media(max-width:760px){.bottom-nav.agenda-bottom{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:760px){.bottom-nav.agenda-bottom{grid-template-columns:repeat(5,minmax(0,1fr))}}

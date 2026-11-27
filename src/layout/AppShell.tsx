@@ -1,4 +1,4 @@
-import {CalendarDays} from 'lucide-react'
+import {CalendarDays,Store} from 'lucide-react'
 import {PlanBadge} from '../plans/PlanBadge'
 import { BrandLogo } from '../brand/BrandLogo'
 import { planDetail, planLabel, type PlanStatus } from '../plans/planStatus'
@@ -18,7 +18,7 @@ import {
   X,
   type LucideIcon
 } from 'lucide-react'
-export type Screen = 'inicio' | 'agenda' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
+export type Screen = 'inicio' | 'agenda' | 'ordenes' | 'clientes' | 'informes' | 'configuracion' | 'mitaller'
 export const navItems: { id: Screen; label: string; compact: string; icon: LucideIcon }[] = [
   { id: 'inicio', label: 'Inicio', compact: 'Inicio', icon: House },
   ...(import.meta.env.VITE_BT_AGENDA_ENABLED==='true' ? [{id:'agenda' as const,label:'Agenda',compact:'Agenda',icon:CalendarDays}] : []),
@@ -66,6 +66,7 @@ export function AppShell({
   preserveNavigationPosition?: boolean
   children: ReactNode
 }) {
+  const items=preserveNavigationPosition&&import.meta.env.VITE_BT_PLAN04_WORKSHOPS_ENABLED==='true'?[...navItems.slice(0,-1),{id:'mitaller' as const,label:'Mi taller',compact:'Mi taller',icon:Store},navItems.at(-1)!]:navItems
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false),
     [showAccount, setShowAccount] = useState(false),
     [showNotifications, setShowNotifications] = useState(false)
@@ -121,10 +122,11 @@ export function AppShell({
         </div>
         <p className="sidebar-caption">MENÚ PRINCIPAL</p>
         <nav className="side-nav">
-          {navItems.map(({ id, label, icon: Icon }) => (
+          {items.map(({ id, label, icon: Icon }) => (
             <button
               type="button"
               key={id}
+              data-screen={id}
               className={'side-link' + (id === screen ? ' active' : '')}
               aria-current={screen === id ? 'page' : undefined}
               onClick={() => navigate(id)}
@@ -277,10 +279,11 @@ export function AppShell({
         </main>
       </div>
       <nav className={"bottom-nav"+(import.meta.env.VITE_BT_AGENDA_ENABLED==='true'?' agenda-bottom':'')} aria-label="Navegación móvil">
-        {navItems.filter(item=>import.meta.env.VITE_BT_AGENDA_ENABLED!=='true'||['inicio','agenda','clientes'].includes(item.id)).map(({ id, compact, icon: Icon }) => (
+        {items.filter(item=>preserveNavigationPosition?['inicio','agenda','ordenes','clientes'].includes(item.id):import.meta.env.VITE_BT_AGENDA_ENABLED!=='true'||['inicio','agenda','clientes'].includes(item.id)).map(({ id, compact, icon: Icon }) => (
           <button
             type="button"
             key={id}
+              data-screen={id}
             className={'bottom-item' + (screen === id ? ' selected' : '')}
             aria-current={screen === id ? 'page' : undefined}
             onClick={() => navigate(id)}
@@ -289,7 +292,7 @@ export function AppShell({
             <span>{compact}</span>
           </button>
         ))}
-        {import.meta.env.VITE_BT_AGENDA_ENABLED==='true'&&<button type="button" className="bottom-item" aria-label="Más secciones" onClick={()=>setMobileMenuOpen(true)}><Menu size={22}/><span>Más</span></button>}
+        {(preserveNavigationPosition||import.meta.env.VITE_BT_AGENDA_ENABLED==='true')&&<button type="button" className="bottom-item" aria-label="Más secciones" onClick={()=>setMobileMenuOpen(true)}><Menu size={22}/><span>Más</span></button>}
       </nav>
     </div>
   )

@@ -1,11 +1,14 @@
+const {navigateSection}=require('./navigation.cjs')
 // Private browser fixture. Every Supabase request is intercepted; no real Auth/RLS/data writes.
 const assert = require('node:assert/strict')
+const {PDFDocument}=require('pdf-lib')
 const api = 'https://suxcqqnmcjoezfxltoms.supabase.co'
 const operationsStatusPath = '/rest/v1/rpc/bt_plan04_operations_status'
 const isOperationsStatusRead = r => r.method === 'POST' && r.path === operationsStatusPath
 // Unknown RPCs and all other non-GET business requests still count as writes.
 const businessWrites = requests => requests.filter(r => r.method !== 'GET' &&
-  !r.path.startsWith('/auth/v1/') && !isOperationsStatusRead(r))
+  !r.path.startsWith('/auth/v1/') && !isOperationsStatusRead(r) &&
+  !(r.method==='POST'&&r.path==='/functions/v1/bt-commercial-documents'&&['draft','multipunto'].includes(r.action)))
 const userId = '00000000-0000-4000-8000-000000000001',
   tenant = '00000000-0000-4000-8000-000000000011'
 const uuid = (n) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0')
@@ -90,7 +93,7 @@ async function cp04Page(browser, width, options = {}) {
     const request = route.request(),
       url = new URL(request.url()),
       method = request.method()
-    requests.push({ path: url.pathname, method })
+    requests.push({ path: url.pathname, method, ...(url.pathname==='/functions/v1/bt-commercial-documents'?{action:request.postDataJSON().action}:{}) })
     const reply = (data, status = 200) =>
       route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
     if (url.pathname === '/auth/v1/token')
@@ -130,6 +133,15 @@ async function cp04Page(browser, width, options = {}) {
       if (state.revoked) return reply({code:'42501',message:'Workshop not authorized'},403)
       return reply({workshopId:tenant,operationsEnabled:state.operationsEnabled === true,
         documentsEnabled:state.documentsEnabled === true})
+    }
+    if(url.pathname==='/functions/v1/bt-commercial-documents'){
+      assert.equal(method,'POST');const body=request.postDataJSON();assert.equal(body.workshopId,tenant)
+      assert.match(request.headers().authorization||'',/^Bearer /)
+      assert.equal(body.action,'multipunto');assert.ok(state.orders.some(o=>o.id===body.orderId))
+      assert.match(body.requestId,/^[a-f0-9-]{36}$/i)
+      if(state.revoked)return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)
+      const pdf=await PDFDocument.create();pdf.addPage().drawText('SYNTHETIC SERVER INSPECTION '+body.orderId)
+      return route.fulfill({status:200,contentType:'application/pdf',body:Buffer.from(await pdf.save({useObjectStreams:false}))})
     }
     const table = url.pathname.split('/').pop()
     assert.ok(
@@ -226,10 +238,7 @@ async function cp04Page(browser, width, options = {}) {
     error.stack+=diagnostic
     throw error
   })
-  await p
-    .locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
-    .nth(1)
-    .click()
+  await navigateSection(p,'ordenes')
   await p.locator('.cp04-private').waitFor()
   return { p, state, requests, errors }
 }

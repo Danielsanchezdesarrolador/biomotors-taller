@@ -8,7 +8,7 @@
 import type { Screen } from '../layout/AppShell'
 
 const key = 'bt:private-screen:v1'
-const permitted: readonly Screen[] = ['inicio', 'agenda', 'ordenes', 'clientes', 'informes', 'configuracion']
+const permitted: readonly Screen[] = ['inicio', 'agenda', 'ordenes', 'clientes', 'informes', 'mitaller', 'configuracion']
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
 function browserStore(): Store | null {

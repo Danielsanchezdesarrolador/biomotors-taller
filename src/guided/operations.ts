@@ -9,7 +9,7 @@ import {canOpen,confirmedStage,type Evidence} from './progress'
 export const operationStages=['Recepción','Inspección multipunto','Cotización','Aprobación','Ejecución','Entrega','Expediente final pendiente']
 export type Operation={id:string;reference:string;plate:string;vehicle:string;customer:string;receivedAt:string|null;stage:number;progress:number;planned:boolean}
 export function orderReference(id:string,ids:string[]){let n=8;while(n<36&&ids.some(other=>other!==id&&other.slice(-n)===id.slice(-n)))n+=4;return 'OT-'+id.slice(-n)}
-export function operationProgress(e:Evidence){const confirmed=[e.order,e.inspection,e.issued&&!e.needsRevision,e.approval,e.execution,e.handover,e.archive].filter(Boolean).length;return Math.floor(confirmed*100/7)}
+export function operationProgress(e:Evidence){const required=[e.order,e.issued&&!e.needsRevision,e.approval,e.execution,e.handover,e.archive];if(e.inspectionRequired!==false)required.splice(1,0,e.inspection);return Math.floor(required.filter(Boolean).length*100/required.length)}
 /** Complete tenant-scoped reads, bounded pages, stable unique key; no recent-orders cap. */
 export function operationsRepository(client:SupabaseClient,context:Context){
  let stopped=false;const abort=new AbortController(),wid=context.workshop.id
@@ -37,7 +37,7 @@ export function operationsRepository(client:SupabaseClient,context:Context){
    let h={approvals:[] as any[],executions:[] as any[],deliveries:[] as any[]}
    if(q&&r)h=await readFlowEvidence(wid,v.id,[q],[r],async(table,ids,_column,foreign='quote_id')=>({bt_flow_quote_approvals:approvals,bt_flow_execution_reports:executions,bt_flow_visit_deliveries:deliveries,bt_agenda_receipts:receipts}[table]||[]).filter(x=>ids.includes(x[foreign])))
    const needsRevision=!!q&&!!r&&!budgetMatches({quote:q,items:items.filter(x=>x.quote_id===q.id)} as Bundle,r)
-   const e:Evidence={planned:o.intake_phase==='planned',order:o.intake_phase!=='planned',inspection:inspection.recorded,issued:!!r&&q?.status==='issued'&&!q.issue_pending,needsRevision,approval:!needsRevision&&h.approvals.length===1,execution:!needsRevision&&h.executions.length===1,handover:!needsRevision&&h.deliveries.length===1,archive:false}
+   const e:Evidence={inspectionRequired:context.inspectionEnabled!==false,planned:o.intake_phase==='planned',order:o.intake_phase!=='planned',inspection:inspection.recorded,issued:!!r&&q?.status==='issued'&&!q.issue_pending,needsRevision,approval:!needsRevision&&h.approvals.length===1,execution:!needsRevision&&h.executions.length===1,handover:!needsRevision&&h.deliveries.length===1,archive:false}
    if(e.handover&&r)e.archive=(await archive.documents(r.id)).complete
    if(e.archive)continue
    const stage=confirmedStage(e)
@@ -52,7 +52,7 @@ export function operationsRepository(client:SupabaseClient,context:Context){
 export function operationsScope(controller:AuthController):string {
  const s=controller.getSnapshot(),c=s.context
  return c&&['authorized','restricted'].includes(s.phase)&&canOpen(c)
-  ?JSON.stringify([c.userId,c.workshop.id,c.workshop.status,c.role,s.authorityVersion??null]):''
+  ?JSON.stringify([c.userId,c.workshop.id,c.workshop.status,c.role,c.inspectionEnabled,s.authorityVersion??null]):''
 }
 export type OperationsState={scope:string;rows:Operation[];busy:boolean;error:string}
 export function watchOperations(controller:AuthController,emit:(s:OperationsState)=>void,

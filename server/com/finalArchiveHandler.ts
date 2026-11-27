@@ -23,18 +23,21 @@ export function finalArchiveHandler(policy:{read:boolean;write:boolean;origin:st
    text+=decoder.decode()
    const body=JSON.parse(text)
    if(!body||typeof body!=='object'||Array.isArray(body))return reply('INVALID',400)
-   const wid=archiveId(body.workshopId),rid=archiveId(body.revisionId)
-   const allowed=body.action==='archive'?['action','workshopId','revisionId','orderId','deliveryId','requestId']:['action','workshopId','revisionId','kind']
+   const id=(value:unknown)=>{if(typeof value!=='string')throw new ArchiveFailure('invalid');return archiveId(value)}
+   const wid=id(body.workshopId),rid=id(body.revisionId)
+   const allowed=body.action==='archive'?['action','workshopId','revisionId','orderId','deliveryId','requestId']:['action','workshopId','revisionId','kind',...(body.action==='download'&&body.kind==='quote'?['requestId']:[])]
    if(Object.keys(body).some(k=>!allowed.includes(k)))return reply('INVALID',400)
    if(body.action==='archive'&&!policy.write)return reply('DISABLED',503)
    if(!['archive','download'].includes(body.action))return reply('INVALID',400)
+   if(body.action==='download'&&!['quote','report','handover'].includes(body.kind))return reply('INVALID',400)
+   const downloadRequest=body.action==='download'&&body.kind==='quote'?id(body.requestId):undefined
    const ports=finalArchivePorts(deps.userClient(authorization),deps.trustedClient(),deps.assets)
    if(body.action==='archive'){
-    const manifest=await ports.archive({workshopId:wid,revisionId:rid,orderId:archiveId(body.orderId),deliveryId:archiveId(body.deliveryId),requestId:archiveId(body.requestId)})
+    const manifest=await ports.archive({workshopId:wid,revisionId:rid,orderId:id(body.orderId),deliveryId:id(body.deliveryId),requestId:id(body.requestId)})
     return Response.json({manifest},{headers})
    }
    if(!['quote','report','handover'].includes(body.kind))return reply('INVALID',400)
-   const {bytes:pdf,doc}=await ports.download(wid,rid,body.kind as DocumentKind)
+   const {bytes:pdf,doc}=await ports.download(wid,rid,body.kind as DocumentKind,downloadRequest)
    return new Response(pdf.slice().buffer,{headers:{...headers,'Content-Type':'application/pdf',
     'Content-Disposition':'attachment; filename="'+doc.fileName+'"','Content-Length':String(pdf.length)}})
   }catch(error){

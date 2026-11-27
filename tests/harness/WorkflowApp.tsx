@@ -31,7 +31,7 @@ import { InformesPanel } from '../../src/informes/InformesPanel'
 import { ClientesPanel } from '../../src/clientes/ClientesPanel'
 import { OrdenesPanel } from '../../src/ordenes/OrdenesPanel'
 
-type Screen = 'agenda' | 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion'
+type Screen = 'agenda' | 'inicio' | 'ordenes' | 'clientes' | 'informes' | 'configuracion' | 'mitaller'
 const metricItems: {
   label: string
   value: number

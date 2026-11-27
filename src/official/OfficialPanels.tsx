@@ -77,6 +77,7 @@ const headings: Record<Screen, [string, string]> = {
     'Informes y cotizaciones',
     'Inspección, diagnóstico, presupuestos e informes de trabajo.'
   ],
+  mitaller:['Mi taller','Administración autorizada de tu taller.'],
   configuracion: [
     'Configuración',
     'Prepara la identidad, el acceso y las preferencias de tu taller.'
@@ -87,6 +88,7 @@ const metrics: Record<
   { label: string; value: number | string; icon: LucideIcon; color: string }[]
 > = {
   agenda: [],
+  mitaller: [],
   inicio: [
     { label: 'Órdenes activas', value: workspace.orders.length, icon: Wrench, color: 'blue' },
     {

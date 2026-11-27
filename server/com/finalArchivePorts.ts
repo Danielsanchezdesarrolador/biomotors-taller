@@ -1,3 +1,4 @@
+import {meteredDocument} from '../commercial/meteredDocument'
 /** Concrete trusted SDK adapter. No keys or SDK construction; no storage paths from HTTP. */
 import type {SupabaseClient} from '@supabase/supabase-js'
 import {archiveClosingCandidate,type ClosingArchiveRequest,type ClosingArchiveManifest,type VerifiedClosingSnapshot} from './closingArchiveCandidate'
@@ -13,7 +14,7 @@ export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,ass
  async function authenticate(){const r=await user.auth.getUser();if(r.error||!r.data.user?.email_confirmed_at)throw new ArchiveFailure('denied');return {id:r.data.user.id,confirmed:true}}
  async function documents(wid:string,rid:string){await authenticate();return validateDocumentSet(await rpc(user,'bt_final_archive_document',{p_workshop_id:wid,p_revision_id:rid}),wid,rid)}
  async function read(bucket:string,path:string){const r=await trusted.storage.from(bucket).download(path);if(r.error||!r.data)throw new ArchiveFailure('missing');return new Uint8Array(await r.data.arrayBuffer())}
- async function download(wid:string,rid:string,kind:DocumentKind){
+ async function readDocument(wid:string,rid:string,kind:DocumentKind){
   const set=await documents(wid,rid),doc=set.documents.find(d=>d.kind===kind)
   if(!doc)throw new ArchiveFailure('missing')
   const bytes=await verifyArchivedBytes(await read(doc.bucket,doc.path),doc)
@@ -26,7 +27,7 @@ export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,ass
   const args={p_workshop_id:request.workshopId,p_order_id:request.orderId,p_revision_id:request.revisionId,p_delivery_id:request.deliveryId}
   const source=await rpc<VerifiedClosingSnapshot|{completed:ClosingArchiveManifest}>(user,'bt_final_archive_source',args)
   if('completed' in source){
-   for(const kind of ['quote','report','handover'] as const)await download(request.workshopId,request.revisionId,kind)
+   for(const kind of ['quote','report','handover'] as const)await readDocument(request.workshopId,request.revisionId,kind)
    return source.completed // A completed retry NEVER loads fonts, renders or uploads.
   }
   return archiveClosingCandidate({approved:true},{
@@ -48,6 +49,11 @@ export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,ass
     ...args,p_request_id:requestId,p_actor_id:actor.id,p_manifest:manifest
    })
   },request)
+ }
+ async function download(wid:string,rid:string,kind:DocumentKind,requestId:string=crypto.randomUUID()){
+  if(kind!=='quote')return readDocument(wid,rid,kind)
+  const result=await readDocument(wid,rid,kind)
+  return {...result,bytes:await meteredDocument(user,trusted,{workshopId:wid,capability:'quote',resourceId:rid,requestId},async()=>result.bytes)}
  }
  return {authenticate,documents,download,archive}
 }

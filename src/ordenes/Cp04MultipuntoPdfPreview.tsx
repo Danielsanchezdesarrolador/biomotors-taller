@@ -3,14 +3,16 @@ import {Download,Eye,FileText,X} from 'lucide-react'
 import type {Finding,OrderWithVehicle,InspectionPdfIdentity} from './cp04Contracts'
 import {hasCurrentProvisionalFindings} from './cp04Autosave'
 
-/** CP04 document preview only. It never sends, stores, or marks a PDF as issued. */
+/** Server-authorized preview with shared quota/retry identity; never issues or emails a document. */
 export function Cp04MultipuntoPdfPreview({
- workshopName,order,findings,outstanding,incomplete,disabled,loadIdentity
+ workshopName,order,findings,outstanding,incomplete,disabled,loadIdentity,loadDocument
 }:{
  workshopName:string;order:OrderWithVehicle;findings:readonly Finding[]
  outstanding:number;incomplete:boolean;disabled:boolean
  loadIdentity?:(orderId:string)=>Promise<InspectionPdfIdentity>
+ loadDocument?:(orderId:string,requestId:string)=>Promise<Uint8Array>
 }){
+ const operation=useRef(crypto.randomUUID())
  const dialog=useRef<HTMLDialogElement>(null)
  const generation=useRef(0),cached=useRef<Uint8Array|null>(null)
  const [url,setUrl]=useState<string|null>(null)
@@ -27,7 +29,7 @@ export function Cp04MultipuntoPdfPreview({
  useEffect(()=>()=>{if(url)URL.revokeObjectURL(url)},[url])
  // An existing preview is a point-in-time local export; invalidate it if
  // server-confirmed findings or the selected order change.
- useEffect(()=>{generation.current++;cached.current=null;setUrl(null);setDisplay(false);setError('');setBusy(false)
+ useEffect(()=>{generation.current++;operation.current=crypto.randomUUID();cached.current=null;setUrl(null);setDisplay(false);setError('');setBusy(false)
    return ()=>{generation.current++;cached.current=null}
  },[order,findings,workshopName,disabled,blocked])
  async function generate(download:boolean){
@@ -36,12 +38,13 @@ export function Cp04MultipuntoPdfPreview({
    const current=generation.current
    setBusy(true);setError('')
    try{
-     const {browserMultipuntoPdf,downloadMultipuntoPdf}=await import('./cp04InspectionPdf')
+     const downloadMultipuntoPdf=(bytes:Uint8Array,name:string)=>{const u=URL.createObjectURL(new Blob([bytes.slice().buffer],{type:'application/pdf'}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),30000)}
      let bytes=cached.current
      if(!bytes){
-       const identity=await loadIdentity?.(order.order.id)
+       await loadIdentity?.(order.order.id)
+       if(!loadDocument)throw Error('OFFICIAL_DOCUMENT_SERVICE_REQUIRED')
        if(current!==generation.current)return
-       bytes=await browserMultipuntoPdf({workshopName,order,findings,identity})
+       bytes=await loadDocument(order.order.id,operation.current)
        if(current!==generation.current)return
        cached.current=bytes
      }
@@ -54,7 +57,7 @@ export function Cp04MultipuntoPdfPreview({
      }
    }catch(error){if(current===generation.current)setError(error instanceof Error&&error.message==='MULTIPUNTO_PDF_FIELD_TOO_LONG'
      ?'Un dato de identificación excede el espacio legible de una hoja A4. Revisa el expediente; no se creó un PDF incompleto.'
-     :'No fue posible crear el PDF local. Comprueba tu conexión y vuelve a verificar tu acceso.')}
+     :'No se pudo autorizar el documento. Revisa el plan, la cuota disponible, tu sesión y los permisos del taller.')}
    finally{if(current===generation.current)setBusy(false)}
  }
  return <section className="cp04-pdf-controls" aria-label="Informe PDF de inspección multipunto">

@@ -1,3 +1,4 @@
+import {commercialDocumentRequest} from '../cp05/documentClient'
 import type {SupabaseClient} from '@supabase/supabase-js'
 import type {Context} from '../auth/controller'
 import {ArchiveFailure,archiveId,validateDocumentSet,verifyArchivedBytes,type ArchiveRow,type ArchivedDocument,type DocumentKind} from './contracts'
@@ -19,7 +20,7 @@ export function finalArchiveRepository(client:SupabaseClient,context:Context){
   },documents,
   async bytes(rid:string,kind:DocumentKind):Promise<{bytes:Uint8Array;doc:ArchivedDocument}>{
    const set=await documents(rid),doc=set.documents.find(x=>x.kind===kind);if(!doc)throw new ArchiveFailure('missing')
-   const r=await client.functions.invoke('bt-final-archive',{body:{action:'download',workshopId:wid,revisionId:archiveId(rid),kind}})
+   const r=await client.functions.invoke('bt-final-archive',{body:{action:'download',workshopId:wid,revisionId:archiveId(rid),kind,...(kind==='quote'?{requestId:commercialDocumentRequest(context,rid)}:{})}})
    valid()
    if(r.error){const status=(r.error as {context?:Response}).context?.status;throw new ArchiveFailure(status===401||status===403?'denied':status===404?'missing':status===409?'integrity':status===503?'disabled':'unavailable')}
    if(!(r.data instanceof Blob))throw new ArchiveFailure('unavailable')

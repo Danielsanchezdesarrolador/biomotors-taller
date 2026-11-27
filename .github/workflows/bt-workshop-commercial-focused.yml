@@ -1,0 +1,105 @@
+name: BT-WORKSHOP-COMMERCIAL-01 focused candidate
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt-workshop-commercial-focused.yml'
+      - 'docs/sql/BT_WORKSHOP_COMMERCIAL_01_*.sql'
+      - 'scripts/*commercial*'
+      - 'scripts/security/verify-commercial-*'
+      - 'server/commercial/**'
+      - 'server/com/**'
+      - 'server/cp05/**'
+      - 'src/workshops/**'
+      - 'tests/commercialLab.ts'
+permissions:
+  contents: read
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx vitest run src/workshops/commercial.test.ts src/guided/operationsCorrection.test.tsx src/workshops/client.test.ts src/official/privateScreen.test.ts
+      - run: docker pull postgres:17
+      - run: bash scripts/security/verify-commercial-local.sh
+      - run: node scripts/package-commercial-edge.mjs /tmp/bt-commercial-edge-candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commercial-server
+          path: |
+            /tmp/bt-commercial-evidence/
+            /tmp/bt-commercial-edge-candidate/
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+        agenda: ['on', 'off']
+    env:
+      BT_COMMERCIAL_BROWSER: ${{ matrix.engine }}
+      BT_COMMERCIAL_AGENDA: ${{ matrix.agenda }}
+      BT_COMMERCIAL_EVIDENCE_DIR: /tmp/bt-commercial-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Prepare isolated synthetic browser runner in official CI only
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-commercial-playwright" --no-save --no-package-lock --no-audit --no-fund playwright
+          "$RUNNER_TEMP/bt-commercial-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-commercial-playwright/node_modules" >> "$GITHUB_ENV"
+      - run: python3 scripts/verify-commercial-ui.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commercial-${{ matrix.engine }}-agenda-${{ matrix.agenda }}
+          path: /tmp/bt-commercial-evidence/
+  delta-and-packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run src/workshops/commercialDelta.test.ts src/workshops/commercial.test.ts src/cp05/pilotDocuments.test.ts
+      - run: docker pull postgres:17
+      - run: python3 scripts/security/verify-commercial-delta-local.py
+      - name: Reproduce and validate all three offline packages
+        run: |
+          node scripts/package-commercial-handlers.mjs /tmp/bt-commercial-delta-build-a
+          node scripts/package-commercial-handlers.mjs /tmp/bt-commercial-delta-build-b
+          node scripts/verify-commercial-handlers-package.mjs /tmp/bt-commercial-delta-build-a /tmp/bt-commercial-delta-build-b
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Native Deno dependency resolution and check (not hosted runtime)
+        run: |
+          for kind in ready freeze; do
+            for service in bt-cp05-documents bt-final-archive bt-commercial-documents; do
+              deno check --no-lock "/tmp/bt-commercial-delta-build-a/$kind/supabase/functions/$service/index.js"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commercial-delta-evidence
+          path: |
+            /tmp/bt-commercial-delta-evidence/
+            /tmp/bt-commercial-delta-build-a/release-manifest.json

@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Candidate UI only: all Supabase/Edge/provider responses are synthetic and intercepted.
 const { chromium } = require('playwright'),
   { PDFDocument, StandardFonts } = require('pdf-lib'),
@@ -207,7 +208,7 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
       })
       .waitFor()
     await p.locator('.cp05-history').screenshot({ path: out + '/documentos-390.png' })
-    await p.locator('.bottom-nav button').nth(2).click()
+    await navigateSection(p,'clientes')
     await p.locator('.cp03-result').first().click()
     await p.getByRole('heading', { name: 'Vehículos vinculados' }).waitFor()
     await p.locator('.cp03-result').filter({ hasText: 'QA1234' }).first().click()

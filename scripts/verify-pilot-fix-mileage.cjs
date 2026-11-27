@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Targeted mileage, truthful failed-save copy and viewport PDF evidence; synthetic HTTP only.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp04Page,uuid,tenant,userId}=require('../tests/harness/cp04BrowserFixture.cjs')
@@ -7,13 +8,13 @@ const out=process.env.OUTPUT_DIR||'/tmp/bt-pilot-fix-evidence'
 try{for(const width of (process.env.PILOT_WIDTHS||'1440,390').split(',').map(Number)){
  const {p,state,errors}=await cp04Page(b,width);p.setDefaultTimeout(12000)
  state.customers.push({id:uuid(50),workshop_id:tenant,full_name:'Cliente sintético kilometraje',email:null,mobile_e164:null,notes:null,archived_at:null,created_at:new Date().toISOString(),updated_at:new Date().toISOString()})
- const nav=async index=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
- await nav(2);await p.getByRole('button',{name:/Cliente sintético kilometraje/}).click();await p.getByRole('button',{name:'Agregar vehículo',exact:true}).click()
+ const nav=screen=>navigateSection(p,screen)
+ await nav('clientes');await p.getByRole('button',{name:/Cliente sintético kilometraje/}).click();await p.getByRole('button',{name:'Agregar vehículo',exact:true}).click()
  await p.getByLabel('Marca *',{exact:true}).fill('Synthetic');await p.getByLabel('Modelo *',{exact:true}).fill('Pilot');await p.getByLabel(/Patente/).last().fill('QA9900')
  const km=p.getByLabel('Kilometraje',{exact:true});await km.fill('120.00');await p.getByText(/Kilometraje inválido/).waitFor();assert.equal(await km.inputValue(),'120.00');assert.equal(state.vehicles.some(v=>v.plate==='QA9900'),false)
  await km.fill('120.000');await p.getByRole('button',{name:'Guardar ficha del vehículo',exact:true}).click();await p.waitForFunction(()=>!document.querySelector('.cp03-editor'))
  assert.equal(state.vehicles.find(v=>v.plate==='QA9900').odometer_km,120000)
- await nav(1);await p.getByLabel('Buscar patente registrada',{exact:true}).fill('QA9900');await p.getByRole('button',{name:'Buscar vehículo',exact:true}).click()
+ await nav('ordenes');await p.getByLabel('Buscar patente registrada',{exact:true}).fill('QA9900');await p.getByRole('button',{name:'Buscar vehículo',exact:true}).click()
  await p.getByLabel('Motivo de ingreso *').fill('Recepción sintética de kilometraje');await p.getByLabel('Kilometraje de recepción',{exact:true}).fill('120.000');await p.getByRole('button',{name:'Guardar orden',exact:true}).click()
  try{await p.waitForFunction(()=>document.querySelector('.cp04-order.selected'))}catch(e){await p.screenshot({path:out+'/mileage-diagnostic-'+width+'.png',fullPage:true});console.log('MILEAGE_DIAGNOSTIC',JSON.stringify({orders:state.orders,errors,text:await p.locator('.cp04-private').innerText()}));throw e}
  assert.equal(state.orders.find(o=>o.complaint==='Recepción sintética de kilometraje').intake_odometer,120000)

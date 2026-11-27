@@ -23,7 +23,6 @@ import {
   QuoteReadPending,
   draftFrom,
   draftPayload,
-  previewSnapshot,
   quoteMessage,
   quoteNumber,
   validateQuoteItem,
@@ -379,32 +378,10 @@ export function QuotePanel({
     try {
       // Official archived bytes must be downloaded through the approved private archive.
       // The current rollout has no Storage authorization; only a clearly marked draft can be generated.
-      const renderer = await import('./pdf')
-      let templatePdf: Uint8Array | undefined
-      if (!revision && privateClient &&
-          import.meta.env.VITE_BT_CP05_CUSTOM_TEMPLATES_ENABLED === 'true' &&
-          ['owner','admin'].includes(context.role)) {
-        const { data, error } = await privateClient.rpc('bt_plan04_pdf_template_status',
-          { p_workshop_id: context.workshop.id })
-        if (error || !data || data.workshopId !== context.workshop.id)
-          throw Error('TEMPLATE_AUTH_UNAVAILABLE')
-        if (data.eligible && ['plus','full'].includes(data.plan) && data.templatePath) {
-          const path: string = data.templatePath
-          const prefix = context.workshop.id + '/'
-          const filename = path.slice(prefix.length)
-          if (!path.startsWith(prefix) ||
-              !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.pdf$/.test(filename))
-            throw Error('TEMPLATE_PATH_MISMATCH')
-          const downloaded = await privateClient.storage
-            .from('bt-workshop-quote-templates').download(path)
-          if (downloaded.error || !downloaded.data ||
-              downloaded.data.size > 4194304) throw Error('PRIVATE_TEMPLATE_UNAVAILABLE')
-          templatePdf = new Uint8Array(await downloaded.data.arrayBuffer())
-        }
-      }
-      const bytes = revision
-        ? await repository.documents.download(revision)
-        : await renderer.browserQuotePdf(previewSnapshot(bundle, draft), true, templatePdf)
+      const renderer = await import('./browserDocument')
+      const bytes = revision ? await repository.documents.download(revision)
+        : privateClient ? await renderer.requestCommercialPdf(privateClient,{action:'draft',workshopId:context.workshop.id,quoteId:bundle.quote.id,draft})
+        : (()=>{throw Error('VERIFIED_DOCUMENT_SERVICE_REQUIRED')})()
       if (active.current && request===sequence.current)
         renderer.downloadPdf(
           bytes,

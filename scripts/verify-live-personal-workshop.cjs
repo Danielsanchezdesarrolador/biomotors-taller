@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // LIVE-FIX-01: real React/SDK, synthetic intercepted HTTP only.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const engine=process.env.BT_LIVE_PERSONAL_BROWSER||'chromium'
@@ -29,6 +30,7 @@ try{for(const width of [1440,390]){
   if(path==='/rest/v1/rpc/bt_plan04_pending_invitations'){assert.deepEqual(args,{});return reply([])}
   if(path==='/rest/v1/rpc/bt_creator_is_creator')return reply(true)
   if(path==='/rest/v1/rpc/bt_plan04_operations_status'){assert.ok([old,own].includes(args.p_workshop_id));return reply({workshopId:args.p_workshop_id,operationsEnabled:false,documentsEnabled:false})}
+  if(path==='/rest/v1/rpc/bt_commercial_own_workshop'){assert.deepEqual(args,{});if(badPersonal)return reply({error:'SYNTHETIC_SCOPE_DENIED'},403);return reply({personalPlan:{scope:'personal',workshopId:null,effectivePlan:personal,personalPlan:personal,isLifetime:lifetime,expiresAt:expiry},workshop:created?{id:own,name:'Mi taller Full sintético'}:null,bound:created,blockedByOwnership:created,canCreate:!created&&personal!=='basic'})}
   if(path==='/rest/v1/rpc/bt_plan04_my_status'){
    const w=args.p_workshop_id;assert.ok(w===null||w===old||created&&w===own)
    if(w===null&&badPersonal)return reply({scope:'workshop',workshopId:old,effectivePlan:'full',personalPlan:'full',isLifetime:true,expiresAt:null})
@@ -51,8 +53,8 @@ try{for(const width of [1440,390]){
  })
  await p.goto(base+'/#/acceso');await p.getByLabel('Correo electrónico',{exact:true}).fill(user.email);await p.getByLabel('Contraseña',{exact:true}).fill('synthetic-password');await p.getByRole('button',{name:'Ingresar',exact:true}).click();await p.locator('.app-shell').waitFor()
  const menu=async()=>{const pop=p.locator('.account-popover');if(!await pop.isVisible())await p.locator('.account-trigger').click();return pop}
- const nav=async(index)=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
- await nav(2);await p.getByRole('button',{name:'Nuevo cliente',exact:true}).click();await p.getByLabel('Nombre completo *').fill('Borrador exclusivo del taller Básico')
+ const nav=screen=>navigateSection(p,screen)
+ await nav('clientes');await p.getByRole('button',{name:'Nuevo cliente',exact:true}).click();await p.getByLabel('Nombre completo *').fill('Borrador exclusivo del taller Básico')
  await p.getByLabel('Nombre completo *').evaluate(el=>window.originalDraft=el)
  let m=await menu();await m.getByRole('region',{name:'Licencia personal y plan del taller'}).waitFor();assert.equal(await m.locator('[data-plan=full] [data-plan-icon=crown]').count(),1);assert.equal(await m.locator('[data-plan=basic]').count(),1)
  await m.getByRole('button',{name:'Mi cuenta personal',exact:true}).click();await p.locator('.personal-home:visible').getByRole('heading',{name:'Mi cuenta ByteTorque'}).waitFor()
@@ -76,7 +78,7 @@ try{for(const width of [1440,390]){
  await p.getByRole('button',{name:'Volver al taller',exact:true}).click();m=await menu();await m.locator('[data-plan=basic]').first().waitFor();assert.equal(await m.locator('[data-plan=full]').count(),0)
  // Independent browser/device changes have no local invalidation event: visible polling re-queries the server.
  personal='plus';lifetime=true;expiry=null;ownPlan='plus';await m.locator('[data-plan=plus]').waitFor({timeout:8000});await m.getByRole('button',{name:'Mi cuenta personal',exact:true}).click();home=p.locator('.personal-home:visible');await home.locator('header [data-plan=plus]').waitFor();await p.screenshot({path:out+'/personal-plus-'+width+'.png',fullPage:true})
- badPersonal=true;await home.locator('header [data-plan=unknown]').waitFor({timeout:8000});await home.getByText('La creación de taller requiere Plus o Full vigente.',{exact:false}).waitFor();assert.equal(await home.getByRole('button',{name:'Crear mi taller',exact:true}).count(),0)
+ badPersonal=true;await home.locator('header [data-plan=unknown]').waitFor({timeout:8000});await home.getByText('No se pudo verificar tu taller propio. La creación permanece bloqueada.',{exact:false}).waitFor();assert.equal(await home.getByRole('button',{name:'Crear mi taller',exact:true}).count(),0)
  assert.equal(JSON.stringify([oldWorkshop,oldSub,membership]),before);assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[])
  results.push({engine,width,status:'PASS',oldBasicUnchanged:true,memberships:members.length,serverMutationKinds:mutations,fullCrown:true,plusBlue:true,draftPreservedOnPersonalNavigation:true,tenantSwitchDisposesOldDraft:true,creatorChangesRequeried:true,externalChangesAutomaticallyRequeried:true,wrongScopeFailsClosed:true})
  await p.close();console.log('LIVE_PERSONAL_WORKSHOP_BROWSER_PASS',engine,width)

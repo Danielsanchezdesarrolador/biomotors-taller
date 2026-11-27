@@ -1,7 +1,7 @@
 /** Backend-only attachment/provider adapter; no provider instance is activated here. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { quoteId, type Revision } from '../../src/cp05/contracts'
-import { restoreRevisionCandidate } from './supabasePortsCandidate'
+import { readAuthorizedRevisionCandidate } from './supabasePortsCandidate'
 import type { DeliveryPorts } from './deliveryCandidate'
 export type Mail = {
   recipient: string
@@ -118,7 +118,7 @@ export function deliveryPortsCandidate(
       )
         throw Error('DOCUMENT_NOT_CURRENT')
       await verifyCurrentRecipient(r.data as Revision)
-      const pdf = await restoreRevisionCandidate(
+      const pdf = await readAuthorizedRevisionCandidate(
         userClient,
         trusted,
         { approved: true },
@@ -161,7 +161,12 @@ export function deliveryPortsCandidate(
       await verifyCurrentRecipient(revision)
       const pdf = attachments.get(revision.id)
       if (!pdf) throw Error('PDF_ATTACHMENT_REQUIRED')
-      return provider.send({
+      const verified=await userClient.auth.getUser();if(verified.error||!verified.data.user?.email_confirmed_at)throw Error('VERIFIED_USER_REQUIRED')
+      const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('email:'+wid+':'+revision.id+':'+verified.data.user.id))),b=>b.toString(16).padStart(2,'0')).join('')
+      const requestId=digest.slice(0,8)+'-'+digest.slice(8,12)+'-4'+digest.slice(13,16)+'-8'+digest.slice(17,20)+'-'+digest.slice(20,32)
+      const reserved=await userClient.rpc('bt_commercial_reserve',{p_workshop_id:wid,p_capability:'email',p_resource_id:revision.id,p_request_id:requestId,p_snapshot_hash:''})
+      if(reserved.error||reserved.data?.request_id!==requestId)throw Error('EMAIL_QUOTA_DENIED')
+      const result=await provider.send({
         recipient,
         customerName: revision.payload.customer.full_name,
         subject: `Cotización COT-${String(revision.payload.quote.number).padStart(6, '0')} · revisión ${revision.revision}`,
@@ -170,6 +175,11 @@ export function deliveryPortsCandidate(
         pdf,
         idempotencyKey
       })
+      if(result.confirmed&&result.providerId||result.definitiveFailure){
+       const receipt=await trusted.rpc('bt_commercial_finish',{p_request_id:requestId,p_actor_id:verified.data.user.id,p_success:!!(result.confirmed&&result.providerId)})
+       if(receipt.error)throw Error('EMAIL_QUOTA_RECONCILIATION_REQUIRED')
+      }
+      return result
     },
     record: (revisionId, attempt, status, providerId, errorCode) =>
       ledger(revisionId, attempt, status, providerId, errorCode)

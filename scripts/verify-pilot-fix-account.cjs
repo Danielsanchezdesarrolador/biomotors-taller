@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // LIVE-FIX-01: real React/SDK, synthetic intercepted HTTP only.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const engine=process.env.BT_PILOT_BROWSER||'chromium'
@@ -30,6 +31,8 @@ try{for(const width of [1440,390]){
   if(path.startsWith('/rest/v1/rpc/'))assert.equal(req.method(),'POST')
   if(path==='/rest/v1/rpc/bt_plan04_accept_pending'){assert.deepEqual(args,{p_invitation_id:invitationId});accepted=true;members.push({user_id:uid,workshop_id:incoming,role:'mechanic',status:'active'});return reply({workshopId:incoming})}
   if(path==='/rest/v1/rpc/bt_plan04_pending_invitations'){assert.deepEqual(args,{});return reply(accepted?[]:[{id:invitationId,workshopName:'Invitación sintética confirmada'}])}
+  if(path==='/rest/v1/rpc/bt_commercial_own_workshop'){assert.deepEqual(args,{});return reply({personalPlan:{scope:'personal',workshopId:null,effectivePlan:personal,personalPlan:personal,isLifetime:lifetime,expiresAt:expiry},workshop:{id:own,name:'Mi taller Full sintético'},bound:true,blockedByOwnership:true,canCreate:false})}
+  if(path==='/rest/v1/rpc/bt_commercial_status'){assert.equal(args.p_workshop_id,old);return reply({workshopId:old,plan:'full',customers:0,customerLimit:null,ownedWorkshops:0,periodStart:'2026-11-23T03:00:00Z',periodEnd:'2026-11-30T03:00:00Z',usage:{quote:{used:0,reserved:0,limit:null},email:{used:0,reserved:0,limit:null},multipunto:{used:0,reserved:0,limit:null}}})}
   if(path==='/rest/v1/rpc/bt_plan04_team'){assert.equal(args.p_workshop_id,old);return reply({workshopId:old,active:activeMechanic?1:0,pending:0,capacity,overCapacity:activeMechanic&&capacity===0,members:[{id:mechanicId,name:'Mecánico sintético',status:activeMechanic?'active':'disabled'}],invites:[]})}
   if(path==='/rest/v1/rpc/bt_plan04_profile'){assert.equal(args.p_workshop_id,old);return reply({workshopId:old,name:'Taller sintético',email:'workshop@invalid.test',phone:'',address:'',logoPath:null})}
   if(path==='/rest/v1/rpc/bt_plan04_manage_mechanic'){assert.equal(args.p_workshop_id,old);assert.equal(args.p_target_id,mechanicId);assert.equal(args.p_email,null);assert.match(args.p_request_id,/^[0-9a-f-]{36}$/);assert.ok(['reactivate','disable'].includes(args.p_action));activeMechanic=args.p_action==='reactivate';teamMutations.push(args.p_action);return reply({id:mechanicId,action:args.p_action})}
@@ -58,13 +61,13 @@ try{for(const width of [1440,390]){
  await p.goto(base+'/#/acceso');await p.getByLabel('Correo electrónico',{exact:true}).fill(user.email);await p.getByLabel('Contraseña',{exact:true}).fill('synthetic-password');await p.getByRole('button',{name:'Ingresar',exact:true}).click()
  await p.getByRole('button',{name:/Taller piloto Full/}).click();await p.locator('.app-shell').waitFor()
  const menu=async()=>{const pop=p.locator('.account-popover');if(!await pop.isVisible())await p.locator('.account-trigger').click();return pop}
- const nav=async(index)=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
- await nav(4);await p.getByRole('heading',{name:'Usuarios y permisos',exact:true}).waitFor()
+ const nav=async(screen)=>navigateSection(p,screen)
+ await nav('mitaller');await p.getByRole('tab',{name:'Mi equipo',exact:true}).click();await p.getByRole('heading',{name:'Mi equipo',exact:true}).waitFor()
  await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).click();await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).waitFor();assert.deepEqual(teamMutations,['reactivate'])
  await p.screenshot({path:out+'/settings-reactivated-'+width+'.png',fullPage:true})
- await p.reload();await p.getByRole('heading',{name:'Usuarios y permisos',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:/Taller piloto Full/}).count(),0);await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).count(),1)
+ await p.reload();await p.getByRole('tab',{name:'Mi equipo',exact:true}).click();await p.getByRole('heading',{name:'Mi equipo',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:/Taller piloto Full/}).count(),0);await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).count(),1)
  await p.getByRole('button',{name:'Desactivar mecánico',exact:true}).click();await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).waitFor()
- capacity=0;await p.reload();await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).isDisabled(),true)
+ capacity=0;await p.reload();await p.getByRole('tab',{name:'Mi equipo',exact:true}).click();await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'Reactivar mecánico',exact:true}).isDisabled(),true)
  await p.getByRole('button',{name:'Volver al inicio',exact:true}).click();await p.locator('.official-panel').first().waitFor()
  let m=await menu();await m.getByRole('button',{name:'Mi cuenta personal',exact:true}).click();await p.getByRole('heading',{name:'Invitaciones a talleres',exact:true}).waitFor();await p.getByText('Invitación sintética confirmada',{exact:true}).waitFor()
  const storage=await p.evaluate(()=>JSON.stringify([Object.entries(localStorage),Object.entries(sessionStorage)]));assert.ok(!storage.includes('token=')&&!storage.includes(invitationId),'Pending continuity stores no invitation credential')

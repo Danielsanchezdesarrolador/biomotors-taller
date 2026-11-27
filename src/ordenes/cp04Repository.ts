@@ -123,6 +123,12 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     if(!vehicleRes.data)throw new WorkOrderFailure('unavailable')
     return {order,vehicle:check<VehicleChoice>(vehicleRes.data,tenant)}
   }
+  async function inspectionDocument(orderId:string,requestId:string):Promise<Uint8Array>{
+    const version=await guard(inspectionStaff)
+    const result=await client.functions.invoke('bt-commercial-documents',{body:{action:'multipunto',workshopId:tenant,orderId:validId(orderId),requestId:validId(requestId)}})
+    valid(version);if(result.error||!(result.data instanceof Blob))throw new WorkOrderFailure('denied')
+    const bytes=new Uint8Array(await result.data.arrayBuffer());if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw new WorkOrderFailure('unavailable');return bytes
+  }
   async function pdfIdentity(orderId:string):Promise<InspectionPdfIdentity>{
     const version=await guard()
     const record=await getOrder(orderId)
@@ -281,5 +287,5 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     return check<Finding>(result.data,tenant)
   }
   return Object.freeze({findVehicleByPlate,getVehicle,recentOrders,getOrder,
-    pdfIdentity,findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
+    inspectionDocument,pdfIdentity,findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
 }

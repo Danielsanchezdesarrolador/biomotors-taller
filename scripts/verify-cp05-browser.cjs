@@ -135,7 +135,7 @@ const {isOperationsStatusRead}=require('../tests/harness/cp04BrowserFixture.cjs'
    await p.screenshot({path:`${out}/cotizacion-${width}.png`,fullPage:true})
    assert.equal(errors.length,0,JSON.stringify(errors))
    assert.ok(!requests.some(r=>r.action==='send'))
-   if(!qa)assert.ok(!requests.some(r=>r.path.startsWith('/functions/')))
+   if(!qa)assert.deepEqual(requests.filter(r=>r.path.startsWith('/functions/')).map(r=>[r.path,r.method,r.action]),[['/functions/v1/bt-commercial-documents','POST','draft']],'Only explicitly authorized watermarked draft read; no issue, final download or email')
    results.push({width,qaDocuments:qa,tabsPreserveDraft:true,confirmedStatusConsistent:true,topPdfVisible:true,immutableHistory:true,emailDisabled:true,overflow:false,errors})
    fs.writeFileSync(`${out}/browser-results.json`,JSON.stringify(results,null,2))
    console.log('CP05_COMPACT_PASS',width,qa?'QA_DOCUMENTS':'DOCUMENTS_OFF')

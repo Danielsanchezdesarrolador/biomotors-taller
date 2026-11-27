@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // BT-PILOT-QA-04B: browser integration with real CP03/CP04 UI and synthetic HTTP.
 // All outbound Supabase URLs are intercepted by cp04BrowserFixture. No production connection.
 const { chromium } = require('playwright')
@@ -12,7 +13,7 @@ function writes(requests, table, method = 'POST') {
 }
 async function assertNoPageErrors(errors) { assert.deepEqual(errors, []) }
 async function openDirectory(p, width) {
-  await p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button').nth(2).click()
+  await navigateSection(p,'clientes')
   await p.locator('.cp03-pilot').waitFor()
   await p.getByRole('button', { name: 'Nuevo cliente' }).waitFor()
 }

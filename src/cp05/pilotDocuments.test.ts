@@ -86,7 +86,18 @@ function fixture() {
     }
     return chain
   }
+  const consumption=new Map<string,any>()
   const rpc = vi.fn(async (name: string, args: any) => {
+    if(name==='bt_commercial_finish'){
+      const row=consumption.get(args.p_request_id)
+      if(!row||row.actor_id!==args.p_actor_id||!state.active)return {data:null,error:Error('DENIED')}
+      row.state=args.p_success?'confirmed':'failed';row.bytes=args.p_bytes
+      return {data:{request_id:args.p_request_id,state:row.state},error:null}
+    }
+    if(name==='bt_commercial_cached'){
+      const row=consumption.get(args.p_request_id)
+      return row?.state==='confirmed'&&row.actor_id===args.p_actor_id?{data:row.bytes?.slice(2),error:null}:{data:null,error:Error('DENIED')}
+    }
     if (name === 'bt_cp05_completed_issue')return {data:state.revision?{...state.reserved,completed:state.revision}:null,error:null}
     if (name === 'bt_cp05_issue_status')
       return {
@@ -143,7 +154,14 @@ function fixture() {
         error: null
       }))
     },
-    from
+    from,
+    rpc:vi.fn(async(name:string,args:any)=>{
+      if(name!=='bt_commercial_reserve')throw Error('Unexpected caller RPC '+name)
+      if(!state.active||args.p_workshop_id!==wid||args.p_resource_id!==rid||!['quote','email'].includes(args.p_capability))return {data:null,error:Error('DENIED')}
+      const previous=consumption.get(args.p_request_id)
+      const row=previous?.state==='confirmed'?previous:{request_id:args.p_request_id,workshop_id:wid,resource_id:rid,actor_id:uid,state:'reserved'}
+      consumption.set(args.p_request_id,row);return {data:row,error:null}
+    })
   } as unknown as SupabaseClient
   const trusted = {
     rpc,

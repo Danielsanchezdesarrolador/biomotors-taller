@@ -98,7 +98,7 @@ export function supabaseGateway(client: SupabaseClient): AuthGateway {
       try {
         const {data,error} = await client.rpc('bt_plan04_operations_status', {p_workshop_id:id})
         if (error || data?.workshopId !== id) return {operationsEnabled:false,documentsEnabled:false}
-        return {operationsEnabled:data.operationsEnabled === true,documentsEnabled:data.documentsEnabled === true}
+        return {operationsEnabled:data.operationsEnabled === true,documentsEnabled:data.documentsEnabled === true,...(typeof data.inspectionEnabled==='boolean'?{inspectionEnabled:data.inspectionEnabled}:{})}
       } catch { return {operationsEnabled:false,documentsEnabled:false} }
     },
     subscribe(callback) {

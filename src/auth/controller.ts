@@ -7,8 +7,8 @@ export type Identity = { id: string; confirmed: boolean; displayName?: string }
 export type Membership = { user_id: string; workshop_id: string; role: string; status: string }
 export type Workshop = { id: string; name: string; status: string }
 export type Choice = { workshop: Workshop; role: Role }
-export type WorkshopAccess = { operationsEnabled: boolean; documentsEnabled: boolean }
-export type Context = Choice & { userId: string; displayName?: string; operationsEnabled?: boolean; documentsEnabled?: boolean }
+export type WorkshopAccess = { operationsEnabled: boolean; documentsEnabled: boolean; inspectionEnabled?:boolean }
+export type Context = Choice & { userId: string; displayName?: string; operationsEnabled?: boolean; documentsEnabled?: boolean; inspectionEnabled?:boolean }
 export interface AuthGateway {
   /** Obtain the same SDK instance used for login, not a second browser session. */
   getDataClient?(): Promise<SupabaseClient | null>

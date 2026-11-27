@@ -1,7 +1,7 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react'
 import type {Screen} from '../layout/AppShell'
 import {readPrivateScreen,rememberPrivateScreen} from './privateScreen'
-const screens:Screen[]=['inicio','agenda','ordenes','clientes','informes','configuracion']
+const screens:Screen[]=['inicio','agenda','ordenes','clientes','informes','mitaller','configuracion']
 /** At most six mounted views with Agenda enabled. Only a section hint enters history; records stay in React. */
 export function useWorkspaceNavigation(privateSession:boolean,scope?:string) {
  const [screen,setScreen]=useState<Screen>(()=>privateSession?readPrivateScreen(undefined,scope):'inicio')

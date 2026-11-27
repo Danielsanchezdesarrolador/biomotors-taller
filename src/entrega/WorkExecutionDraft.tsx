@@ -70,7 +70,7 @@ export function WorkExecutionDraft({
     setError('')
     try {
       const [{ browserExecutionDraftPdf }, { downloadPdf }] = await Promise.all([
-        import('./executionPdf'), import('../cp05/pdf')
+        import('./executionPdf'), import('../cp05/browserDocument')
       ])
       const bytes = await browserExecutionDraftPdf(review)
       downloadPdf(

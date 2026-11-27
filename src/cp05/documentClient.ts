@@ -89,7 +89,7 @@ export function documentClient(
     },
     async download(revision: Revision): Promise<Uint8Array> {
       if (revision.workshop_id !== context.workshop.id) throw new QuoteFailure('denied')
-      const data = await call('download', { revisionId: quoteId(revision.id) })
+      const data = await call('download', { revisionId: quoteId(revision.id),requestId: commercialDocumentRequest(context,revision.id) })
       if (!(data instanceof Blob)) throw new QuoteFailure('unavailable')
       const bytes = new Uint8Array(await data.arrayBuffer())
       alive()
@@ -130,4 +130,10 @@ export function documentClient(
       disposed = true
     }
   }
+}
+
+export function commercialDocumentRequest(context:Context,resource:string):string {
+ const key='bt:commercial-document:'+context.userId+':'+context.workshop.id+':'+resource
+ try{const previous=JSON.parse(sessionStorage.getItem(key)||'null');if(previous&&Date.now()>=previous.at&&Date.now()-previous.at<240000)return quoteId(previous.id)}catch{/* Hint is never authority. */}
+ const id=crypto.randomUUID();try{sessionStorage.setItem(key,JSON.stringify({id,at:Date.now()}))}catch{/* Retry remains in caller memory where possible. */}return id
 }

@@ -720,7 +720,7 @@ export function VehicleHistory({
                 ? closingPreview.Panel : undefined
             }
             onDownload={archive?.scope === scope ? async (revision) => {
-              const { downloadPdf } = await import('../cp05/pdf')
+              const { downloadPdf } = await import('../cp05/browserDocument')
               await archivedRevisionPdf(
                 revision, vehicleId, context.workshop.id, archive.port, downloadPdf
               )
@@ -734,7 +734,7 @@ export function VehicleHistory({
                     await repository.vehicle(vehicleId)
                     const { prepareClosingPacket } = await import('../entrega/finalPackage')
                     const { browserClosingDocumentPdf } = await import('../entrega/finalPdf')
-                    const { downloadPdf } = await import('../cp05/pdf')
+                    const { downloadPdf } = await import('../cp05/browserDocument')
                     const packet = prepareClosingPacket(quote, revision, evidence)
                     const bytes = await browserClosingDocumentPdf(packet, kind)
                     await repository.vehicle(vehicleId)

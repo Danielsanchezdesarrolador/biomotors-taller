@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Focused kept-alive CP05 selector regression. All Supabase HTTP is synthetic.
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
@@ -7,7 +8,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
  const out=process.env.OUTPUT_DIR||'/tmp/bt-cp05-selector';fs.mkdirSync(out,{recursive:true});const results=[]
  try{for(const width of (process.env.CP05_WIDTHS||'390,1366').split(',').map(Number)){
   const {p,state,requests,errors,quotes,commands}=await cp05Page(browser,width)
-  const nav=index=>p.locator(width>760?'.side-nav button':'.bottom-nav button').nth(index).click()
+  const nav=screen=>navigateSection(p,screen)
   const selector=p.locator('.cp05-list select')
   const quoteReads=()=>requests.filter(r=>r.method==='GET'&&r.path.startsWith('/rest/v1/quote')).length
   let fail=false,holdNext=false,release,intercepted=0
@@ -21,13 +22,13 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
   })
   try{
    // Visit general Quotes first, so it will remain mounted with its old list.
-   await nav(3);await selector.waitFor();await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
+   await nav('informes');await selector.waitFor();await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
    await p.evaluate(()=>{window.__selectorDocument=crypto.randomUUID()})
    const documentId=await p.evaluate(()=>window.__selectorDocument)
    const originalNode=await selector.elementHandle()
    const newOrders=[]
    async function newOrder(number){
-    await nav(1)
+    await nav('ordenes')
     const vehicle={...state.vehicles[0],id:uuid(1800+number),plate:'QS'+(8000+number),plate_key:'QS'+(8000+number)}
     state.vehicles.push(vehicle)
     await p.getByLabel('Buscar patente registrada').fill(vehicle.plate)
@@ -39,7 +40,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
     return {order,vehicle}
    }
    const first=await newOrder(1)
-   await nav(3);await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
+   await nav('informes');await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
    assert.ok((await selector.locator('option').allTextContents()).some(s=>s.includes(first.vehicle.plate)))
    assert.equal(await originalNode.evaluate(el=>el.isConnected),true,'Same kept-alive selector is refreshed')
    await selector.selectOption(first.order.id)
@@ -59,7 +60,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
    const itemInput=await p.getByLabel('Descripción del ítem').elementHandle()
    const selectedQuote=quotes[0].id,writes=commands.size,readCount=quoteReads()
    const second=await newOrder(2)
-   await nav(3);await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
+   await nav('informes');await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
    if(width<=760)await p.getByRole('button',{name:'Cambiar cotización u OT'}).click()
    const options=await selector.locator('option').allTextContents()
    for(const vehicle of [first.vehicle,second.vehicle])assert.ok(options.some(s=>s.includes(vehicle.plate)))
@@ -70,7 +71,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
    assert.equal(quotes[0].id,selectedQuote);assert.equal(commands.size,writes)
    assert.equal(quoteReads(),readCount,'Entry refresh must not reload the quote or its draft')
    // An error blocks only the selector/create action, not unsaved quote editing.
-   await nav(0);fail=true;await nav(3)
+   await nav('inicio');fail=true;await nav('informes')
    await p.getByRole('button',{name:'Reintentar órdenes',exact:true}).waitFor()
    assert.equal(await selector.isDisabled(),true)
    assert.equal(await p.getByRole('button',{name:'Crear cotización',exact:true}).isDisabled(),true)
@@ -79,14 +80,14 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
    fail=false;await p.getByRole('button',{name:'Reintentar órdenes',exact:true}).click()
    await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
    // A slower response from the previous visit cannot replace the newer one.
-   await nav(0);holdNext=true;await nav(3)
+   await nav('inicio');holdNext=true;await nav('informes')
    await p.waitForFunction(()=>document.querySelector('.cp05-list select')?.disabled===true)
    for(let i=0;i<40&&!release;i++)await p.waitForTimeout(25)
    assert.equal(intercepted,1);assert.ok(release)
-   await nav(0)
+   await nav('inicio')
    const raceOrder={...second.order,id:uuid(1999),complaint:'OT nueva durante lectura suspendida'}
    state.orders.push(raceOrder)
-   await nav(3);await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
+   await nav('informes');await p.waitForFunction(()=>!document.querySelector('.cp05-list select')?.disabled)
    assert.equal(await selector.locator(`option[value="${raceOrder.id}"]`).count(),1)
    release();await p.waitForTimeout(150)
    assert.equal(await selector.locator(`option[value="${raceOrder.id}"]`).count(),1,'Ignore previous activation response')
@@ -106,7 +107,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
    await p.screenshot({path:`${out}/selector-${width}.png`,fullPage:true})
    // New guarded reads after membership revocation cannot show/create from stale options.
    const beforeDenied=commands.size
-   await nav(0);state.revoked=true;await nav(3)
+   await nav('inicio');state.revoked=true;await nav('informes')
    await p.getByText('No se pudo verificar el acceso a las órdenes. Vuelve a verificar tu sesión.',{exact:true}).waitFor()
    assert.equal(await p.locator('.cp05-workspace-toolbar').count(),0)
    assert.equal(await selector.locator('option').count(),1)

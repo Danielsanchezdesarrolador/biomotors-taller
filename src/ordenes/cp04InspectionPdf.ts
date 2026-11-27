@@ -1,7 +1,5 @@
 /** BT-INS-PDF-01: read-only PDF from confirmed CP04 visit findings. No network writes. */
 import {PDFDocument,rgb,pushGraphicsState,popGraphicsState,setTextRenderingMode,TextRenderingMode,setLineWidth,setStrokingColor,type RGB as Color,type PDFImage} from 'pdf-lib'
-import lightLogoUrl from '../../apps/android/assets/brand/logo-horizontal.png?url'
-import darkLogoUrl from '../../apps/android/assets/brand/logo-horizontal-dark.png?url'
 import fontkit from '@pdf-lib/fontkit'
 import {multipuntoTemplateItems,latestForMultipuntoItem,multipuntoSavedState,multipuntoDisplayNote} from './cp04Multipunto'
 import {provisionalFinding,CP04_PROVISIONAL_NOTE} from './cp04Autosave'
@@ -176,12 +174,6 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
  gradient(0,830,W,12,navy,blue)
  // Deliberately only one addPage call; long notes never enter this fixed layout.
  return pdf.save({useObjectStreams:false})
-}
-export async function browserMultipuntoPdf(input:MultipuntoPdfInput):Promise<Uint8Array>{
- const responses=await Promise.all([fetch('/cp05/DejaVuSans.ttf'),fetch(lightLogoUrl),fetch(darkLogoUrl)])
- if(responses.some(r=>!r.ok))throw Error('MULTIPUNTO_PDF_ASSET_UNAVAILABLE')
- const [font,light,dark]=await Promise.all(responses.map(async r=>new Uint8Array(await r.arrayBuffer())))
- return multipuntoPdf(input,font,{light,dark})
 }
 export function downloadMultipuntoPdf(bytes:Uint8Array,fileName:string){
  const url=URL.createObjectURL(new Blob([bytes.slice().buffer],{type:'application/pdf'}))

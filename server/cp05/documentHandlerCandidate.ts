@@ -112,7 +112,8 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
           trusted,
           { approved: true },
           wid,
-          rid
+          rid,
+          quoteId(String(body.requestId||''))
         )
         return new Response(pdf.slice().buffer, {
           headers: {

@@ -1,3 +1,23 @@
+## 26/11/2026 — BT-WORKSHOP-COMMERCIAL-01-DELTA-01: corrección privada focalizada
+
+Base ba69a30eb62e2af6e7f01b62e11975b10e3978bb conservada. FIX-01: contrato HTTP de expediente final admite requestId UUID string únicamente en descargas quote, rechaza campos extra/tipos inválidos y preserva históricos. FIX-02: toda salida meteredDocument procede de bytes canónicos confirmados, también tras render concurrente; SQL finish/cache revisado, first-wins correcto y sin modificación. FIX-03: paquetes reproducibles CP05/final archive/commercial, JWT requerido, configuración conjunta y tres entradas freeze 503.
+
+Validación específica: 30 casos unitarios/HTTP distintos (22 nuevos + 3 afectados + 5 guardas existentes), 8 comprobaciones reales PostgreSQL17 aislado y 7 de paquetes PASS; TypeScript/sintaxis/diff PASS. No repetir suites anteriores de 44/48; UI y WebKit no ejecutados. Runtime de paquetes probado con Node ESM/adaptador Deno y SDK sintético; no certifica Deno nativo/Edge. [Checkpoint y procedimiento de congelación/actualización](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_DELTA_01_20261126.md). Barrera de mantenimiento confiable y drenaje de todas las salidas antiguas/Storage obligatorios antes de instalar/abrir; despliegues secuenciales no son atómicos. No instalar nada en este bloque.
+
+Solo delta DTK-ERR-056 en bytetorque-review/main/BT-WORKSHOP-COMMERCIAL-01-DELTA-01. Conservar entrega original y todas las anteriores. SHAs/hashes en metadatos de entrega. Sin push oficial, SQL alojado, Render, secretos, Edge desplegadas, nuevas dependencias o ramas; SEC07 cerrado y servicios OFF. Próxima puerta: revisión independiente y CI/runtime oficial, no nuevas funcionalidades.
+
+---
+
+## 26/11/2026 — BT-WORKSHOP-COMMERCIAL-01: candidato privado consolidado
+
+Implementados BT-PILOT-FIX-02, ART-WORKSHOP, PLAN-LIMITS y PLAN-ENFORCEMENT sobre main `c3cb91db1d33edb98fbe62776f9fbabbcbc09307`. Mi taller separado de Configuración, cuatro pestañas y R2 según ocho referencias; cuenta personal consulta titularidad self-only, Plus/Full crea un único taller y Básico conserva vínculo previo. Gestión de equipo, sesión, navegación persistente y borradores por taller reutilizados. Nueva capacidad/ledger SQL incremental autoritativo; Básico completa circuito sin inventar inspección; cuotas tenant-scoped con locks, ventanas servidor, reintentos de bytes idénticos y watermark integrado. Generadores oficiales fuera del navegador, salidas CP05/archivo/multipunto medidas y lectura Storage directa restringida. Ningún bucket nuevo; logos, correo, registro público y pagos OFF.
+
+Validación local sintética: 44 servidor PostgreSQL17 aislado; 48 unitarias afectadas; Chromium ocho estados, Agenda OFF dos, titularidad cuatro, CP05 dos viewports y continuidad PDF móvil. TypeScript/builds/grafo y paquete offline PASS. WebKit BLOCKED_ENVIRONMENT, cero descargas; workflow manual preparado, pendiente CI oficial. No equivale a LIVE ni aceptación humana. No suites históricas completas, respaldos o SEC07.
+
+[Checkpoint completo, semántica de cuotas, instalación y reversión](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_20261126.md). Instalar solo tras revisión/CI/autorización: congelar egress antiguo primero, SQL transaccional, actualizar **todos** los handlers existentes además del nuevo adaptador, frontend compatible y QA antes de abrir. Nunca convivir con salidas service_role antiguas sin cuota. Rollback funcional cerrado conserva ledger/guardas y exige congelación real. No producción, push oficial, SQL alojado, Edge/Render/secretos ni Android. Solo delta privado DTK-ERR-056 en bytetorque-review/main/BT-WORKSHOP-COMMERCIAL-01; SHAs/inventario/hashes verificables en metadatos de entrega. Próxima puerta: revisión independiente; no iniciar otro trabajo.
+
+---
+
 ## 26/11/2026 — BT-PILOT-FIX-02: Mi taller y Configuración separados; creación única
 
 Decisión del titular tras QA humana del LIVE BT-PILOT-FIX-01. Taller piloto localizado y accesible; no declarar aceptación completa de FIX-01. Nuevo bloque correctivo obligatorio antes de BT-PLAN-LIMITS-01, una entrega consolidada, sin repetir suites no afectadas.

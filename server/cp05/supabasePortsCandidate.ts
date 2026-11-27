@@ -1,3 +1,4 @@
+import {meteredDocument} from '../commercial/meteredDocument'
 /** Backend candidate only. Caller supplies an authenticated SDK and a trusted SDK.
  * No SDK construction, endpoint, secret lookup, bucket creation or deployed worker.
  */
@@ -123,7 +124,7 @@ export function issuancePortsCandidate(
   }
 }
 /** Restore only a revision visible through caller's RLS; never accept a browser path. */
-export async function restoreRevisionCandidate(
+export async function readAuthorizedRevisionCandidate(
   userClient: SupabaseClient,
   trustedClient: SupabaseClient,
   policy: { approved: boolean },
@@ -145,9 +146,10 @@ export async function restoreRevisionCandidate(
     throw Error('REVISION_NOT_AUTHORIZED')
   const expected = `${wid}/quotes/${quoteId(r.data.quote_id)}/r${r.data.revision}/${r.data.payload_sha256}.pdf`
   if (r.data.pdf_object_path !== expected) throw Error('ARCHIVE_PATH_MISMATCH')
-  return privateArchiveCandidate(trustedClient, policy).restore(
-    r.data.pdf_object_path,
-    r.data.pdf_sha256,
-    r.data.pdf_size
-  )
+  return privateArchiveCandidate(trustedClient,policy).restore(r.data.pdf_object_path,r.data.pdf_sha256,r.data.pdf_size)
+}
+
+/** Public document egress only. Internal provider attachment reads are independently metered as email. */
+export async function restoreRevisionCandidate(userClient:SupabaseClient,trustedClient:SupabaseClient,policy:{approved:boolean},workshopId:string,revisionId:string,requestId:string=crypto.randomUUID()){
+ return meteredDocument(userClient,trustedClient,{workshopId:quoteId(workshopId),capability:'quote',resourceId:quoteId(revisionId),requestId:quoteId(requestId)},()=>readAuthorizedRevisionCandidate(userClient,trustedClient,policy,workshopId,revisionId))
 }

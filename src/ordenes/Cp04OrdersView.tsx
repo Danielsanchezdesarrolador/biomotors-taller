@@ -59,7 +59,7 @@ export type Cp04Port = Pick<
   | 'createFinding'
   | 'updateFindingNote'
   | 'markResolved'
->
+> & {inspectionDocument?:ReturnType<typeof cp04Repository>['inspectionDocument']}
 
 const statusNext: Record<OrderStatus, OrderStatus[]> = {
   received: ['inspecting', 'closed'],
@@ -141,7 +141,7 @@ export function Cp04OrdersView({
   const [notice, setNotice] = useState('')
   const canCreate =
     context.role === 'owner' || context.role === 'admin' || context.role === 'reception'
-  const canInspect = canCreate || context.role === 'mechanic'
+  const canInspect = (canCreate || context.role === 'mechanic')&&context.inspectionEnabled!==false
   const scope = { userId: context.userId, workshopId: context.workshop.id }
 
   // Text stays in a same-tab draft during focus/session revalidation. Never
@@ -885,12 +885,13 @@ export function Cp04OrdersView({
           </div>
           <Cp04MultipuntoPdfPreview
             loadIdentity={repository.pdfIdentity}
+            loadDocument={repository.inspectionDocument}
             workshopName={context.workshop.name}
             order={selected}
             findings={findings}
             outstanding={multipuntoOutstanding}
             incomplete={multipuntoIncomplete}
-            disabled={busy || loading}
+            disabled={busy || loading || context.inspectionEnabled===false}
           />
           {canCreate && statusNext[selected.order.status].length > 0 && (
             <div className="cp04-actions">

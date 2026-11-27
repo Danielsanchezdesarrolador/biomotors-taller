@@ -1,3 +1,4 @@
+import {degrees} from 'pdf-lib'
 import { PDFDocument, rgb } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { quoteNumber, type Snapshot } from './contracts'
@@ -383,6 +384,10 @@ export async function quotePdf(
   finishingBlock()
   const pages = doc.getPages()
   pages.forEach((p, index) => {
+    if(draft){
+      for(const [text,y,size] of [['BORRADOR',H*.50,56],['NO VÁLIDO COMO COTIZACIÓN',H*.38,28],['DOCUMENTO NO EMITIDO',H*.29,20]] as const)
+        p.drawText(text,{x:45,y,size,font:font,rotate:degrees(28),opacity:.23,color:rgb(.25,.32,.42)})
+    }
     p.drawRectangle({ x: 0, y: 0, width: W, height: 28, color: navy })
     p.drawRectangle({ x: M, y: 27, width: 70, height: 2, color: blue })
     const previousPage = page
