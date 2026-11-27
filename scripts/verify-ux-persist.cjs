@@ -20,6 +20,16 @@ function assertCp05OrderRefresh(reads,vehicleIds){
  assert.match(id||'',/^in\.\([0-9a-f-]+(?:,[0-9a-f-]+)*\)$/)
  assert.deepEqual(id.slice(4,-1).split(',').sort(),[...new Set(vehicleIds)].sort(),'Only vehicles referenced by the expected synthetic orders are read')
 }
+// Identity lookup is now required for every document action; no blanket GET exemption.
+function assertPdfIdentityReads(reads,order,vehicle){
+ const q=(select,id)=>({select,workshop_id:'eq.'+tenant,id:'eq.'+id})
+ assert.deepEqual(reads,[
+  {method:'GET',path:'/rest/v1/work_orders',query:q('workshop_id,id,vehicle_id,complaint,intake_odometer,status,opened_by,opened_at,closed_at,updated_at',order.id)},
+  {method:'GET',path:'/rest/v1/vehicles',query:q('workshop_id,id,customer_id,plate,plate_key,make,model,odometer_km',vehicle.id)},
+  {method:'GET',path:'/rest/v1/customers',query:q('workshop_id,id,full_name',vehicle.customer_id)},
+  {method:'GET',path:'/rest/v1/vehicles',query:q('workshop_id,id,customer_id,model_year',vehicle.id)}
+ ],'Exactly the four tenant/resource-scoped identity reads for one authorized document action')
+}
 const active=p=>p.locator('[data-workspace-section]:not([hidden])')
 async function stable(p,value){
  assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),true,'Original form node remains mounted')
@@ -34,7 +44,7 @@ async function stable(p,value){
  try{for(const width of (process.env.BT_UX_WIDTHS||'1366,390,768').split(',').map(Number)){
   let context
   try {context=await cp04Page(browser,width,{customers:[{id:uuid(50),workshop_id:tenant,full_name:'Cliente sintético UX',email:null,mobile_e164:null,archived_at:null}]})} catch(error){const page=browser.contexts()[0]?.pages()[0];if(page){await page.screenshot({path:out+'/startup-failure.png'});console.log(await page.locator('[role=status],[role=alert]').allTextContents())}throw error}
-  const {p,state,requests,errors}=context
+  const {p,state,requests,errors,documentCalls,documentOperations}=context
   p.setDefaultTimeout(15000)
   // A separate trace preserves query shape for this assertion without changing
   // the shared fixture's request-log contract or relaxing its route guards.
@@ -115,7 +125,22 @@ async function stable(p,value){
    await modal.waitFor({state:'detached'})
    return digest
   }
+  const order=state.orders[0],vehicle=state.vehicles.find(v=>v.id===order.vehicle_id)
+  assert.ok(vehicle)
+  const documentStart=httpTrace.length,firstReads=dataReads(requests),callStart=documentCalls.length,ledgerStart=documentOperations.size
   const originalPdf=await openPdf()
+  const assertAction=(start,readStart,index,status,replay)=>{
+   const phase=httpTrace.slice(start)
+   assertPdfIdentityReads(dataReadRecords(phase),order,vehicle)
+   assert.equal(dataReads(requests),readStart+4)
+   assert.deepEqual(phase.filter(r=>r.path.startsWith('/functions/')).map(r=>[r.method,r.path]),[['POST','/functions/v1/bt-commercial-documents']])
+   assert.equal(documentCalls.length,index+1)
+   const call=documentCalls[index]
+   assert.deepEqual(call,{action:'multipunto',workshopId:tenant,orderId:order.id,requestId:documentCalls[callStart].requestId,status,replay})
+   assert.equal(documentOperations.size,ledgerStart+1)
+   assert.equal(documentOperations.get(call.requestId)?.confirmed,true)
+  }
+  assertAction(documentStart,firstReads,callStart,200,false)
   const pdfReads=dataReads(requests),navStart=requests.length,traceStart=httpTrace.length
   // Wait for both specific CP05 responses and its ready selector before leaving:
   // do not cancel the intentional refresh or attribute late reads to the PDF.
@@ -129,14 +154,24 @@ async function stable(p,value){
   assertCp05OrderRefresh(navReads,state.orders.map(o=>o.vehicle_id))
   assert.deepEqual(dataReadRecords(requests.slice(navStart)).map(r=>r.path),navReads.map(r=>r.path),'Fixture and browser trace agree on the exact two navigation reads')
   assert.equal(dataReads(requests),pdfReads+2,'No other business reads while visiting CP05')
-  const reopenStart=httpTrace.length
+  const returnStart=httpTrace.length
   await nav('ordenes')
-  assert.deepEqual(await openPdf(),originalPdf,'Same cached PDF bytes after returning to the mounted module')
-  const reopenReads=dataReadRecords(httpTrace.slice(reopenStart))
-  console.log('BT_UX_PDF_REOPEN_READS',engine,width,JSON.stringify(reopenReads))
-  assert.deepEqual(reopenReads,[],'Returning to CP04 and reopening the same PDF perform no business reads')
-  assert.equal(dataReads(requests),pdfReads+2,'Reopening the same PDF does not reload business records')
-  assert.equal(businessWrites(requests).length,pdfWrites,'Preview and navigation do not write or issue')
+  assert.deepEqual(dataReadRecords(httpTrace.slice(returnStart)),[],'Returning to mounted CP04 does not reload business records')
+  assert.equal(documentCalls.length,callStart+1,'Navigation alone does not request a document')
+  const reopenStart=httpTrace.length,reopenReadStart=dataReads(requests)
+  assert.deepEqual(await openPdf(),originalPdf,'Same server-authorized canonical PDF bytes for the same operation UUID')
+  assertAction(reopenStart,reopenReadStart,callStart+1,200,true)
+  console.log('BT_UX_PDF_REOPEN_READS',engine,width,JSON.stringify(dataReadRecords(httpTrace.slice(reopenStart))))
+  // A denial before the client sees a plan change cannot reuse locally delivered bytes.
+  state.documentPlan='basic'
+  const denialStart=httpTrace.length,denialReads=dataReads(requests)
+  await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
+  await p.getByText('No se pudo autorizar el documento. Revisa el plan, la cuota disponible, tu sesión y los permisos del taller.',{exact:true}).waitFor()
+  assert.equal(await modal.count(),0)
+  assertAction(denialStart,denialReads,callStart+2,403,false)
+  state.documentPlan='full'
+  assert.equal(businessWrites(requests).length,pdfWrites,'No unintended business writes or issue; one confirmed synthetic document operation')
+  console.log('BT_UX_PDF_REAUTH_PASS',engine,width,'two authorized actions, one confirmed UUID, one denied action, equal canonical hashes')
   // CP03 selection and CP06 subview stay mounted while visiting another module.
   await nav('clientes');await p.getByRole('button',{name:'Cerrar formulario',exact:true}).click()
   await p.getByRole('button',{name:/Cliente sintético UX/}).first().click()
@@ -161,7 +196,7 @@ async function stable(p,value){
   await p.evaluate(()=>window.btUxQa.verify());assert.equal(await p.locator('.workspace-views').count(),0)
   assert.equal(await p.evaluate(()=>window.__uxInput.isConnected),false)
   assert.deepEqual(errors,[])
-  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF modal reopen retains exact cached bytes; CP05 entry refreshes exactly two tenant-scoped order-option reads; CP04 return/reopen no business reads; no writes','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
+  results.push({engine,width,status:'PASS',scope:'HTTP mocks, not hosted Auth/RLS or physical Safari',cases:['same DOM/cursor/scroll','screenshot/focus/visibility burst','token refresh','no business reload','five modules/back/forward','unsent CP03/04 forms','pending X no duplicate write','PDF: CP05 entry exactly two scoped reads; CP04 return none; each document action four scoped identity reads and one POST, same UUID/canonical SHA-256, one synthetic confirmation, server denial without fallback, no unintended writes','CP06 subview','offline recovery','revoked membership','role change','different verified user denied old memberships']})
   await p.close();console.log('BT_UX_PERSIST_PASS',engine,width)
  }
  fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2))

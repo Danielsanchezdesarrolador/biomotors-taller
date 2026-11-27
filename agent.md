@@ -1,3 +1,9 @@
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-CI-FIX-01 / CI_PENDING
+
+Base ecc7926badf152ea9c17f7876f6be5e1d07ef0d5. WebKit evaluaba harness antes de registro React; UX usaba fixture que regeneraba PDF y expectativa histórica de cero lecturas incompatible con reautorización. Candidato exclusivamente de pruebas: espera semántica, ledger sintético canónico por UUID y ámbito, cuatro GET de identidad y POST por acción, SHA-256 igual y una confirmación, denegación sin fallback. 3/3 sintaxis JS y 15 checks offline de bloques simulados, no Playwright local. 12 SQL/HTTP y Chromium anteriores conservados como evidencia del SHA base, CI nueva pendiente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_CI_FIX_01_20261127.md). SEC07 cerrado; no SQL, Supabase alojado, Edge, Render, flags, secretos, Codex ni bloques B/C; Auto-Deploy OFF. No confundir preparación/CI con autorización de despliegue.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-DELTA-01 / REVISIÓN PENDIENTE
 
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01 / INTEGRATION_CI_PENDING

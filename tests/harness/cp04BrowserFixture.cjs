@@ -52,6 +52,7 @@ async function cp04Page(browser, width, options = {}) {
     revoked: false,
     operationsEnabled: false,
     documentsEnabled: false,
+    documentPlan: 'full',
     failList: false,
     slowList: false,
     failFindings: false,
@@ -85,6 +86,9 @@ async function cp04Page(browser, width, options = {}) {
   }
   const requests = [],
     errors = []
+  // Synthetic server ledger, per page. This models authorized canonical retries,
+  // not the full SQL quota/lease model covered by the hardening server suite.
+  const documentOperations = new Map(), documentCalls = []
   let serial = 500,
     tick = 0
   const timestamp = () => new Date(Date.UTC(2026, 10, 16, 1, 0, ++tick)).toISOString()
@@ -135,13 +139,41 @@ async function cp04Page(browser, width, options = {}) {
         documentsEnabled:state.documentsEnabled === true})
     }
     if(url.pathname==='/functions/v1/bt-commercial-documents'){
-      assert.equal(method,'POST');const body=request.postDataJSON();assert.equal(body.workshopId,tenant)
-      assert.match(request.headers().authorization||'',/^Bearer /)
-      assert.equal(body.action,'multipunto');assert.ok(state.orders.some(o=>o.id===body.orderId))
-      assert.match(body.requestId,/^[a-f0-9-]{36}$/i)
-      if(state.revoked)return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)
-      const pdf=await PDFDocument.create();pdf.addPage().drawText('SYNTHETIC SERVER INSPECTION '+body.orderId)
-      return route.fulfill({status:200,contentType:'application/pdf',body:Buffer.from(await pdf.save({useObjectStreams:false}))})
+      assert.equal(method,'POST');const body=request.postDataJSON()
+      assert.deepEqual(Object.keys(body).sort(),['action','orderId','requestId','workshopId'])
+      assert.equal(body.workshopId,tenant);assert.equal(body.action,'multipunto')
+      assert.match(body.requestId,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i)
+      const bearer=request.headers().authorization||''
+      assert.match(bearer,/^Bearer [^\s]+$/)
+      const parts=bearer.slice(7).split('.')
+      assert.equal(parts.length,3);assert.equal(parts[2],'synthetic')
+      const actor=JSON.parse(Buffer.from(parts[1],'base64url').toString())
+      assert.equal(actor.sub,userId);assert.equal(actor.role,'authenticated')
+      const call={...body,status:403,replay:false};documentCalls.push(call)
+      const authorized=()=>!state.revoked&&['owner','admin','reception','mechanic'].includes(state.role)&&['plus','full'].includes(state.documentPlan)
+      if(!authorized())return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)
+      const binding=()=>{
+        const order=state.orders.find(o=>o.id===body.orderId&&o.workshop_id===tenant)
+        const vehicle=state.vehicles.find(v=>v.id===order?.vehicle_id&&v.workshop_id===tenant)
+        assert.ok(order&&vehicle,'Synthetic document resource must belong to its workshop')
+        const customer=state.customers.find(c=>c.id===vehicle.customer_id&&c.workshop_id===tenant)||null
+        const findings=state.findings.filter(x=>x.order_id===order.id&&x.workshop_id===tenant).sort((a,b)=>a.id.localeCompare(b.id))
+        return JSON.stringify([actor.sub,tenant,body.orderId,state.documentPlan,order,vehicle,customer,findings])
+      }
+      const scope=binding(),prior=documentOperations.get(body.requestId)
+      if(prior&&prior.scope!==scope){call.status=409;return reply({error:'DOCUMENT_OPERATION_NOT_CURRENT'},409)}
+      const entry=prior||{scope,confirmed:false,bytes:(async()=>{
+        const pdf=await PDFDocument.create();pdf.setTitle('Synthetic operation '+body.requestId)
+        pdf.addPage().drawText('SYNTHETIC SERVER INSPECTION '+body.orderId)
+        return Buffer.from(await pdf.save({useObjectStreams:false}))
+      })()}
+      if(!prior)documentOperations.set(body.requestId,entry)
+      let bytes
+      try{bytes=await entry.bytes}catch(error){if(documentOperations.get(body.requestId)===entry)documentOperations.delete(body.requestId);throw error}
+      // Do not deliver stale bytes when authority/source changes during rendering.
+      if(!authorized()||binding()!==scope){if(!entry.confirmed&&documentOperations.get(body.requestId)===entry)documentOperations.delete(body.requestId);return reply({error:'COMMERCIAL_DOCUMENT_DENIED'},403)}
+      call.replay=entry.confirmed;entry.confirmed=true;call.status=200
+      return route.fulfill({status:200,contentType:'application/pdf',headers:{'Cache-Control':'no-store'},body:bytes})
     }
     const table = url.pathname.split('/').pop()
     assert.ok(
@@ -240,6 +272,6 @@ async function cp04Page(browser, width, options = {}) {
   })
   await navigateSection(p,'ordenes')
   await p.locator('.cp04-private').waitFor()
-  return { p, state, requests, errors }
+  return { p, state, requests, errors, documentCalls, documentOperations }
 }
 module.exports = { cp04Page, uuid, tenant, userId, operationsStatusPath, isOperationsStatusRead, businessWrites }
