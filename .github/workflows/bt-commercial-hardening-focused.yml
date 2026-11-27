@@ -1,0 +1,76 @@
+name: BT-COMMERCIAL-HARDENING-01 focused CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt-commercial-hardening-focused.yml'
+      - 'scripts/verify-commercial-hardening.*'
+      - 'scripts/security/verify-hardening-session-local.py'
+      - 'tests/hardeningSessionLab.ts'
+      - 'tests/harness/CommercialHardeningFixture.tsx'
+      - 'tests/harness/commercial-hardening.html'
+      - 'src/documents/**'
+      - 'src/auth/documentAccess.ts'
+      - 'src/ordenes/Cp04MultipuntoPdfPreview.tsx'
+      - 'server/commercial/**'
+permissions:
+  contents: read
+jobs:
+  session-sql-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: docker pull postgres:17
+      - name: Eleven SQL and HTTP cases on isolated PostgreSQL
+        env:
+          BT_HARDENING_DELTA_EVIDENCE: /tmp/bt-hardening-main
+        run: python3 scripts/security/verify-hardening-session-local.py
+      - name: One focused revocation race
+        env:
+          BT_HARDENING_DELTA_FOCUS: cache-race
+          BT_HARDENING_DELTA_EVIDENCE: /tmp/bt-hardening-race
+        run: python3 scripts/security/verify-hardening-session-local.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hardening-sql-http
+          path: |
+            /tmp/bt-hardening-main/*.json
+            /tmp/bt-hardening-race/*.json
+            /tmp/bt-hardening-main/*.pdf
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    env:
+      BT_HARDENING_BROWSER: ${{ matrix.engine }}
+      OUTPUT_DIR: /tmp/bt-commercial-hardening-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install isolated browser runner (CI only)
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-hardening-playwright" --no-save --no-package-lock --no-audit --no-fund playwright
+          "$RUNNER_TEMP/bt-hardening-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-hardening-playwright/node_modules" >> "$GITHUB_ENV"
+      - run: node --check scripts/verify-commercial-hardening.cjs
+      - run: python3 scripts/verify-commercial-hardening.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hardening-browser-${{ matrix.engine }}
+          path: /tmp/bt-commercial-hardening-evidence/

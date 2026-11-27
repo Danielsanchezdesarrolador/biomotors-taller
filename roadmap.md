@@ -1,5 +1,9 @@
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-DELTA-01 / REVISIÓN PENDIENTE
 
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01 / INTEGRATION_CI_PENDING
+Titular autorizó explícitamente integración oficial y CI, no despliegue. Revisión independiente: 67/67 hashes SHA-256 del manifiesto DELTA-01, 38/38 snapshots consolidados (30 heredados + 8 delta), árboles base/original/final reconstruidos exactamente. Base d9977e046372bf98a1640f975ec1ce90c24c9309; árbol candidato dcc018296251745bf0b8e20b76dcbd22c4fed3ec, commit oficial de contenido exacto 914f020ffec70ebcb89542ffc0878bd87fc0d3f3. FIX-01/02 favorables según SQL y código; 12 PASS reportadas por Codex, no ejecución independiente local. Nueva CI focalizada prueba contrato SQL aislado y ambos motores de navegador; solo adaptador de prueba parametrizado, sin cambiar código productivo respecto del candidato. CI general/comercial existentes conservadas; ninguna declaración de SUCCESS anticipada. Auto-Deploy OFF; SQL/RLS/Storage, flags, Edge y Render intactos; SEC07 cerrado. No ejecutar instalación hasta CI verde, preflight y autorización específica. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_INTEGRATION_20261127.md).
+
+
 Base exclusiva 1b5a3cdb91ef6b7dead7c3ff3a8de00082f6e860. Contrato SQL real contrastado: reserva vencida no consumida recupera UUID; confirmada vencida rechaza y conserva consumo. Reingreso con UUID ligado a sesión revocada ofrece renovación explícita solo tras revalidación de usuario y lectura autorizada actual en servidor; sin bytes de fallback ni consumo automático. SQL sin cambios. 12 regresiones focalizadas con cuerpos SQL reales en PostgreSQL 17 aislado PASS; las 34 anteriores siguen históricas sin repetición. [Checkpoint y límites](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_DELTA_01_20261127.md). Entrega privada DTK-ERR-056; sin push oficial, producción, migraciones, instalación o activación. No aceptación integral ni autorización de despliegue.
 
 ---

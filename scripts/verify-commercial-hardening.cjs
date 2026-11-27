@@ -1,9 +1,9 @@
 // Focused browser regressions only: real CP04 component/repository, synthetic loopback HTTP.
-const {chromium}=require('playwright'),{PDFDocument,StandardFonts}=require('pdf-lib'),assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto')
+const {chromium,webkit}=require('playwright'),{PDFDocument,StandardFonts}=require('pdf-lib'),assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto')
 const base=process.env.BT_HARDENING_URL||'http://127.0.0.1:5251',out=process.env.OUTPUT_DIR||'/tmp/bt-commercial-hardening-evidence'
 const uid='00000000-0000-4000-8000-000000000002',wid='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000011',oid='00000000-0000-4000-8000-000000000007',vid='00000000-0000-4000-8000-000000000006',cid='00000000-0000-4000-8000-000000000005'
 ;(async()=>{fs.mkdirSync(out,{recursive:true});const pdf=await PDFDocument.create();pdf.addPage().drawText('SYNTHETIC AUTHORIZED PDF',{font:await pdf.embedFont(StandardFonts.Helvetica)});const bytes=Buffer.from(await pdf.save()),hash=crypto.createHash('sha256').update(bytes).digest('hex')
-const browser=await chromium.launch({...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{}),args:['--no-sandbox']});const results=[]
+const engine=process.env.BT_HARDENING_BROWSER||'chromium';assert.ok(['chromium','webkit'].includes(engine),'Unsupported browser');const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='chromium'?{...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{}),args:['--no-sandbox']}:{});const results=[]
 const selected=process.env.BT_HARDENING_CASES?.split(',');const run=name=>!selected||selected.includes(name)
 async function fixture(plan='full',archive=false){
  const state={plan,workshopId:wid,role:'owner',phase:'authorized'},ledger=new Map(),calls=[],errors=[],unknown=[];let hold=false,arrived,release,remoteExpired=false
