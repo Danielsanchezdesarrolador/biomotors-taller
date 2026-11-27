@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // CP06: actual React/SDK, strictly intercepted synthetic HTTP. No hosted data access.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
@@ -124,9 +125,8 @@ const { cp04Page, uuid, tenant, userId } = require('../tests/harness/cp04Browser
           )
         })
       })
-      const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
       async function selectVehicle() {
-        await nav().nth(2).click()
+        await navigateSection(p, 'clientes')
         await p.locator('.cp03-result').first().click()
         await p.getByRole('heading', { name: 'Vehículos vinculados' }).waitFor()
         await p.locator('.cp03-result').filter({ hasText: 'QA1234' }).first().click()

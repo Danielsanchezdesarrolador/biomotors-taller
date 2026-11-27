@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Seven reference screens + explicit read-only reviews. The single fake account is tested only on loopback.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
@@ -162,10 +163,15 @@ const { chromium } = require('playwright'),
       assert.equal(await p.getByRole('dialog').count(), 0)
       await p.goto(publicUrl('/revision/administrador'))
       assert.match(await p.locator('.access-review-note').innerText(), /sin autenticación real/)
-      const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
-      assert.equal(await nav().count(), 5)
-      for (let i = 0; i < 5; i++) {
-        await nav().nth(i).click()
+      const sectionIds = ['inicio', 'ordenes', 'clientes', 'informes', 'configuracion']
+      const navIds = selector => p.locator(selector).evaluateAll(nodes =>
+        nodes.map(node => node.getAttribute('data-screen') || node.getAttribute('aria-label')).sort()
+      )
+      assert.deepEqual(await navIds('.side-nav button'), [...sectionIds].sort(), 'All and only expected sections are in the sidebar')
+      assert.deepEqual(await navIds('.bottom-nav button'), [...sectionIds].sort(), 'Public default-off navigation exposes exactly its permitted sections')
+      for (const section of sectionIds) {
+        await navigateSection(p, section)
+        assert.equal(await p.locator('.side-nav [aria-current="page"]').getAttribute('data-screen'), section, 'Selected section must match the requested destination')
         assert.equal(await p.locator('input:enabled,textarea:enabled,select:enabled').count(), 0)
       }
       await button('Ver usuarios y permisos').click()

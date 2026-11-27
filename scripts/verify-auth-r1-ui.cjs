@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Real SDK + intercepted synthetic HTTP on private loopback harness. NOT real Auth/RLS E2E.
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
@@ -162,11 +163,21 @@ async function shot(p, name) {
       )
       await fits(p)
       await shot(p, `owner-mock-${width}`)
-      const nav = p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
-      assert.equal(await nav.count(), 5)
-      for (let panel = 0; panel < 5; panel++) {
-        await nav.nth(panel).click()
-        await p.locator('.official-panel:visible').waitFor()
+      const sectionIds = ['inicio', 'ordenes', 'clientes', 'informes', 'configuracion']
+      const navIds = selector => p.locator(selector).evaluateAll(nodes =>
+        nodes.map(node => node.getAttribute('data-screen') || node.getAttribute('aria-label')).sort()
+      )
+      assert.deepEqual(await navIds('.side-nav button'), [...sectionIds].sort(), 'All and only expected sections are in the sidebar')
+      // R1 is built with Agenda and the workshop-commercial UI OFF. Private
+      // mobile navigation deliberately exposes three sections plus Más.
+      assert.deepEqual(await navIds('.bottom-nav button'), ['inicio', 'ordenes', 'clientes', 'Más secciones'].sort(), 'Private Agenda-OFF shortcuts plus More')
+      for (const [panel, section] of sectionIds.entries()) {
+        await navigateSection(p, section)
+        const current = p.locator('[data-workspace-section="'+section+'"]:not([hidden])')
+        await current.locator('.official-panel').waitFor()
+        assert.equal(await p.locator('[data-workspace-section]:not([hidden])').getAttribute('data-workspace-section'), section)
+        assert.equal(await p.locator('.side-nav [aria-current="page"]').getAttribute('data-screen'), section, 'Selected section must match the requested destination')
+        assert.equal(await p.locator('.official-panel:visible').count(), 1, 'Exactly the selected authorized panel is visible')
         assert.equal(
           await p
             .locator(
@@ -184,6 +195,9 @@ async function shot(p, name) {
       }
       await p.reload()
       await p.locator('.dashboard-main').waitFor()
+      await p.locator('[data-workspace-section="configuracion"]:not([hidden]) .official-panel').waitFor()
+      assert.equal(await p.locator('.side-nav [aria-current="page"]').getAttribute('data-screen'), 'configuracion', 'Last private section restored after authenticated reload')
+      console.log('BT_AUTH_R1_SEMANTIC_NAV_PASS', width, JSON.stringify(sectionIds))
       // Invalid workshop IDs in URL do not select or authorize another workshop.
       await p.goto(harness + '/#/acceso?workshop_id=' + b)
       await p.locator('.dashboard-main').waitFor()
@@ -224,7 +238,7 @@ async function shot(p, name) {
         width,
         sdkMock: 'PASS',
         tests:
-          'login, RLS query shape, five empty panels, restore, URL denial, DEMO separation, revoke, logout'
+          'login, RLS query shape, all five authorized empty panels via semantic navigation (including Más on mobile), restore last section, URL denial, DEMO separation, revoke, logout'
       })
       await p.close()
     }

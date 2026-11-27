@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Runs against the public build. No fixture injection, switches or operational forms.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
@@ -37,7 +38,12 @@ const { chromium } = require('playwright'),
       })
       const base = process.env.BASE_URL || 'http://127.0.0.1:5173'
       await p.goto(base + '/#/revision/publica')
-      const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
+      const sectionIds = ['inicio', 'ordenes', 'clientes', 'informes', 'configuracion']
+      const navIds = selector => p.locator(selector).evaluateAll(nodes =>
+        nodes.map(node => node.getAttribute('data-screen') || node.getAttribute('aria-label')).sort()
+      )
+      assert.deepEqual(await navIds('.side-nav button'), [...sectionIds].sort(), 'All and only expected sections are in the sidebar')
+      assert.deepEqual(await navIds('.bottom-nav button'), [...sectionIds].sort(), 'Public default-off navigation exposes exactly its permitted sections')
       const labels = [
         'Inicio',
         'Órdenes de trabajo',
@@ -52,9 +58,9 @@ const { chromium } = require('playwright'),
         'Sin informes disponibles',
         'Tu taller aún no está configurado'
       ]
-      assert.equal(await nav().count(), 5)
-      for (let i = 0; i < 5; i++) {
-        await nav().nth(i).click()
+      for (const [i, section] of sectionIds.entries()) {
+        await navigateSection(p, section)
+        assert.equal(await p.locator('.side-nav [aria-current="page"]').getAttribute('data-screen'), section, 'Selected section must match the requested destination')
         await p
           .getByRole('heading', {
             name: i === 0 ? '¿Qué vamos a hacer hoy?' : labels[i],
@@ -100,7 +106,7 @@ const { chromium } = require('playwright'),
       if (!process.env.CAPTURE_BEFORE) {
         await p.getByRole('button', { name: 'Notificaciones', exact: true }).click()
         assert.match(await p.locator('.top-popover').innerText(), /acceso seguro/)
-        await nav().nth(0).click()
+        await navigateSection(p, 'inicio')
         // Public URLs/flags cannot activate fixtures or a writable local workflow.
         for (const url of [
           '/?demo=1&test=1&harness=true',

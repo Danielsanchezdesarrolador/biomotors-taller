@@ -1,3 +1,4 @@
+const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Approved artwork in public screens, navigation and private printable workshop documents.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
@@ -55,9 +56,15 @@ const { chromium } = require('playwright'),
           })
       }
       await p.goto(base + '/#/revision/publica')
-      const nav = () => p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
-      for (let i = 0; i < 5; i++) {
-        await nav().nth(i).click()
+      const sectionIds = ['inicio', 'ordenes', 'clientes', 'informes', 'configuracion']
+      const navIds = selector => p.locator(selector).evaluateAll(nodes =>
+        nodes.map(node => node.getAttribute('data-screen') || node.getAttribute('aria-label')).sort()
+      )
+      assert.deepEqual(await navIds('.side-nav button'), [...sectionIds].sort(), 'All and only expected sections are in the sidebar')
+      assert.deepEqual(await navIds('.bottom-nav button'), [...sectionIds].sort(), 'Public default-off navigation exposes exactly its permitted sections')
+      for (const [i, section] of sectionIds.entries()) {
+        await navigateSection(p, section)
+        assert.equal(await p.locator('.side-nav [aria-current="page"]').getAttribute('data-screen'), section, 'Selected section must match the requested destination')
         await ready(p.locator(width > 760 ? '.brand .bt-brand img' : '.shell-mobile-brand img'))
         assert.equal(await p.locator('.brand svg,.brand-mark,.brand-name').count(), 0)
         assert.equal(await p.locator('input:enabled,textarea:enabled,select:enabled').count(), 0)
@@ -122,8 +129,7 @@ const { chromium } = require('playwright'),
       if (!process.env.SKIP_HARNESS && [1650, 390].includes(width)) {
         for (const mode of ['Cotización', 'informe']) {
           await p.goto(harness)
-          const n = p.locator(width > 760 ? '.side-nav button' : '.bottom-nav button')
-          await n.nth(3).click()
+          await navigateSection(p, 'informes')
           await p
             .getByRole('button', {
               name: mode === 'Cotización' ? 'Nueva cotización' : 'Nuevo informe',
