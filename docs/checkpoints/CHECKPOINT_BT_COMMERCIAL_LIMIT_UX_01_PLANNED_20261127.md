@@ -1,0 +1,15 @@
+# BT-COMMERCIAL-LIMIT-UX-01 — PLANNED
+
+27/11/2026 UTC. Durante aceptación Básico el titular intentó descargar COT-000001 y recibió “No se confirmó el guardado. Verifica la conexión y reintenta la misma operación.” Solicita mensaje comercial que explique falta de cupos y ofrezca mejorar plan.
+
+## Evidencia y diagnóstico
+- UI Básico reportada por titular: 2/1 cotizaciones, 2/0 multipunto, 0/0 correos, 1/0 mecánicos, clientes 1/5; cero disponibles en documentos. Postintento consulta read-only conserva 4 registros confirmed: quote Full 1, Plus 1; multipunto Full 1, Plus 1. Sin nuevo consumo ni reserva. No se capturó respuesta HTTP individual, por lo que no se certifica causa exacta de ese intento ni ausencia de bytes por inspección de red.
+- SQL INSTALL_GATE4 distingue COMMERCIAL_QUOTA_EXHAUSTED, BASIC_CUSTOMER_LIMIT y permisos; meteredDocument.ts actualmente agrupa errores de reserva y discordancias de identidad bajo COMMERCIAL_QUOTA_DENIED. documentClient.ts reconoce pocos códigos específicos y otros estados como unavailable/denied/blocked; contracts.ts contiene el mensaje genérico observado. Es necesario preservar causa autorizada a través de servidor/Edge/cliente, no traducir todo error HTTP a cuota.
+
+## Requisitos de futura implementación
+- Mensaje contextual “Alcanzaste el límite de tu plan”, explicación del recurso agotado, opción “Ver planes y beneficios” que navega a comparativa vigente; alternativa de esperar liberación de cupo cuando aplique. Mostrar disponibilidad/fecha calculada por servidor cuando verificable (Básico ventana móvil 48 h; Plus semana comercial). Para capacidades no incluidas explicar que requieren plan habilitado, no prometer cupo por esperar. No iniciar cobro ni checkout.
+- Extender coherentemente a cotizaciones, multipunto, clientes, mecánicos e invitaciones, correos (sin activar envío). Mantener fallos de red, servicio deshabilitado, sesión, conflicto, permisos y aislamiento como categorías distintas; no revelar existencia de recurso ajeno ni datos internos. Si causa indeterminada, mensaje honesto genérico sin upsell falso. No relajar cuotas ni devolver PDF si se deniega.
+- Validar contratos de error tipados y UI, botones y navegación, no consumo al denegar, sin bypass de límites o acceso entre talleres, reintentos idempotentes. Coordinar con BT-PLAN-MECHANIC-LIMITS-01 y BT-MULTIPUNTO-FINAL-01 después del cierre de aceptación vigente y antes del piloto Ignacio. No cambiar servicios activos durante esta prueba.
+- Auto-Deploy OFF confirmado. Solo documentación, no código, SQL, Edge, Render, flags ni Codex.
+
+Estado: PLANNED / NOT_IMPLEMENTED. ACCEPTANCE-07B rechazo observado sin aumento de consumo; UX pendiente. Continuar prueba de multipunto Básico y demás aceptación.
