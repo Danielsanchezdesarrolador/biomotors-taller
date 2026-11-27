@@ -1,0 +1,13 @@
+# BT-COMMERCIAL-DOCUMENTS-UX-01 — CI_FINAL_PASS / LIVE_PENDING
+
+27/11/2026. Titular reportó CI verde; verificación independiente GitHub en SHA fb261a391a68bfe948657e3f4e4fbaefb26eec9c: 8/8 workflows activados SUCCESS (no nueve: Workshop Commercial no se activó para esta corrección; su PASS anterior corresponde a c10523b53952bd60c1beddd31fcc29023aa35f21).
+- Documents UX 46081329333: Chromium job 140780742887, WebKit 140780742671, server/artifacts 140780742948 SUCCESS. Paso Deno nativo SUCCESS (deno check, no ejecución alojada). Logs SQL/HTTP 16 PASS; dos empaquetados 43 hashes cada uno.
+- OFICIAL-01A 46081329259: tres jobs SUCCESS; log job 140780743173 confirma BT_UX_PERSIST_PASS para Chromium y WebKit, cada uno 1366/390/768, 6/6. 
+- REG 46081329307, Hardening 46081329301, Plans 46081329279, General 46081329230, COT 46081329228, FLOW 46081329226 SUCCESS.
+- Comparación exacta contra c10523b: 8 rutas, una corrección productiva PdfViewer.tsx, tres rutas de pruebas, cuatro documentales. No SQL, Edge, Storage ni cambios de contrato en fix. Diagnóstico StrictMode: evento close de cleanup llega con diálogo reabierto; ignorar únicamente evento obsoleto, preservar cierre real/autoridad. Causa reproducida según checkpoint de fix; CI oficial confirma resolución integral. No atribuir fallo inicial a WebKit.
+- Integración previa: titular reportó PASS de extracción binaria/árbol/31 archivos; comprobación independiente de 30 blobs y roadmap reconciliado exacto, padre 067014f7; 154 SHA256 ejecutados por titular, no recalculados aquí. La causa del fallo original de extracción no está confirmada; no afirmar CRLF sin evidencia.
+- ZIP exclusivo Plus/Full autorizado por titular. Dos paquetes Edge cambian (final archive y commercial documents); CP05 byte-idéntico según comparación de manifiestos de entrega B y C. Revalidar hashes del paquete generado por CI corregida antes de cualquier instalación. No asumir que un check Deno equivale a prueba de runtime alojado.
+- Render Auto-Deploy OFF confirmado; despliegue B dep-dc4tunp5efls73anrvkg permanece LIVE. Sin cambios productivos en esta intervención.
+
+## Próximo
+Preflight read-only de producción y preparación del runbook C, inventario/backup vigente y compatibilidad de paquetes, estrategia de mantenimiento/drenaje y recuperación específica. No reinstalar SQL B, no repetir SEC07 ni desplegar por rutina CP05 ready idéntico. Evaluar necesidad de barreras y freeze para coordinación, con autorización específica por fase, sin reducir seguridad de documentos/caché/leases. No autorizar todavía instalación, GATE4, Edge o Render. QA física pendiente; C no aceptado en producción. BT-MOBILE-02 funcional en orden establecido, R3 diferido, DevOps después de piloto Ignacio.
