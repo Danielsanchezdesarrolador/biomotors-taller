@@ -1,3 +1,9 @@
+## 27/11/2026 UTC — GATE4_OPEN_PASS / COMMERCIAL_ACCEPTANCE_PENDING
+
+Titular autorizó GATE_OPEN exacto de cuatro RPC tras verificar navegación autenticada, Mi taller, Plan y beneficios y correo frontend false. Preflight 12:33:32 UTC: cuatro ACL cerradas, Render LIVE SHA 7dc06a26, main Auto-Deploy OFF, Edge 12/9/2 JWT true y onboarding v8 intacta. Ejecutado SQL blob e377cbe473804a4104eb54c23826fdec2d83743f sin cambios; postflight 12:33:45 UTC: 4 EXECUTE authenticated, 8 denegaciones anon/service_role, 12/12 PASS, cuerpos RPC idénticos por MD5, 16 objetos, 2 buckets privados, 0 consumos, 8 definiciones, RLS forzado y 3 políticas Storage restrictivas. No cambios flags/datos/Edge/Render/Auth/Storage ni Codex. Correo servidor no verificado independientemente; no activación adicional. Riesgo residual aceptado anteriormente, ticket SU-571138 pendiente sin garantía global. Siguiente: aceptación humana y focalizada Básico/Plus/Full, sin clientes reales. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_OPEN_PASS_20261127.md).
+
+---
+
 ## 27/11/2026 UTC — GATE4_RENDER_LIVE / REOPEN_BLOCKED
 
 Render dep-dc4ljttg1s2s73etout0 LIVE 10:23:12 UTC, SHA 7dc06a26; tsc/Vite build PASS (2.51 s, advertencia chunk no bloqueante). Postflight 10:23:52 UTC: cuatro ACL cerradas, 12/12 denegaciones, 16 objetos, 2 buckets privados, 0 consumos. Auto-Deploy OFF y main confirmados. No modificar flags ni SQL/Edge/Storage/Auth, sin Codex ni repetir CI. Queda verificar configuración efectiva de flags y frontend en navegador; el conector no permite leer flags individuales y no se ha acreditado navegación autenticada. GATE_OPEN exige autorización específica, no ejecutar aún. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_RENDER_LIVE_20261127.md).
