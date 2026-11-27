@@ -1,0 +1,10 @@
+# BT-COMMERCIAL-DOCUMENTS-UX-01-LIVE — FREEZE_DEPLOY_PASS / HTTP_AND_DRAIN_PENDING
+
+27/11/2026. Titular reportó verde. GitHub workflow 46084089140 job 140789505087 SUCCESS, dispatch SHA 8211cd2c722d3d0d239faa0b767663be59c25986. Código fijado fb261a391a68bfe948657e3f4e4fbaefb26eec9c; manifest 3a2f7cdb1ced86672ddc41714e84bfabf6c42495.
+Logs reales UTC:
+- 23:43:59.4902466 COMMERCIAL_THREE_HANDLERS_PACKAGE_PASS 43 hashed files; ready + deny-all freeze.
+- 23:43:59.5562816 SOURCE_HASHES 15/15 PASS; 23:43:59.5564612 PACKAGE_HASHES 43/43 PASS; 23:43:59.5566500 EXACT_MANIFEST_AND_INVENTORY PASS; 23:43:59.5567429 PRE_DEPLOY_PACKAGE_PASS.
+- 23:44:17.5849048 CP05 FREEZE_DEPLOYED; 23:44:20.0145956 final archive FREEZE_DEPLOYED; 23:44:22.3036786 commercial FREEZE_DEPLOYED; 23:44:23.4782500 THREE_DEPLOYS_COMPLETE; HTTP_AND_DRAIN_PENDING. Run actualizado 23:44:27 UTC. Artefacto 15238536874, 2630 bytes, metadata/logs verificados, no descarga independiente de artifact.
+Postflight 23:45:26.654113 UTC: 9 confirmados, 0 reservas/leases, 16 objetos/2 buckets privados, seats MD5 prosrc 8e431729bf340f1dda00e946a5b32ecb, cuatro ACL postgres-only y 12/12 denegaciones, cuatro huellas intactas. Conteos agregados, no auditoría de bytes.
+Edge ACTIVE verify_jwt true: CP05 v17 3d161a18b15dda47d4d88daea6b7898e76ebe9db2a21553b325ad13725834a20; final v15 847dfedbfdaa42e2b0a449cf2289f8d3a82636093a4e71da38d2744d5ced3362; commercial v7 2dc5ff8132d13169bec53d7bf1d62a97c90ef1ab42601cc9933e1d66dc725e00; hashes freeze coinciden con despliegue anterior B; onboarding v8 2496da78594bd46389a491052983847dbb143a5c6fb0aeec849bb3b0c89db3e2 intacto. Render B LIVE Auto-Deploy OFF.
+Pendiente reutilizar prueba HTTP autenticada PS5.1 DTK-ERR-063, 3/3 POST 503/0 bytes/no-store/Retry-After 60/nosniff, no secretos en chat. Drenaje >=400 s desde último freeze confirmado, umbral conservador 23:51:07 UTC tomando fin observado del run 23:44:27; revalidar transacciones antiguas, reservas y leases antes de READY. No garantía global, no revoca archivos previamente descargados ni URLs previas. No repetir SQL B ni SEC07. No READY, Render o reapertura autorizados. Mantener GATE4 cerrado.
