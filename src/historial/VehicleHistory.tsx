@@ -1,3 +1,6 @@
+import {documentFence} from '../auth/documentAccess'
+import {DocumentOperationExpired} from '../documents/operation'
+import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
@@ -357,6 +360,7 @@ export function HistoryView({
       }
     }
   }
+  const [documentExpiry,setDocumentExpiry]=useState<DocumentOperationExpired|null>(null)
   async function downloadArchived(revision: Revision) {
     if (!onDownload || downloading) return
     setDownloading(revision.id)
@@ -364,7 +368,8 @@ export function HistoryView({
     try {
       await onDownload(revision)
     } catch (e) {
-      if (e instanceof QuoteFailure && e.kind === 'denied') {
+      if(e instanceof DocumentOperationExpired){setDocumentExpiry(e);setDownloadError(e.message)}
+      else if (e instanceof QuoteFailure && e.kind === 'denied') {
         failure(new HistoryFailure('denied'))
       } else {
         setDownloadError('No se pudo recuperar el PDF archivado. Verifica la conexión e inténtalo nuevamente.')
@@ -397,7 +402,8 @@ export function HistoryView({
     try {
       await onPackageDownload(quote, revision, quotes.evidence)
     } catch (e) {
-      if (e instanceof HistoryFailure && e.kind === 'denied') failure(e)
+      if(e instanceof DocumentOperationExpired){setDocumentExpiry(e);setDownloadError(e.message)}
+      else if (e instanceof HistoryFailure && e.kind === 'denied') failure(e)
       else if (e instanceof QuoteFailure && e.kind === 'denied')
         failure(new HistoryFailure('denied'))
       else setDownloadError('No se descargó el paquete. Verifica el PDF archivado, las tres constancias y la sesión.')
@@ -415,6 +421,7 @@ export function HistoryView({
         <p>Visitas, inspecciones y observaciones del taller autorizado.</p>
       </header>
       {busy && <p role="status">Consultando historial…</p>}
+      <DocumentOperationNotice error={documentExpiry} onRestart={()=>{setDocumentExpiry(null);setDownloadError('Nueva operación preparada. Solicita de nuevo el documento.')}}/>
       {downloadError && <p className="cp06-error" role="alert">{downloadError}</p>}
       {error && (
         <div className="cp06-error" role="alert">
@@ -731,6 +738,7 @@ export function VehicleHistory({
               import.meta.env.VITE_BT_FLOW_LIVE_02_ENABLED === 'true' &&
               import.meta.env.VITE_BT_CP05_DOCUMENTS_ENABLED === 'true'
                 ? async (quote, revision, evidence, kind) => {
+                    const fence=documentFence()
                     await repository.vehicle(vehicleId)
                     const { prepareClosingPacket } = await import('../entrega/finalPackage')
                     const { browserClosingDocumentPdf } = await import('../entrega/finalPdf')
@@ -738,7 +746,7 @@ export function VehicleHistory({
                     const packet = prepareClosingPacket(quote, revision, evidence)
                     const bytes = await browserClosingDocumentPdf(packet, kind)
                     await repository.vehicle(vehicleId)
-                    downloadPdf(bytes, kind === 'report'
+                    fence.assert();downloadPdf(bytes, kind === 'report'
                       ? packet.report.fileName : packet.handover.fileName)
                   }
                 : undefined
@@ -752,6 +760,7 @@ export function VehicleHistory({
               archive?.scope === scope && closingPreview?.scope === scope &&
               ['owner', 'admin', 'reception'].includes(context.role)
                 ? async (quote, revision, evidence) => {
+                    const fence=documentFence()
                     // Never use a browser draft as document 01: fetch the exact
                     // archived PDF through the existing Auth/SHA-256-verifying port.
                     await repository.vehicle(vehicleId)
@@ -769,7 +778,7 @@ export function VehicleHistory({
                     const zip = closingPackageZip(packet, { quotation, report, handover })
                     // Recheck context after all asynchronous work and before download.
                     await repository.vehicle(vehicleId)
-                    downloadClosingZip(zip.bytes, zip.fileName)
+                    fence.assert();downloadClosingZip(zip.bytes, zip.fileName)
                   }
                 : undefined
             }

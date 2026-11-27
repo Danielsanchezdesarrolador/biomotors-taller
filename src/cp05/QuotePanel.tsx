@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState, useId } from 'react'
+import {documentFence,documentEpoch,subscribeDocuments} from '../auth/documentAccess'
+import {DocumentOperationExpired} from '../documents/operation'
+import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
+import { useEffect, useRef, useState, useId, useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   ArrowLeft,
@@ -78,6 +81,9 @@ export function QuotePanel({
     [message, setMessage] = useState(''),
     [error, setError] = useState('')
   const [ordersRefreshing,setOrdersRefreshing]=useState(true)
+  const documentAuthority=useSyncExternalStore(subscribeDocuments,documentEpoch,documentEpoch)
+  const [documentExpiry,setDocumentExpiry]=useState<DocumentOperationExpired|null>(null)
+  useEffect(()=>{setDocumentExpiry(null)},[documentAuthority,bundle?.quote.id])
   const [ordersError,setOrdersError]=useState('')
   const [ordersRetry,setOrdersRetry]=useState(0)
   const recordsListRevision=useRef(0),recordsVehicleScope=useRef(initialVehicleId)
@@ -370,6 +376,7 @@ export function QuotePanel({
     setEditing(null)
   }
   async function pdf(revision?: Revision) {
+    const fence=documentFence()
     if (!bundle || lock.current || readPending) return
     const request = sequence.current
     lock.current = true
@@ -382,16 +389,15 @@ export function QuotePanel({
       const bytes = revision ? await repository.documents.download(revision)
         : privateClient ? await renderer.requestCommercialPdf(privateClient,{action:'draft',workshopId:context.workshop.id,quoteId:bundle.quote.id,draft})
         : (()=>{throw Error('VERIFIED_DOCUMENT_SERVICE_REQUIRED')})()
-      if (active.current && request===sequence.current)
+      if (active.current && request===sequence.current&&fence.current())
         renderer.downloadPdf(
           bytes,
           `${quoteNumber(bundle.quote)}-${revision ? 'r' + revision.revision : 'borrador'}.pdf`
         )
     } catch (error) {
-      if (active.current)failure(error)
+      if (active.current&&request===sequence.current&&fence.current()){if(error instanceof DocumentOperationExpired){setDocumentExpiry(error);setError(error.message)}else failure(error)}
     } finally {
-      lock.current = false
-      if (active.current) setBusy(false)
+      if(request===sequence.current){lock.current=false;if(active.current)setBusy(false)}
     }
   }
   async function documentAction(kind: 'issue' | 'send' | 'cancel', revision?: Revision, review?: QuoteEmailReview, confirmedSource?:Bundle) {
@@ -490,6 +496,7 @@ export function QuotePanel({
         </button>
       </div>}
       {busy && <p role="status">Consultando o guardando la cotización…</p>}
+      <DocumentOperationNotice error={documentExpiry} onRestart={()=>{setDocumentExpiry(null);setError('Nueva operación preparada. Solicita de nuevo el documento.')}}/>
       {error && (
         <p className="cp04-error" role="alert">
           {error}
@@ -719,7 +726,7 @@ export function QuotePanel({
                           ? !(guided||orderLocked) && <FlowLive02Loader stage={bundle?.source.order.intake_phase==='planned'?4:undefined} key={revision.id}
                               client={privateClient} context={context}
                               revision={revision} quote={bundle.quote} />
-                          : <WorkExecutionDraft key={revision.id}
+                          : <WorkExecutionDraft key={revision.id} authorizeDownload={()=>repository.load(revision.quote_id)}
                               revision={revision} quote={bundle.quote} />
                       )}
                     </section>

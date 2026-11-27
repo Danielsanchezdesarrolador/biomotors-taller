@@ -1,3 +1,5 @@
+import {documentFence} from '../auth/documentAccess'
+import {documentOperation as authorizedDocumentOperation,documentOperationKey,assertDocumentOperation,DocumentOperationExpired} from '../documents/operation'
 /** Future authenticated document endpoint. Public switches never grant server permission. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Context } from '../auth/controller'
@@ -55,6 +57,7 @@ export function documentClient(
           .clone()
           .json()
           .catch(() => null)
+        if(action==='download'&&body?.error==='DOCUMENT_OPERATION_NOT_CURRENT')throw new DocumentOperationExpired(documentOperationKey(context.userId,context.workshop.id,String(args.revisionId)),'invalidated')
         if (body?.error === 'DOCUMENT_NOT_CURRENT') throw new QuoteFailure('conflict')
         if (['PROVIDER_ACK_UNKNOWN', 'DELIVERY_PENDING'].includes(body?.error))
           throw new QuoteFailure('delivery_pending')
@@ -88,8 +91,9 @@ export function documentClient(
       return r
     },
     async download(revision: Revision): Promise<Uint8Array> {
+      const fence=documentFence(),key=documentOperationKey(context.userId,context.workshop.id,revision.id),requestId=commercialDocumentRequest(context,revision.id)
       if (revision.workshop_id !== context.workshop.id) throw new QuoteFailure('denied')
-      const data = await call('download', { revisionId: quoteId(revision.id),requestId: commercialDocumentRequest(context,revision.id) })
+      const data = await call('download', { revisionId: quoteId(revision.id),requestId })
       if (!(data instanceof Blob)) throw new QuoteFailure('unavailable')
       const bytes = new Uint8Array(await data.arrayBuffer())
       alive()
@@ -105,6 +109,7 @@ export function documentClient(
         .join('')
       alive()
       if (hash !== revision.pdf_sha256) throw new QuoteFailure('unavailable')
+      fence.assert();assertDocumentOperation(key,requestId)
       return bytes
     },
     async send(revision: Revision, attempt: number, review: QuoteEmailReview) {
@@ -133,7 +138,5 @@ export function documentClient(
 }
 
 export function commercialDocumentRequest(context:Context,resource:string):string {
- const key='bt:commercial-document:'+context.userId+':'+context.workshop.id+':'+resource
- try{const previous=JSON.parse(sessionStorage.getItem(key)||'null');if(previous&&Date.now()>=previous.at&&Date.now()-previous.at<240000)return quoteId(previous.id)}catch{/* Hint is never authority. */}
- const id=crypto.randomUUID();try{sessionStorage.setItem(key,JSON.stringify({id,at:Date.now()}))}catch{/* Retry remains in caller memory where possible. */}return id
+ return authorizedDocumentOperation(documentOperationKey(context.userId,context.workshop.id,resource)).id
 }

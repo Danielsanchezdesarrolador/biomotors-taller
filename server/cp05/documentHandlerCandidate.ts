@@ -1,3 +1,4 @@
+import {CommercialOperationNotCurrent} from '../commercial/meteredDocument'
 /** Undeployed HTTP boundary. No credentials, endpoint registration or environment activation. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { quoteId, type Revision } from '../../src/cp05/contracts'
@@ -168,6 +169,7 @@ export function documentHandlerCandidate(policy: DocumentPolicy, deps: DocumentD
       )
       return reply({ revision })
     } catch (error) {
+      if(error instanceof CommercialOperationNotCurrent)return reply({error:'DOCUMENT_OPERATION_NOT_CURRENT'},409)
       // Deliberately sanitized; no SQL, customer details, provider response or token in errors.
       const message = error instanceof Error ? error.message : ''
       if (message === 'DOCUMENT_NOT_CURRENT') return reply({ error: 'DOCUMENT_NOT_CURRENT' }, 409)

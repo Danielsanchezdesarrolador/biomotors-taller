@@ -1,6 +1,6 @@
 import {hasCurrentProvisionalFindings} from '../../src/ordenes/cp04Autosave'
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {meteredDocument} from './meteredDocument'
+import {meteredDocument,CommercialOperationNotCurrent} from './meteredDocument'
 import {quotePdf} from '../../src/cp05/pdf'
 import {quoteId,draftPayload,previewSnapshot,type Bundle,type Draft} from '../../src/cp05/contracts'
 import {multipuntoPdf,type MultipuntoPdfInput} from '../../src/ordenes/cp04InspectionPdf'
@@ -38,5 +38,5 @@ export function commercialDocumentHandler(deps:CommercialDocumentDependencies,or
    bytes=await meteredDocument(user,trusted,{workshopId:wid,capability:'multipunto',resourceId:oid,requestId:quoteId(body.requestId),snapshotHash},async()=>{const assets=await deps.assets();return multipuntoPdf(source,assets.font,{light:assets.light,dark:assets.dark})})
   }else throw Error('ACTION_DENIED')
   return new Response(bytes.slice().buffer,{headers:{...headers,'Content-Type':'application/pdf','Content-Disposition':'inline'}})
- }catch{return Response.json({error:'COMMERCIAL_DOCUMENT_DENIED'},{status:403,headers})}
+ }catch(error){if(error instanceof CommercialOperationNotCurrent)return Response.json({error:'DOCUMENT_OPERATION_NOT_CURRENT'},{status:409,headers});return Response.json({error:'COMMERCIAL_DOCUMENT_DENIED'},{status:403,headers})}
 }}

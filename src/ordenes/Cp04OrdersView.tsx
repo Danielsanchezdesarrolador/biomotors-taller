@@ -884,6 +884,7 @@ export function Cp04OrdersView({
             </small>
           </div>
           <Cp04MultipuntoPdfPreview
+            documentScope={context.userId+':'+context.workshop.id}
             loadIdentity={repository.pdfIdentity}
             loadDocument={repository.inspectionDocument}
             workshopName={context.workshop.name}

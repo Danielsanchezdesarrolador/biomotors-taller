@@ -1,3 +1,5 @@
+import {documentFence} from '../auth/documentAccess'
+import {documentOperationKey,assertDocumentOperation,DocumentOperationExpired,isDocumentOperationNotCurrent} from '../documents/operation'
 import {commercialDocumentRequest} from '../cp05/documentClient'
 import type {SupabaseClient} from '@supabase/supabase-js'
 import type {Context} from '../auth/controller'
@@ -18,16 +20,18 @@ export function finalArchiveRepository(client:SupabaseClient,context:Context){
     if(typeof row.customerName!=='string'||typeof row.canArchive!=='boolean'||!Number.isSafeInteger(row.total)||row.total<0||!Number.isSafeInteger(row.revision)||row.revision<1||!Number.isFinite(Date.parse(row.issuedAt)))throw new ArchiveFailure('unavailable')}
    return rows
   },documents,
-  async bytes(rid:string,kind:DocumentKind):Promise<{bytes:Uint8Array;doc:ArchivedDocument}>{
+  async bytes(rid:string,kind:DocumentKind):Promise<{bytes:Uint8Array;doc:ArchivedDocument;expiresAt?:number;operationKey?:string}>{
+   const fence=documentFence(),operationKey=documentOperationKey(uid,wid,rid),requestId=kind==='quote'?commercialDocumentRequest(context,rid):undefined
    const set=await documents(rid),doc=set.documents.find(x=>x.kind===kind);if(!doc)throw new ArchiveFailure('missing')
-   const r=await client.functions.invoke('bt-final-archive',{body:{action:'download',workshopId:wid,revisionId:archiveId(rid),kind,...(kind==='quote'?{requestId:commercialDocumentRequest(context,rid)}:{})}})
+   const r=await client.functions.invoke('bt-final-archive',{body:{action:'download',workshopId:wid,revisionId:archiveId(rid),kind,...(kind==='quote'?{requestId}:{})}})
    valid()
-   if(r.error){const status=(r.error as {context?:Response}).context?.status;throw new ArchiveFailure(status===401||status===403?'denied':status===404?'missing':status===409?'integrity':status===503?'disabled':'unavailable')}
+   if(r.error){if(requestId&&await isDocumentOperationNotCurrent(r.error))throw new DocumentOperationExpired(operationKey,'invalidated');const status=(r.error as {context?:Response}).context?.status;throw new ArchiveFailure(status===401||status===403?'denied':status===404?'missing':status===409?'integrity':status===503?'disabled':'unavailable')}
    if(!(r.data instanceof Blob))throw new ArchiveFailure('unavailable')
    const bytes=await verifyArchivedBytes(new Uint8Array(await r.data.arrayBuffer()),doc)
    const checked=await documents(rid);valid()
    if(JSON.stringify(checked.documents.find(x=>x.kind===kind))!==JSON.stringify(doc))throw new ArchiveFailure('denied')
-   return {bytes,doc}
+   fence.assert();if(requestId)assertDocumentOperation(operationKey,requestId)
+   return {bytes,doc,...(requestId?{expiresAt:Date.now()+300000,operationKey}:{})}
   },
   async archive(row:ArchiveRow,requestId:string){
    if(row.workshopId!==wid||!row.deliveryId||!row.canArchive)throw new ArchiveFailure('invalid')

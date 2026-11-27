@@ -1,4 +1,5 @@
-import { useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
+import {invalidateDocuments,setDocumentAuthority} from './documentAccess'
+import { useEffect, useLayoutEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
 import { AccessScreens } from '../access/AccessScreens'
 import { TechnicianReview } from '../access/TechnicianReview'
 import type { AccessPage, AccessPresentation } from '../access/accessContract'
@@ -80,6 +81,9 @@ export function RealAccess({
   const [planResponse,setPlanResponse]=useState<{scope:string;personal:PlanStatus|null;workshop:PlanStatus|null}|null>(null)
   const personalStatus=planResponse?.scope===planScope?planResponse.personal:null
   const planStatus=planResponse?.scope===planScope?planResponse.workshop:null
+  const documentAuthority=JSON.stringify([privateScope,state.phase,state.context?.operationsEnabled,state.context?.documentsEnabled,state.context?.inspectionEnabled,planStatus])
+  useLayoutEffect(()=>{setDocumentAuthority(documentAuthority)},[documentAuthority])
+  useLayoutEffect(()=>{const stop=controller.subscribe(invalidateDocuments);return()=>{stop();invalidateDocuments()}},[controller])
   useEffect(()=>{
     let active=true
     if(import.meta.env.VITE_BT_PLAN04_PRIVATE_ENABLED!=='true'||!['authorized','restricted','no-membership'].includes(state.phase)){setPlanResponse(null);return}

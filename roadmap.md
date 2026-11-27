@@ -1,3 +1,19 @@
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-DELTA-01 / REVISIÓN PENDIENTE
+
+Base exclusiva 1b5a3cdb91ef6b7dead7c3ff3a8de00082f6e860. Contrato SQL real contrastado: reserva vencida no consumida recupera UUID; confirmada vencida rechaza y conserva consumo. Reingreso con UUID ligado a sesión revocada ofrece renovación explícita solo tras revalidación de usuario y lectura autorizada actual en servidor; sin bytes de fallback ni consumo automático. SQL sin cambios. 12 regresiones focalizadas con cuerpos SQL reales en PostgreSQL 17 aislado PASS; las 34 anteriores siguen históricas sin repetición. [Checkpoint y límites](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_DELTA_01_20261127.md). Entrega privada DTK-ERR-056; sin push oficial, producción, migraciones, instalación o activación. No aceptación integral ni autorización de despliegue.
+
+---
+
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01 / CANDIDATO PARA REVISIÓN
+
+Base oficial d9977e046372bf98a1640f975ec1ce90c24c9309. Endurecimiento focalizado de acciones documentales: cada preview/descarga consulta servidor; UUID estable por actor/taller/recurso, snapshot verificado en servidor, sin caché de bytes ni rotación por reloj. Invalida visores/Blob URLs/respuestas pendientes por plan, sesión, rol y taller sin remontar formularios. Expiración/cambio de vigencia se informa mediante código HTTP saneado en los tres handlers; nueva operación solo con confirmación explícita, no automática. SQL, RLS, Storage, límites y PDF intactos. Informes preliminares/ZIP/historial conservan validación y cercas de contexto; sin bloques B/C.
+
+20 casos unitarios/HTTP focalizados y 14 Chromium sintéticos PASS; TypeScript/builds/grafo, empaquetado y sintaxis PASS. Evidencia previa SQL reutilizada, sin repetir 44/8 ni suites históricas completas. [Checkpoint del candidato, pruebas y límites](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_20261127.md). TARGETED_HARDENING_REVIEW_PENDING: revisión independiente y CI/runtime oficial pendientes, no aceptación comercial integral ni autorización de despliegue. No se promete revocar bytes/copia legítima anterior; plan remoto se conoce por polling, nuevas acciones ya revalidan servidor.
+
+Entrega exclusiva DTK-ERR-056 en bytetorque-review/main/BT-COMMERCIAL-HARDENING-01, anteriores intactas. Sin push oficial, Supabase/SQL alojado, Render, Edge, secretos, dependencias instaladas o nueva rama. Correo/pagos/logos/registro y Auto-Deploy no se activan; SEC07 cerrado. No iniciar otras funcionalidades.
+
+---
+
 ## 27/11/2026 UTC — ACCEPTANCE-10/11 / TARGETED_HARDENING_PENDING
 
 Downgrade en sesión abierta: titular reporta rechazo multipunto; read-only confirma Básico activo y 3 multipunto/2 quote/0 reservas. Full recuperado y verificado con mismos consumos. Límites y aislamiento: reutilizar 44 PASS laboratorio comercial y 8 PASS DELTA, CI focalizada 6/6 histórica; guardas actuales SQL/ACL/RLS/Storage revisadas en vivo, sin agotar cupos ni E2E entre talleres alojados. Hallazgo inicial de PDF Plus reutilizado bajo Básico no reproducido; Cp04MultipuntoPdfPreview usa caché local que evita consulta en acciones posteriores si contexto no se refresca. Pendiente endurecimiento focalizado antes de cierre/piloto: revalidación servidor en nuevas acciones UI con misma identidad/lease válida, invalidar caché/visor por cambio plan/sesión, prevenir carreras y conservar idempotencia. No prometer revocar bytes ya obtenidos. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_ACCEPTANCE_10_11_20261127.md). Solo documentación, Auto-Deploy OFF; sin cambios productivos ni Codex.

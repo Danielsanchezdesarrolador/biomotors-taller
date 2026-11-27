@@ -1,3 +1,4 @@
+import {documentURL,revokeDocumentURL} from '../auth/documentAccess'
 /**
  * BT-COM-01: one local, uncompressed ZIP with exactly three PDFs.
  * The caller MUST obtain the original CP05 PDF through the authorized,
@@ -123,12 +124,10 @@ export function closingPackageZip(
 export function downloadClosingZip(bytes: Uint8Array, fileName: string) {
   if (!bytes.length || !/^CIERRE_COT-\d+_R\d+\.zip$/.test(fileName))
     throw Error('BT_COM_INVALID_DOWNLOAD')
-  const url = URL.createObjectURL(new Blob([bytes.slice().buffer], {
-    type: 'application/zip'
-  }))
+  const url = documentURL(bytes,30000,'application/zip')
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = fileName
   anchor.click()
-  setTimeout(() => URL.revokeObjectURL(url), 30_000)
+  setTimeout(() => revokeDocumentURL(url), 30_000)
 }

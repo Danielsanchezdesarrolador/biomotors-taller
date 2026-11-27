@@ -116,6 +116,7 @@ assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
+      (cp04PrivateEnabled && /src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx)$/.test(id)) ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
       (process.env.VITE_BT_AGENDA_ENABLED==='true' && /src\/agenda\//.test(id)) ||
@@ -168,3 +169,5 @@ if(process.env.VITE_BT_AGENDA_ENABLED!=='true')assert.ok(modules.every(id=>!id.i
 if(process.env.VITE_BT_AGENDA_ENABLED==='true')for(const flag of ['VITE_BT_AUTH_R1_ENABLED','VITE_BT_CP03_PRIVATE_ENABLED','VITE_BT_CP04_PRIVATE_ENABLED','VITE_BT_CP05_PRIVATE_ENABLED','VITE_BT_CP06_PRIVATE_ENABLED','VITE_BT_CP05_DOCUMENTS_ENABLED','VITE_BT_FLOW_LIVE_02_ENABLED','VITE_BT_FINAL_ARCHIVE_ENABLED','VITE_BT_RECORDS_PRIVATE_ENABLED'])assert.equal(process.env[flag],'true','Agenda needs private prerequisites')
 
 assert.ok(modules.every(id=>!/(?:src\/cp05\/pdf\.ts|src\/ordenes\/cp04InspectionPdf\.ts)$/.test(id)),'Official document renderers must stay server-side; browser cannot export clean unmetered PDFs')
+
+if(!cp04PrivateEnabled)assert.ok(modules.every(id=>!id.includes('src/documents/')),'Private document operation metadata and renewal UI must stay out of the public bundle')

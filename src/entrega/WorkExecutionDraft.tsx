@@ -1,3 +1,4 @@
+import {documentFence} from '../auth/documentAccess'
 /**
  * Authenticated CP05 view only: operator-assisted PRELIMINARY WORK REVIEW.
  * Does not infer performance, persist choices, send messages, sign, or deliver.
@@ -11,8 +12,9 @@ import './execution.css'
 export function WorkExecutionDraft({
   revision,
   quote,
-  onRecord, onPendingChange, guided=false, registerSave
+  onRecord, onPendingChange, guided=false, registerSave,authorizeDownload
 }: {
+  authorizeDownload?:()=>Promise<unknown>
   guided?:boolean
   registerSave?:(save:((exit:boolean)=>Promise<boolean>)|null)=>void
   onPendingChange?:(pending:boolean)=>void
@@ -64,15 +66,20 @@ export function WorkExecutionDraft({
     }
   }
   async function download() {
-    if (!review?.readyForDraftPdf || lock.current) return
+    const fence=documentFence()
+    if (!authorizeDownload||!review?.readyForDraftPdf || lock.current) return
     lock.current = true
     setBusy(true)
     setError('')
     try {
+      await authorizeDownload()
+      fence.assert()
       const [{ browserExecutionDraftPdf }, { downloadPdf }] = await Promise.all([
         import('./executionPdf'), import('../cp05/browserDocument')
       ])
       const bytes = await browserExecutionDraftPdf(review)
+      await authorizeDownload()
+      fence.assert()
       downloadPdf(
         bytes,
         'INFORME-BORRADOR-COT-' + String(revision.payload.quote.number).padStart(6,'0') +
@@ -149,7 +156,7 @@ export function WorkExecutionDraft({
             </ul>
           )}
           <button type="button" className="cp04-primary"
-            disabled={busy || !review.readyForDraftPdf}
+            disabled={busy || !review.readyForDraftPdf || !authorizeDownload}
             onClick={() => void download()}>
             {busy ? 'Generando borrador…' : 'Descargar informe técnico · BORRADOR'}
           </button>

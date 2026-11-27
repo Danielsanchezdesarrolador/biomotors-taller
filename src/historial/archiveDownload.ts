@@ -1,3 +1,4 @@
+import {documentFence} from '../auth/documentAccess'
 /** CP06 -> CP05 private archive: never download by user-selected Storage path.
  * The established document client validates verified Auth, tenant and SHA-256.
  * This boundary additionally binds the selected vehicle and immutable snapshot.
@@ -31,8 +32,9 @@ export async function archivedRevisionPdf(
   port: { download: (revision: Revision) => Promise<Uint8Array> } | null,
   save: (pdf: Uint8Array, name: string) => void
 ): Promise<void> {
+  const fence=documentFence()
   const bytes = await archivedRevisionBytes(revision, vehicleId, workshopId, port)
   const name = 'COT-' + String(revision.payload.quote.number).padStart(6, '0') +
     '-R' + revision.revision + '.pdf'
-  save(bytes, name)
+  fence.assert();save(bytes, name)
 }

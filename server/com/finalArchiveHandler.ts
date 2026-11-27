@@ -1,3 +1,4 @@
+import {CommercialOperationNotCurrent} from '../commercial/meteredDocument'
 /** New endpoint candidate; no deployment/secret lookup. Every read checks the live session twice. */
 import type {SupabaseClient} from '@supabase/supabase-js'
 import {ArchiveFailure,archiveId,type DocumentKind} from '../../src/expedientes/contracts'
@@ -41,6 +42,7 @@ export function finalArchiveHandler(policy:{read:boolean;write:boolean;origin:st
    return new Response(pdf.slice().buffer,{headers:{...headers,'Content-Type':'application/pdf',
     'Content-Disposition':'attachment; filename="'+doc.fileName+'"','Content-Length':String(pdf.length)}})
   }catch(error){
+   if(error instanceof CommercialOperationNotCurrent)return reply('DOCUMENT_OPERATION_NOT_CURRENT',409)
    const kind=error instanceof ArchiveFailure?error.kind:'unavailable'
    return reply(kind.toUpperCase(),kind==='denied'?403:kind==='invalid'?400:kind==='disabled'?503:kind==='missing'?404:kind==='integrity'?409:500)
   }

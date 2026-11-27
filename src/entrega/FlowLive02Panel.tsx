@@ -256,7 +256,7 @@ export function FlowLive02Panel({
                 <p>Trabajos pendientes: {records.execution.pending_note}</p>}
             </div>
           ) : records.approval ? (
-            <WorkExecutionDraft guided={!!stage} registerSave={bindExecution} onPendingChange={setExecutionPending} revision={revision} quote={quote} onRecord={recordExecution} />
+            <WorkExecutionDraft authorizeDownload={async()=>{if(!port)throw Error('ACCESS_REQUIRED');return port.history(quote,revision)}} guided={!!stage} registerSave={bindExecution} onPendingChange={setExecutionPending} revision={revision} quote={quote} onRecord={recordExecution} />
           ) : (
             <p>Primero registra la declaración de aprobación de esta revisión.</p>
           )}

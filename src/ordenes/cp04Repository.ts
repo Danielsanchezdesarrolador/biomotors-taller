@@ -1,3 +1,5 @@
+import {DocumentOperationExpired,isDocumentOperationNotCurrent} from '../documents/operation'
+import {documentFence} from '../auth/documentAccess'
 /**
  * CP04 candidate — work orders, multipoint inspection and carried-forward
  * issues. Only inject the same authenticated R1 Supabase client as CP03.
@@ -124,10 +126,10 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     return {order,vehicle:check<VehicleChoice>(vehicleRes.data,tenant)}
   }
   async function inspectionDocument(orderId:string,requestId:string):Promise<Uint8Array>{
-    const version=await guard(inspectionStaff)
+    const fence=documentFence(),version=await guard(inspectionStaff)
     const result=await client.functions.invoke('bt-commercial-documents',{body:{action:'multipunto',workshopId:tenant,orderId:validId(orderId),requestId:validId(requestId)}})
-    valid(version);if(result.error||!(result.data instanceof Blob))throw new WorkOrderFailure('denied')
-    const bytes=new Uint8Array(await result.data.arrayBuffer());if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw new WorkOrderFailure('unavailable');return bytes
+    valid(version);if(result.error&&await isDocumentOperationNotCurrent(result.error))throw new DocumentOperationExpired('','invalidated');if(result.error||!(result.data instanceof Blob))throw new WorkOrderFailure('denied')
+    const bytes=new Uint8Array(await result.data.arrayBuffer());valid(version);fence.assert();if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw new WorkOrderFailure('unavailable');return bytes
   }
   async function pdfIdentity(orderId:string):Promise<InspectionPdfIdentity>{
     const version=await guard()
