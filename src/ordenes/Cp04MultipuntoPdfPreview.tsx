@@ -1,10 +1,11 @@
+import {PdfViewer} from '../documents/PdfViewer'
 import {CommercialPlanHelp} from '../plans/commercialPresentation'
 import {CommercialFailure} from '../plans/commercialErrors'
 import {documentFence,documentEpoch,subscribeDocuments,documentURL,revokeDocumentURL} from '../auth/documentAccess'
 import {documentOperation,assertDocumentOperation,DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
 import {useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore} from 'react'
-import {Download,Eye,FileText,X} from 'lucide-react'
+import {Download,Eye,FileText} from 'lucide-react'
 import type {Finding,OrderWithVehicle,InspectionPdfIdentity} from './cp04Contracts'
 import {hasCurrentProvisionalFindings} from './cp04Autosave'
 
@@ -18,7 +19,7 @@ export function Cp04MultipuntoPdfPreview({
  loadDocument?:(orderId:string,requestId:string)=>Promise<Uint8Array>
 }){
  const authority=useSyncExternalStore(subscribeDocuments,documentEpoch,documentEpoch)
- const dialog=useRef<HTMLDialogElement>(null),generation=useRef(0),locked=useRef(false),currentURL=useRef<string|null>(null)
+ const focusTarget=useRef<HTMLElement|null>(null),generation=useRef(0),locked=useRef(false),currentURL=useRef<string|null>(null)
  const [url,setUrl]=useState<{value:string;authority:number;expiresAt:number;key:string}|null>(null)
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[display,setDisplay]=useState(false),[expired,setExpired]=useState<DocumentOperationExpired|null>(null)
  const blocked=outstanding>0||incomplete||hasCurrentProvisionalFindings(findings)
@@ -28,13 +29,13 @@ export function Cp04MultipuntoPdfPreview({
  useLayoutEffect(()=>{generation.current++;locked.current=false;closePreview();setBusy(false);setError('');setExpired(null)
   return()=>{generation.current++;if(currentURL.current)revokeDocumentURL(currentURL.current);currentURL.current=null}
  },[snapshot,disabled,blocked,documentScope,authority])
- useEffect(()=>{if(display&&url&&url.authority===authority&&dialog.current&&!dialog.current.open)dialog.current.showModal()},[display,url,authority])
  useEffect(()=>{if(!url)return;const seq=generation.current;const timer=setTimeout(()=>{if(seq===generation.current){closePreview();setError('El visor se cerró por inactividad. Solicita de nuevo el documento para revalidar su autorización.')}},Math.max(0,url.expiresAt-Date.now()));return()=>clearTimeout(timer)},[url])
  async function generate(download:boolean){
   if(locked.current||disabled)return
   if(blocked){setError(reason);return}
   const current=generation.current,fence=documentFence(),valid=()=>current===generation.current&&fence.current()
   let operationKey=''
+  if(!download)focusTarget.current=document.activeElement as HTMLElement|null
   locked.current=true;setBusy(true);setError('');setExpired(null)
   try{
    await loadIdentity?.(order.order.id)
@@ -69,14 +70,7 @@ export function Cp04MultipuntoPdfPreview({
    {error&&<p className="cp04-error" role="alert">{error}</p>}
 <CommercialPlanHelp message={error}/>
    <DocumentOperationNotice error={expired} onRestart={()=>{setExpired(null);setError('Nueva operación preparada. Solicita el documento para revalidar con el servidor.')}}/>
-   {display&&url&&url.authority===authority&&<dialog ref={dialog} className="bt-inspection-dialog" aria-label="Vista previa del borrador · No enviado" onCancel={closePreview} onClick={e=>{if(e.target===e.currentTarget)closePreview()}}>
-     <div className="cp04-pdf-preview-title">
-       <strong>Vista previa del borrador · No enviado</strong>
-       <button type="button" className="cp04-secondary" onClick={closePreview}
-         aria-label="Cerrar vista previa PDF"><X size={16}/> Cerrar</button>
-     </div>
-     <iframe src={url.value+'#view=FitH'} title="Vista previa de la inspección multipunto en PDF" />
-     <p>Si el dispositivo no muestra PDF integrados, selecciona «Descargar borrador» para abrirlo en tu lector.</p>
-   </dialog>}
+   {display&&url&&url.authority===authority&&<PdfViewer frameTitle="Vista previa de la inspección multipunto en PDF" returnFocus={focusTarget.current} className="bt-inspection-dialog" url={url.value} title="Vista previa del borrador · No enviado" authority={url.authority} onClose={closePreview} onDownload={()=>generate(true)} closeLabel="Cerrar vista previa PDF"/>}
+
  </section>
 }

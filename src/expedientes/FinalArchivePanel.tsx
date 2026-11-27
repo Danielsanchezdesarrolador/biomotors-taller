@@ -1,8 +1,9 @@
+import {PdfViewer} from '../documents/PdfViewer'
 import {CommercialPlanHelp} from '../plans/commercialPresentation'
 import {documentFence,documentEpoch,subscribeDocuments,documentURL,revokeDocumentURL} from '../auth/documentAccess'
 import {DocumentOperationExpired} from '../documents/operation'
 import {DocumentOperationNotice} from '../documents/DocumentOperationNotice'
-import {useEffect,useRef,useState,useId,useSyncExternalStore} from 'react'
+import {useEffect,useRef,useState,useSyncExternalStore} from 'react'
 import {Archive,ArrowLeft,Download,Eye,Search,RefreshCw} from 'lucide-react'
 import {ArchiveFailure,isArchiveAccessDenied,archiveMessage,type ArchiveRow,type ArchiveDocumentSet,type ArchivedDocument,type DocumentKind} from './contracts'
 import type {FinalArchivePort} from './repository'
@@ -23,27 +24,34 @@ export function FinalArchivePanel({repository,vehicleId,revisionId,fixedRow,orde
  useEffect(()=>{registerSave?.(async exit=>{if(loading||busy)return false;const row=selected??fixedRow;if(!row||!matches(row)){setError('No se pudo recuperar la revisión de esta visita.');return false}try{const saved=checked(row,await repository.documents(row.revisionId));if(exit||saved.complete)return true;if(!row.canArchive){setError('La entrega debe estar confirmada antes de archivar.');return false}return await archive(row)??false}catch(e){failed(e);return false}});return()=>registerSave?.(null)})
  function matches(row:ArchiveRow){return (!orderId||row.orderId===orderId)&&(!revisionId||row.revisionId===revisionId)&&(!vehicleId||row.vehicleId===vehicleId)&&(!guided||!!fixedRow&&row.orderId===fixedRow.orderId&&row.revisionId===fixedRow.revisionId&&row.workshopId===fixedRow.workshopId)}
  function checked(row:ArchiveRow,data:ArchiveDocumentSet){if(!matches(row)||data.workshopId!==row.workshopId||data.revisionId!==row.revisionId||data.quoteId!==row.quoteId||data.orderId!==row.orderId||data.vehicleId!==row.vehicleId||data.customerId!==row.customerId||data.revision!==row.revision)throw new ArchiveFailure('denied');return data}
- const ownedURLs=useRef(new Set<string>())
+ const focusTarget=useRef<HTMLElement|null>(null),ownedURLs=useRef(new Set<string>())
  function releaseURL(url:string){ownedURLs.current.delete(url);revokeDocumentURL(url)}
  useEffect(()=>()=>{for(const url of ownedURLs.current)revokeDocumentURL(url);ownedURLs.current.clear()},[])
- const request=useRef({revisionId:'',id:''}),generation=useRef(0),alive=useRef(true),lock=useRef(false),dialog=useRef<HTMLDialogElement>(null),heading=useId()
+ const request=useRef({revisionId:'',id:''}),generation=useRef(0),alive=useRef(true),lock=useRef(false)
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;generation.current++}},[repository])
  useEffect(()=>{let cancelled=false;const seq=++generation.current;setLoading(true);setPreview(null);setRows([]);setSelected(null);setDocuments([]);setError('')
   void (fixedRow&&!matches(fixedRow)?Promise.reject(new ArchiveFailure('denied')):fixedRow?repository.documents(fixedRow.revisionId).then(d=>{checked(fixedRow,d);return [{...fixedRow,complete:d.complete,canArchive:!d.complete&&fixedRow.canArchive}]}):repository.list(term,vehicleId,page)).then(data=>{if(!cancelled&&alive.current&&seq===generation.current)setRows(revisionId?data.filter(r=>r.revisionId===revisionId):data)}).catch(e=>{if(!cancelled&&alive.current&&seq===generation.current)failed(e)}).finally(()=>{if(!cancelled&&alive.current&&seq===generation.current)setLoading(false)})
   return()=>{cancelled=true}
  },[repository,vehicleId,revisionId,fixedRow,orderId,guided,term,page,refresh])
- useEffect(()=>{if(preview)dialog.current?.showModal();else dialog.current?.close();return()=>{if(preview)releaseURL(preview.url)}},[preview])
+ useEffect(()=>()=>{if(preview)releaseURL(preview.url)},[preview])
  useEffect(()=>{if(!preview?.expiresAt)return;const timer=setTimeout(()=>{setPreview(null);setNotice('El visor se cerró por inactividad. Solicita de nuevo el documento para revalidar su autorización.')},Math.max(0,preview.expiresAt-Date.now()));return()=>clearTimeout(timer)},[preview])
  function failed(error:unknown){setPreview(null);if(error instanceof DocumentOperationExpired){setExpired(error);setError(error.message);return}if(isArchiveAccessDenied(error)){generation.current++;setLoading(false);setRows([]);setSelected(null);setDocuments([]);setExpired(null);setNotice('');request.current={revisionId:'',id:''};for(const url of ownedURLs.current)revokeDocumentURL(url);ownedURLs.current.clear()}setError(archiveMessage(error))}
  async function open(row:ArchiveRow){if(lock.current)return;if(!matches(row)){failed(new ArchiveFailure('denied'));return}lock.current=true;setBusy(true);setError('');setDocuments([]);setSelected(row);const seq=++generation.current
   try{const data=checked(row,await repository.documents(row.revisionId));if(alive.current&&seq===generation.current){setDocuments(data.documents);setSelected({...row,complete:data.complete})}}
   catch(e){if(alive.current&&seq===generation.current)failed(e)}finally{lock.current=false;if(alive.current)setBusy(false)}
  }
- async function pdf(kind:DocumentKind,view:boolean){const fence=documentFence();if(!selected||lock.current)return;if(!matches(selected)){failed(new ArchiveFailure('denied'));return}lock.current=true;setBusy(true);setError('');const seq=generation.current
+ async function pdf(kind:DocumentKind,view:boolean){const fence=documentFence();if(!selected||lock.current)return;if(!matches(selected)){failed(new ArchiveFailure('denied'));return}if(view)focusTarget.current=document.activeElement as HTMLElement|null;lock.current=true;setBusy(true);setError('');const seq=generation.current
   try{const result=await repository.bytes(selected.revisionId,kind);if(!alive.current||seq!==generation.current||!fence.current())return
    const url=documentURL(result.bytes,result.expiresAt?result.expiresAt-Date.now():300000);ownedURLs.current.add(url)
    if(view)setPreview({url,name:result.doc.fileName,authority,expiresAt:result.expiresAt,operationKey:result.operationKey});else{const a=document.createElement('a');a.href=url;a.download=result.doc.fileName;a.click();setTimeout(()=>releaseURL(url),1500)}
   }catch(e){if(alive.current&&seq===generation.current&&fence.current())failed(e)}finally{lock.current=false;if(alive.current)setBusy(false)}
+ }
+ async function zip(){if(!selected||!selected.complete||lock.current)return;if(!matches(selected)){failed(new ArchiveFailure('denied'));return}const fence=documentFence(),seq=generation.current;lock.current=true;setBusy(true);setError('')
+  let bytes:Uint8Array|undefined
+  try{const result=await repository.zip(selected.revisionId);bytes=result.bytes;if(!alive.current||seq!==generation.current||!fence.current())return
+   const url=documentURL(bytes,1500,'application/zip');ownedURLs.current.add(url);const a=document.createElement('a');a.href=url;a.download=result.fileName;a.click();setTimeout(()=>releaseURL(url),1500)
+   setNotice('Expediente ZIP preparado con los tres originales verificados. No se regeneraron documentos.')
+  }catch(e){if(alive.current&&seq===generation.current&&fence.current())failed(e)}finally{bytes?.fill(0);lock.current=false;if(alive.current)setBusy(false)}
  }
  async function archive(row=selected){if(!row||lock.current||!row.canArchive)return;if(!matches(row)){failed(new ArchiveFailure('denied'));return}
   if(!window.confirm('¿Archivar el expediente desde sus registros definitivos? Se conservarán los documentos sin permitir sobrescrituras.'))return
@@ -71,9 +79,11 @@ export function FinalArchivePanel({repository,vehicleId,revisionId,fixedRow,orde
    {selected?<><h2>Cotización {selected.number} · Revisión {selected.revision}</h2><p>{selected.customerName} · {selected.plate??'Sin patente'}</p><p>Contenido e importes de la revisión original. La anulación o archivo no modifica sus documentos.</p>
     {!selected.complete&&<p>El informe y la constancia no tienen un original archivado disponible. No se regeneran al consultarlos.</p>}
     {documents.map(doc=><article className="final-archive-document" key={doc.kind}><h3>{label(doc.kind)}</h3><span>{(doc.byteLength/1024).toFixed(1)} KB · PDF privado</span><details><summary>Comprobante SHA-256</summary><code>{doc.sha256}</code></details><div className="final-archive-actions"><button className="cp03-secondary" disabled={busy} aria-label={'Visualizar '+label(doc.kind).toLowerCase()} onClick={()=>void pdf(doc.kind,true)}><Eye size={17}/>{guided?'Visualizar':'Visualizar '+label(doc.kind).toLowerCase()}</button><button className="cp03-secondary" disabled={busy} aria-label={'Descargar '+label(doc.kind).toLowerCase()} onClick={()=>void pdf(doc.kind,false)}><Download size={17}/>{guided?'Descargar':'Descargar '+label(doc.kind).toLowerCase()}</button></div></article>)}
+    {selected.complete&&<div className="final-archive-zip"><button className="cp03-primary" disabled={busy||loading} aria-label="Descargar expediente ZIP" onClick={()=>void zip()}><Download size={17}/>Descargar expediente ZIP</button><p>Premium · Plus y Full. Tres originales verificados, máximo 12 MB; sin regeneración.</p></div>}
     {selected.canArchive&&!selected.complete&&<button className="cp03-primary" disabled={busy} onClick={()=>void archive()}><Archive size={17}/> Archivar expediente definitivo</button>}
    </>:<p>Selecciona una visita y revisión para consultar sus documentos.</p>}
   </section></div>
-  <dialog ref={dialog} className="final-archive-preview" aria-labelledby={heading} onCancel={()=>setPreview(null)} onClose={()=>setPreview(null)}>{preview&&preview.authority===authority&&<><header><h2 id={heading}>{preview.name}</h2><button className="cp03-secondary" onClick={()=>setPreview(null)}>Cerrar vista previa</button></header><iframe title={'PDF original: '+preview.name} src={preview.url} referrerPolicy="no-referrer"/></>}</dialog>
+  {preview&&preview.authority===authority&&<PdfViewer returnFocus={focusTarget.current} className="final-archive-preview" url={preview.url} title={'PDF original: '+preview.name} authority={preview.authority} onClose={()=>setPreview(null)} onDownload={()=>pdf(documents.find(d=>d.fileName===preview.name)?.kind??'quote',false)}/>}
+
  </section>
 }

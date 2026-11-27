@@ -4,6 +4,12 @@ Decisión del titular: mantener BT-MOBILE-02A–D en su posición ya establecida
 
 ---
 
+## 27/11/2026 — BT-COMMERCIAL-DOCUMENTS-UX-01 / CANDIDATE_PARTIAL
+
+Base main a81e594847394bcb655660a73b4a01ffb19575bd. C01 ZIP premium de3 originales por endpoint final autorizado y cuota/UUID vigente, sin regeneración ni Storage nuevo; C02 visor compartido responsive/zoom/foco/fallback e invalidación; C03 BORRADOR servidor incondicional, A4/34 componentes intactos.16 SQL/HTTP +2 SDK reales,14 unitarias +3 renderer,23 Chromium focalizados y paquetes/builds/flags PASS local. WebKit BLOCKED_ENVIRONMENT, CI/Deno nativos/dispositivos pendientes; no aceptación integral. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_DOCUMENTS_UX_01_20261127.md), [informe, instalación/recuperación y riesgo MEDIO](docs/BT_COMMERCIAL_DOCUMENTS_UX_01.md). Sin SQL, servicios, GATE4, producción, push oficial, nuevas ramas, deploy, Auto-Deploy o SEC07. B_ACCEPTED_PASS/0/2/4 preservado; definitivo multipunto, Android nativo y BT-DEVOPS-01 no iniciados. Entrega privada DTK-ERR-056; revisión independiente antes de integración/activación.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / B_ACCEPTED_PASS — C pendiente
 
 Bloque B instalado y aceptación funcional 6/6 confirmada por titular; postflight productivo 21:57:45 UTC: Full activo 4 cupos, 16 objetos/2 buckets privados, 9 consumos confirmados (uno nuevo multipunto Plus tras reapertura), cero reservas, 7 membresías/2 invitaciones. GATE4 abierto 4 permisos/8 denegaciones, cuerpos intactos, seats 0/2/4, Edge v16/v14/v6 y onboarding v8 JWT true, Render LIVE Auto-Deploy OFF. Aceptación del titular, no auditoría independiente de cada prueba o bytes; no equivale a entrega Ignacio. [Checkpoint cierre B](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_LIVE_QA_20261127.md). Siguiente: definir bloque C (ZIP tres originales autorizados, visor PDF responsive amplio, marca de agua multipunto). No activar funciones diferidas ni iniciar C sin candidato autorizado; SEC07 cerrado. BT-DEVOPS-01 posterior a entrega y aceptación del piloto Ignacio.

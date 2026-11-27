@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
               /\.test\./.test(id) ||
               (sharedPlanPresentation.test(id) && !sharedPlanPresentationEnabled) ||
               (!id.endsWith('.css') &&
-                !(env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && /\/src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx)$/.test(id)) &&
+                !(env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && /\/src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx|PdfViewer\.tsx)$/.test(id)) &&
                 !(env.VITE_BT_AGENDA_ENABLED==='true' && /\/src\/agenda\//.test(id)) &&
                 !(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && env.VITE_BT_FLOW_LIVE_02_ENABLED==='true' && /\/src\/guided\/(?:GuidedWorkspace|progress|continuity|OperationsCenter|operations)\.(?:tsx|ts)$/.test(id)) &&
                 !(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && /\/src\/expedientes\//.test(id)) &&

@@ -5,7 +5,7 @@ export type DocumentKind='quote'|'report'|'handover'
 export type ArchivedDocument={kind:DocumentKind;fileName:string;bucket:string;path:string;sha256:string;byteLength:number;contentType:'application/pdf'}
 export type ArchiveRow={workshopId:string;revisionId:string;quoteId:string;orderId:string;customerId:string;vehicleId:string;revision:number;number:number;issuedAt:string;customerName:string;plate:string|null;make:string;model:string;total:number;complete:boolean;quoteStatus:string;customerArchived:boolean;vehicleArchived:boolean;orderCancelled:boolean;deliveryId:string|null;canArchive:boolean}
 export type ArchiveDocumentSet={workshopId:string;revisionId:string;quoteId:string;orderId:string;vehicleId:string;customerId:string;revision:number;issuedAt:string;complete:boolean;documents:ArchivedDocument[]}
-export class ArchiveFailure extends Error {constructor(readonly kind:'denied'|'disabled'|'integrity'|'missing'|'unavailable'|'invalid'){super(kind)}}
+export class ArchiveFailure extends Error {constructor(readonly kind:'denied'|'disabled'|'integrity'|'missing'|'unavailable'|'invalid'|'too_large'){super(kind)}}
 /** All authorization denials must reach the panel's defensive cleanup, regardless of error family. */
 export function isArchiveAccessDenied(error:unknown){return error instanceof ArchiveFailure&&error.kind==='denied'||error instanceof CommercialFailure&&['session','permission'].includes(error.reason)}
 /** Preserve historical HTTP semantics before considering commercial promotion. No response bytes are reused. */
@@ -25,6 +25,7 @@ export async function archiveDownloadFailure(error:unknown,commercial=false):Pro
 }
 export function archiveId(id:string){if(!UUID.test(id))throw new ArchiveFailure('invalid');return id.toLowerCase()}
 export function archiveMessage(error:unknown){if(error instanceof CommercialFailure)return error.message;return error instanceof ArchiveFailure?{
+ too_large:'El expediente supera el límite de 12 MB. Descarga sus originales individualmente.',
  denied:'Tu sesión o tus permisos no permiten consultar este expediente.',disabled:'El archivo documental no está habilitado para este taller.',
  integrity:'El documento no coincide con su comprobante de integridad. No se entregaron sus bytes.',missing:'El original no está disponible. No se regenerará ni sustituirá por una copia actual.',
  unavailable:'No se pudo confirmar la consulta. Reintenta; una respuesta incierta al archivar se conciliará con el mismo expediente.',invalid:'La referencia documental no es válida.'

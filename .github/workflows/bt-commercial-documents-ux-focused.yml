@@ -1,0 +1,139 @@
+name: BT-COMMERCIAL-DOCUMENTS-UX-01 focused CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt-commercial-documents-ux-focused.yml'
+      - 'src/expedientes/**'
+      - 'src/documents/**'
+      - 'src/ordenes/cp04InspectionPdf*'
+      - 'src/ordenes/Cp04MultipuntoPdfPreview.tsx'
+      - 'src/auth/documentAccess.ts'
+      - 'server/com/**'
+      - 'server/commercial/**'
+      - 'scripts/*documents*'
+      - 'scripts/security/verify-documents-ux-local.sh'
+      - 'scripts/package-commercial-handlers.mjs'
+      - 'tests/documentsUx*'
+      - 'tests/harness/DocumentsUxFixture.tsx'
+      - 'tests/harness/documents-ux.html'
+      - 'vite*.ts'
+      - 'package*.json'
+permissions:
+  contents: read
+jobs:
+  server-and-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx vitest run src/expedientes/documentsUx.test.ts
+      - name: Only affected A4 renderer regressions
+        run: npx vitest run src/ordenes/cp04InspectionPdf.test.ts -t 'creates a complete|leaves every box empty|creates exactly one A4'
+      - name: Prepare isolated tools in CI only
+        run: |
+          docker pull postgres:17
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+      - name: Real SQL quotas, revocation and HTTP ZIP / server watermark
+        env:
+          BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-documents-evidence
+        run: bash scripts/security/verify-documents-ux-local.sh
+      - name: Installed SDK and frontend repository against real SQL HTTP
+        env:
+          BT_DOCUMENTS_FOCUS: sdk
+          BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-documents-sdk
+        run: bash scripts/security/verify-documents-ux-local.sh
+      - name: Independent original ZIP and all-page watermark / full legacy A4 layout
+        run: |
+          python3 scripts/verify-documents-originals.py /tmp/bt-documents-evidence
+          node scripts/verify-documents-pdf.mjs /tmp/bt-documents-evidence/multipunto-watermarked.pdf /tmp/bt-documents-evidence/pdf-operator-results.json
+          python3 scripts/verify-documents-watermark.py /tmp/bt-documents-evidence/multipunto-watermarked.pdf /tmp/bt-documents-evidence/multipunto-model.json
+      - name: Public/private builds with deferred features OFF
+        run: python3 scripts/verify-documents-builds.py
+      - name: Reproduce and verify all offline services
+        run: |
+          node scripts/package-commercial-handlers.mjs /tmp/bt-documents-packages-a
+          node scripts/package-commercial-handlers.mjs /tmp/bt-documents-packages-b
+          node scripts/verify-commercial-handlers-package.mjs /tmp/bt-documents-packages-a /tmp/bt-documents-packages-b
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Native Deno checks, no deployment
+        run: |
+          for kind in ready freeze; do
+            for service in bt-cp05-documents bt-final-archive bt-commercial-documents; do
+              deno check --no-lock "/tmp/bt-documents-packages-a/$kind/supabase/functions/$service/index.js"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: documents-ux-server
+          path: |
+            /tmp/bt-documents-evidence/*.json
+            /tmp/bt-documents-evidence/*.log
+            /tmp/bt-documents-evidence/*.pdf
+            /tmp/bt-documents-evidence/*.zip
+            /tmp/bt-documents-sdk/*.json
+            /tmp/bt-documents-sdk/*.log
+            /tmp/bt-documents-build/
+            /tmp/bt-documents-packages-a/release-manifest.json
+            /tmp/bt-commercial-delta-evidence/package-results.json
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Isolated browsers in official CI only
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-documents-playwright" --no-save --no-package-lock --no-audit --no-fund playwright@1.65.1
+          "$RUNNER_TEMP/bt-documents-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-documents-playwright/node_modules" >> "$GITHUB_ENV"
+      - name: Consolidated ZIP and shared viewer desktop/mobile
+        env:
+          BT_DOCUMENTS_BROWSER: ${{ matrix.engine }}
+          OUTPUT_DIR: /tmp/bt-documents-browser
+        run: python3 scripts/verify-documents-ux.py
+      - name: Only affected Hardening guards
+        env:
+          BT_HARDENING_BROWSER: ${{ matrix.engine }}
+          BT_HARDENING_CASES: archive-preview-download,archive-open-downgrade,server-expiry-explicit-new-operation,concurrent-actions-single-operation,role-invalidation
+          OUTPUT_DIR: /tmp/bt-documents-hardening
+        run: python3 scripts/verify-commercial-hardening.py
+      - name: Only affected historical-denial paths
+        env:
+          BT_COMMERCIAL_BROWSER: ${{ matrix.engine }}
+          BT_ARCHIVE_DELTA_CASES: session,permission,integrity,explicit-renewal,authorization-denial-discards-stale-response
+          OUTPUT_DIR: /tmp/bt-documents-archive-regression
+        run: python3 scripts/verify-archive-commercial-delta.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: documents-ux-${{ matrix.engine }}
+          path: |
+            /tmp/bt-documents-browser/*.json
+            /tmp/bt-documents-browser/*.png
+            /tmp/bt-documents-browser/*.pdf
+            /tmp/bt-documents-browser/*.zip
+            /tmp/bt-documents-browser/*.log
+            /tmp/bt-documents-hardening/*.json
+            /tmp/bt-documents-hardening/*.log
+            /tmp/bt-documents-archive-regression/*.json
+            /tmp/bt-documents-archive-regression/*.log

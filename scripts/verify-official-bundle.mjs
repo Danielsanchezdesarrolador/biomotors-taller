@@ -119,7 +119,7 @@ assert.ok(
   modules.every(
     (id) =>
       id.endsWith('.css') ||
-      (cp04PrivateEnabled && /src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx)$/.test(id)) ||
+      (cp04PrivateEnabled && /src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx|PdfViewer\.tsx)$/.test(id)) ||
       (creatorPrivateEnabled && /src\/creator\//.test(id)) ||
       (workshopsEnabled && /src\/workshops\//.test(id)) ||
       (process.env.VITE_BT_AGENDA_ENABLED==='true' && /src\/agenda\//.test(id)) ||

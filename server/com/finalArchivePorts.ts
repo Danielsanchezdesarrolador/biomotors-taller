@@ -1,3 +1,5 @@
+import {originalArchiveZip,archiveZipManifest} from '../../src/expedientes/originalZip'
+import {CommercialFailure} from '../../src/plans/commercialErrors'
 import {meteredDocument} from '../commercial/meteredDocument'
 /** Concrete trusted SDK adapter. No keys or SDK construction; no storage paths from HTTP. */
 import type {SupabaseClient} from '@supabase/supabase-js'
@@ -13,7 +15,7 @@ async function rpc<T>(client:SupabaseClient,name:string,args:Record<string,unkno
 export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,assets:()=>Promise<{font:Uint8Array;logo:Uint8Array;wordmark?:Uint8Array;boldFont?:Uint8Array}>){
  async function authenticate(){const r=await user.auth.getUser();if(r.error||!r.data.user?.email_confirmed_at)throw new ArchiveFailure('denied');return {id:r.data.user.id,confirmed:true}}
  async function documents(wid:string,rid:string){await authenticate();return validateDocumentSet(await rpc(user,'bt_final_archive_document',{p_workshop_id:wid,p_revision_id:rid}),wid,rid)}
- async function read(bucket:string,path:string){const r=await trusted.storage.from(bucket).download(path);if(r.error||!r.data)throw new ArchiveFailure('missing');return new Uint8Array(await r.data.arrayBuffer())}
+ async function read(bucket:string,path:string){const r=await trusted.storage.from(bucket).download(path);if(r.error||!r.data)throw new ArchiveFailure('missing');if(r.data.size<12||r.data.size>20_000_000)throw new ArchiveFailure('integrity');return new Uint8Array(await r.data.arrayBuffer())}
  async function readDocument(wid:string,rid:string,kind:DocumentKind){
   const set=await documents(wid,rid),doc=set.documents.find(d=>d.kind===kind)
   if(!doc)throw new ArchiveFailure('missing')
@@ -55,6 +57,20 @@ export function finalArchivePorts(user:SupabaseClient,trusted:SupabaseClient,ass
   const result=await readDocument(wid,rid,kind)
   return {...result,bytes:await meteredDocument(user,trusted,{workshopId:wid,capability:'quote',resourceId:rid,requestId},async()=>result.bytes)}
  }
- return {authenticate,documents,download,archive}
+ async function zip(wid:string,rid:string,requestId:string){
+  const actor=await authenticate()
+  async function authorizeZip(){const current=await authenticate();if(current.id!==actor.id)throw new ArchiveFailure('denied');const status=await rpc<{workshopId:string;plan:string}>(user,'bt_commercial_status',{p_workshop_id:wid});if(status.workshopId!==wid)throw new ArchiveFailure('denied');if(!['plus','full'].includes(status.plan))throw new CommercialFailure('plan');return status.plan}
+  const plan=await authorizeZip(),set=await documents(wid,rid);archiveZipManifest(set)
+  const files:Uint8Array[]=[];let temporary:Uint8Array|undefined
+  try{
+   for(const kind of ['quote','report','handover'] as const){const result=await download(wid,rid,kind,requestId);files.push(result.bytes)}
+   const result=await originalArchiveZip(set,files);temporary=result.bytes
+   // Recheck after every asynchronous build/hash step, including original paid receipt/session.
+   if(await authorizeZip()!==plan||JSON.stringify(await documents(wid,rid))!==JSON.stringify(set))throw new ArchiveFailure('denied')
+   await meteredDocument(user,trusted,{workshopId:wid,capability:'quote',resourceId:rid,requestId},async()=>{throw new ArchiveFailure('denied')})
+   temporary=undefined;return result
+  }finally{temporary?.fill(0);for(const bytes of files)bytes.fill(0)}
+ }
+ return {authenticate,documents,download,archive,zip}
 }
 export type FinalArchiveMetadata=ArchiveDocumentSet

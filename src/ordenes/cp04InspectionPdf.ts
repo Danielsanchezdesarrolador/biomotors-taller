@@ -1,5 +1,5 @@
 /** BT-INS-PDF-01: read-only PDF from confirmed CP04 visit findings. No network writes. */
-import {PDFDocument,rgb,pushGraphicsState,popGraphicsState,setTextRenderingMode,TextRenderingMode,setLineWidth,setStrokingColor,type RGB as Color,type PDFImage} from 'pdf-lib'
+import {PDFDocument,rgb,degrees,StandardFonts,pushGraphicsState,popGraphicsState,setTextRenderingMode,TextRenderingMode,setLineWidth,setStrokingColor,type RGB as Color,type PDFImage} from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import {multipuntoTemplateItems,latestForMultipuntoItem,multipuntoSavedState,multipuntoDisplayNote} from './cp04Multipunto'
 import {provisionalFinding,CP04_PROVISIONAL_NOTE} from './cp04Autosave'
@@ -172,6 +172,8 @@ export async function multipuntoPdf(source:MultipuntoPdfInput,fontBytes:Uint8Arr
  fit('OT: '+o.id+'  ·  Patente: '+(v.plate||'—'),M,804,CW,7.5,false,6.5)
  put('Sin X: no evaluado. No certifica reparaciones ni seguridad de circulación.',M,816,7,muted)
  gradient(0,830,W,12,navy,blue)
+ const watermarkFont=await pdf.embedFont(StandardFonts.HelveticaBold)
+ for(const sheet of pdf.getPages())sheet.drawText('BORRADOR',{x:72,y:290,size:82,font:watermarkFont,rotate:degrees(38),opacity:.16,color:rgb(.18,.35,.52)})
  // Deliberately only one addPage call; long notes never enter this fixed layout.
  return pdf.save({useObjectStreams:false})
 }

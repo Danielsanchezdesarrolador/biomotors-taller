@@ -1,3 +1,5 @@
+import {archiveZipManifest,archiveZipName,verifyOriginalArchiveZip,MAX_ARCHIVE_BYTES} from './originalZip'
+import {CommercialFailure} from '../plans/commercialErrors'
 import {documentFence} from '../auth/documentAccess'
 import {documentOperationKey,assertDocumentOperation,DocumentOperationExpired,isDocumentOperationNotCurrent} from '../documents/operation'
 import {commercialDocumentRequest} from '../cp05/documentClient'
@@ -32,6 +34,23 @@ export function finalArchiveRepository(client:SupabaseClient,context:Context){
    if(JSON.stringify(checked.documents.find(x=>x.kind===kind))!==JSON.stringify(doc))throw new ArchiveFailure('denied')
    fence.assert();if(requestId)assertDocumentOperation(operationKey,requestId)
    return {bytes,doc,...(requestId?{expiresAt:Date.now()+300000,operationKey}:{})}
+  },
+  async zip(rid:string){
+   const fence=documentFence(),operationKey=documentOperationKey(uid,wid,rid),requestId=commercialDocumentRequest(context,rid)
+   const set=await documents(rid);archiveZipManifest(set)
+   const r=await client.functions.invoke('bt-final-archive',{body:{action:'zip',workshopId:wid,revisionId:archiveId(rid),requestId}});valid()
+   if(r.error){const status=(r.error as {context?:Response}).context?.status;if(status===409&&await isDocumentOperationNotCurrent(r.error))throw new DocumentOperationExpired(operationKey,'invalidated');if(status===413)throw new ArchiveFailure('too_large');throw await archiveDownloadFailure(r.error,true)}
+   if(!(r.data instanceof Blob))throw new ArchiveFailure('unavailable')
+   if(r.data.size>MAX_ARCHIVE_BYTES+2048)throw new ArchiveFailure('too_large')
+   const bytes=new Uint8Array(await r.data.arrayBuffer())
+   try{
+    await verifyOriginalArchiveZip(bytes,set)
+    if(JSON.stringify(await documents(rid))!==JSON.stringify(set))throw new ArchiveFailure('denied')
+    const status=await rpc('bt_commercial_status',{})
+    if(status?.workshopId!==wid)throw new ArchiveFailure('denied');if(!['plus','full'].includes(status.plan))throw new CommercialFailure('plan')
+    fence.assert();assertDocumentOperation(operationKey,requestId);valid()
+    return {bytes,fileName:archiveZipName(set)}
+   }catch(error){bytes.fill(0);throw error}
   },
   async archive(row:ArchiveRow,requestId:string){
    if(row.workshopId!==wid||!row.deliveryId||!row.canArchive)throw new ArchiveFailure('invalid')

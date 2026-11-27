@@ -1,0 +1,22 @@
+import {finalArchivePorts} from '../../server/com/finalArchivePorts'
+import type {SupabaseClient} from '@supabase/supabase-js'
+import {it,expect,vi} from 'vitest'
+import {createHash} from 'node:crypto'
+import {originalArchiveZip,verifyOriginalArchiveZip,archiveZipManifest,MAX_ARCHIVE_BYTES} from './originalZip'
+import type {ArchiveDocumentSet} from './contracts'
+const id=(n:number)=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0'),wid=id(1),rid=id(2),qid=id(3),oid=id(4)
+const files=['Quote original','Execution original','Handover original'].map(text=>new TextEncoder().encode('%PDF-1.7\n'+text+'\n%%EOF\n'))
+const hash=(b:Uint8Array)=>createHash('sha256').update(b).digest('hex')
+const set:ArchiveDocumentSet={workshopId:wid,revisionId:rid,quoteId:qid,orderId:oid,customerId:id(5),vehicleId:id(6),revision:2,issuedAt:'2026-11-27T12:00:00Z',complete:true,documents:(['quote','report','handover'] as const).map((kind,i)=>({kind,fileName:kind+'.pdf',bucket:i===0?'cp05-quote-documents':'bt-closing-documents',path:i===0?wid+'/quotes/'+qid+'/r2/'+'a'.repeat(64)+'.pdf':wid+'/closings/'+oid+'/'+rid+'/'+id(7)+'/'+kind+'/'+hash(files[i])+'.pdf',sha256:hash(files[i]),byteLength:files[i].length,contentType:'application/pdf'}))}
+it('exact three-original ZIP is deterministic, verified and leaves all source bytes unchanged',async()=>{const originals=files.map(x=>x.slice()),a=await originalArchiveZip(set,files),b=await originalArchiveZip(set,files);expect(a.bytes).toEqual(b.bytes);expect(await verifyOriginalArchiveZip(a.bytes,set)).toBe(a.bytes);expect(files).toEqual(originals);expect(a.fileName).toBe('EXPEDIENTE_R2_'+rid+'.zip')})
+it('incomplete final archive is rejected, without generating missing originals',async()=>{await expect(originalArchiveZip({...set,complete:false,documents:[set.documents[0]]},[files[0]])).rejects.toMatchObject({kind:'missing'})})
+it('missing bytes cannot produce a partial archive',async()=>{await expect(originalArchiveZip(set,files.slice(0,2))).rejects.toMatchObject({kind:'integrity'})})
+it('corrupted original is rejected even if size matches',async()=>{const bad=files[1].slice();bad[20]^=1;await expect(originalArchiveZip(set,[files[0],bad,files[2]])).rejects.toMatchObject({kind:'integrity'})})
+it('unsafe filenames and foreign document paths never enter ZIP',()=>{for(const doc of [{...set.documents[1],fileName:'../../secret.pdf'},{...set.documents[1],path:set.documents[1].path.replace(wid,id(90))}])expect(()=>archiveZipManifest({...set,documents:[set.documents[0],doc,set.documents[2]]})).toThrow()})
+it('duplicate document hashes are not accepted as three originals',()=>{const d={...set.documents[1],sha256:set.documents[0].sha256,path:set.documents[1].path.replace(set.documents[1].sha256,set.documents[0].sha256)};expect(()=>archiveZipManifest({...set,documents:[set.documents[0],d,set.documents[2]]})).toThrow()})
+it('revision identity cannot be injected into filenames',()=>{expect(()=>archiveZipManifest({...set,revisionId:'../../other'})).toThrow()})
+it('declared aggregate exceeds memory budget before reading files',()=>{expect(()=>archiveZipManifest({...set,documents:set.documents.map(d=>({...d,byteLength:MAX_ARCHIVE_BYTES/3+1}))})).toThrow('too_large')})
+it.each(['name','crc','end','extra'] as const)('strict client ZIP verification rejects tampered %s',async field=>{const original=(await originalArchiveZip(set,files)).bytes;let bad=original.slice();if(field==='name')bad[30]=47;if(field==='crc')bad[14]^=1;if(field==='end')bad[bad.length-14]=4;if(field==='extra'){bad=new Uint8Array(original.length+1);bad.set(original)}await expect(verifyOriginalArchiveZip(bad,set)).rejects.toMatchObject({kind:'integrity'})})
+it('a server ZIP with mismatched revision does not match caller metadata',async()=>{const result=await originalArchiveZip(set,files);await expect(verifyOriginalArchiveZip(result.bytes,{...set,revision:3})).rejects.toThrow()})
+
+it('oversized private Storage object is rejected before materializing another buffer',async()=>{const arrayBuffer=vi.fn();const user={auth:{getUser:async()=>({data:{user:{id:id(7),email_confirmed_at:'confirmed'}},error:null})},rpc:async()=>({data:set,error:null})} as unknown as SupabaseClient;const trusted={storage:{from:()=>({download:async()=>({data:{size:20_000_001,arrayBuffer},error:null})})}} as unknown as SupabaseClient;await expect(finalArchivePorts(user,trusted,async()=>{throw Error('NO_RENDER')}).download(wid,rid,'report')).rejects.toMatchObject({kind:'integrity'});expect(arrayBuffer).not.toHaveBeenCalled()})

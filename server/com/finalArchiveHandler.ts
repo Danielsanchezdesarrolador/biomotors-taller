@@ -27,13 +27,14 @@ export function finalArchiveHandler(policy:{read:boolean;write:boolean;origin:st
    if(!body||typeof body!=='object'||Array.isArray(body))return reply('INVALID',400)
    const id=(value:unknown)=>{if(typeof value!=='string')throw new ArchiveFailure('invalid');return archiveId(value)}
    const wid=id(body.workshopId),rid=id(body.revisionId)
-   const allowed=body.action==='archive'?['action','workshopId','revisionId','orderId','deliveryId','requestId']:['action','workshopId','revisionId','kind',...(body.action==='download'&&body.kind==='quote'?['requestId']:[])]
+   const allowed=body.action==='zip'?['action','workshopId','revisionId','requestId']:body.action==='archive'?['action','workshopId','revisionId','orderId','deliveryId','requestId']:['action','workshopId','revisionId','kind',...(body.action==='download'&&body.kind==='quote'?['requestId']:[])]
    if(Object.keys(body).some(k=>!allowed.includes(k)))return reply('INVALID',400)
    if(body.action==='archive'&&!policy.write)return reply('DISABLED',503)
-   if(!['archive','download'].includes(body.action))return reply('INVALID',400)
+   if(!['archive','download','zip'].includes(body.action))return reply('INVALID',400)
    if(body.action==='download'&&!['quote','report','handover'].includes(body.kind))return reply('INVALID',400)
    const downloadRequest=body.action==='download'&&body.kind==='quote'?id(body.requestId):undefined
    const ports=finalArchivePorts(deps.userClient(authorization),deps.trustedClient(),deps.assets)
+   if(body.action==='zip'){const result=await ports.zip(wid,rid,id(body.requestId));return new Response(result.bytes.slice().buffer,{headers:{...headers,'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename="'+result.fileName+'"','Content-Length':String(result.bytes.length)}})}
    if(body.action==='archive'){
     const manifest=await ports.archive({workshopId:wid,revisionId:rid,orderId:id(body.orderId),deliveryId:id(body.deliveryId),requestId:id(body.requestId)})
     return Response.json({manifest},{headers})
@@ -45,7 +46,7 @@ export function finalArchiveHandler(policy:{read:boolean;write:boolean;origin:st
   }catch(error){if(error instanceof CommercialFailure){const code=error.reason==='quota'?'COMMERCIAL_QUOTA_EXHAUSTED':error.reason==='plan'?'PLAN_CAPABILITY_REQUIRED':error.reason==='session'?'SESSION_INVALID':'PERMISSION_DENIED';return reply(code,error.reason==='quota'?429:error.reason==='session'?401:403)}
    if(error instanceof CommercialOperationNotCurrent)return reply('DOCUMENT_OPERATION_NOT_CURRENT',409)
    const kind=error instanceof ArchiveFailure?error.kind:'unavailable'
-   return reply(kind.toUpperCase(),kind==='denied'?403:kind==='invalid'?400:kind==='disabled'?503:kind==='missing'?404:kind==='integrity'?409:500)
+   return reply(kind.toUpperCase(),kind==='too_large'?413:kind==='denied'?403:kind==='invalid'?400:kind==='disabled'?503:kind==='missing'?404:kind==='integrity'?409:500)
   }
  }
 }
