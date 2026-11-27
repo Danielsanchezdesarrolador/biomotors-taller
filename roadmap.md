@@ -1,3 +1,9 @@
+## BT-DEVOPS-01 — Automatización de despliegues seguros (post-piloto Ignacio)
+
+Decisión del titular 27/11/2026: diferir diseño e implementación hasta entregar y aceptar el piloto de Ignacio. Clasificar cambios por riesgo: UI/código compatible con CI y despliegue controlado; migraciones y cambios de autorización con respaldo vigente, preflight, barreras/freeze cuando corresponda, paquetes fijados por hash, instalación coordinada, postflight, recuperación y aprobaciones explícitas según riesgo. Automatizar verificaciones repetibles, registrar evidencia y evitar repeticiones innecesarias sin debilitar seguridad. No activar Auto-Deploy ni cambios de infraestructura por esta anotación. No iniciar ahora ni interferir con instalación B/C o piloto.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / CI_FINAL_PASS — instalación pendiente
 
 CI 8/8 SUCCESS comprobado directamente para c7e4ace9ed436437a1f4e19ec4816766c4f929d6; integración base fb82fe9625c3b76f0b3a763712eec1b75ed374be, 185/185 SHA-256 y dos árboles exactos reportados por el titular. Se cierran las observaciones de CI-FIX-01: frontera CP03/workshops, aserción obsoleta 0/8 y encabezado ownership Agenda ON; regresión documental preservada. Chromium/WebKit, SQL aislado 0/2/4 y check Deno en CI aprobados; no certifican ejecución alojada ni Safari físico. Auto-Deploy OFF verificado. Siguiente: preflight de solo lectura e instalación coordinada previa autorización específica; SQL, Edge, GATE4, Render y licencias sin intervención en esta etapa. SEC07 cerrado; C no iniciado. [Checkpoint CI FINAL](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_CI_FINAL_20261127.md). Development Toolkit ERR-035/056/062 ampliados en 5a2518b330b6c8c55aea3f877075356ad2f4a835; no duplicar fichas.
