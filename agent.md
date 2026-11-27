@@ -1,5 +1,9 @@
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-CI-FIX-01 / CI_PENDING
 
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-LIVE-01 / GATE_OPEN_PASS / HUMAN_QA_PENDING
+Titular confirmó navegación del frontend, funciones pendientes deshabilitadas, aceptación explícita del riesgo residual y autorización transaccional GATE4. Preflight 17:52:08 UTC PASS; ejecutado SQL GATE_OPEN exacto blob e377cbe473804a4104eb54c23826fdec2d83743f. Postflight 17:52:26 UTC: 4/4 permisos authenticated, 8/8 denegaciones anon/service_role, 4/4 MD5 intactos, 16 objetos privados, 5 confirmed, 0 reservas activas, RLS/Storage intactos, Edge v14/v12/v4 y onboarding v8, Render LIVE SHA 1e1217cdd735e9fe07b22fee56374e8454eaa580, Auto-Deploy OFF. No cambios de flags ni datos. Confirmación de flags y navegación por titular, no inspección independiente del navegador; riesgo residual no equivale a revocación global. Pendiente aceptación humana controlada QA, no declarar cierre bloque A ni comercialización. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_LIVE_01_GATE_OPEN_20261127.md).
+
+
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-LIVE-01 / RENDER_LIVE_PASS / GATE_OPEN_PENDING
 Render dep-dc4s4d8u01pc73f6l710 LIVE 17:47:56 UTC, SHA 1e1217cdd735e9fe07b22fee56374e8454eaa580 equivalente en código al SHA CI aprobado. Auto-Deploy OFF. Postflight 4/4 GATE4 cerradas (12/12 denegaciones), 16 objetos privados, 5 confirmed, 0 reservas activas. No cambios SQL, flags, Auth, datos ni Edge. Pendiente comprobación humana de navegación autenticada bajo bloqueo y flags OFF (correo/registro clientes/logo/pagos), revisión residual y autorización separada GATE_OPEN. No declarar aceptación ni abrir bloque B. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_LIVE_01_RENDER_LIVE_20261127.md).
 
