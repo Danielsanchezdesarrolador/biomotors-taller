@@ -1,5 +1,9 @@
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-CI-FIX-01 / CI_PENDING
 
+## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-LIVE-01 / RENDER_LIVE_PASS / GATE_OPEN_PENDING
+Render dep-dc4s4d8u01pc73f6l710 LIVE 17:47:56 UTC, SHA 1e1217cdd735e9fe07b22fee56374e8454eaa580 equivalente en código al SHA CI aprobado. Auto-Deploy OFF. Postflight 4/4 GATE4 cerradas (12/12 denegaciones), 16 objetos privados, 5 confirmed, 0 reservas activas. No cambios SQL, flags, Auth, datos ni Edge. Pendiente comprobación humana de navegación autenticada bajo bloqueo y flags OFF (correo/registro clientes/logo/pagos), revisión residual y autorización separada GATE_OPEN. No declarar aceptación ni abrir bloque B. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_LIVE_01_RENDER_LIVE_20261127.md).
+
+
 ## 27/11/2026 — BT-COMMERCIAL-HARDENING-01-LIVE-01 / RENDER_DEPLOY_STARTED
 Titular autorizó únicamente despliegue frontend manteniendo GATE4 cerrado y Auto-Deploy OFF. Comparación recursiva SHA aprobado 5375a3ea0cbb62ceaf3ceca4ad61d756b63b08ae contra HEAD 1e1217cdd735e9fe07b22fee56374e8454eaa580: 11 rutas, todas documentación o workflow manual, sin diferencias productivas. Preflight 12/12 denegaciones, 16 objetos, 5 confirmed, 0 reservas; Edge Ready v14/v12/v4, onboarding v8 intacta. Deploy manual Render dep-dc4s4d8u01pc73f6l710 iniciado 17:47:33 UTC, SHA 1e1217cdd735e9fe07b22fee56374e8454eaa580, último estado observado build_in_progress. Auto-Deploy OFF, sin cambios configuración, sin nuevo SQL ni reapertura. Verificar LIVE exacto, flags y navegación bloqueada antes de autorización separada GATE_OPEN. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_HARDENING_01_LIVE_01_RENDER_DEPLOY_20261127.md).
 
