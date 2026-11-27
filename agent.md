@@ -1,3 +1,9 @@
+## 27/11/2026 UTC — GATE4_RENDER_LIVE / REOPEN_BLOCKED
+
+Render dep-dc4ljttg1s2s73etout0 LIVE 10:23:12 UTC, SHA 7dc06a26; tsc/Vite build PASS (2.51 s, advertencia chunk no bloqueante). Postflight 10:23:52 UTC: cuatro ACL cerradas, 12/12 denegaciones, 16 objetos, 2 buckets privados, 0 consumos. Auto-Deploy OFF y main confirmados. No modificar flags ni SQL/Edge/Storage/Auth, sin Codex ni repetir CI. Queda verificar configuración efectiva de flags y frontend en navegador; el conector no permite leer flags individuales y no se ha acreditado navegación autenticada. GATE_OPEN exige autorización específica, no ejecutar aún. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_RENDER_LIVE_20261127.md).
+
+---
+
 ## 27/11/2026 UTC — GATE4_RESIDUAL_ACCEPTED / RENDER_DEPLOY_STARTED / REOPEN_BLOCKED
 
 Titular acepta riesgo residual documentado y autoriza exclusivamente frontend Render con cuatro ACL cerradas. Capturas acreditan nueva clave Storage ES256 activa y antigua revocada (~02:55 UTC), ticket SU-571138 recibido sin respuesta técnica acreditada; no purga CDN. 10:21 UTC: >7 h desde revocación, cacheControl 3600 s, 11 storage_logs/24 edge_logs desde ready sin coincidencias firma/documentales; no certificación global. Versiones/hashes registrados intactos, 12/12 denegaciones, 16 objetos privados, 0 consumos, 8 definiciones, RLS forzado y tres políticas Storage restrictivas. Preflight 10:22:37 UTC confirma 4 ACL cerradas. Auto-Deploy OFF, main 7dc06a26, frontend idéntico a CI aprobado. Render manual dep-dc4ljttg1s2s73etout0 iniciado 10:22:47 UTC; build_in_progress observado, no LIVE certificado. No cambios flags, SQL/Edge/datos ni Codex. Verificar resultado, configuración y solicitar autorización específica GATE_OPEN; no reabrir automáticamente. [Checkpoint](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_RESIDUAL_ACCEPTED_20261127.md).
