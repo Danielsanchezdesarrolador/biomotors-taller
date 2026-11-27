@@ -1,3 +1,9 @@
+## 27/11/2026 UTC — evidencia residual GATE4
+
+9/9 denegaciones, 16 documentos, freeze intacto, cero transacciones antiguas. 23h30 de logs agregados sin coincidencias de rutas de firma y 27 blobs históricos documentales revisados sin mecanismos de firma detectados. No demuestra ausencia histórica absoluta ni convergencia global. Propuesta pendiente de decisión: instalar SQL/ready con cuatro ACL cerradas, separar reapertura y mantenerla bloqueada hasta resolver incertidumbre material; no ejecutar sin autorización específica. Ver [adenda GATE4](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_PREP_20261127.md). Sin mutaciones productivas.
+
+---
+
 ## 27/11/2026 UTC — BT-WORKSHOP-COMMERCIAL-01: GATE4_PREPARED / RELEASE_GATE_BLOCKED
 
 Titular autorizó preparación de cuarta barrera. [INSTALL_GATE4](docs/sql/BT_WORKSHOP_COMMERCIAL_01_INSTALL_GATE4.sql) preserva candidato exacto y añade preflight de tres ACL/huellas y cierre transaccional de bt_commercial_status antes del único COMMIT; postflight cuatro ACL (12 denegaciones). [GATE_OPEN](docs/sql/BT_WORKSHOP_COMMERCIAL_01_GATE_OPEN.sql) ampliado a cuatro. Validación estática focalizada, no ejecutada en PostgreSQL. Workflow y paquetes aprobados intactos. No ejecutar CANDIDATE directamente. HTTP_FREEZE_PASS previo conservado; no repetir por rutina. Incertidumbre global/URLs históricas y revisión del alcance de otras RPC de negocio pendientes; la barrera documental no congela toda escritura (reserve authenticated no entrega bytes). No instalar SQL, ready, Render ni abrir hasta puertas correspondientes y autorización específica. [Checkpoint GATE4](docs/checkpoints/CHECKPOINT_BT_WORKSHOP_COMMERCIAL_01_GATE4_PREP_20261127.md). Sin Codex, nuevas CI o cambios productivos.
