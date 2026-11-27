@@ -1,3 +1,9 @@
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / B_ACCEPTED_PASS — C pendiente
+
+Bloque B instalado y aceptación funcional 6/6 confirmada por titular; postflight productivo 21:57:45 UTC: Full activo 4 cupos, 16 objetos/2 buckets privados, 9 consumos confirmados (uno nuevo multipunto Plus tras reapertura), cero reservas, 7 membresías/2 invitaciones. GATE4 abierto 4 permisos/8 denegaciones, cuerpos intactos, seats 0/2/4, Edge v16/v14/v6 y onboarding v8 JWT true, Render LIVE Auto-Deploy OFF. Aceptación del titular, no auditoría independiente de cada prueba o bytes; no equivale a entrega Ignacio. [Checkpoint cierre B](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_LIVE_QA_20261127.md). Siguiente: definir bloque C (ZIP tres originales autorizados, visor PDF responsive amplio, marca de agua multipunto). No activar funciones diferidas ni iniciar C sin candidato autorizado; SEC07 cerrado. BT-DEVOPS-01 posterior a entrega y aceptación del piloto Ignacio.
+
+---
+
 ## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / CI_FINAL_PASS — instalación pendiente
 
 CI 8/8 SUCCESS comprobado directamente para c7e4ace9ed436437a1f4e19ec4816766c4f929d6; integración base fb82fe9625c3b76f0b3a763712eec1b75ed374be, 185/185 SHA-256 y dos árboles exactos reportados por el titular. Se cierran las observaciones de CI-FIX-01: frontera CP03/workshops, aserción obsoleta 0/8 y encabezado ownership Agenda ON; regresión documental preservada. Chromium/WebKit, SQL aislado 0/2/4 y check Deno en CI aprobados; no certifican ejecución alojada ni Safari físico. Auto-Deploy OFF verificado. Siguiente: preflight de solo lectura e instalación coordinada previa autorización específica; SQL, Edge, GATE4, Render y licencias sin intervención en esta etapa. SEC07 cerrado; C no iniciado. [Checkpoint CI FINAL](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_CI_FINAL_20261127.md). Development Toolkit ERR-035/056/062 ampliados en 5a2518b330b6c8c55aea3f877075356ad2f4a835; no duplicar fichas.

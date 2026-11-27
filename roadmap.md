@@ -1,3 +1,9 @@
+## 27/11/2026 — BT-COMMERCIAL-PLANS-01 / B_ACCEPTED_PASS — C pendiente
+
+Bloque B instalado y aceptación funcional 6/6 confirmada por titular; postflight productivo 21:57:45 UTC: Full activo 4 cupos, 16 objetos/2 buckets privados, 9 consumos confirmados (uno nuevo multipunto Plus tras reapertura), cero reservas, 7 membresías/2 invitaciones. GATE4 abierto 4 permisos/8 denegaciones, cuerpos intactos, seats 0/2/4, Edge v16/v14/v6 y onboarding v8 JWT true, Render LIVE Auto-Deploy OFF. Aceptación del titular, no auditoría independiente de cada prueba o bytes; no equivale a entrega Ignacio. [Checkpoint cierre B](docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_PLANS_01_LIVE_QA_20261127.md). Siguiente: definir bloque C (ZIP tres originales autorizados, visor PDF responsive amplio, marca de agua multipunto). No activar funciones diferidas ni iniciar C sin candidato autorizado; SEC07 cerrado. BT-DEVOPS-01 posterior a entrega y aceptación del piloto Ignacio.
+
+---
+
 ## BT-DEVOPS-01 — Automatización de despliegues seguros (post-piloto Ignacio)
 
 Decisión del titular 27/11/2026: diferir diseño e implementación hasta entregar y aceptar el piloto de Ignacio. Clasificar cambios por riesgo: UI/código compatible con CI y despliegue controlado; migraciones y cambios de autorización con respaldo vigente, preflight, barreras/freeze cuando corresponda, paquetes fijados por hash, instalación coordinada, postflight, recuperación y aprobaciones explícitas según riesgo. Automatizar verificaciones repetibles, registrar evidencia y evitar repeticiones innecesarias sin debilitar seguridad. No activar Auto-Deploy ni cambios de infraestructura por esta anotación. No iniciar ahora ni interferir con instalación B/C o piloto.
