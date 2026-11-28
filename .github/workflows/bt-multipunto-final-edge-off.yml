@@ -1,0 +1,125 @@
+name: ByteTorque MULTIPUNTO-01B - Edge OFF
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'MULTIPUNTO_EDGE_OFF_GATES_INTACT (solo V2 OFF; rutas anteriores FREEZE)'
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: bytetorque-commercial-edge-release
+  cancel-in-progress: false
+jobs:
+  edge-off:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      APPROVED_SHA: 20926b532030ad1a613ab5b8d616859d75063663
+      REQUEST_REF: ${{ github.ref }}
+      CONFIRMATION: ${{ inputs.confirmacion }}
+      PACKAGE: /tmp/bt-mp-edge-off-${{ github.run_id }}-${{ github.run_attempt }}-a
+      PACKAGE_B: /tmp/bt-mp-edge-off-${{ github.run_id }}-${{ github.run_attempt }}-b
+      BT_MPF_EVIDENCE: /tmp/bt-mp-edge-off-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Reject unauthorized ref or confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REQUEST_REF" == refs/heads/main ]]
+          [[ "$CONFIRMATION" == MULTIPUNTO_EDGE_OFF_GATES_INTACT ]]
+      - uses: actions/checkout@v4
+        with:
+          ref: 20926b532030ad1a613ab5b8d616859d75063663
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Reproduce and verify exact approved packages and native Deno
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          npm ci --no-audit --no-fund
+          git diff --exit-code
+          git diff --cached --exit-code
+          mkdir -p "$BT_MPF_EVIDENCE"
+          node scripts/package-multipunto-final.mjs "$PACKAGE"
+          node scripts/package-multipunto-final.mjs "$PACKAGE_B"
+          node scripts/verify-multipunto-package.mjs "$PACKAGE" "$PACKAGE_B"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFile,readdir,writeFile} from 'node:fs/promises'
+          import {join} from 'node:path'
+          import {createHash} from 'node:crypto'
+          const expected = {"version":2,"scope":"OFFLINE_REVIEW_ONLY","files":{"migration-delta.sql":"bd8fec3d0a176f5c7a3678d9b3e9edf86b3dc446ce857903603e2936143c9c7e","migration.sql":"731f482fe3d6611f120642b902fb35d64ba17899cbdc2d8cf8b858486936d29c","policy-delta.sql":"6135854c733c4bace2f799401cba24ca2c79629010242e779d68645953c4caee","policy.sql":"3fe45d81551f2c97643c91edb86f4bc9e598d3d702dc7868c5d3059cd07145a0","storage.sql":"2a2ca385d48194dc89869f9ee36aabc1a0761c8922084072518a5fbfe1a02b02","supabase/config.toml":"93d2c3115b46246d436ee0ee90eb4da7fc0f92857c192b7193aeff47ae160e88","supabase/functions/bt-multipunto-documents/assets/DejaVuSans.ttf":"57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e","supabase/functions/bt-multipunto-documents/assets/FONT-LICENSE.txt":"e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c","supabase/functions/bt-multipunto-documents/assets/logo-dark.png":"fe66f89b0799864fecfbc4939e896f9e41da85e414d1dc6bd2656fe5c3123e8d","supabase/functions/bt-multipunto-documents/assets/logo-light.png":"d47484d31979089e12019893fd1632eda980dbc7bddc100a9f40f1d6da3395f4","supabase/functions/bt-multipunto-documents/index.js":"fcc64fe465afc674c59c32a5aaaed80a69dea22946fcfbbf9b90a6a1ef35b8d5"},"gates":"OFF","deployed":false}
+          const sha = b=>createHash('sha256').update(b).digest('hex')
+          for (const root of [process.env.PACKAGE,process.env.PACKAGE_B]) {
+            const manifest = await readFile(join(root,'manifest.json'))
+            assert.equal(sha(manifest),'86cc931a0f0e14bbcacfae65f39ea2ccb09d6b1a13ae4b28c8e80e2173e440d5')
+            assert.deepEqual(JSON.parse(manifest),expected)
+            const found=[]
+            async function walk(dir,prefix=''){
+              for(const e of await readdir(dir,{withFileTypes:true})){
+                const rel=prefix+e.name
+                if(e.isDirectory()) await walk(join(dir,e.name),rel+'/')
+                else if(e.isFile()) found.push(rel)
+                else throw Error('NON_REGULAR_PACKAGE_ENTRY')
+              }
+            }
+            await walk(root)
+            assert.deepEqual(found.sort(),[...Object.keys(expected.files),'manifest.json'].sort())
+            for(const [p,h] of Object.entries(expected.files)) assert.equal(sha(await readFile(join(root,p))),h,p)
+          }
+          const result=JSON.parse(await readFile(join(process.env.BT_MPF_EVIDENCE,'package-results.json'),'utf8'))
+          assert.equal(result.status,'PASS')
+          assert.equal(result.nativeDeno.status,'PASS')
+          assert.equal(result.reproducible,true)
+          assert.equal(result.network,0)
+          assert.equal(result.files,11)
+          const config=await readFile(join(process.env.PACKAGE,'supabase/config.toml'),'utf8')
+          assert.ok(config.includes('verify_jwt = true'))
+          assert.ok(config.includes('static_files = ["./functions/bt-multipunto-documents/assets/*"]'))
+          await writeFile(join(process.env.BT_MPF_EVIDENCE,'verify-receipt.json'),JSON.stringify({status:'PASS',sha:process.env.APPROVED_SHA,reviewManifestBlob:'4baa49720655667ad3ca141f5f6efab74977b36b',files:11,packages:2,nativeDeno:'PASS',gates:'OFF',deployed:false},null,2)+'\n')
+          console.log('BT_MP_EDGE_OFF: EXACT_REVIEW_MANIFEST_11_OF_11_X2_PASS; NATIVE_DENO_PASS')
+          JS
+      - name: Preserve verification evidence before any production changes
+        uses: actions/upload-artifact@v4
+        with:
+          name: multipunto-final-edge-off-verified
+          path: |
+            ${{ env.PACKAGE }}/manifest.json
+            ${{ env.BT_MPF_EVIDENCE }}/package-results.json
+            ${{ env.BT_MPF_EVIDENCE }}/verify-receipt.json
+          if-no-files-found: error
+      - uses: supabase/setup-cli@v3
+        with:
+          version: v2.stable
+      - name: Install exclusively Multipunto V2 with flags OFF
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: suxcqqnmcjoezfxltoms
+        run: |
+          set -euo pipefail
+          [[ "$REQUEST_REF" == refs/heads/main ]]
+          [[ "$CONFIRMATION" == MULTIPUNTO_EDGE_OFF_GATES_INTACT ]]
+          [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
+          [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]
+          supabase --version
+          docker info >/dev/null
+          supabase functions deploy --help > "$BT_MPF_EVIDENCE/deploy-help.txt"
+          grep -q -- '--use-docker' "$BT_MPF_EVIDENCE/deploy-help.txt"
+          supabase secrets set --help >/dev/null
+          cd "$PACKAGE"
+          sha256sum -c <(node --input-type=module -e 'import fs from "node:fs";for(const [p,h] of Object.entries(JSON.parse(fs.readFileSync("manifest.json")).files)) console.log(h+"  "+p)')
+          supabase secrets set BT_MP_READ_ENABLED=false BT_MP_WRITE_ENABLED=false --project-ref "$PROJECT_REF"
+          echo 'BT_MP_EDGE_OFF: TWO_FLAGS_SET_FALSE'
+          supabase functions deploy bt-multipunto-documents --project-ref "$PROJECT_REF" --use-docker
+          supabase functions list --project-ref "$PROJECT_REF"
+          echo 'BT_MP_EDGE_OFF: DEPLOY_COMPLETE; POSTFLIGHT_HTTP_PENDING'
