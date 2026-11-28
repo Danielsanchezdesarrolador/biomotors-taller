@@ -99,7 +99,7 @@ jobs:
           if-no-files-found: error
       - uses: supabase/setup-cli@v3
         with:
-          version: v2.stable
+          version: '2.122.1'
       - name: Install exclusively Multipunto V2 with flags OFF
         shell: bash
         env:
@@ -111,10 +111,13 @@ jobs:
           [[ "$CONFIRMATION" == MULTIPUNTO_EDGE_OFF_GATES_INTACT ]]
           [[ "$(git rev-parse HEAD)" == "$APPROVED_SHA" ]]
           [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]
-          supabase --version
+          cli_version="$(supabase --version)"
+          printf 'Supabase CLI: %s\n' "$cli_version"
+          [[ "$cli_version" == 2.122.1 ]] || { echo 'BT_MP_EDGE_OFF: CLI_VERSION_MISMATCH' >&2; exit 1; }
           docker info >/dev/null
           supabase functions deploy --help > "$BT_MPF_EVIDENCE/deploy-help.txt"
-          grep -q -- '--use-docker' "$BT_MPF_EVIDENCE/deploy-help.txt"
+          # --use-docker is intentionally hidden in v2.122.1; do not grep help for it.
+          grep -q -- '--project-ref' "$BT_MPF_EVIDENCE/deploy-help.txt" || { echo 'BT_MP_EDGE_OFF: CLI_HELP_PROJECT_REF_MISSING' >&2; exit 1; }
           supabase secrets set --help >/dev/null
           cd "$PACKAGE"
           sha256sum -c <(node --input-type=module -e 'import fs from "node:fs";for(const [p,h] of Object.entries(JSON.parse(fs.readFileSync("manifest.json")).files)) console.log(h+"  "+p)')
