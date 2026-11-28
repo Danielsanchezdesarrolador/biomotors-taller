@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict'
+import {randomUUID} from 'node:crypto'
+import {writeFile} from 'node:fs/promises'
+import {fixture as f,sql,lit,assets,objects,client} from './lab'
+import {projectSnapshot} from '../../server/multipunto/snapshot'
+import {renderMultipunto} from '../../server/multipunto/renderer'
+import {multipuntoService} from '../../server/multipunto/service'
+import {sha,type MPWorker,type MPJob} from '../../server/multipunto/protocol'
+const capture=sql(`SELECT bt_multipunto_private.capture(${lit(f.wid)},${lit(f.oid)},'MP-V2-1');`)
+assert.equal(capture.payload.schema,'MP-SNAPSHOT-1/PG17');assert.ok('email'in capture.payload.customer);assert.ok(!('email'in projectSnapshot(capture.payload).customer))
+const documentId=randomUUID(),credit=randomUUID(),snapshot=randomUUID(),j={id:randomUUID(),workshop_id:f.wid,order_id:f.oid,kind:'final',state:'ISSUED',generation:1,credit_id:credit,document_id:documentId,revision:999,created_at:'2026-11-01T12:00:00Z',lease_until:'2026-11-01T12:05:00Z'} as MPJob
+const bytes=await renderMultipunto({job:j,snapshot:capture.payload,snapshotHash:capture.snapshotHash,canonical:capture.canonical,artifact:null} as MPWorker,await assets()),digest=await sha(bytes),path=f.wid+'/inspections/'+f.oid+'/r999/'+documentId+'/'+digest+'.pdf'
+sql(`INSERT INTO bt_multipunto_private.snapshots(id,workshop_id,order_id,source_hash,snapshot_hash,policy_id,canonical,payload) VALUES(${[snapshot,f.wid,f.oid,capture.sourceHash,capture.snapshotHash,'MP-V2-1',capture.canonical,capture.payload].map(lit).join(',')});INSERT INTO bt_commercial_private.consumption(request_id,workshop_id,actor_id,capability,resource_id,state,reserved_at,expires_at,confirmed_at,plan_at_reservation,snapshot_hash,session_id) VALUES(${lit(credit)},${lit(f.wid)},${lit(f.owner)},'multipunto',${lit(f.oid)},'confirmed','2026-11-01T12:00:00Z','2026-11-01T12:05:00Z','2026-11-01T12:01:00Z','full',${lit(capture.snapshotHash)},'retired-synthetic-session');INSERT INTO bt_multipunto_private.credits(credit_id,workshop_id,snapshot_id,authority) VALUES(${lit(credit)},${lit(f.wid)},${lit(snapshot)},'{}');INSERT INTO bt_multipunto_private.documents(id,workshop_id,order_id,snapshot_id,revision,credit_id,issuer,pdf_hash,byte_length,bucket,path,document_date,confirmed_at) VALUES(${lit(documentId)},${lit(f.wid)},${lit(f.oid)},${lit(snapshot)},999,${lit(credit)},${lit(f.owner)},${lit(digest)},${bytes.length},'bt-inspection-documents',${lit(path)},'2026-11-01T12:00:00Z','2026-11-01T12:01:00Z');`)
+objects.set(path,bytes);const n=sql('SELECT count(*) FROM bt_commercial_private.consumption;'),service=multipuntoService(client('authenticated'),client('service_role'),async()=>{throw Error('HISTORICAL_MUST_NOT_RENDER')});const recovered=await service.read(f.wid,f.oid,documentId,null);assert.deepEqual(recovered,bytes);assert.equal(sql('SELECT count(*) FROM bt_commercial_private.consumption;'),n)
+assert.throws(()=>sql(`SELECT bt_multipunto_private.charge_check_at(${lit(f.wid)},NULL,clock_timestamp());`,'authenticated'),/permission denied/)
+assert.throws(()=>sql('SELECT * FROM bt_multipunto_private.read_limits;','authenticated'),/permission denied/)
+await writeFile((process.env.BT_MPF_EVIDENCE||'/tmp/bt-mpf-delta-evidence')+'/legacy-results.json',JSON.stringify({status:'PASS',scope:'Explicit synthetic historical V1 snapshot/original fixture, expired credit and retired session. Real current PostgreSQL authorization + actual service read, no renderer fallback or new consumption.',pdfSHA256:digest,legacyProjection:'PASS',privateClockInjectionDenied:true,privateReadCountersDenied:true},null,2))
+console.log('MULTIPUNTO_DELTA_LEGACY_AND_PRIVILEGES_PASS')

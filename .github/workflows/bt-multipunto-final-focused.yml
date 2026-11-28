@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['server/multipunto/**', 'src/multipunto/**', 'tests/multipunto/**', 'docs/sql/BT_MULTIPUNTO_FINAL_01B*', 'scripts/*multipunto*', 'scripts/security/*multipunto*', '.github/workflows/bt-multipunto-final-focused.yml']
+    paths: ['server/multipunto/**', 'src/multipunto/**', 'tests/multipunto/**', 'tests/fixtures/multipuntoV1BeforeDelta.json', 'tests/harness/*Multipunto*', 'tests/harness/multipunto-*.html', 'docs/sql/BT_MULTIPUNTO_FINAL_01B*', 'scripts/*multipunto*', 'scripts/security/*multipunto*', '.github/workflows/bt-multipunto-final-focused.yml']
 permissions:
   contents: read
 jobs:
@@ -32,6 +32,10 @@ jobs:
           python3 scripts/security/seed-multipunto-final-lab.py
           docker exec -i "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_MULTIPUNTO_FINAL_01B_POLICY_CANDIDATE.sql
           bash scripts/security/verify-multipunto-final-local.sh
+          docker exec "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque -c 'UPDATE bt_multipunto_private.control SET read_enabled=false,write_enabled=false,recovery_ready=false;'
+          docker exec -i "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_MULTIPUNTO_FINAL_01B_DELTA_01_CANDIDATE.sql
+          docker exec -i "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_MULTIPUNTO_FINAL_01B_DELTA_01_POLICY_CANDIDATE.sql
+          bash scripts/security/verify-multipunto-delta-local.sh
           python3 scripts/backup/test_multipunto_recovery.py
           sudo apt-get update && sudo apt-get install -y poppler-utils
           python3 scripts/verify-multipunto-pdf.py
@@ -49,6 +53,8 @@ jobs:
           for i in $(seq 1 40); do curl -fsS http://127.0.0.1:5184/multipunto-final.html >/dev/null && break; sleep 1; done
           node scripts/verify-multipunto-final-browser.cjs
           BT_MPF_BROWSER=webkit node scripts/verify-multipunto-final-browser.cjs
+          node scripts/verify-multipunto-delta-browser.cjs
+          BT_MPF_BROWSER=webkit node scripts/verify-multipunto-delta-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

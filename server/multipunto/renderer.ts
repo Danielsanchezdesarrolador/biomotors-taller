@@ -1,18 +1,20 @@
 import {PDFDocument,rgb,type PDFFont,type PDFPage} from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
-import {multipuntoPdf,type MultipuntoPdfInput} from '../../src/ordenes/cp04InspectionPdf'
+import type {Finding} from '../../src/ordenes/cp04Contracts'
+import {projectSnapshot} from './snapshot'
+import {multipuntoPdf} from '../../src/ordenes/cp04InspectionPdf'
 import {sha,MPError,type MPWorker} from './protocol'
 export type MPAssets={font:Uint8Array;light:Uint8Array;dark:Uint8Array}
 export const MP_RENDERER='BT-MP-FINAL-1'
 /** Layout is pinned by policy/assets and rendered only in the trusted service. */
 export async function renderMultipunto(work:MPWorker,assets:MPAssets):Promise<Uint8Array>{
- const s=work.snapshot,p=s.policy
- if(s.schema!=='MP-SNAPSHOT-1/PG17'||p.renderer!==MP_RENDERER||s.items.length!==34||new Set(s.items.map(i=>i.id)).size!==34||await sha(new TextEncoder().encode(work.canonical))!==work.snapshotHash)throw new MPError('MP_POLICY_MISMATCH',503)
+ const s=projectSnapshot(work.snapshot),p=s.policy
+ if(!['MP-SNAPSHOT-1/PG17','MP-SNAPSHOT-2/PG17'].includes(s.schema)||p.renderer!==MP_RENDERER||s.items.length!==34||new Set(s.items.map(i=>i.id)).size!==34||await sha(new TextEncoder().encode(work.canonical))!==work.snapshotHash)throw new MPError('MP_POLICY_MISMATCH',503)
  for(const key of ['font','light','dark'] as const)if(p[key]!==await sha(assets[key]))throw new MPError('MP_ASSET_MISMATCH',503)
  if(work.job.kind==='draft'){
   // Preserve the approved watermarked summary; the request cannot remove the mark.
-  const findings=s.items.filter(i=>i.state!=='unreviewed').map((i,n)=>({id:'00000000-0000-4000-8000-'+String(n+1).padStart(12,'0'),workshop_id:s.scope.workshopId,order_id:s.scope.orderId,vehicle_id:s.vehicle.id,category:'Multipunto · '+i.name,result:i.state==='ok'?'ok':'attention',note:i.note,resolution:i.resolution,created_at:work.job.created_at}))
-  return multipuntoPdf({workshopName:String(s.profile?.commercial_name||s.workshop.name),order:{order:s.order,vehicle:s.vehicle},findings,identity:{workshop_id:s.scope.workshopId,order_id:s.scope.orderId,vehicle_id:s.vehicle.id,customer_id:s.customer.id,ownerName:s.customer.full_name,modelYear:s.vehicle.model_year}} as unknown as MultipuntoPdfInput,assets.font,{light:assets.light,dark:assets.dark})
+  const findings:Finding[]=s.items.filter(i=>i.state!=='unreviewed').map((i,n)=>({id:'00000000-0000-4000-8000-'+String(n+1).padStart(12,'0'),workshop_id:s.scope.workshopId,order_id:s.scope.orderId,vehicle_id:s.vehicle.id,category:'Multipunto · '+i.name,result:i.state==='ok'?'ok':'attention',note:i.note,resolution:i.resolution as Finding['resolution'],created_at:work.job.created_at,updated_at:work.job.created_at,recorded_by:s.scope.workshopId,resolved_at:null}))
+  return multipuntoPdf({workshopName:String(s.profile?.commercial_name||s.workshop.name),order:{order:{...s.order,complaint:'',opened_by:s.scope.workshopId,closed_at:null,updated_at:work.job.created_at},vehicle:{...s.vehicle,plate_key:null,odometer_km:null}},findings,identity:{workshop_id:s.scope.workshopId,order_id:s.scope.orderId,vehicle_id:s.vehicle.id,customer_id:s.customer.id,ownerName:s.customer.full_name,modelYear:s.vehicle.model_year}},assets.font,{light:assets.light,dark:assets.dark})
  }
  const pdf=await PDFDocument.create();pdf.registerFontkit(fontkit)
  const font=await pdf.embedFont(assets.font,{subset:true}),logo=await pdf.embedPng(assets.light)

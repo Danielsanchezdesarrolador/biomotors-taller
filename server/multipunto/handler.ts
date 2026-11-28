@@ -1,5 +1,5 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {MPError,uuid,hash,type MPJob} from './protocol'
+import {MPError,uuid,hash,type MPJob,type MPStatus} from './protocol'
 import type {MPAssets} from './renderer'
 import {rpc,multipuntoService} from './service'
 export type MPDependencies={user:(authorization:string)=>SupabaseClient;trusted:()=>SupabaseClient;assets:()=>Promise<MPAssets>;origin:string;readEnabled:boolean;writeEnabled:boolean}
@@ -38,7 +38,7 @@ export function multipuntoHandler(deps:MPDependencies){return async(request:Requ
    }else if(action==='renew'){
     if(b.maxAdditionalUnits!==1)throw new MPError('MP_CONSENT_REQUIRED',400)
     job=await rpc(user,'bt_mp_renew',{p_workshop_id:wid,p_job_id:uuid(b.jobId),p_max_additional_units:1})
-   }else job=await rpc(user,'bt_mp_status',{p_workshop_id:wid,p_job_id:uuid(b.jobId)})
+   }else{const status=await rpc<MPStatus>(user,'bt_mp_status',{p_workshop_id:wid,p_job_id:uuid(b.jobId)});if(status.state==='NOT_PREPARED')throw new MPError('MP_OPERATION_NOT_FOUND',404);job=status}
    // Prior canonical document and other active attempt do not authorize a new render.
    result=job.id?await service.process(job):job
    if((result as {error?:string}).error)throw new MPError((result as {error:string}).error)

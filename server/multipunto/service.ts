@@ -1,12 +1,13 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {MPError,sha,unhex,hex,type MPJob,type MPWorker,type MPDocument} from './protocol'
+import {MPError,sha,unhex,hex,type MPJob,type MPStatus,type MPWorker,type MPDocument} from './protocol'
 import {renderMultipunto,type MPAssets} from './renderer'
 const bucket='bt-inspection-documents'
-export async function rpc<T>(client:SupabaseClient,name:string,args:Record<string,unknown>):Promise<T>{const r=await client.rpc(name,args);if(r.error){const code=/MP_[A-Z_]+/.exec(r.error.message)?.[0]??'MP_PERMISSION_DENIED';throw new MPError(code,code==='MP_QUOTA_EXHAUSTED'?429:code.includes('INVALID_REQUEST')?400:code==='MP_ORIGINAL_MISSING'?404:code.includes('DISABLED')||code.includes('GATE_CLOSED')?503:code.includes('SESSION')?401:code.includes('DENIED')||code==='MP_PLAN_REQUIRED'?403:409)}return r.data as T}
+export async function rpc<T>(client:SupabaseClient,name:string,args:Record<string,unknown>):Promise<T>{const r=await client.rpc(name,args);if(r.error){const code=/MP_[A-Z_]+/.exec(r.error.message)?.[0]??'MP_PERMISSION_DENIED';throw new MPError(code,(code==='MP_QUOTA_EXHAUSTED'||code==='MP_READ_RATE_LIMIT')?429:code.includes('INVALID_REQUEST')?400:code==='MP_ORIGINAL_MISSING'?404:code.includes('DISABLED')||code.includes('GATE_CLOSED')?503:code.includes('SESSION')?401:code.includes('DENIED')||code==='MP_PLAN_REQUIRED'?403:409)}return r.data as T}
 export function multipuntoService(user:SupabaseClient,trusted:SupabaseClient,assets:()=>Promise<MPAssets>){
  const worker=(j:MPJob,action:string,extra={})=>rpc<MPWorker>(trusted,'bt_mp_worker',{p_job_id:j.id,p_generation:j.generation,p_action:action,...extra})
  async function process(j:MPJob){
-  const current=await rpc<MPJob>(user,'bt_mp_status',{p_workshop_id:j.workshop_id,p_job_id:j.id})
+  const current=await rpc<MPStatus>(user,'bt_mp_status',{p_workshop_id:j.workshop_id,p_job_id:j.id})
+  if(current.state==='NOT_PREPARED')throw new MPError('MP_OPERATION_NOT_FOUND',404)
   if(current.generation!==j.generation)throw new MPError('MP_WORKER_FENCED')
   j=current
   if(['ISSUED','DRAFT_CONFIRMED'].includes(j.state))return rpc<Record<string,unknown>>(user,'bt_mp_complete',{p_workshop_id:j.workshop_id,p_job_id:j.id})
@@ -30,7 +31,7 @@ export function multipuntoService(user:SupabaseClient,trusted:SupabaseClient,ass
    await worker(j,'verified',{p_hash:a.hash})
   }
   return await rpc<Record<string,unknown>>(user,'bt_mp_complete',{p_workshop_id:j.workshop_id,p_job_id:j.id})
-  }catch(error){const status=await rpc<MPJob>(user,'bt_mp_status',{p_workshop_id:j.workshop_id,p_job_id:j.id});if(status.generation===j.generation&&['ISSUED','DRAFT_CONFIRMED'].includes(status.state))return rpc<Record<string,unknown>>(user,'bt_mp_complete',{p_workshop_id:j.workshop_id,p_job_id:j.id});try{await worker(j,'failed')}catch{/* A revoked/expired generation cannot append as an active worker. */}throw error}
+  }catch(error){const status=await rpc<MPStatus>(user,'bt_mp_status',{p_workshop_id:j.workshop_id,p_job_id:j.id});if(status.state!=='NOT_PREPARED'&&status.generation===j.generation&&['ISSUED','DRAFT_CONFIRMED'].includes(status.state))return rpc<Record<string,unknown>>(user,'bt_mp_complete',{p_workshop_id:j.workshop_id,p_job_id:j.id});try{await worker(j,'failed')}catch{/* A revoked/expired generation cannot append as an active worker. */}throw error}
  }
  async function read(wid:string,oid:string,documentId:string|null,jobId:string|null){
   const args={p_workshop_id:wid,p_order_id:oid,p_document_id:documentId,p_job_id:jobId}

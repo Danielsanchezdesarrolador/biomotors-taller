@@ -1,5 +1,9 @@
 ## 27/11/2026 — BT-ORDERS-UX-01 / LIVE_ACCEPTED_PASS
 
+## BT-MULTIPUNTO-FINAL-01B-DELTA-01 — 28/11/2026
+
+Delta focalizado sobre 3431c396c8dac53d1552a2549f7525e095f036ec (e332060d437d1ba5fe73ac04a36a6006c0f9b0c3), reconstruido desde su entrega. RI-01–05: crédito directo confirmado por servidor, consentimiento individual, contextos asíncronos inmutables, runtimes CI obligatorios y único instante de cuota/confirmed_at. Complementos: borrador canónico sin crecimiento gratuito, proyección tipada MP-V2-2/H_source, límite técnico de lectura y guard temporal de confirmaciones multipunto V1 del ledger compartido. Ver docs/architecture/BT_MULTIPUNTO_FINAL_01B_DELTA_01 y checkpoint DELTA_01_20261128. Validación focalizada local PASS; Deno/WebKit BLOCKED_ENVIRONMENT y CI nativa/revisión pendientes. Solo entrega nueva privada DTK-ERR-056. Sin push oficial/producción/SQL alojado, GATE4, buckets reales o Auto-Deploy. No repetir SEC07 ni iniciar fases diferidas. 01B y evidencias anteriores conservados.
+
 ## BT-MULTIPUNTO-FINAL-01B — 28/11/2026
 
 Candidato aislado sobre 7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba. Implementación D01–D10 autorizada: protocolo V2, ledger único, snapshot/epochs/CAS, original A4 privado y recuperación S5B. Ver docs/architecture/BT_MULTIPUNTO_FINAL_01B y docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_FINAL_01B_20261128.md. GATE4 y ZIP=3 preservados. Gates nuevos inicialmente OFF. WebKit/Deno BLOCKED_ENVIRONMENT, CI y revisión independientes pendientes. Entrega solo bytetorque-review/BT-MULTIPUNTO-FINAL-01B por DTK-ERR-056; no push oficial ni producción. SEC07 cerrado; Auto-Deploy/correo/pagos/logos/registro OFF; DevOps/Mobile/R3 diferidos. SHA/árbol del candidato y transferencia se resuelven en CANDIDATO.json/recibos del paquete, sin autorreferencia en documentos fuente.

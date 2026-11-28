@@ -1,0 +1,30 @@
+{
+  "baseCandidate": "3431c396c8dac53d1552a2549f7525e095f036ec",
+  "baseTree": "e332060d437d1ba5fe73ac04a36a6006c0f9b0c3",
+  "officialBase": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+  "previousDelivery": "https://github.com/Danielsanchezdesarrolador/bytetorque-review/tree/2736ad257aee597aa4d009f6ff957cdc7fc6889c/BT-MULTIPUNTO-FINAL-01B",
+  "instructionSHA256": "b6121913992664a206abdc12b3212a07f2aaee5273e966b00d6332ad7bc9697d",
+  "continuity": [
+    "AGENTS.md latest applicable state",
+    "agent.md",
+    "roadmap.md",
+    "docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_FINAL_01B_20261128.md",
+    "docs/architecture/BT_MULTIPUNTO_FINAL_01B/CONTRATO_APROBADO.md",
+    "docs/architecture/BT_MULTIPUNTO_FINAL_01B/RUNBOOK.md"
+  ],
+  "toolkitReferences": [
+    "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-056.md",
+    "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-062.md"
+  ],
+  "existingImplementation": [
+    "src/multipunto/MultipuntoDocuments.tsx",
+    "src/multipunto/repository.ts",
+    "server/multipunto/protocol.ts",
+    "server/multipunto/service.ts",
+    "server/multipunto/renderer.ts",
+    "scripts/verify-multipunto-package.mjs",
+    ".github/workflows/bt-multipunto-final-focused.yml",
+    "docs/sql/BT_MULTIPUNTO_FINAL_01B_CANDIDATE.sql"
+  ],
+  "sourceReview": "Source review is separate from effective execution recorded in the delta evidence; no hosted inspection or production mutation."
+}
