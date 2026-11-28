@@ -47,6 +47,9 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           .locator('.cp04-quick-actions')
           .getByRole('button', { name: 'Nueva recepción', exact: true })
           .click()
+        // Observe the committed focus, retaining the original exact assertion.
+        await p.getByLabel('Buscar patente registrada').and(p.locator(':focus'))
+          .waitFor({ state: 'visible', timeout: 3000 })
         assert.equal(
           await p
             .getByLabel('Buscar patente registrada')

@@ -6,7 +6,7 @@ import {parseKilometres} from '../clientes/kilometres'
  * No fixture, demo item, payment, email, or secret key. The repository is
  * injected only after verified Auth R1, and RLS isolates tenant records.
  */
-import { useEffect, useRef, useState, useId, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useId, type FormEvent, type MouseEvent } from 'react'
 import {
   ClipboardCheck,
   Search,
@@ -108,7 +108,10 @@ export function Cp04OrdersView({
   // Presentation only: both panels retain their original form/queue instances.
   const [receptionOpen, setReceptionOpen] = useState(Boolean(initial.complaint || initial.intakeOdometer))
   const [listOpen, setListOpen] = useState(false)
-  const receptionTrigger = useRef<HTMLElement | null>(null)
+  const receptionTrigger = useRef<HTMLButtonElement | null>(null)
+  const primaryReceptionTrigger = useRef<HTMLButtonElement>(null)
+  const receptionFocusIntent = useRef<'open' | 'close' | null>(null)
+  const [receptionFocusVersion, setReceptionFocusVersion] = useState(0)
   const viewRoot = useRef<HTMLDivElement>(null)
   const scrollPosition = useRef(initial.scrollY ?? 0)
   const restoredPosition = useRef(false)
@@ -153,6 +156,26 @@ export function Cp04OrdersView({
     context.role === 'owner' || context.role === 'admin' || context.role === 'reception'
   const canInspect = (canCreate || context.role === 'mechanic')&&context.inspectionEnabled!==false
   const scope = { userId: context.userId, workshopId: context.workshop.id }
+
+  // Apply focus only after React has committed hidden/visible. Consume the
+  // explicit intent once, including when an already-open panel is requested.
+  useLayoutEffect(() => {
+    const intent = receptionFocusIntent.current
+    receptionFocusIntent.current = null
+    if (!intent || !viewRoot.current?.isConnected || viewRoot.current.closest('[hidden]')) return
+    if (intent === 'open' && receptionOpen) {
+      receptionSection.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
+      plateInput.current?.focus({ preventScroll: true })
+    } else if (intent === 'close' && !receptionOpen) {
+      const trigger = receptionTrigger.current
+      receptionTrigger.current = null
+      if (trigger?.isConnected && !trigger.disabled) trigger.focus({ preventScroll: true })
+      if (document.activeElement !== trigger) {
+        const fallback = primaryReceptionTrigger.current
+        if (fallback?.isConnected && !fallback.disabled) fallback.focus({ preventScroll: true })
+      }
+    }
+  }, [receptionOpen, receptionFocusVersion])
 
   // Text stays in a same-tab draft during focus/session revalidation. Never
   // send unsaved descriptions to the server or store an authorization token.
@@ -299,6 +322,9 @@ export function Cp04OrdersView({
         setMultipuntoIncomplete(false)
       }
       setSelected(item)
+      // Selection/creation closes reception without requesting trigger focus.
+      receptionFocusIntent.current = null
+      receptionTrigger.current = null
       setReceptionOpen(false)
       setListOpen(false)
       setVehicle(item.vehicle)
@@ -339,18 +365,17 @@ export function Cp04OrdersView({
   function scrollBehavior(): ScrollBehavior {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
   }
-  function newReception() {
+  function newReception(event: MouseEvent<HTMLButtonElement>) {
     if (!canCreate) return
-    receptionTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    receptionTrigger.current = event.currentTarget
+    receptionFocusIntent.current = 'open'
     setReceptionOpen(true)
-    window.requestAnimationFrame(() => {
-      receptionSection.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
-      plateInput.current?.focus({ preventScroll: true })
-    })
+    setReceptionFocusVersion(value => value + 1)
   }
   function closeReception() {
+    receptionFocusIntent.current = 'close'
     setReceptionOpen(false)
-    window.requestAnimationFrame(() => receptionTrigger.current?.focus({ preventScroll: true }))
+    setReceptionFocusVersion(value => value + 1)
   }
   async function searchVehicle(e: FormEvent) {
     e.preventDefault()
@@ -655,6 +680,7 @@ export function Cp04OrdersView({
           className="cp04-primary"
           disabled={!canCreate}
           title={!canCreate ? 'Tu rol no puede crear órdenes.' : undefined}
+          ref={primaryReceptionTrigger}
           onClick={newReception}
           aria-expanded={receptionOpen}
           aria-controls={tabId+'-reception'}

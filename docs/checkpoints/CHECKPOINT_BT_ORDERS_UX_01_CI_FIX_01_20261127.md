@@ -1,0 +1,11 @@
+# CHECKPOINT BT-ORDERS-UX-01-CI-FIX-01 — 27/11/2026
+
+**Estado: CANDIDATE_PARTIAL / INDEPENDENT_REVIEW_AND_CI_PENDING.** No aceptación oficial. Base 4cb73fd5065f56c6d309ba80e7f779d14cda0dee; árbol 89ba2328a697acd483b66d00474a1faef1ef5fe4. Continuidad BT-ORDERS-UX-01, DELTA-01 y C_ACCEPTED_PASS preservada.
+
+CI base: 6/8 SUCCESS; WebKit Orders run 46095013638, job 140824265351, responsive PASS, intake falla línea 82; regresión documental del mismo job SKIPPED. OFICIAL-01A run 46095013649, job 140824265533, falla CP04 rediseño línea 50; los pasos siguientes SKIPPED. Dos jobs LIVE-FIX SUCCESS; Chromium y contracts-builds Orders SUCCESS. No adjudicar resultados anteriores al candidato.
+
+Corrección focalizada: capturar MouseEvent.currentTarget en ambos botones; intención consumida en useLayoutEffect después del commit, incluso al reabrir panel abierto; retorno al disparador real o al principal si deja de existir; cierre de selección/creación no reclama foco. Sin reconstruir formularios, borrar borradores, alterar guardas, escrituras, estilos R2, SQL, Auth, Storage, Edge, GATE4 o dependencias.
+
+Preservar aserciones originales, añadir espera acotada por foco exacto, verificar botón/Escape, teclado, ambos disparadores, última invocación, identidad del textarea, valores, cero escrituras y creación única. Nuevos escenarios pendientes de ejecución CP04 integral en Chromium/WebKit. Chromium real 144 aislado: 8 comprobaciones positivas del modelo corregido y 3 reproducciones del riesgo original con foco de ratón intencionalmente suprimido y ciclo de commit/replay simulado; no equivale a React StrictMode real, WebKit, RLS o HTTP. Transpile TypeScript aislado PASS; npm/red EAI_AGAIN y WebKit no instalado; no build, typecheck integral, ni suites históricas repetidas. Resultados anteriores del chat interrumpido no recuperados; reconstrucción desde blobs inmutables.
+
+DTK-ERR-062/029: propuesta de adenda en entrega privada, no nueva ficha ni push Toolkit. DTK-ERR-056: entrega privada incremental, snapshots, diff, manifiesto, árbol esperado y SHA de transferencia; no push oficial, rama adicional, despliegue, Auto-Deploy, SEC07 ni cambios de infraestructura. Aprobación específica posterior requerida para integración; CI oficial debe comprobarse antes de CI_FINAL_PASS.

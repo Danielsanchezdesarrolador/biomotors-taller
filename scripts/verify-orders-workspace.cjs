@@ -14,6 +14,20 @@ async function choose(f, index = 0) { const p = f.p; p.setDefaultTimeout(12000);
 const tab = (p, name) => p.getByRole('tab', { name, exact: true });
 async function documents(p) { const group = p.locator('.cp04-action-group').filter({ has: p.locator('summary').filter({ hasText: /^Documentos\s*$/ }) }); if (!await group.getAttribute('open').then(v => v !== null))
     await group.locator('summary').click(); }
+// Wait for the exact locator to be focused, not an arbitrary animation delay.
+async function receptionFocus(p, target) {
+    await target.and(p.locator(':focus')).waitFor({ state: 'visible', timeout: 3000 });
+    assert.ok(await target.evaluate(e => e === document.activeElement));
+}
+async function receptionOpened(p) {
+    await p.locator('.cp04-reception').waitFor({ state: 'visible', timeout: 3000 });
+    await receptionFocus(p, p.getByLabel('Buscar patente registrada'));
+}
+async function receptionClosed(p, trigger) {
+    await p.locator('.cp04-reception').waitFor({ state: 'hidden', timeout: 3000 });
+    assert.ok(await p.locator('.cp04-reception').isHidden());
+    await receptionFocus(p, trigger);
+}
 async function clean(f) { assert.deepEqual(f.errors, []); assert.ok(await f.p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No horizontal overflow'); await f.p.close(); }
 ;
 (async () => {
@@ -63,7 +77,9 @@ async function clean(f) { assert.deepEqual(f.errors, []); assert.ok(await f.p.ev
         if (run('intake')) {
             const f = await cp04Page(b, 1366, { operationsEnabled: true }), { p, state, requests } = f;
             await p.locator('.cp04-order').first().waitFor();
-            await p.locator('.cp04-quick-actions').getByRole('button', { name: 'Nueva recepción', exact: true }).click();
+            const trigger = p.locator('.cp04-quick-actions').getByRole('button', { name: 'Nueva recepción', exact: true });
+            await trigger.click();
+            await receptionOpened(p);
             const value = 'Borrador sintético conservado';
             await p.getByLabel('Buscar patente registrada').fill('QA1234');
             await p.getByRole('button', { name: 'Buscar vehículo', exact: true }).click();
@@ -72,15 +88,29 @@ async function clean(f) { assert.deepEqual(f.errors, []); assert.ok(await f.p.ev
             await p.getByLabel('Kilometraje de recepción').fill('120.000');
             await p.evaluate(() => window.ordersForm = document.querySelector('.cp04-reception textarea'));
             await p.getByRole('button', { name: 'Cerrar recepción y conservar borrador' }).click();
+            await receptionClosed(p, trigger);
             assert.ok(await p.locator('.cp04-reception').isHidden());
             assert.equal(businessWrites(requests).length, 0);
-            await p.locator('.cp04-quick-actions').getByRole('button', { name: 'Nueva recepción', exact: true }).click();
+            await trigger.press('Enter');
+            await receptionOpened(p);
             assert.equal(await p.getByLabel('Motivo de ingreso *').inputValue(), value);
             assert.ok(await p.evaluate(() => window.ordersForm === document.querySelector('.cp04-reception textarea')));
+            // Calling the same action while open must refocus the plate.
+            await p.getByLabel('Motivo de ingreso *').focus();
+            await trigger.click();
+            await receptionOpened(p);
             await p.keyboard.press('Escape');
+            await receptionClosed(p, trigger);
             assert.ok(await p.locator('.cp04-reception').isHidden());
             assert.ok(await p.locator('.cp04-quick-actions button').first().evaluate(e => e === document.activeElement));
-            await p.locator('.cp04-quick-actions').getByRole('button', { name: 'Nueva recepción', exact: true }).click();
+            assert.equal(businessWrites(requests).length, 0);
+            await trigger.click();
+            await receptionOpened(p);
+            assert.equal(await p.getByLabel('Buscar patente registrada').inputValue(), 'QA1234');
+            assert.equal(await p.getByLabel('Motivo de ingreso *').inputValue(), value);
+            assert.equal(await p.getByLabel('Kilometraje de recepción').inputValue(), '120.000');
+            assert.ok(await p.evaluate(() => window.ordersForm === document.querySelector('.cp04-reception textarea')));
+            assert.equal(businessWrites(requests).length, 0);
             const count = state.orders.length;
             await p.getByRole('button', { name: 'Guardar orden', exact: true }).click();
             await p.getByText('Orden de trabajo guardada en el servidor.', { exact: true }).waitFor();
@@ -93,7 +123,36 @@ async function clean(f) { assert.deepEqual(f.errors, []); assert.ok(await f.p.ev
             assert.match(await p.locator('.cp04-detail-head').innerText(), /Borrador sintético conservado/);
             assert.equal(JSON.parse(await p.evaluate(() => sessionStorage.getItem('bt:cp04:temporary-draft:v1'))).draft.selectedOrderId, created);
             await clean(f);
-            await saveResult('intake', ['ORD-02', 'ORD-03', 'ORD-04', 'ORD-23']);
+            // The empty-state trigger is a distinct real button, not the toolbar button.
+            const empty = await cp04Page(b, 390, { operationsEnabled: true, orders: [] });
+            const ep = empty.p;
+            const emptyTrigger = ep.locator('.cp04-empty').getByRole('button', { name: 'Nueva recepción', exact: true });
+            const primaryTrigger = ep.locator('.cp04-quick-actions').getByRole('button', { name: 'Nueva recepción', exact: true });
+            await emptyTrigger.waitFor({ state: 'visible' });
+            await emptyTrigger.click();
+            await receptionOpened(ep);
+            await ep.getByLabel('Motivo de ingreso *').fill('Borrador estado vacío');
+            await ep.evaluate(() => window.ordersForm = document.querySelector('.cp04-reception textarea'));
+            await ep.getByRole('button', { name: 'Cerrar recepción y conservar borrador' }).click();
+            await receptionClosed(ep, emptyTrigger);
+            await emptyTrigger.press('Enter');
+            await receptionOpened(ep);
+            await ep.keyboard.press('Escape');
+            await receptionClosed(ep, emptyTrigger);
+            await emptyTrigger.click();
+            await receptionOpened(ep);
+            await primaryTrigger.click();
+            await receptionOpened(ep);
+            await ep.keyboard.press('Escape');
+            await receptionClosed(ep, primaryTrigger);
+            await emptyTrigger.click();
+            await receptionOpened(ep);
+            assert.equal(await ep.getByLabel('Motivo de ingreso *').inputValue(), 'Borrador estado vacío');
+            assert.ok(await ep.evaluate(() => window.ordersForm === document.querySelector('.cp04-reception textarea')));
+            assert.equal(businessWrites(empty.requests).length, 0);
+            assert.equal(empty.state.orders.length, 0);
+            await clean(empty);
+            await saveResult('intake', ['ORD-02', 'ORD-03', 'ORD-04', 'ORD-23'], { receptionFocus: ['toolbar-click','button-close','keyboard-reopen','already-open','escape','empty-trigger','latest-trigger','same-node','zero-writes'] });
         }
         if (run('inspection')) {
             const f = await cp04Page(b, 1650, { operationsEnabled: true }), { p, state, requests } = f;
