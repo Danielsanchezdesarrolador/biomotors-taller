@@ -1,0 +1,16 @@
+# BT-MULTIPUNTO-FINAL-01B + DELTA-01 — READ-01
+
+28/11/2026 · America/Santiago. **READ_SQL_ON / HTTP_POSTFLIGHT_PENDING**. Titular autorizó explícitamente bindings Edge y lectura exclusivamente, con escritura, recovery_ready y frontend V2 OFF, V1 READY, GATE4 intacto, Auto-Deploy OFF, sin repetir SEC07.
+
+## Evidencia previa
+- Edge OFF run [46151728717](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/46151728717): manifiesto 11/11 x2, Deno PASS, dos flags false, instalación exclusiva V2. Sonda titular 13:55:32 UTC: cuatro rutas HTTP 503/0 bytes y encabezados correctos.
+- READY V1 run [46152153568](https://github.com/Danielsanchezdesarrolador/biomotors-taller/actions/runs/46152153568): fuentes 15/15, paquete 43/43, tres despliegues; huellas READY coinciden con C_ACCEPTED_PASS. Titular confirmó prueba funcional. Render [dep-dc5dvh7f3r2c73eh9hmg](https://dashboard.render.com/static/srv-dbqe4quc6qcc73f275jg/deploys/dep-dc5dvh7f3r2c73eh9hmg) LIVE 14:06:21 UTC, SHA d708e59b1d76699689f3ee9d2a5b01db218fdafc, Auto-Deploy OFF; flag V2 ausente según captura y prueba UI del titular. HTTP V2 OFF recheck 503/0/no-store previo al deploy.
+- Titular configuró BT_MP_ALLOWED_ORIGIN=https://bytetorque.cl, BT_MP_PUBLISHABLE_KEY moderna, BT_MP_READ_ENABLED=true y BT_MP_WRITE_ENABLED=false. No registrar valores de claves. Las cinco huellas Edge permanecieron iguales; las versiones incrementaron al actualizar secretos. Preflight HTTP autenticado del titular: info 503 MP_DISABLED, prepare 503 MP_WRITE_DISABLED, origen ajeno 403 MP_ORIGIN_DENIED (3/3 PASS).
+
+## Incidente de conectividad y transición
+- Primera ejecución administrativa devolvió error interno; consulta posterior también falló. SQL Editor del titular mostró Unable to reach the server. No se repitió una escritura a ciegas. Causa de infraestructura no determinada; no inferir caída global. Una vez restablecida la consulta, titular y conector confirmaron independientemente control false/false/false, epoch=1.
+- Con autorización vigente, transición transaccional condicionada a fila única epoch=1 y tres controles OFF, GATE4 4/4 exacto, RLS 11/11, políticas 2/2, V2 vacío y 16 originales con digest de inventario aabde4f3640f85f201f92486cb41c22c. Única actualización: read_enabled=true; trigger incrementa epoch a 2. Validación dentro de transacción; COMMIT confirmado.
+- Postflight independiente 14:16:54 UTC: read=true, write=false, recovery_ready=false, epoch=2; GATE4 ACL/MD5 idénticos, RLS 11/11, 16 originales e inventario idéntico, 15 consumos confirmados (incluye cotización de QA anterior), cero reservas y leases; cero jobs, credits y documents V2. RPC cliente 6/6 authenticated, anon 0/7, worker sin EXECUTE cliente. No cambios adicionales de SQL, Edge, Storage ni Render.
+
+## Pendiente
+HTTP postflight de lectura real, denegación fuera de alcance y escritura bloqueada; verificar aislamiento y permisos con evidencia pertinente. No declarar READ-01 aceptado antes de esa prueba. Recuperación incremental V2 y compatibilidad ejecutor S5B pendientes; no habilitar recovery_ready, escritura ni frontend sin dictamen y autorización posterior. SEC07 cerrado. No se certifica propagación global ni se repite prueba histórica.
