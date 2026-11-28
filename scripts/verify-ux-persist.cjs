@@ -1,3 +1,4 @@
+const {selectOrder,openReception,openDocuments}=require('../tests/harness/ordersNavigation.cjs')
 const {navigateSection}=require('../tests/harness/navigation.cjs')
 // BT-UX-PERSIST-01: real React/SDK with synthetic HTTP only, never hosted data.
 const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
@@ -67,6 +68,7 @@ async function stable(p,value){
    assert.equal(req.method(),'GET');assert.equal(url.searchParams.get('workshop_id'),'eq.'+tenant)
    requests.push({path:url.pathname,method:req.method()});return route.fulfill({contentType:'application/json',body:'[]'})
   })
+  await openReception(p)
   await p.getByLabel('Buscar patente registrada').fill('QA1234');await p.getByRole('button',{name:'Buscar vehículo',exact:true}).click();await p.locator('.cp04-found').waitFor()
   const value='Recepción sin enviar: conservar texto y cursor'
   await p.getByLabel('Motivo de ingreso *').fill(value)
@@ -99,7 +101,7 @@ async function stable(p,value){
   const beforeReturn=dataReads(requests);await nav('ordenes');await stable(p,value)
   assert.equal(dataReads(requests),beforeReturn,'Return to a mounted module reuses its view')
   assert.ok(Math.abs(await p.evaluate(()=>scrollY)-position)<=2,JSON.stringify({width,expected:position,actual:await p.evaluate(()=>scrollY)}))
-  await p.locator('.cp04-order').first().click();await p.getByRole('button',{name:'Abrir inspección multipunto con X'}).click()
+  await selectOrder(p,p.locator('.cp04-order').first());await p.getByRole('button',{name:'Abrir inspección multipunto con X'}).click()
   const row=p.locator('.mp-row').first();state.failFindings=true
   await row.getByRole('radio',{name:/ · OK$/}).check();await row.getByText('Error al guardar',{exact:true}).waitFor()
   const attempts=businessWrites(requests).length
@@ -113,7 +115,7 @@ async function stable(p,value){
   const modal=p.getByRole('dialog',{name:'Vista previa del borrador · No enviado'})
   const frame=modal.getByTitle('Vista previa de la inspección multipunto en PDF')
   const openPdf=async()=>{
-   await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
+   await openDocuments(p);await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
    await modal.waitFor();await frame.waitFor()
    const src=await frame.getAttribute('src');assert.ok(src?.startsWith('blob:'))
    const digest=await p.evaluate(async url=>{
@@ -167,7 +169,7 @@ async function stable(p,value){
   state.documentPlan='basic'
   const denialStart=httpTrace.length,denialReads=dataReads(requests)
   const denialResponse=p.waitForResponse(r=>r.url()===api+'/functions/v1/bt-commercial-documents'&&r.request().method()==='POST')
-  await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
+  await openDocuments(p);await p.getByRole('button',{name:'Vista previa PDF',exact:true}).click()
   const denial=await denialResponse
   assert.equal(denial.status(),403);assert.deepEqual(await denial.json(),{error:'PLAN_CAPABILITY_REQUIRED'})
   const controls=active(p).locator('.cp04-pdf-controls')

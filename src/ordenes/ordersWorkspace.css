@@ -1,0 +1,168 @@
+/* BT-ORDERS-UX-01: Orders only; shared R2, guided flow and document viewer untouched. */
+.cp04-orders-workspace {--orders-border:#d7e3f7;--orders-muted:#536e93;color:#091a3c;}
+.cp04-orders-workspace .cp04-heading {min-height:0;padding:10px 0 12px;}
+.cp04-orders-workspace .cp04-heading::before {display:none;}
+.cp04-orders-workspace .cp04-heading h1 {font-size:26px;margin:4px 0;}
+.cp04-orders-workspace .cp04-heading>p {font-size:14px;max-width:none;}
+.cp04-orders-workspace .cp04-autosave-bar {margin:0 0 10px;padding:5px 10px;gap:10px;font-size:12px;}
+.cp04-orders-workspace .cp04-autosave-bar>svg {width:20px;height:20px;}
+.cp04-orders-workspace .cp04-autosave-bar>span {font-size:12px;}
+.cp04-orders-workspace .cp04-metrics {gap:8px;}
+.cp04-orders-workspace .cp04-metric {min-height:56px;padding:9px 12px;gap:10px;border-radius:12px;background:#fff;box-shadow:0 2px 8px #061c3905;}
+.cp04-orders-workspace .cp04-metric>svg {width:22px;height:22px;margin:0;align-self:center;}
+.cp04-orders-workspace .cp04-metric>div {display:flex;align-items:center;gap:9px;}
+.cp04-orders-workspace .cp04-metric strong {min-height:0;font-size:23px;}
+.cp04-orders-workspace .cp04-metric span {font-size:12px;}
+.cp04-orders-workspace .cp04-scope {margin:6px 0 10px;font-size:11px;}
+.cp04-orders-workspace .cp04-quick-actions {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;}
+.cp04-orders-workspace .cp04-quick-actions button {min-height:44px;padding:9px 13px;font-size:13px;border-radius:10px;box-shadow:none;}
+.cp04-orders-workspace .cp04-quick-actions .cp04-list-toggle {display:none;}
+.cp04-orders-workspace .cp04-draft-hint {font-size:12px;color:var(--orders-muted);}
+.cp04-orders-workspace .cp04-layout {display:grid;grid-template-columns:minmax(225px,280px) minmax(0,1fr);align-items:start;gap:14px;}
+.cp04-orders-workspace .cp04-panel {margin:0;padding:14px;border:1px solid var(--orders-border);border-radius:16px;box-shadow:0 5px 22px #061c3908;min-width:0;}
+.cp04-orders-workspace .cp04-order-list {grid-column:1;grid-row:1 / span 3;position:sticky;top:12px;}
+.cp04-orders-workspace .cp04-list-heading {align-items:start;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.cp04-orders-workspace .cp04-list-heading h2 {font-size:16px;margin:0;gap:6px;}
+.cp04-orders-workspace .cp04-list-heading h2>svg {width:19px;height:19px;}
+.cp04-orders-workspace .cp04-list-count {font-size:11px;}
+.cp04-orders-workspace .cp04-orders {max-height:calc(100dvh - 110px);overflow:auto;overscroll-behavior:auto;scrollbar-gutter:stable;}
+.cp04-orders-workspace .cp04-order {display:flex;align-items:start;gap:8px;margin:0 0 8px;padding:10px 9px;border-radius:11px;box-shadow:none;background:#fbfdff;}
+.cp04-orders-workspace .cp04-order.selected {border-color:#0469f6;background:#edf5ff;box-shadow:inset 3px 0 #0469f6;}
+.cp04-orders-workspace .cp04-car-icon {display:none;}
+.cp04-orders-workspace .cp04-order-content {gap:4px;min-width:0;flex:1;}
+.cp04-orders-workspace .cp04-order-heading {display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.cp04-orders-workspace .cp04-plate {font-size:17px;padding:2px 5px;border-radius:5px;}
+.cp04-orders-workspace .cp04-order .cp04-status {font-size:10px;padding:3px 7px;}
+.cp04-orders-workspace .cp04-vehicle-name {font-size:13px;}
+.cp04-orders-workspace .cp04-complaint {font-size:12px;}
+.cp04-orders-workspace .cp04-order-meta {display:flex;flex-wrap:wrap;gap:4px;font-size:10px;padding:4px;background:transparent;}
+.cp04-orders-workspace .cp04-order-meta svg {width:13px;height:13px;}
+.cp04-orders-workspace .cp04-order-chevron {width:15px;align-self:center;}
+.cp04-orders-workspace .cp04-reception {grid-column:2;grid-row:1;margin:0;padding:16px;scroll-margin-top:12px;}
+.cp04-orders-workspace [hidden] {display:none!important;}
+.cp04-orders-workspace .cp04-reception-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cp04-orders-workspace .cp04-reception-heading h2 {font-size:19px;margin:0;}
+.cp04-orders-workspace .cp04-reception .cp04-form {gap:10px;}
+.cp04-orders-workspace .cp04-selection-empty {grid-column:2;padding:28px;text-align:center;color:var(--orders-muted);}
+.cp04-orders-workspace .cp04-selection-empty>svg {color:#0469f6;}
+.cp04-orders-workspace .cp04-selection-empty h2 {justify-content:center;font-size:20px;color:#091a3c;}
+.cp04-orders-workspace .cp04-detail {grid-column:2;position:static;top:auto;padding:0;margin:0;overflow:visible;scroll-margin-top:12px;}
+.cp04-orders-workspace .cp04-workspace-toolbar {display:block;position:static;padding:16px 16px 0;background:#fff;border-radius:16px 16px 0 0;box-shadow:none;border-bottom:1px solid var(--orders-border);z-index:3;}
+.cp04-orders-workspace .cp04-detail-head {flex-wrap:nowrap;gap:12px;margin-bottom:12px;}
+.cp04-orders-workspace .cp04-detail-head>div {min-width:0;}
+.cp04-orders-workspace .cp04-detail-head h2 {font-size:22px;line-height:1.3;overflow-wrap:anywhere;margin:4px 0;}
+.cp04-orders-workspace .cp04-detail-head p {font-size:14px;line-height:1.5;overflow-wrap:anywhere;}
+.cp04-orders-workspace .cp04-detail-head small {font-size:12px;color:var(--orders-muted);}
+.cp04-orders-workspace .cp04-main-actions {display:flex;align-items:start;flex-wrap:wrap;gap:8px;}
+.cp04-orders-workspace .cp04-workspace-toolbar button {min-height:44px;padding:9px 12px;font-size:13px;}
+.cp04-orders-workspace .cp04-workspace-toolbar .cp04-checklist-launch {display:contents;}
+.cp04-orders-workspace .cp04-checklist-launch .commercial-promotion {flex-basis:100%;}
+.cp04-orders-workspace .cp04-secondary-actions {display:flex;align-items:start;flex-wrap:wrap;gap:8px;margin:10px 0;}
+.cp04-orders-workspace .cp04-action-group {min-width:0;max-width:100%;border:1px solid var(--orders-border);border-radius:10px;background:#f8fbff;}
+.cp04-orders-workspace .cp04-action-group[open] {flex-basis:100%;}
+.cp04-orders-workspace .cp04-action-group>summary {display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;box-sizing:border-box;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:650;color:#21436e;list-style:none;}
+.cp04-orders-workspace .cp04-action-group>summary::-webkit-details-marker {display:none;}
+.cp04-orders-workspace .cp04-action-group[open]>summary>svg {transform:rotate(180deg);}
+.cp04-orders-workspace .cp04-action-content,.cp04-orders-workspace .cp04-action-group>.cp04-info {padding:0 12px 10px;margin:0;}
+.cp04-orders-workspace .cp04-action-group .cp04-actions {display:flex;gap:8px;flex-wrap:wrap;margin:0;padding:0 12px 12px;}
+.cp04-orders-workspace .cp04-action-content .cp04-pdf-controls {display:block;margin:0;padding:0;border:0;background:transparent;}
+.cp04-orders-workspace .cp04-action-content .cp04-pdf-actions {display:flex;gap:8px;flex-wrap:wrap;}
+.cp04-orders-workspace .cp04-inspection-counts {gap:6px 12px;font-size:12px;margin:0 0 8px;}
+.cp04-orders-workspace .cp04-detail-tabs {border-top:1px solid var(--orders-border);padding-top:0;}
+.cp04-orders-workspace .cp04-detail-tabs [role=tab] {font-size:12px;min-height:48px;padding:8px 5px;color:#435f85;}
+.cp04-orders-workspace .cp04-detail-tabs [aria-selected=true] {color:#0756c9;background:#edf5ff;font-weight:750;}
+.cp04-orders-workspace .cp04-workspace-content {position:static;top:auto;margin:0;}
+.cp04-orders-workspace .cp04-tab-content {max-height:none;overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto;padding:16px;}
+.cp04-orders-workspace .cp04-current-groups {grid-template-columns:1fr;}
+.cp04-orders-workspace .cp04-current-row {font-size:13px;}
+.cp04-orders-workspace .cp04-current-row span {font-size:12px;}
+.cp04-orders-workspace .cp04-checklist-top {padding:0;border:0;background:transparent;margin:0 0 10px;}
+.cp04-orders-workspace .cp04-checklist-top .official-eyebrow,.cp04-orders-workspace .cp04-checklist-top>button {display:none;}
+.cp04-orders-workspace .cp04-checklist-top h2 {font-size:18px;}
+.cp04-orders-workspace .cp04-checklist-top p {font-size:13px;}
+.cp04-orders-workspace .cp04-count {font-size:12px;margin:10px 0;}
+.cp04-orders-workspace .cp04-inspection-progress {display:grid;gap:5px;padding:10px 0;font-size:13px;font-weight:650;}
+.cp04-orders-workspace .cp04-inspection-progress progress {width:100%;height:7px;accent-color:#0469f6;}
+.cp04-orders-workspace .cp04-inspection-progress small {font-weight:400;font-size:11px;color:var(--orders-muted);}
+.cp04-orders-workspace .cp04-checklist-legend {gap:8px 12px;font-size:12px;}
+.cp04-orders-workspace .cp04-checklist-legend i {width:16px;height:14px;}
+.cp04-orders-workspace .cp04-checklist-sheet {overflow:visible;}
+.cp04-orders-workspace .cp04-checklist-sheet .mp-tables {grid-template-columns:1fr;gap:14px;}
+.cp04-orders-workspace .mp-category h3 {font-size:15px;padding:12px;}
+.cp04-orders-workspace .cp04-checklist-sheet .mp-row {padding:10px 12px;gap:5px 12px;}
+.cp04-orders-workspace .cp04-checklist-sheet .mp-item-name {font-size:14px;line-height:1.4;}
+.cp04-orders-workspace .cp04-inline-control {gap:5px 12px;}
+.cp04-orders-workspace .cp04-current-state {font-size:12px;font-weight:650;}
+.cp04-orders-workspace .cp04-current-state.state-ok {color:#226d4b;}
+.cp04-orders-workspace .cp04-current-state.state-attention {color:#805800;}
+.cp04-orders-workspace .cp04-current-state.state-immediate {color:#a52626;}
+.cp04-orders-workspace .cp04-inline-status {flex:0 1 auto;font-size:11px;color:#536e93;}
+.cp04-orders-workspace .cp04-inline-status.is-error {color:#a52626;}
+.cp04-orders-workspace .cp04-inline-note {flex-basis:100%;font-size:12px;}
+.cp04-orders-workspace .cp04-inline-note textarea {font-size:14px;}
+.cp04-orders-workspace summary:focus-visible {outline:3px solid #0469f6;outline-offset:2px;border-radius:8px;}
+/* Only the contextual order list has independent scrolling. No clipped diagnostic panels. */
+@media(min-width:1200px) and (min-height:850px) {
+ .cp04-orders-workspace .cp04-workspace-toolbar {position:sticky;top:0;}
+}
+@media(max-width:1199px) {
+ .cp04-orders-workspace .cp04-layout {grid-template-columns:minmax(200px,240px) minmax(0,1fr);}
+ .cp04-orders-workspace .cp04-detail-head h2 {font-size:20px;}
+ .cp04-orders-workspace .cp04-metric>div {display:block;}
+}
+@media(max-width:1050px) {
+ .cp04-orders-workspace .cp04-layout {grid-template-columns:1fr;}
+ .cp04-orders-workspace .cp04-order-list {grid-column:1;grid-row:auto;position:static;}
+ .cp04-orders-workspace.has-selection:not(.list-open) .cp04-order-list {display:none;}
+ .cp04-orders-workspace .cp04-orders {max-height:none;overflow:visible;}
+ .cp04-orders-workspace .cp04-reception,.cp04-orders-workspace .cp04-detail,.cp04-orders-workspace .cp04-selection-empty {grid-column:1;}
+ .cp04-orders-workspace.has-selection .cp04-quick-actions .cp04-list-toggle {display:inline-flex;}
+ .cp04-orders-workspace .cp04-metric {min-height:50px;padding:8px;}
+ .cp04-orders-workspace .cp04-metric>div {display:flex;}
+}
+@media(max-width:600px) {
+ .cp04-orders-workspace .cp04-heading {padding-top:6px;}
+ .cp04-orders-workspace .cp04-heading h1 {font-size:23px;}
+ .cp04-orders-workspace .cp04-heading>p {font-size:13px;}
+ .cp04-orders-workspace .cp04-heading .official-eyebrow {font-size:10px;}
+ .cp04-orders-workspace .cp04-autosave-bar {display:flex;flex-wrap:wrap;gap:6px;padding:4px 8px;}
+ .cp04-orders-workspace .cp04-autosave-bar>span {display:none;}
+ .cp04-orders-workspace .cp04-save-help {margin-left:auto;}
+ .cp04-orders-workspace .cp04-metric {gap:7px;}
+ .cp04-orders-workspace .cp04-metric>div {display:block;}
+ .cp04-orders-workspace .cp04-metric strong {font-size:21px;}
+ .cp04-orders-workspace .cp04-metric span {font-size:11px;}
+ .cp04-orders-workspace .cp04-detail-head {flex-wrap:wrap;gap:7px;}
+ .cp04-orders-workspace .cp04-detail-head h2 {font-size:20px;}
+ .cp04-orders-workspace .cp04-detail-head small {font-size:11px;}
+ .cp04-orders-workspace .cp04-workspace-toolbar {padding:12px 12px 0;}
+ .cp04-orders-workspace .cp04-main-actions>button,.cp04-orders-workspace .cp04-main-actions>.cp04-checklist-launch>button {flex:1 1 100%;}
+ .cp04-orders-workspace .cp04-workspace-toolbar button {font-size:12px;}
+ .cp04-orders-workspace .cp04-detail-tabs {grid-template-columns:repeat(2,minmax(0,1fr));gap:0;}
+ .cp04-orders-workspace .cp04-detail-tabs [role=tab] {font-size:12px;padding:8px;}
+ .cp04-orders-workspace .cp04-inspection-counts {font-size:11px;gap:6px 9px;}
+ .cp04-orders-workspace .cp04-tab-content {padding:12px;}
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-row {grid-template-columns:1fr;padding:10px;}
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-item-name {grid-column:1;grid-row:1;font-size:14px;}
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-status {grid-column:1;grid-row:2;justify-content:flex-start;gap:7px;}
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-clear {min-width:44px;}
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-cell {width:48px;min-width:48px;flex-basis:48px;height:46px;}
+ .cp04-orders-workspace .cp04-inline-note textarea {font-size:16px;}
+}
+/* Expanded menus and plan explanations never become a tall sticky obstruction. */
+.cp04-orders-workspace .cp04-workspace-toolbar:has(.cp04-action-group[open]),
+.cp04-orders-workspace .cp04-workspace-toolbar:has(.commercial-promotion) {position:static;}
+.cp04-orders-workspace .cp04-overview {margin:0 0 10px;border:1px solid var(--orders-border);border-radius:12px;background:#f8fbff;}
+.cp04-orders-workspace .cp04-overview>summary {display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:44px;padding:8px 12px;box-sizing:border-box;color:#21436e;font-size:12px;font-weight:650;cursor:pointer;list-style:none;}
+.cp04-orders-workspace .cp04-overview>summary::-webkit-details-marker {display:none;}
+.cp04-orders-workspace .cp04-overview>summary>span {margin-left:auto;font-size:11px;font-weight:400;color:#536e93;}
+.cp04-orders-workspace .cp04-overview[open]>summary>svg {transform:rotate(180deg);}
+.cp04-orders-workspace .cp04-overview[open] {padding:0 10px;}
+.cp04-orders-workspace .cp04-overview .cp04-autosave-bar {margin-bottom:8px;}
+@media(min-width:1100px) and (max-height:750px){
+ .cp04-orders-workspace .cp04-heading>p {display:none;}
+ .cp04-orders-workspace .cp04-heading {padding-top:4px;padding-bottom:8px;}
+}
+@media(min-width:1550px){
+ .cp04-orders-workspace .cp04-checklist-sheet .mp-tables,.cp04-orders-workspace .cp04-current-groups {grid-template-columns:repeat(2,minmax(0,1fr));}
+}

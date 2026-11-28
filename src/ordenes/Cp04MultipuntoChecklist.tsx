@@ -7,12 +7,14 @@ import {
   Cp04AutosaveQueue,CP04_PROVISIONAL_NOTE,provisionalFinding
 } from './cp04Autosave'
 import {latestForMultipuntoItem} from './cp04Multipunto'
+import {resultLabels} from '../informes/multipunto/multipuntoTemplate'
 import '../informes/multipunto/multipunto.css'
 
 export function Cp04MultipuntoChecklist({
- guided=false,findings,repository,scope,onSaved,onBack,onQueueChange,disabled,readOnly,plate
+ guided=false,workspacePresentation=false,findings,repository,scope,onSaved,onBack,onQueueChange,disabled,readOnly,plate
 }:{
  guided?:boolean
+ workspacePresentation?:boolean
  findings:readonly Finding[]
  repository:ConstructorParameters<typeof Cp04AutosaveQueue>[0]['port']
  scope:AutosaveScope
@@ -54,6 +56,7 @@ export function Cp04MultipuntoChecklist({
  const temporaryRecoveryAvailable=queue.hasTemporaryRecovery()
  const incomplete=queue.hasIncompleteNotes()
  const savedCount=queue.getSavedCount()
+ const reviewedCount=items.filter(item=>item.state!=='unreviewed').length
  useEffect(()=>{onQueueChange?.(unconfirmed,incomplete)},[unconfirmed,incomplete,onQueueChange])
  const readOnlyOrBusy=readOnly||disabled
  return <div className={"cp04-checklist"+(guided?" inspection-guided":"")} aria-label="Hoja de inspección multipunto con X y autoguardado">
@@ -73,10 +76,12 @@ export function Cp04MultipuntoChecklist({
      {errors>0&&<strong className="cp04-error-text"> · {errors} error(es) de guardado</strong>}
      {incomplete&&<span> · Hay observaciones técnicas pendientes de completar</span>}
    </div>
+   {workspacePresentation&&<div className="cp04-inspection-progress"><label htmlFor={scope.orderId+'-progress'}>{reviewedCount}/34 componentes revisados · {34-reviewedCount} sin revisar</label><progress id={scope.orderId+'-progress'} value={reviewedCount} max={34}/><small>El progreso incluye cambios pendientes; la confirmación se indica por separado.</small></div>}
    <div className="cp04-checklist-legend">
      <span><i className="cp04-legend-ok"/> OK</span>
      <span><i className="cp04-legend-attention"/> Requiere atención</span>
      <span><i className="cp04-legend-immediate"/> Cambio inmediato</span>
+     {workspacePresentation&&<span>Sin X · Sin revisar</span>}
    </div>
    {unconfirmed>0&&!temporaryRecoveryAvailable&&<p className="cp04-error" role="alert">
      <WifiOff size={17} aria-hidden="true"/> No hay copia temporal recuperable:
@@ -109,6 +114,7 @@ export function Cp04MultipuntoChecklist({
            :phase==='error'?'Error al guardar':'Guardado'
            :saved?(item.state==='unreviewed'?'Sin revisar · Guardado':'Guardado'):'Sin revisar'
          return <div className="cp04-inline-control">
+           {workspacePresentation&&<span className={"cp04-current-state state-"+item.state}>{resultLabels[item.state]}</span>}
            <span className={
              'cp04-inline-status '+(phase==='error'?'is-error':
              phase==='saving'||phase==='queued'?'is-saving':'is-saved')

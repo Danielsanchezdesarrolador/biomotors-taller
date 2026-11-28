@@ -1,3 +1,4 @@
+const {selectOrder}=require('../tests/harness/ordersNavigation.cjs')
 // Actual CP04 + official SDK; all Supabase HTTP is synthetic and intercepted.
 const { chromium } = require('playwright'),
   assert = require('node:assert/strict'),
@@ -13,9 +14,9 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
   fs.mkdirSync(out, { recursive: true })
   const results = []
   try {
-    for (const width of before ? [1650, 390] : [360, 390, 430, 768, 1366, 1440, 1920]) {
+    for (const width of before ? [1650, 390] : (process.env.CP04_WIDTHS||'360,390,430,768,1366,1440,1920').split(',').map(Number)) {
       const { p, state, requests, errors } = await cp04Page(browser, width)
-      await p.locator('.cp04-order').first().waitFor()
+      await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
       await p.screenshot({
         path: `${out}/${before ? 'before' : 'after'}-${width}.png`,
         fullPage: true
@@ -56,12 +57,12 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           .getByLabel('Motivo de ingreso *')
           .fill('Borrador que debe conservarse al actualizar')
         await p.getByRole('button', { name: 'Actualizar', exact: true }).click()
-        await p.locator('.cp04-order').first().waitFor()
+        await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
         assert.equal(
           await p.getByLabel('Motivo de ingreso *').inputValue(),
           'Borrador que debe conservarse al actualizar'
         )
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.getByRole('button', { name: 'Abrir inspección multipunto con X' }).click()
         assert.equal(await p.locator('.mp-row').count(), 34)
         // Ten consecutive independent marks; SDK POSTs are intercepted, never real writes.
@@ -72,7 +73,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
         )
         assert.equal(state.findings.length, 10)
         await p.getByRole('button', { name: 'Actualizar', exact: true }).click()
-        await p.locator('.cp04-order').first().waitFor()
+        await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
         assert.equal(await p.getByRole('radio', { checked: true }).count(), 10)
         // Simulate returning from another app: real R1 focus revalidation remounts CP04.
         await p.locator('.mp-row').nth(15).scrollIntoViewIfNeeded()
@@ -113,7 +114,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           )
           assert.equal(state.findings.length, 34)
           await p.getByRole('tab', { name: 'Resumen', exact: true }).click()
-          await p.locator('.cp04-order').nth(4).click()
+          await selectOrder(p,p.locator('.cp04-order').nth(4))
           await p.locator('.cp04-detail h2').filter({ hasText: 'QA1238' }).waitFor()
           await p.getByRole('button', { name: 'Abrir inspección multipunto con X' }).click()
           assert.equal(await p.getByRole('radio').count(), 0, 'closed order is read-only')
@@ -180,7 +181,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
             result: 'attention', note: 'Pendiente de revisar foco izquierdo.',
             resolution: 'pending', resolved_at: null }
         )
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
         await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
         await p.getByRole('tab',{name:'Observaciones pendientes',exact:true}).click()
@@ -231,7 +232,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           await p.screenshot({ path: `${out}/error-390.png`, fullPage: true })
           state.failList = false
           await p.getByRole('button', { name: 'Reintentar', exact: true }).click()
-          await p.locator('.cp04-order').first().waitFor()
+          await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
         } else if (scenario === 'empty') {
           await p.getByRole('heading', { name: 'Todavía no hay órdenes en tu taller' }).waitFor()
           assert.deepEqual(await p.locator('.cp04-metric strong').allTextContents(), [
@@ -245,9 +246,9 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
           await p.locator('.cp04-order-skeleton').waitFor()
           assert.equal(await p.locator('.cp04-metric strong').first().innerText(), 'Cargando')
           await p.screenshot({ path: `${out}/loading-390.png`, fullPage: true })
-          await p.locator('.cp04-order').first().waitFor()
+          await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
         } else {
-          await p.locator('.cp04-order').first().waitFor()
+          await p.locator('.cp04-order-list[aria-busy="false"] .cp04-order').first().waitFor({state:'attached'})
           state.revoked = true
           await p.evaluate(() => window.dispatchEvent(new Event('focus')))
           await p.getByText('Cuenta personal verificada.', { exact: false }).waitFor()
@@ -261,7 +262,7 @@ const { cp04Page, uuid, tenant, isOperationsStatusRead } = require('../tests/har
     console.log(
       before
         ? 'CP04 before captures complete'
-        : 'CP04 redesign: five viewports, drafts, refresh, ten X and focus restore PASS'
+        : 'CP04 redesign: selected viewports, drafts, refresh, ten X and focus restore PASS'
     )
   } finally {
     await browser.close()

@@ -1,3 +1,4 @@
+const {selectOrder,openReception}=require('../tests/harness/ordersNavigation.cjs')
 const {navigateSection}=require('../tests/harness/navigation.cjs')
 // BT-PILOT-QA-04B: browser integration with real CP03/CP04 UI and synthetic HTTP.
 // All outbound Supabase URLs are intercepted by cp04BrowserFixture. No production connection.
@@ -24,6 +25,7 @@ async function createCustomer(p, name) {
   await p.getByRole('button', { name: 'Guardar ficha de cliente' }).click()
 }
 async function createOrder(p, plate, reason) {
+  await openReception(p)
   await p.getByLabel('Buscar patente registrada').fill(plate)
   await p.getByRole('button', { name: 'Buscar vehículo' }).click()
   await p.locator('.cp04-found').waitFor()
@@ -31,6 +33,7 @@ async function createOrder(p, plate, reason) {
   await p.getByRole('button', { name: 'Guardar orden' }).click()
 }
 async function run(browser, id, width, task) {
+  if(process.env.BT_PILOT_CASES&&!process.env.BT_PILOT_CASES.split(',').includes(id))return
   const ctx = await cp04Page(browser, width, { injectFault: id })
   const { p, state, requests, errors } = ctx
   try {
@@ -50,7 +53,7 @@ async function run(browser, id, width, task) {
     args: ['--no-sandbox']
   })
   try {
-    for (const width of [390, 1366]) {
+    for (const width of (process.env.BT_PILOT_WIDTHS||'390,1366').split(',').map(Number)) {
       await run(browser, 'F01', width, async ({ p, state, requests }) => {
         await openDirectory(p, width)
         await createCustomer(p, 'Cliente F01 Sintético')
@@ -98,7 +101,7 @@ async function run(browser, id, width, task) {
         assert.equal(writes(requests, 'work_orders'), 1, 'refresh must not re-POST OT')
       })
       await run(browser, 'F04', width, async ({ p, state, requests }) => {
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.locator('.cp04-detail').waitFor()
         await p.locator('.cp04-additional-finding summary').click()
         const findingForm = p.locator('.cp04-detail form.cp04-form')
@@ -111,7 +114,7 @@ async function run(browser, id, width, task) {
         assert.equal(writes(requests, 'inspection_findings'), 1)
         assert.equal(await p.locator('[data-detail-tab=history] .cp04-finding').count(), 1)
         state.failFindingReads = false
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
         await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
         assert.equal(state.findings.length, 1)
@@ -124,7 +127,7 @@ async function run(browser, id, width, task) {
           note: 'Freno de prueba pendiente', resolution: 'pending', resolved_at: null,
           created_at: at, updated_at: at
         })
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.getByRole('tab',{name:'Observaciones pendientes',exact:true}).click()
         await p.locator('.cp04-pending').first().waitFor()
         await p.getByRole('button', { name: 'Marcar resuelto' }).click()
@@ -133,7 +136,7 @@ async function run(browser, id, width, task) {
         assert.equal(await p.locator('.cp04-pending').count(), 0)
         assert.equal(writes(requests, 'inspection_findings', 'PATCH'), 1)
         state.failFindingReads = false
-        await p.locator('.cp04-order').first().click()
+        await selectOrder(p,p.locator('.cp04-order').first())
         await p.getByRole('tab',{name:'Historial de diagnósticos',exact:true}).click()
         await p.getByRole('tabpanel',{name:'Historial de diagnósticos',exact:true}).locator('.cp04-finding').first().waitFor()
         assert.equal(await p.locator('.cp04-pending').count(), 0)

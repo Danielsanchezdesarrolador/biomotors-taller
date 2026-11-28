@@ -20,7 +20,10 @@ import {
   CalendarDays,
   Gauge,
   CloudUpload,
-  Info
+  Info,
+  ChevronDown,
+  X,
+  ListFilter
 } from 'lucide-react'
 import type { Context } from '../auth/controller'
 import { onRecordChange } from '../official/recordChanges'
@@ -48,6 +51,7 @@ import { hasCurrentProvisionalFindings } from './cp04Autosave'
 import {multipuntoItemsFromFindings,multipuntoDisplayNote} from './cp04Multipunto'
 import {categories,resultLabels} from '../informes/multipunto/multipuntoTemplate'
 import './cp04.css'
+import './ordersWorkspace.css'
 export type Cp04Port = Pick<
   ReturnType<typeof cp04Repository>,
   | 'pdfIdentity'
@@ -101,6 +105,10 @@ export function Cp04OrdersView({
         workshopId: context.workshop.id
       }) ?? emptyCp04Draft
   )
+  // Presentation only: both panels retain their original form/queue instances.
+  const [receptionOpen, setReceptionOpen] = useState(Boolean(initial.complaint || initial.intakeOdometer))
+  const [listOpen, setListOpen] = useState(false)
+  const receptionTrigger = useRef<HTMLElement | null>(null)
   const viewRoot = useRef<HTMLDivElement>(null)
   const scrollPosition = useRef(initial.scrollY ?? 0)
   const restoredPosition = useRef(false)
@@ -291,6 +299,8 @@ export function Cp04OrdersView({
         setMultipuntoIncomplete(false)
       }
       setSelected(item)
+      setReceptionOpen(false)
+      setListOpen(false)
       setVehicle(item.vehicle)
       setPlate(item.vehicle.plate ?? '')
       setFindings(list)
@@ -331,8 +341,16 @@ export function Cp04OrdersView({
   }
   function newReception() {
     if (!canCreate) return
-    receptionSection.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
-    plateInput.current?.focus({ preventScroll: true })
+    receptionTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setReceptionOpen(true)
+    window.requestAnimationFrame(() => {
+      receptionSection.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
+      plateInput.current?.focus({ preventScroll: true })
+    })
+  }
+  function closeReception() {
+    setReceptionOpen(false)
+    window.requestAnimationFrame(() => receptionTrigger.current?.focus({ preventScroll: true }))
   }
   async function searchVehicle(e: FormEvent) {
     e.preventDefault()
@@ -577,12 +595,14 @@ export function Cp04OrdersView({
     }
   ]
   return (
-    <div className="official-panel cp04-private" ref={viewRoot}>
+    <div className={"official-panel cp04-private cp04-orders-workspace"+(selected?" has-selection":"")+(listOpen?" list-open":"")} ref={viewRoot}>
       <section className="welcome-area cp04-heading">
         <span className="official-eyebrow">Recepción e inspección — taller autorizado</span>
         <h1>Órdenes de trabajo</h1>
         <p>Recibe vehículos, documenta inspecciones y consulta el avance de las órdenes.</p>
       </section>
+      <details className="cp04-overview" open={!selected}>
+        <summary>Indicadores y guardado <span>{ordersState==='ready'?`${metrics[0].value} activas · ${metrics[3].value} listas`:'Resumen de órdenes recientes'}</span><ChevronDown size={16} aria-hidden="true"/></summary>
       <div className="cp04-autosave-bar" role="note">
         <CloudUpload aria-hidden="true" />
         <strong>Guardado automático</strong>
@@ -628,6 +648,7 @@ export function Cp04OrdersView({
             ? 'Consultando las órdenes recientes del taller…'
             : 'Indicadores no disponibles: la consulta de órdenes falló.'}
       </p>
+      </details>
       <div className="cp04-quick-actions">
         <button
           type="button"
@@ -635,6 +656,8 @@ export function Cp04OrdersView({
           disabled={!canCreate}
           title={!canCreate ? 'Tu rol no puede crear órdenes.' : undefined}
           onClick={newReception}
+          aria-expanded={receptionOpen}
+          aria-controls={tabId+'-reception'}
         >
           <Plus aria-hidden="true" /> Nueva recepción
         </button>
@@ -646,6 +669,10 @@ export function Cp04OrdersView({
         >
           <RefreshCw aria-hidden="true" /> Actualizar
         </button>
+        <button type="button" className="cp04-secondary cp04-list-toggle" aria-expanded={listOpen} aria-controls={tabId+'-orders'} onClick={()=>setListOpen(value=>!value)}>
+          <ListFilter aria-hidden="true"/> {listOpen?'Ocultar listado':'Cambiar de orden'}
+        </button>
+        {!receptionOpen && (complaint || intake) && <span className="cp04-draft-hint">Recepción: borrador conservado en esta pestaña</span>}
       </div>
       {message && (
         <p className="cp04-error" role="alert">
@@ -660,6 +687,7 @@ export function Cp04OrdersView({
       <section className="cp04-layout">
         <section
           className="dashboard-card cp04-panel cp04-order-list"
+          id={tabId+'-orders'}
           aria-labelledby="cp04-orders-title"
           aria-busy={ordersState === 'loading'}
         >
@@ -760,11 +788,15 @@ export function Cp04OrdersView({
         <section
           className="dashboard-card cp04-panel cp04-reception"
           ref={receptionSection}
+          id={tabId+'-reception'}
+          hidden={!receptionOpen}
+          onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();closeReception()}}}
           aria-labelledby="cp04-reception-title"
         >
-          <h2 id="cp04-reception-title">
+          <div className="cp04-reception-heading"><h2 id="cp04-reception-title">
             <CarFront size={20} /> Nueva recepción
-          </h2>
+          </h2><button type="button" className="cp04-secondary" onClick={closeReception} aria-label="Cerrar recepción y conservar borrador"><X size={18} aria-hidden="true"/></button></div>
+          <p className="cp04-info">Puedes cerrar este panel: se conserva el borrador en esta pestaña, sin crear una orden.</p>
           <p id="cp04-reception-help" className="cp04-info">
             Busca el vehículo registrado en Clientes y vehículos y confirma su ingreso.
           </p>
@@ -832,7 +864,6 @@ export function Cp04OrdersView({
             Piloto controlado: no registres datos personales sin autorización.
           </p>
         </section>
-      </section>
       {selected && (
         <section
           className="dashboard-card cp04-panel cp04-detail"
@@ -862,6 +893,7 @@ export function Cp04OrdersView({
               {selected.order.cancelled_at?'Cancelada':workStatusLabel[selected.order.status]}
             </span>
           </div>
+          <div className="cp04-main-actions">
           {onGuided&&<button className="cp04-primary" disabled={busy} onClick={()=>onGuided(selected.order.id)}>Continuar recorrido guiado</button>}
           {onQuote && (
             <button
@@ -876,7 +908,7 @@ export function Cp04OrdersView({
             {context.inspectionEnabled===false&&<BasicInspectionPromotion/>}
               <button
               type="button"
-              className="cp04-primary"
+              className="cp04-secondary"
               disabled={loading || busy}
               onClick={openMultipunto}
             >
@@ -886,6 +918,11 @@ export function Cp04OrdersView({
               Revisar los componentes de la hoja original y guardar cada X con confirmación.
             </small>
           </div>
+          </div>
+          <div className="cp04-secondary-actions">
+          <details className="cp04-action-group" onKeyDown={event=>{if(event.key==='Escape'&&!event.currentTarget.querySelector('dialog[open]')){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus()}}}>
+            <summary>Documentos <ChevronDown size={16} aria-hidden="true"/></summary>
+            <div className="cp04-action-content">
           <Cp04MultipuntoPdfPreview
             documentScope={context.userId+':'+context.workshop.id}
             loadIdentity={repository.pdfIdentity}
@@ -897,13 +934,18 @@ export function Cp04OrdersView({
             incomplete={multipuntoIncomplete}
             disabled={busy || loading || context.inspectionEnabled===false}
           />
+            </div>
+          </details>
           {canCreate && statusNext[selected.order.status].length > 0 && (
+            <details className="cp04-action-group" onKeyDown={event=>{if(event.key==='Escape'&&!event.currentTarget.querySelector('dialog[open]')){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus()}}}>
+              <summary>Estado e historial <ChevronDown size={16} aria-hidden="true"/></summary>
+              <p className="cp04-info">Los cambios se confirman en el servidor. Cerrar conserva el historial.</p>
             <div className="cp04-actions">
               {statusNext[selected.order.status].map((next) => (
                 <button
                   type="button"
                   key={next}
-                  className={next === 'closed' ? 'cp04-secondary' : 'cp04-primary'}
+                  className="cp04-secondary"
                   disabled={busy}
                   onClick={() => {
                     if (
@@ -917,16 +959,19 @@ export function Cp04OrdersView({
                 </button>
               ))}
             </div>
+            </details>
           )}
+          </div>
           <div className="cp04-inspection-counts" aria-label="Estados confirmados de los 34 componentes">
             {(['ok','attention','immediate','unreviewed'] as const).map(state=><span key={state} className={'cp04-count-'+state}><strong>{inspectionCounts[state]}</strong> {resultLabels[state]}</span>)}
           </div>
           <div className="cp04-detail-tabs" role="tablist" aria-label="Secciones de la orden">
-            {detailTabs.map(([key,label],index)=><button type="button" role="tab" key={key}
+            {detailTabs.map(([key,label])=><button type="button" role="tab" key={key}
               id={tabId+'-tab-'+key} aria-controls={tabId+'-panel-'+key} aria-selected={detailTab===key}
               tabIndex={detailTab===key?0:-1} onClick={()=>{setDetailTab(key);if(key==='inspection')setMultipuntoOpen(true)}}
               onKeyDown={event=>{
-                const next=event.key==='ArrowRight'?(index+1)%4:event.key==='ArrowLeft'?(index+3)%4:event.key==='Home'?0:event.key==='End'?3:-1
+                const index=detailTabs.findIndex(([id])=>id===key)
+                const next=event.key==='ArrowRight'?(index+1)%detailTabs.length:event.key==='ArrowLeft'?(index+detailTabs.length-1)%detailTabs.length:event.key==='Home'?0:event.key==='End'?detailTabs.length-1:-1
                 if(next>=0){event.preventDefault();setDetailTab(detailTabs[next][0]);document.getElementById(tabId+'-tab-'+detailTabs[next][0])?.focus({preventScroll:true})}
               }}>{label}</button>)}
           </div>
@@ -935,6 +980,7 @@ export function Cp04OrdersView({
           <div ref={multipuntoSection} role="tabpanel" data-detail-tab="inspection" onScroll={e=>rememberPanel('inspection',e.currentTarget)} id={tabId+'-panel-inspection'} aria-labelledby={tabId+'-tab-inspection'} hidden={detailTab!=='inspection'} tabIndex={0} className="cp04-tab-content cp04-multipunto-anchor">
               {['ready','closed'].includes(selected.order.status)&&<p role="status">{blockMessages.readonly}</p>}
               <Cp04MultipuntoChecklist
+                workspacePresentation
                 key={selected.order.id}
                 repository={repository}
                 scope={{
@@ -1057,6 +1103,8 @@ export function Cp04OrdersView({
 
         </section>
       )}
+      {!selected && <section className="dashboard-card cp04-panel cp04-selection-empty" aria-label="Selecciona una orden"><CarFront size={32} aria-hidden="true"/><h2>Tu espacio de trabajo</h2><p>Selecciona una orden del listado para consultar su diagnóstico, continuar la atención o abrir el multipunto.</p><p className="cp04-info">La nueva recepción está disponible sin salir de este espacio.</p></section>}
+      </section>
     </div>
   )
 }

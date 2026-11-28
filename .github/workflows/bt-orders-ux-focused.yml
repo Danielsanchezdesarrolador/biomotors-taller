@@ -1,0 +1,87 @@
+name: BT-ORDERS-UX-01 focused
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/ordenes/Cp04OrdersView.tsx'
+      - 'src/ordenes/Cp04MultipuntoChecklist.tsx'
+      - 'src/ordenes/ordersWorkspace.css'
+      - 'src/ordenes/ordersWorkspace.test.tsx'
+      - 'tests/harness/orders*'
+      - 'tests/harness/cp04BrowserFixture.cjs'
+      - 'scripts/verify-orders-workspace.*'
+      - '.github/workflows/bt-orders-ux-focused.yml'
+  pull_request:
+    paths:
+      - 'src/ordenes/**'
+      - 'tests/harness/orders*'
+      - 'scripts/verify-orders-workspace.*'
+      - '.github/workflows/bt-orders-ux-focused.yml'
+permissions:
+  contents: read
+jobs:
+  contracts-builds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Only affected presentation, queue, draft and repository contracts
+        run: npx vitest run src/ordenes/ordersWorkspace.test.tsx src/ordenes/Cp04OrdersView.test.tsx src/ordenes/cp04Autosave.test.ts src/ordenes/cp04Draft.test.ts src/ordenes/cp04Repository.test.ts
+      - name: Public/private builds and feature boundaries, deferred services OFF
+        env:
+          BT_DOCUMENTS_BUILD_EVIDENCE: /tmp/bt-orders-builds
+        run: python3 scripts/verify-documents-builds.py
+      - name: Runner syntax
+        run: |
+          node --check scripts/verify-orders-workspace.cjs
+          node --check tests/harness/ordersNavigation.cjs
+          python3 -m py_compile scripts/verify-orders-workspace.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: orders-builds
+          path: /tmp/bt-orders-builds/
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install browsers only on official CI
+        run: |
+          npm install --prefix "$RUNNER_TEMP/bt-orders-playwright" --no-save --no-package-lock --no-audit --no-fund playwright@1.65.1
+          "$RUNNER_TEMP/bt-orders-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/bt-orders-playwright/node_modules" >> "$GITHUB_ENV"
+      - name: Orders UI and responsive matrix with isolated synthetic HTTP
+        env:
+          BT_ORDERS_BROWSER: ${{ matrix.engine }}
+          OUTPUT_DIR: /tmp/bt-orders-browser
+        run: python3 scripts/verify-orders-workspace.py
+      - name: Shared viewer and commercial ZIP affected regressions only
+        env:
+          BT_DOCUMENTS_BROWSER: ${{ matrix.engine }}
+          BT_DOCUMENTS_CASES: inspection-viewer-1366,inspection-viewer-390,inspection-strict-dialog,zip-full,zip-plus-mobile
+          OUTPUT_DIR: /tmp/bt-orders-documents
+        run: python3 scripts/verify-documents-ux.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: orders-browser-${{ matrix.engine }}
+          path: |
+            /tmp/bt-orders-browser/
+            /tmp/bt-orders-documents/

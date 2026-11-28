@@ -136,7 +136,8 @@ async function cp04Page(browser, width, options = {}) {
       assert.equal(JSON.parse(Buffer.from(parts[1], 'base64url').toString()).sub, userId)
       if (state.revoked) return reply({code:'42501',message:'Workshop not authorized'},403)
       return reply({workshopId:tenant,operationsEnabled:state.operationsEnabled === true,
-        documentsEnabled:state.documentsEnabled === true})
+        documentsEnabled:state.documentsEnabled === true,
+        ...(typeof state.inspectionEnabled==='boolean'?{inspectionEnabled:state.inspectionEnabled}:{})})
     }
     if(url.pathname==='/functions/v1/bt-commercial-documents'){
       assert.equal(method,'POST');const body=request.postDataJSON()
