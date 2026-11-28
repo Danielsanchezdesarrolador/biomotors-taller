@@ -1,5 +1,9 @@
 """Read synthetic PDFs with Poppler; verify text, page sizes are asserted in SQL/renderer lab."""
 import json,os,subprocess,re
+if os.environ.get('BT_MPF_PDF_FIX')=='true':
+ import runpy
+ runpy.run_path('scripts/verify-multipunto-pdf-fix.py',run_name='__main__')
+ raise SystemExit(0)
 out=os.environ.get('BT_MPF_EVIDENCE','/tmp/bt-mpf-evidence')
 def text(name):return subprocess.run(['pdftotext',out+'/'+name,'-'],capture_output=True,text=True,check=True).stdout
 final,draft,notes=(text(n) for n in ['final.pdf','draft.pdf','long-notes.pdf'])

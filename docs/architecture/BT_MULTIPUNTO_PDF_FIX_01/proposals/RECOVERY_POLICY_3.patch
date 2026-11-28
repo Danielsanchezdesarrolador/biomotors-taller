@@ -1,0 +1,15 @@
+--- a/scripts/backup/sec07_multipunto_recovery.py
++++ b/scripts/backup/sec07_multipunto_recovery.py
+@@ -263,10 +263,10 @@
+                 _need(embedded['workshop_id'] == r['workshop_id'], 'MP_SNAPSHOT_TENANT_MISMATCH')
+         if isinstance(payload.get('workshop'), dict):
+             _need(payload['workshop'].get('id') == r['workshop_id'], 'MP_SNAPSHOT_TENANT_MISMATCH')
+-        _need(r['policy_id'] in ('MP-V2-1', 'MP-V2-2'), 'MP_POLICY_VERSION_UNSUPPORTED')
++        _need(r['policy_id'] in ('MP-V2-1', 'MP-V2-2', 'MP-V2-3'), 'MP_POLICY_VERSION_UNSUPPORTED')
+         expected_schema = 'MP-SNAPSHOT-1/PG17' if r['policy_id'] == 'MP-V2-1' else 'MP-SNAPSHOT-2/PG17'
+         _need(payload.get('schema') == expected_schema, 'MP_SNAPSHOT_SCHEMA_MISMATCH')
+-        if r['policy_id'] == 'MP-V2-2':
++        if r['policy_id'] in ('MP-V2-2', 'MP-V2-3'):
+             _need(payload.get('sourceHash') == r['source_hash'], 'MP_SOURCE_HASH_BINDING_MISMATCH')
+     ledger = indices[LEDGER]
+     for r in ledger.values():

@@ -1,0 +1,33 @@
+{
+  "base": "eed6dee7d7ce9cf5bddcb03025500b646b2961f5",
+  "date": "2026-11-28 America/Santiago",
+  "mandatoryContinuity": [
+    "AGENTS.md",
+    "agent.md",
+    "roadmap.md",
+    "docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_FINAL_01B_DELTA_01_20261128.md",
+    "docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_RECOVERY_V2_CLOSE_01_20261128.md"
+  ],
+  "visualReference": {
+    "received": "multipunto-borrador (1).pdf",
+    "role": "Mandatory visual reference; original kept outside delivery to avoid personal data",
+    "sourceTemplate": "src/ordenes/cp04InspectionPdf.ts",
+    "comparison": "First-page static geometry and pixel regions; synthetic outputs only in private delivery",
+    "definitiveReference": "Not yet attached; existing server renderer inspected directly",
+    "sha256": "965c4b9a28905bbf258311b7b0447817fb7e46e98a92f3bf748a14ff33fca946"
+  },
+  "toolkit": [
+    "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-056.md",
+    "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-062.md"
+  ],
+  "code": [
+    "server/multipunto/renderer.ts",
+    "server/multipunto/service.ts",
+    "server/multipunto/handler.ts",
+    "src/ordenes/cp04InspectionPdf.ts",
+    "src/ordenes/cp04Multipunto.ts",
+    "src/informes/multipunto/multipuntoTemplate.ts",
+    "scripts/backup/sec07_multipunto_recovery.py"
+  ],
+  "productionRead": false
+}

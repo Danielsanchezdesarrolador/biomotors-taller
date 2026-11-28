@@ -1,0 +1,51 @@
+name: BT-MULTIPUNTO-PDF-FIX-01 focused
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['server/multipunto/renderer*.ts', 'server/multipunto/pdfLayout.ts', 'scripts/*multipunto-pdf*', 'scripts/multipunto-policy.mjs', 'scripts/package-multipunto-final.mjs', 'tests/multipunto/pdf*', 'docs/sql/BT_MULTIPUNTO_PDF_FIX_01*', 'scripts/backup/sec07_multipunto_recovery.py', '.github/workflows/bt-multipunto-pdf-fix.yml']
+permissions:
+  contents: read
+jobs:
+  pdf-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BT_MPF_LAB: bt-mpf-pdf-ci
+      BT_MPF_EVIDENCE: /tmp/bt-mp-pdf-fix-evidence
+      BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-mp-pdf-fix-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm ci
+      - run: |
+          docker pull postgres:17
+          python3 -m pip install Pillow
+          sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: |
+          bash scripts/security/prepare-multipunto-final-lab.sh
+          python3 scripts/security/seed-multipunto-final-lab.py
+          for file in docs/sql/BT_MULTIPUNTO_FINAL_01B_POLICY_CANDIDATE.sql docs/sql/BT_MULTIPUNTO_FINAL_01B_DELTA_01_CANDIDATE.sql docs/sql/BT_MULTIPUNTO_FINAL_01B_DELTA_01_POLICY_CANDIDATE.sql; do
+            docker exec -i "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < "$file"
+          done
+          node scripts/verify-multipunto-pdf-fix.mjs
+          python3 scripts/verify-multipunto-pdf-recovery-compat.py
+          BT_MPF_PDF_FIX=true python3 scripts/verify-multipunto-pdf.py
+          node scripts/verify-multipunto-pdf-runtime.mjs
+          node scripts/package-multipunto-final.mjs /tmp/mp-pdf-package-a
+          node scripts/package-multipunto-final.mjs /tmp/mp-pdf-package-b
+          node scripts/verify-multipunto-package.mjs /tmp/mp-pdf-package-a /tmp/mp-pdf-package-b
+          npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multipunto-pdf-fix-synthetic
+          path: /tmp/bt-mp-pdf-fix-evidence/
+      - if: always()
+        run: docker stop "$BT_MPF_LAB" || true
