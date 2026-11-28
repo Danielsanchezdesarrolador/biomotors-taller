@@ -1,3 +1,4 @@
+const {selectOrder}=require('../tests/harness/ordersNavigation.cjs')
 const {navigateSection}=require('../tests/harness/navigation.cjs')
 const {chromium}=require('playwright')
 const assert=require('node:assert/strict')
@@ -112,7 +113,7 @@ const review='He cotejado el alcance técnico actual y confirmo que las partidas
    await p.getByRole('button',{name:'Cerrar recorrido',exact:true}).click()
    assert(await p.locator('[data-workspace-section="clientes"]').isVisible())
    await navigateSection(p,'ordenes')
-   await p.locator('.cp04-order').nth(1).click()
+   await selectOrder(p,p.locator('.cp04-order').nth(1))
    assert(await p.getByRole('button',{name:'Continuar recorrido guiado'}).isVisible())
    assert.deepEqual(errors,[])
    console.log('PASS B05 real AppShell menu, kept-alive draft, close, resume, other order consultation',width)

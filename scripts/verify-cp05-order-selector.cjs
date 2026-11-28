@@ -1,10 +1,13 @@
+const engine=process.env.BT_PILOT_BROWSER||'chromium'
+const {openReception}=require('../tests/harness/ordersNavigation.cjs')
 const {navigateSection}=require('../tests/harness/navigation.cjs')
 // Focused kept-alive CP05 selector regression. All Supabase HTTP is synthetic.
-const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
+const {chromium,webkit}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs')
 const {cp05Page}=require('../tests/harness/cp05BrowserFixture.cjs')
 const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
+assert.ok(['chromium','webkit'].includes(engine),'Unsupported browser engine')
 ;(async()=>{
- const browser=await chromium.launch({executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
+ const browser=await (process.env.BT_PILOT_BROWSER==='webkit'?webkit:chromium).launch(process.env.BT_PILOT_BROWSER==='webkit'?{}:{executablePath:fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined,args:['--no-sandbox']})
  const out=process.env.OUTPUT_DIR||'/tmp/bt-cp05-selector';fs.mkdirSync(out,{recursive:true});const results=[]
  try{for(const width of (process.env.CP05_WIDTHS||'390,1366').split(',').map(Number)){
   const {p,state,requests,errors,quotes,commands}=await cp05Page(browser,width)
@@ -28,7 +31,7 @@ const {uuid}=require('../tests/harness/cp04BrowserFixture.cjs')
    const originalNode=await selector.elementHandle()
    const newOrders=[]
    async function newOrder(number){
-    await nav('ordenes')
+    await nav('ordenes');await openReception(p)
     const vehicle={...state.vehicles[0],id:uuid(1800+number),plate:'QS'+(8000+number),plate_key:'QS'+(8000+number)}
     state.vehicles.push(vehicle)
     await p.getByLabel('Buscar patente registrada').fill(vehicle.plate)

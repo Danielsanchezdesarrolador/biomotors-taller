@@ -1,0 +1,67 @@
+name: BT-ORDERS-UX-01 DELTA-01 RI focused
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/verify-pilot-fix-browser.cjs'
+      - 'scripts/verify-pilot-fix-mileage.cjs'
+      - 'scripts/verify-cp04-pdf.cjs'
+      - 'scripts/verify-cp05-order-selector.cjs'
+      - 'scripts/verify-cp04-current-diagnosis.cjs'
+      - 'scripts/verify-orders-coverage.cjs'
+      - 'scripts/verify-orders-ux-delta.py'
+      - 'tests/harness/ordersCoverage.cjs'
+      - '.github/workflows/bt-orders-ux-delta-focused.yml'
+  pull_request:
+    paths:
+      - 'scripts/verify-pilot-fix-*.cjs'
+      - 'scripts/verify-cp04-*.cjs'
+      - 'scripts/verify-cp05-order-selector.cjs'
+      - 'scripts/verify-orders-coverage.cjs'
+      - 'scripts/verify-orders-ux-delta.py'
+      - 'tests/harness/ordersCoverage.cjs'
+      - '.github/workflows/bt-orders-ux-delta-focused.yml'
+permissions:
+  contents: read
+jobs:
+  affected-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install selected browser only on official CI
+        run: |
+          npm install --prefix "$RUNNER_TEMP/orders-delta-playwright" --no-save --no-package-lock --no-audit --no-fund playwright@1.65.1
+          "$RUNNER_TEMP/orders-delta-playwright/node_modules/.bin/playwright" install --with-deps "${{ matrix.engine }}"
+          echo "NODE_PATH=$RUNNER_TEMP/orders-delta-playwright/node_modules" >> "$GITHUB_ENV"
+      - name: Runner syntax
+        run: |
+          node --check scripts/verify-orders-coverage.cjs
+          node --check tests/harness/ordersCoverage.cjs
+          node --check scripts/verify-pilot-fix-browser.cjs
+          node --check scripts/verify-pilot-fix-mileage.cjs
+          node --check scripts/verify-cp04-pdf.cjs
+          node --check scripts/verify-cp05-order-selector.cjs
+          node --check scripts/verify-cp04-current-diagnosis.cjs
+          node --check scripts/verify-flow-next-r1-browser.cjs
+          python3 -m py_compile scripts/verify-orders-ux-delta.py
+      - name: Only affected executors and main-scroll geometry
+        env:
+          BT_ORDERS_BROWSER: ${{ matrix.engine }}
+          OUTPUT_DIR: /tmp/bt-orders-ux-delta
+        run: python3 scripts/verify-orders-ux-delta.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: orders-ux-delta-${{ matrix.engine }}
+          path: /tmp/bt-orders-ux-delta/
