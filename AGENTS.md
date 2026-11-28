@@ -1,3 +1,9 @@
+## 28/11/2026 — Regla vinculante RECOVERY-V2 / DELTA-05
+- Aceptación técnica local y real PASS según recibos del Director; consultar [checkpoint RECOVERY-V2](docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_RECOVERY_V2_20261128.md). No repetir SEC07 ni las 80 pruebas históricas por rutina. No confundir verificación sintética, instalación local, respaldo real y CI oficial.
+- Windows 5.1: parsear toda fuente activa y ejecutar regresiones nativas de argumentos omitidos/explicitos, .NET, JSON raíz y salidas no cero; Bypass solo en hijo autorizado y respetar directivas de grupo. No usar mensajes PASS sin recibos/hash. PostgreSQL: selectores exactos calificados, --strict-names, comparación tipada de todas las tablas/columnas; inventario del dump exacto y conciliación de objetos, bytea, staging y generaciones. No sustituir comprobaciones por conteos.
+- El ejecutor semanal local tiene cuatro candidatos DELTA-05 y 45/45 pins; preservar ACL, originales y política privada, mantener lock hasta autorización separada. No publicar rutas/secretos/logs crudos ni instalar otra versión sin actualización coordinada y rollback. El diálogo histórico aún no menciona Multipunto V2: revisar antes de operación habitual. Integración de fuentes locales en main pendiente, no asumida.
+- Mantener lectura V2 ON, escritura OFF, recovery_ready=false, frontend V2 OFF, GATE4 intacto, Auto-Deploy OFF y funciones diferidas. Cierre documental no autoriza ninguna activación. DevOps/Mobile/R3 diferidos. Mantener main sin force push.
+
 ## 27/11/2026 — BT-ORDERS-UX-01 / LIVE_ACCEPTED_PASS
 
 ## BT-MULTIPUNTO-FINAL-01B-DELTA-01 — 28/11/2026
