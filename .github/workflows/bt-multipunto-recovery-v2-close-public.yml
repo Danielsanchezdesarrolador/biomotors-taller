@@ -1,0 +1,43 @@
+name: BT-MULTIPUNTO-RECOVERY-V2-CLOSE-01 - Public integrity (offline checks)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrity:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify accepted bytes without importing backup modules
+        shell: bash
+        run: |
+          python3 -I -B -S - <<'PY'
+          import ast
+          import hashlib
+          from pathlib import Path
+
+          expected = {'final_archive_inventory.sql': {'sha256': '848ffbfc797d9fd20f968e4ef36090ae262318de9bd7f874af314f04fbe65af7', 'git_blob': '27f543767544620da6577ebafeb170c06dfad4a7'}, 'final_archive_storage.py': {'sha256': '3333ee33a14f4d8029481103654c2e560cb1cd1136a146b274929423bcffc749', 'git_blob': '83fbe43fd940f4e3ccaf09eab275911d0133a007'}, 'sec07_multipunto_recovery.py': {'sha256': 'ccaa2d1ae1c2e70db47f2482f57ca4635fbb058820620dade6d41b73aad2e224', 'git_blob': '756d0c227b023558391147db4e120440f7bacf22'}}
+          for name, hashes in expected.items():
+              path = Path("scripts/backup") / name
+              data = path.read_bytes()
+              if hashlib.sha256(data).hexdigest() != hashes["sha256"]:
+                  raise SystemExit("SHA256_MISMATCH:" + name)
+              git_blob = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + bytes([0]) + data).hexdigest()
+              if git_blob != hashes["git_blob"]:
+                  raise SystemExit("GIT_BLOB_MISMATCH:" + name)
+              if path.suffix == ".py":
+                  compile(data, str(path), "exec")
+          helper = ast.parse((Path("scripts/backup") / "sec07_multipunto_recovery.py").read_bytes())
+          allowed = {"datetime", "decimal", "hashlib", "json", "re", "uuid"}
+          for node in ast.walk(helper):
+              if isinstance(node, ast.Import):
+                  if any(n.name not in allowed for n in node.names):
+                      raise SystemExit("HELPER_IMPORT_CHANGED")
+              elif isinstance(node, ast.ImportFrom):
+                  raise SystemExit("HELPER_IMPORT_CHANGED")
+          print("PUBLIC_SOURCE_INTEGRITY_PASS (3 exact files; static only)")
+          PY
