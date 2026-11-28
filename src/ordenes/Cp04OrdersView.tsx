@@ -46,6 +46,7 @@ import {
 } from './cp04Contracts'
 import { readCp04Draft, writeCp04Draft, emptyCp04Draft, rememberCp04Position, rememberCp04PanelPosition } from './cp04Draft'
 import { Cp04MultipuntoChecklist } from './Cp04MultipuntoChecklist'
+import {MultipuntoDocuments} from '../multipunto/MultipuntoDocuments'
 import { Cp04MultipuntoPdfPreview } from './Cp04MultipuntoPdfPreview'
 import { hasCurrentProvisionalFindings } from './cp04Autosave'
 import {multipuntoItemsFromFindings,multipuntoDisplayNote} from './cp04Multipunto'
@@ -65,7 +66,7 @@ export type Cp04Port = Pick<
   | 'createFinding'
   | 'updateFindingNote'
   | 'markResolved'
-> & {inspectionDocument?:ReturnType<typeof cp04Repository>['inspectionDocument']}
+> & {multipunto?:ReturnType<typeof cp04Repository>['multipunto'];inspectionDocument?:ReturnType<typeof cp04Repository>['inspectionDocument']}
 
 const statusNext: Record<OrderStatus, OrderStatus[]> = {
   received: ['inspecting', 'closed'],
@@ -949,7 +950,7 @@ export function Cp04OrdersView({
           <details className="cp04-action-group" onKeyDown={event=>{if(event.key==='Escape'&&!event.currentTarget.querySelector('dialog[open]')){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus()}}}>
             <summary>Documentos <ChevronDown size={16} aria-hidden="true"/></summary>
             <div className="cp04-action-content">
-          <Cp04MultipuntoPdfPreview
+          {repository.multipunto?<MultipuntoDocuments port={repository.multipunto} orderId={selected.order.id} scope={context.userId+':'+context.workshop.id} blocked={busy||loading||multipuntoOutstanding>0||multipuntoIncomplete}/>:<Cp04MultipuntoPdfPreview
             documentScope={context.userId+':'+context.workshop.id}
             loadIdentity={repository.pdfIdentity}
             loadDocument={repository.inspectionDocument}
@@ -959,7 +960,7 @@ export function Cp04OrdersView({
             outstanding={multipuntoOutstanding}
             incomplete={multipuntoIncomplete}
             disabled={busy || loading || context.inspectionEnabled===false}
-          />
+          />}
             </div>
           </details>
           {canCreate && statusNext[selected.order.status].length > 0 && (

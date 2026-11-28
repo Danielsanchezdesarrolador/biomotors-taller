@@ -37,6 +37,7 @@ export default defineConfig(({ mode }) => {
     throw new Error('Record management requires the authenticated private directory.')
   if(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && (env.VITE_BT_CP03_PRIVATE_ENABLED!=='true'||env.VITE_BT_CP05_PRIVATE_ENABLED!=='true'||env.VITE_BT_CP06_PRIVATE_ENABLED!=='true'))throw new Error('Final archive requires private directory, CP05 and CP06.')
   if(env.VITE_BT_AGENDA_ENABLED==='true'&&['VITE_BT_AUTH_R1_ENABLED','VITE_BT_CP03_PRIVATE_ENABLED','VITE_BT_CP04_PRIVATE_ENABLED','VITE_BT_CP05_PRIVATE_ENABLED','VITE_BT_CP06_PRIVATE_ENABLED','VITE_BT_CP05_DOCUMENTS_ENABLED','VITE_BT_FLOW_LIVE_02_ENABLED','VITE_BT_FINAL_ARCHIVE_ENABLED','VITE_BT_RECORDS_PRIVATE_ENABLED'].some(flag=>env[flag]!=='true'))throw new Error('Agenda requires verified private intake, quotes, history and final archive.')
+  if(env.VITE_BT_MULTIPUNTO_V2_ENABLED==='true'&&env.VITE_BT_CP04_PRIVATE_ENABLED!=='true')throw new Error('Multipunto V2 requires authenticated private CP04.')
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (key && !/^sb_publishable_[A-Za-z0-9_-]+$/.test(key))
     throw new Error('Only a Supabase publishable key may be included in the frontend.')
@@ -63,6 +64,7 @@ export default defineConfig(({ mode }) => {
               /\.test\./.test(id) ||
               (sharedPlanPresentation.test(id) && !sharedPlanPresentationEnabled) ||
               (!id.endsWith('.css') &&
+                !(env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && /\/src\/multipunto\/(?:repository\.ts|MultipuntoDocuments\.tsx)$/.test(id)) &&
                 !(env.VITE_BT_CP04_PRIVATE_ENABLED==='true' && /\/src\/documents\/(?:operation\.ts|DocumentOperationNotice\.tsx|PdfViewer\.tsx)$/.test(id)) &&
                 !(env.VITE_BT_AGENDA_ENABLED==='true' && /\/src\/agenda\//.test(id)) &&
                 !(env.VITE_BT_FINAL_ARCHIVE_ENABLED==='true' && env.VITE_BT_FLOW_LIVE_02_ENABLED==='true' && /\/src\/guided\/(?:GuidedWorkspace|progress|continuity|OperationsCenter|operations)\.(?:tsx|ts)$/.test(id)) &&

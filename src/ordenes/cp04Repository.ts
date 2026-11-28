@@ -1,3 +1,4 @@
+import {multipuntoRepository} from '../multipunto/repository'
 import {documentFailure} from '../plans/commercialErrors'
 import {DocumentOperationExpired,isDocumentOperationNotCurrent} from '../documents/operation'
 import {documentFence} from '../auth/documentAccess'
@@ -290,5 +291,5 @@ export function cp04Repository(client:SupabaseClient,context:Context){
     return check<Finding>(result.data,tenant)
   }
   return Object.freeze({findVehicleByPlate,getVehicle,recentOrders,getOrder,
-    inspectionDocument,pdfIdentity,findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
+    multipunto:import.meta.env.VITE_BT_MULTIPUNTO_V2_ENABLED==='true'?multipuntoRepository(client,tenant,()=>{if(invalidated)throw new WorkOrderFailure('denied')}):undefined,inspectionDocument,pdfIdentity,findingsForOrder,pendingForVehicle,createOrder,setStatus,createFinding,updateFindingNote,markResolved,dispose})
 }

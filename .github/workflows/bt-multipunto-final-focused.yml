@@ -1,0 +1,58 @@
+name: BT-MULTIPUNTO-FINAL-01B focused isolated review
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['server/multipunto/**', 'src/multipunto/**', 'tests/multipunto/**', 'docs/sql/BT_MULTIPUNTO_FINAL_01B*', 'scripts/*multipunto*', 'scripts/security/*multipunto*', '.github/workflows/bt-multipunto-final-focused.yml']
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BT_MPF_LAB: bt-mpf-ci
+      BT_MPF_EVIDENCE: /tmp/bt-mpf-evidence
+      BT_PLAN04BC_EVIDENCE_DIR: /tmp/bt-mpf-evidence
+      BT_MPF_BASE: http://127.0.0.1:5184
+      NODE_PATH: /tmp/bt-mpf-playwright/node_modules
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm ci
+      - run: docker pull postgres:17
+      - run: |
+          bash scripts/security/prepare-multipunto-final-lab.sh
+          python3 scripts/security/seed-multipunto-final-lab.py
+          docker exec -i "$BT_MPF_LAB" psql -X -v ON_ERROR_STOP=1 -U postgres -d bytetorque < docs/sql/BT_MULTIPUNTO_FINAL_01B_POLICY_CANDIDATE.sql
+          bash scripts/security/verify-multipunto-final-local.sh
+          python3 scripts/backup/test_multipunto_recovery.py
+          sudo apt-get update && sudo apt-get install -y poppler-utils
+          python3 scripts/verify-multipunto-pdf.py
+      - run: |
+          npm run build
+          npx vitest run src/expedientes/documentsUx.test.ts -t 'exact three-original ZIP|duplicate document hashes|unsafe filenames'
+          python3 -m unittest discover -s scripts/backup -p test_final_archive_storage.py
+          node scripts/package-multipunto-final.mjs /tmp/mp-package-a
+          node scripts/package-multipunto-final.mjs /tmp/mp-package-b
+          node scripts/verify-multipunto-package.mjs /tmp/mp-package-a /tmp/mp-package-b
+      - run: |
+          npm install --prefix /tmp/bt-mpf-playwright --no-package-lock playwright@1.65.1
+          /tmp/bt-mpf-playwright/node_modules/.bin/playwright install --with-deps chromium webkit
+          npm run dev:harness -- --port 5184 --strictPort > /tmp/bt-mpf-evidence/vite.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:5184/multipunto-final.html >/dev/null && break; sleep 1; done
+          node scripts/verify-multipunto-final-browser.cjs
+          BT_MPF_BROWSER=webkit node scripts/verify-multipunto-final-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multipunto-final-isolated
+          path: /tmp/bt-mpf-evidence/
+      - if: always()
+        run: docker stop "$BT_MPF_LAB" || true

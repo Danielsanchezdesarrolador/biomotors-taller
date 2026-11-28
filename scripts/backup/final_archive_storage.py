@@ -22,7 +22,7 @@ def canonical(value):
     return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(',', ':')).encode('ascii')
 
 def inventory(value):
-    if not isinstance(value, dict) or value.get('version') != 1 or not re.fullmatch(UUID, value.get('workshopId', '')) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', value.get('recoverySetId', '')):
+    if not isinstance(value, dict) or value.get('version') not in (1, 2) or not re.fullmatch(UUID, value.get('workshopId', '')) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', value.get('recoverySetId', '')):
         raise StorageRecoveryError('INVENTORY_INVALID')
     docs = value.get('documents')
     if not isinstance(docs, list) or not docs or len(docs) > 100000:
@@ -32,6 +32,12 @@ def inventory(value):
         bucket, path = d.get('bucket'), d.get('path')
         wid = value['workshopId']
         pattern = (re.escape(wid) + '/quotes/' + UUID + r'/r[1-9][0-9]*/[a-f0-9]{64}\.pdf') if bucket == 'cp05-quote-documents' else (re.escape(wid) + '/closings/' + UUID + '/' + UUID + '/' + UUID + r'/(report|handover)/[a-f0-9]{64}\.pdf') if bucket == 'bt-closing-documents' else None
+        if bucket == 'bt-inspection-documents' and value['version'] == 2:
+            pattern = re.escape(wid) + '/inspections/' + UUID + r'/r[1-9][0-9]*/' + UUID + r'/[a-f0-9]{64}\.pdf'
+            if d.get('state') not in ('published', 'staged') or not re.fullmatch(UUID, d.get('orderId', '')) or not re.fullmatch(UUID, d.get('documentId', '')) or type(d.get('revision')) is not int or d['revision'] < 1:
+                raise StorageRecoveryError('INVENTORY_INVALID')
+            if path != f"{wid}/inspections/{d['orderId']}/r{d['revision']}/{d['documentId']}/{d['sha256']}.pdf":
+                raise StorageRecoveryError('INVENTORY_INVALID')
         if not pattern or not isinstance(path, str) or not re.fullmatch(pattern, path) or (bucket, path) in seen or not re.fullmatch(r'[a-f0-9]{64}', d.get('sha256', '')) or type(d.get('byteLength')) is not int or not 12 <= d['byteLength'] <= MAX_BYTES:
             raise StorageRecoveryError('INVENTORY_INVALID')
         seen.add((bucket, path))

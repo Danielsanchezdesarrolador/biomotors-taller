@@ -1,0 +1,11 @@
+/* Scoped additions inside the approved Documents group; no global R2 changes. */
+.cp04-private .mp-v2 {font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
+.cp04-private .mp-v2 h3 {font-size:16px;margin:10px 0;color:#15345d;}
+.cp04-private .mp-v2 h4 {margin:18px 0 8px;}
+.cp04-private .mp-v2 p {margin:8px 0;color:#536a87;}
+.cp04-private .mp-v2 label {display:flex;align-items:flex-start;gap:8px;padding:10px;background:#f1f7ff;border:1px solid #dbe6f5;border-radius:10px;margin:8px 0;}
+.cp04-private .mp-v2 input[type=checkbox] {width:17px;height:17px;flex:none;accent-color:#0567ee;margin-top:2px;}
+.cp04-private .mp-v2 button {display:inline-flex;align-items:center;justify-content:center;min-height:40px;max-width:100%;padding:9px 12px;margin:5px 6px 5px 0;border:1px solid #c5d9f4;border-radius:9px;background:#f1f7ff;color:#174886;font:inherit;font-weight:650;}
+.cp04-private .mp-v2 button:disabled {opacity:.55;}
+.cp04-private .mp-v2 [role=alert] {background:#fff0f0;color:#8e2136;border-radius:9px;padding:12px;}
+@media(max-width:600px){.cp04-private .mp-v2 button {width:100%;margin-right:0;}.cp04-private .mp-v2 {min-width:0;}}

@@ -1,0 +1,312 @@
+{
+  "base": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+  "repositorySources": [
+    {
+      "path": "AGENTS.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "bcd0c7a7a80f099cd1ac061af0aa9a1f224edeaf",
+      "sha256": "55482586d97d455d004b30730a4032a06e587adf1f2d9a03afe277f31d0f22c9",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/AGENTS.md"
+    },
+    {
+      "path": "agent.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "9d6546d1186e96d98dfe031d6adc1c41bdf7f29d",
+      "sha256": "bb1f02dc0a0156c0a0c0997f0177c62e23dfd92075ceed53d9a9e9c0e0043064",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/agent.md"
+    },
+    {
+      "path": "roadmap.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "5ad842100b262c6a899ddcc4bd2f2390a9a42c22",
+      "sha256": "c9d1e7bb54892fec22bb5ce247a62088f499e439250f4c8ef3693fa67a1d29e6",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/roadmap.md"
+    },
+    {
+      "path": "docs/checkpoints/CHECKPOINT_BT_ORDERS_UX_01_LIVE_ACCEPTED_PASS_20261127.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "605a2073332c44055d88fe40a7e3a64670bf49f5",
+      "sha256": "b75a4d6737d2820b05623d4b7db789559eb3e3e04eb691881ddcf55a35b8b2c4",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/checkpoints/CHECKPOINT_BT_ORDERS_UX_01_LIVE_ACCEPTED_PASS_20261127.md"
+    },
+    {
+      "path": "docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_FINAL_01_PLANNED_20261127.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "e0c8dd23a713e85a0607814dfcaac93034095125",
+      "sha256": "b935f44d2925e7eaf7f0326caffa95ad0eeebc1c9377c59e1aa49614b82a3a47",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_FINAL_01_PLANNED_20261127.md"
+    },
+    {
+      "path": "docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_DOCUMENTS_UX_01_LIVE_QA_C_ACCEPTED_PASS_20261127.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "f68e1e6e2e7c0c2de3d843a1d442c302ff2c44fe",
+      "sha256": "457fedaa219d7b5107995d02283ba265179452140014d00d6a528d2f5e99fb3f",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/checkpoints/CHECKPOINT_BT_COMMERCIAL_DOCUMENTS_UX_01_LIVE_QA_C_ACCEPTED_PASS_20261127.md"
+    },
+    {
+      "path": "src/ordenes/Cp04OrdersView.tsx",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "c594843ad43f578e8c2d037f0175d5ae4db8e80f",
+      "sha256": "d90492b7b65078ac2d9f1d93284de4fea2e79fb21e23eeec893f1892f54104db",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/ordenes/Cp04OrdersView.tsx"
+    },
+    {
+      "path": "src/ordenes/Cp04MultipuntoPdfPreview.tsx",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "5cfd3a99617582f786985b6deebd2c80ddebec9b",
+      "sha256": "9a2d314ace754ed462672859c38d6e6e1b01568ecac0f98947dfb669f2b3e365",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/ordenes/Cp04MultipuntoPdfPreview.tsx"
+    },
+    {
+      "path": "src/ordenes/cp04Repository.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "c51576cf1ca868354678316cbbb97692ae4ca5ed",
+      "sha256": "ec774b6325e0af0c39476bac99605f94dff319aa8a64994b4f48f0b4eca86cca",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/ordenes/cp04Repository.ts"
+    },
+    {
+      "path": "src/ordenes/cp04InspectionPdf.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "456ec5f440621b63321c917a4e3ee58acb4d060b",
+      "sha256": "c73b85dcf6ba35c5c65754da459a0508b532ea0fdb380a2bca1f3eac3a795df6",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/ordenes/cp04InspectionPdf.ts"
+    },
+    {
+      "path": "src/documents/operation.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "bdfacc2d0cf85ce865c9772541ce9581c4e8c812",
+      "sha256": "87dd57b810f244b690498e8fbc24376f28b72e53592f3b4f000b8b4416d8041f",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/documents/operation.ts"
+    },
+    {
+      "path": "src/documents/PdfViewer.tsx",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "17ca86621920262dcd42ffc0268dc166cdd1296d",
+      "sha256": "a43b0c9a3c2de3ce74b02051cc365b0d263e807e5e9caac7285c53f2b8f5c31e",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/documents/PdfViewer.tsx"
+    },
+    {
+      "path": "src/auth/documentAccess.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "202dd49b4a0b3fe9ca909bcb5b5272fa3f7d16ee",
+      "sha256": "10d6d586e33dcfc90decc86897be083d38c27f4ae7aebb190e4adc0a26401906",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/auth/documentAccess.ts"
+    },
+    {
+      "path": "server/commercial/documentHandler.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "ab266cfa0cd634d1769c65e13f4f4b2edb9cb7b8",
+      "sha256": "931785f85893b4cda6aa7ba356641e5a0d29e7e880ddfcf87f4ae7966d463870",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/commercial/documentHandler.ts"
+    },
+    {
+      "path": "server/commercial/meteredDocument.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "274960a8e66f099fb3c63337fc21ede951616850",
+      "sha256": "249ebe718559a88ebdc491571426151578999c3a06446fa1d8dbd9bf95ded8d7",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/commercial/meteredDocument.ts"
+    },
+    {
+      "path": "server/commercial/edgeEntryCandidate.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "5eb770122d2dcf81e72008790bea1f8605e4edda",
+      "sha256": "1c3d67a749857c2d26b5fee5edf33f10c41f133c78cd7afdfcfd293ef82f9344",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/commercial/edgeEntryCandidate.ts"
+    },
+    {
+      "path": "server/com/finalArchivePorts.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "a3f3673d41ca988e2933de45962f2da8324c3a06",
+      "sha256": "a75df271706e4d548d0c66fd2527906907c5095f062b4d019e420e548d417d62",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/com/finalArchivePorts.ts"
+    },
+    {
+      "path": "server/com/finalArchiveHandler.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "27c8f94f84b60cb7c2024ed87187d76213d37c9a",
+      "sha256": "56d398ca6b6e4d402522c4c2738a189fb6c80a1f38500ad492ae212a9c36fa4b",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/com/finalArchiveHandler.ts"
+    },
+    {
+      "path": "server/com/closingArchiveCandidate.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "20f0808b22f358c468059c95150ca9d8c87f4aee",
+      "sha256": "f9bde7f7703555b9c81575cf40f5d2cca74baacd47624a721ad2d2142293d0ec",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/com/closingArchiveCandidate.ts"
+    },
+    {
+      "path": "server/cp05/archiveCandidate.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "148f10f9c8e1b035fc69b2da2f6c80c6f896f531",
+      "sha256": "b894776ca0497fc6258f921003506a4e31dd9309c0011d48381ce9bf379613ab",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/cp05/archiveCandidate.ts"
+    },
+    {
+      "path": "server/cp05/supabasePortsCandidate.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "4a4bcfee5cf37830f515266027a784ced8c8c32c",
+      "sha256": "895a220293ea90f9a2b04c08c2e1f9a97b8dfb6685825b9771666e795eb9262d",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/server/cp05/supabasePortsCandidate.ts"
+    },
+    {
+      "path": "src/expedientes/originalZip.ts",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "04f34122e13828d2fe873c9e09daa60aba14395a",
+      "sha256": "4de61653d9a15d70e57a80b46e0dc73e20f3302910077eb15e754ee578d8ae79",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/src/expedientes/originalZip.ts"
+    },
+    {
+      "path": "scripts/backup/final_archive_inventory.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "2af7d6194c2c6230827f642ca3eb88904be0d231",
+      "sha256": "92ae807e827732a0b0f7e08549358e8ee170bdb4edef1ad3704090940c899c43",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/scripts/backup/final_archive_inventory.sql"
+    },
+    {
+      "path": "scripts/backup/final_archive_storage.py",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "d5b7c1ea533000aac17d2c36adf229e0e0e0be83",
+      "sha256": "14edcd9472af96830dce3053c39e78ac3b832919162fe403b91254fc2f76a272",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/scripts/backup/final_archive_storage.py"
+    },
+    {
+      "path": "docs/sql/BT_WORKSHOP_COMMERCIAL_01_CANDIDATE.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "9b1f2f42ca9edbbe6928fd7157ec18bef8caedf4",
+      "sha256": "f0ae1b4b5e2100bbe1ac7e3109ae12efe9f03fc418ffba50b32e286ee2f283f9",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_WORKSHOP_COMMERCIAL_01_CANDIDATE.sql"
+    },
+    {
+      "path": "docs/sql/BT_WORKSHOP_COMMERCIAL_01_INSTALL_GATE4.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "eb39a2a16e1e2592747967644168cd132a3622e6",
+      "sha256": "a93dff3087e182246fff0bc3782cffd703a1a726e45b79e5200987ea50f41b86",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_WORKSHOP_COMMERCIAL_01_INSTALL_GATE4.sql"
+    },
+    {
+      "path": "docs/sql/BT_WORKSHOP_COMMERCIAL_01_GATE_CLOSE.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "6114f7ca71e7a356eafe3674c335fba3d7254821",
+      "sha256": "8bdd1b9e17d5168b3ff807be59b49fd6af34df561b067a447f12d87988331812",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_WORKSHOP_COMMERCIAL_01_GATE_CLOSE.sql"
+    },
+    {
+      "path": "docs/sql/BT_WORKSHOP_COMMERCIAL_01_GATE_OPEN.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "e377cbe473804a4104eb54c23826fdec2d83743f",
+      "sha256": "b2230cced2fe901a044e033f2554a653e5bef1d077a4fad128fdfec38f4227a8",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_WORKSHOP_COMMERCIAL_01_GATE_OPEN.sql"
+    },
+    {
+      "path": "docs/sql/BT_COMMERCIAL_PLANS_01_CANDIDATE.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "7e25e04387e7aed07e5fedd199d4ccb2639380be",
+      "sha256": "f43eb5145b467af4f3fd587a64412d83537f7b049f17b44f548321b68f555d36",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_COMMERCIAL_PLANS_01_CANDIDATE.sql"
+    },
+    {
+      "path": "docs/sql/BT_PILOT_FIX_01_CANDIDATE.sql",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "6f4a0c80127ae8ed1062d545791a1d508c8b0340",
+      "sha256": "8ae41d62e73f617da866911b3e90ec46e5d37d57db817164d2b46db8e117eac7",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/sql/BT_PILOT_FIX_01_CANDIDATE.sql"
+    },
+    {
+      "path": "docs/MATRIZ_ROLES_Y_PERMISOS.md",
+      "baseCommit": "7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba",
+      "gitBlob": "0f5d45a9f0cfbcbb3b6da71f6b5ca9a4f74988a6",
+      "sha256": "b497ac7dc26226f3b39dda5bb78f3100368068f14bd038435446da9ad7219c78",
+      "link": "https://github.com/Danielsanchezdesarrolador/biomotors-taller/blob/7c877e72a3b6636d8b4ae131b3c0c2b5e5c064ba/docs/MATRIZ_ROLES_Y_PERMISOS.md"
+    }
+  ],
+  "toolkitSources": [
+    {
+      "path": "AGENTS.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "8bf24ad750c77c0e2a124076414ebb5ef385147f",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/AGENTS.md"
+    },
+    {
+      "path": "README.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "914ee1ab1991933893bb52e559f4e9f64dcea19c",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/README.md"
+    },
+    {
+      "path": "catalogo.json",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "7c0d79e778044d2f01340ea6a74daa26f883844b",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/catalogo.json"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-012.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "a52e138af36aaeadaa2296eedb82712e282ed557",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-012.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-013.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "1aae26f4c41bf517fe8e203c21d2151c6492fd8d",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-013.md"
+    },
+    {
+      "path": "04-desarrollo/documentos-y-correo.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "a050c7a4a408412913385104b3ab3f8ca024020c",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/04-desarrollo/documentos-y-correo.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-056.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "e25101c231e48144d3af8761a15979e8e1556e2b",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-056.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-059.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "e0801ad20345bf95e09da06708f0666a3802022b",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-059.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-060.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "d035e3ca8b314f2f386a8e532f85e56bad693352",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-060.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-061.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "820b8e51b97e7d27bcda5da091da36cef175560d",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-061.md"
+    },
+    {
+      "path": "05-errores-y-soluciones/DTK-ERR-063.md",
+      "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+      "gitBlob": "5cd7a2067d3fb930c45af5d0d241d2177584908e",
+      "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-063.md"
+    }
+  ],
+  "sourceReview": "01B uses the pinned 01A diagnosis and mandatory continuity sources; actual isolated validation is recorded separately, not inferred from source review.",
+  "architecture01A": {
+    "candidate": "307677653324bfde7a2ac7a955df61c94366ae1d",
+    "transfer": "d6ac2559b6f2f5b78cec5c6271c2f10b182c3be2",
+    "directory": "BT-MULTIPUNTO-FINAL-01A",
+    "documents": [
+      "README.md",
+      "DIAGNOSTICO.md",
+      "CONTRATO.md",
+      "ARQUITECTURA.md",
+      "UX_INSTALACION.md",
+      "VALIDACION_RIESGOS.md"
+    ],
+    "approval": "User instruction BT-MULTIPUNTO-FINAL-01B: D01–D10 approved with additional conditions"
+  },
+  "instructionSHA256": "c386363a8b1f8d82e877cfe41a33dbbd427b50f55e1dbf052116bb8a5270967e",
+  "toolkit062": {
+    "commit": "a231ddfe321506ad4e6ea0a01d3dd1707572a060",
+    "path": "05-errores-y-soluciones/DTK-ERR-062.md",
+    "sha256": "445fd7f2b6b439a5bd935e17e8b87f2793654626dc9aa76268307848cc91d805",
+    "link": "https://github.com/Danielsanchezdesarrolador/development-toolkit/blob/a231ddfe321506ad4e6ea0a01d3dd1707572a060/05-errores-y-soluciones/DTK-ERR-062.md"
+  }
+}
