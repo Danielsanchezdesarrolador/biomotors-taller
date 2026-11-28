@@ -1,3 +1,12 @@
+## 28/11/2026 — BT-MULTIPUNTO-RECOVERY-V2-01 / RECOVERY_V2_PASS técnico
+- [x] R1 y DELTA-01: ampliación incremental de inventario/recovery, 64+16 focalizadas reportadas PASS; corrección selector exacto de tablas PG17.
+- [x] DELTA-02 a 05: gramática PowerShell 5.1, contrato JSON fail-closed, File.Replace/NullString, PackageRoot dentro de try; FullRecovery nativo PASS con instalación/reversión sintética y restauración aislada.
+- [x] DELTA-05 instalado localmente: 4/4 fuentes, 45/45 pins, ACL y política previa preservadas, plan offline PASS.
+- [x] Única aceptación real PASS: GPG/PG17 exacto, 12/12 tablas, 3/3 buckets y 16/16 PDF por bytes, ledger 15, conciliación sin diferencias. MP real vacío; escenarios no vacíos sintéticos. No DR integral, paridad de seguridad o apertura visual. Recibos y hashes en [checkpoint RECOVERY-V2](docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_RECOVERY_V2_20261128.md).
+- [ ] Sincronizar fuente candidata local con main previa revisión/autorización y CI independiente; revisar mensaje visible del lanzador semanal y autorizar liberación controlada del lock. No equivale a nueva exportación obligatoria.
+- [ ] Puerta recovery_ready separada: verificar estado actual y solicitar autorización; lectura ON, escritura y frontend V2 OFF, GATE4 intacto, Auto-Deploy OFF. No repetir SEC07 ni iniciar fases diferidas.
+- [ ] Incorporar controles nativos a DevOps futuro (documentación no es implementación ni autorización). Mantener historial y reglas existentes.
+
 ## 27/11/2026 — BT-ORDERS-UX-01 / LIVE_ACCEPTED_PASS
 
 ## BT-MULTIPUNTO-FINAL-01B-DELTA-01 — 28/11/2026
