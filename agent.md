@@ -1,3 +1,7 @@
+## 28/11/2026 — RECOVERY-V2 / aceptación técnica PASS (DELTA-05)
+Estado más reciente: FullRecovery nativo Windows PS 5.1 y PG17 PASS; instalación local 4/4, política privada 45/45, --plan offline PASS; aceptación supervisada única REAL_V2_RECOVERY_EVIDENCE_PASS: EXACT 12/12 tablas (ledger 15, items 34, policy 2, control 1), 3 buckets/16 PDF verificados byte a byte, cero huérfanos/faltantes/duplicados/conflictos. MP V2 sin artefactos reales; no vacíos cubiertos sintéticamente. No DR integral ni paridad de seguridad ni apertura visual certificada. Evidencia del Director; paquete 133/133 cotejado. [checkpoint RECOVERY-V2](docs/checkpoints/CHECKPOINT_BT_MULTIPUNTO_RECOVERY_V2_20261128.md).
+Siguiente puerta: revisar sincronización DELTA-05 en main y mensaje de autorización semanal; liberar lock solo con autorización y verificación. recovery_ready=false; lectura ON, escritura/frontend V2 OFF, GATE4 intacto, Render Auto-Deploy OFF, demás diferidos. No repetir SEC07 ni lanzar respaldo/CI/deploy por continuidad documental.
+
 ## 27/11/2026 — BT-ORDERS-UX-01 / LIVE_ACCEPTED_PASS
 
 ## BT-MULTIPUNTO-FINAL-01B-DELTA-01 — 28/11/2026
