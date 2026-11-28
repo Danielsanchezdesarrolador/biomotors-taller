@@ -1,0 +1,5 @@
+# BT-ORDERS-UX-01 — CI_FINAL_PASS
+
+27/11/2026 Chile (28/11 UTC). Código validado: 6030afd4d0e831434a68b4253938bac61b9eb10d, árbol ea1900e6ee8aac7b515d3c625eb28c57c0d55265. CI-FIX-01 transferencia privada 7a5c865463f964c95630cd4eb391760cc338dc91, revisión independiente y autorización de integración previas.
+
+Lectura directa GitHub Actions del SHA validado: 3/3 workflows SUCCESS, 8/8 jobs SUCCESS. Orders focused 46097072970: WebKit 140830783501, contracts-builds 140830783515, Chromium 140830783589. OFICIAL-01A 46097072956: interfaz-publica 140830783681, LIVE-FIX WebKit 140830783540, Chromium 140830783733. Verificación ByteTorque 46097072994: Android Expo sin APK 140830783630, Web/iOS PWA 140830783897. CI-ERR-01/02 cerrados en CI. Los seis workflows verdes del SHA anterior son antecedentes, no nuevas ejecuciones. No QA física ni visual humana todavía. Auto-Deploy OFF comprobado. GATE4 sin intervención; no cambios en Supabase, infraestructura ni SEC07. No autoriza despliegue. Siguiente: autorización específica de frontend Render del SHA validado, verificación LIVE y QA humana de Órdenes/multipunto; no declarar aceptación final antes de ello.
